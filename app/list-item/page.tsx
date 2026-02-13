@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabaseClient';
 
 export default function ListItemPage() {
   // 1. STATE
@@ -37,13 +38,41 @@ export default function ListItemPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // 1. The Bouncer (Check required fields)
     if (!fullName || !itemName || !availability) {
       alert("Please fill in the required fields (Name, Item, and Availability).");
       return;
     }
-    setIsSubmitted(true);
+
+    // 2. The Cloud Upload
+    // We tell Supabase: "Insert this object into the 'gear_items' table"
+    const { data, error } = await supabase
+      .from('gear_items')
+      .insert([
+        { 
+          full_name: fullName,
+          burner_name: burnerName,
+          item_name: itemName,
+          category: category,
+          description: description,
+          availability: availability,
+          zip_code: zip,
+          city: city,
+          state: state,
+          location_type: locationType
+        },
+      ]);
+
+    if (error) {
+      console.error("Error uploading to Supabase:", error.message);
+      alert("Something went wrong saving to the cloud: " + error.message);
+    } else {
+      // 3. Success! Flip the switch
+      setIsSubmitted(true);
+    }
   };
 
   // 3. UI
