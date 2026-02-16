@@ -11,12 +11,13 @@ export default function ListItemPage() {
   
   // FORM FIELDS
   const [itemName, setItemName] = useState('');
+  const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
   const [condition, setCondition] = useState('good');
   const [pickupBy, setPickupBy] = useState('');
   const [returnBy, setReturnBy] = useState('');
   const [terms, setTerms] = useState('');
-
+const [manualAddress, setManualAddress] = useState('');
   useEffect(() => {
     const fetchLocations = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -32,10 +33,49 @@ export default function ListItemPage() {
     fetchLocations();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Submitting:", { itemName, description, condition, availability, pickupBy, returnBy, terms });
-  };
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  // 1. Get the authenticated user
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    alert("Please log in first!");
+    return;
+  }
+
+  // 2. Insert into gear_items
+const { error } = await supabase
+  .from('gear_items')
+  .insert([
+    { 
+      item_name: itemName, 
+      description: description, 
+      condition: condition,
+      category: category, // Add this line!
+      pickup_by: pickupBy || null, 
+      return_by: returnBy || null,
+      terms: terms,
+      location_type: selectedLocation, 
+      manual_address: selectedLocation === 'other' ? manualAddress : null,
+      user_id: user.id 
+    },
+  ]);
+
+  if (error) {
+    console.error("Supabase Error:", error.message);
+    alert("Error: " + error.message);
+  } else {
+    alert("Success! Your gear is now listed.");
+    // Clear the form fields
+    setItemName('');
+    setDescription('');
+    setManualAddress('');
+    setTerms('');
+    setPickupBy('');
+    setReturnBy('');
+  }
+};
 
   return (
     <div style={containerStyle}>
@@ -48,6 +88,23 @@ export default function ListItemPage() {
           <input type="text" value={itemName} onChange={(e) => setItemName(e.target.value)} style={inputStyle} placeholder="e.g. Heavy Duty Tarp" required />
         </div>
 
+{/* CATEGORY DROPDOWN */}
+<div style={sectionStyle}>
+  <label style={labelStyle}>Category</label>
+  <select 
+    value={category} 
+    onChange={(e) => setCategory(e.target.value)} 
+    style={inputStyle} 
+    required
+  >
+    <option value="">-- Select Category --</option>
+    <option value="camping">Camping</option>
+    <option value="tools">Tools</option>
+    <option value="sports">Sports</option>
+    <option value="electronics">Electronics</option>
+    {/* Add more as needed */}
+  </select>
+</div>
         {/* CONDITION */}
         <div style={sectionStyle}>
           <label style={labelStyle}>Condition</label>
@@ -127,11 +184,19 @@ export default function ListItemPage() {
           </select>
         </div>
 
-        {selectedLocation === 'other' && (
-          <div style={sectionStyle}>
-            <input type="text" placeholder="Specify City/State" style={inputStyle} required />
-          </div>
-        )}
+     {selectedLocation === 'other' && (
+  <div style={sectionStyle}>
+    <input 
+      type="text" 
+      placeholder="Specify City/State" 
+      style={inputStyle} 
+      required 
+      /* Add these two lines */
+      value={manualAddress} 
+      onChange={(e) => setManualAddress(e.target.value)} 
+    />
+  </div>
+)}
 
         <button type="submit" style={buttonStyle}>
           {loading ? 'Loading...' : 'Post Gear'}
