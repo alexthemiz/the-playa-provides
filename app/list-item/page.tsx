@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabaseClient';
 export default function ListItemPage() {
   const [locations, setLocations] = useState<any[]>([]);
   const [selectedLocation, setSelectedLocation] = useState('');
-  const [availability, setAvailability] = useState('keep'); 
+  const [availability, setAvailability] = useState('You can keep it'); // Matches Feed string
   const [loading, setLoading] = useState(true);
   
   // FORM FIELDS
@@ -17,14 +17,15 @@ export default function ListItemPage() {
   const [pickupBy, setPickupBy] = useState('');
   const [returnBy, setReturnBy] = useState('');
   const [terms, setTerms] = useState('');
-const [manualAddress, setManualAddress] = useState('');
+  const [manualAddress, setManualAddress] = useState('');
+
   useEffect(() => {
     const fetchLocations = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data } = await supabase
           .from('locations')
-          .select('id, label')
+          .select('id, label, location_type')
           .eq('user_id', user.id);
         if (data) setLocations(data);
       }
@@ -33,79 +34,84 @@ const [manualAddress, setManualAddress] = useState('');
     fetchLocations();
   }, []);
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
 
-  // 1. Get the authenticated user
-  const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
-    alert("Please log in first!");
-    return;
-  }
+    if (!user) {
+      alert("Please log in first!");
+      setLoading(false);
+      return;
+    }
 
-  // 2. Insert into gear_items
-const { error } = await supabase
-  .from('gear_items')
-  .insert([
-    { 
-      item_name: itemName, 
-      description: description, 
-      condition: condition,
-      category: category, // Add this line!
-      pickup_by: pickupBy || null, 
-      return_by: returnBy || null,
-      terms: terms,
-      location_type: selectedLocation, 
-      manual_address: selectedLocation === 'other' ? manualAddress : null,
-      user_id: user.id 
-    },
-  ]);
+    // Identify the location_type (Home, Storage, etc) for the selected ID
+    const activeLoc = locations.find(l => l.id === selectedLocation);
 
-  if (error) {
-    console.error("Supabase Error:", error.message);
-    alert("Error: " + error.message);
-  } else {
-    alert("Success! Your gear is now listed.");
-    // Clear the form fields
-    setItemName('');
-    setDescription('');
-    setManualAddress('');
-    setTerms('');
-    setPickupBy('');
-    setReturnBy('');
-  }
-};
+    const { error } = await supabase
+      .from('gear_items')
+      .insert([
+        { 
+          item_name: itemName, 
+          description: description, 
+          condition: condition,
+          category: category,
+          availability_status: availability, 
+          pickup_by: pickupBy || null, 
+          return_by: returnBy || null,
+          terms: terms,
+          // NEW: We save BOTH the ID for the Join and the Type for the label
+          location_id: selectedLocation === 'other' ? null : selectedLocation,
+          location_type: selectedLocation === 'other' ? 'Other' : activeLoc?.location_type, 
+          manual_address: selectedLocation === 'other' ? manualAddress : null,
+          user_id: user.id 
+        },
+      ]);
+
+    if (error) {
+      console.error("Supabase Error:", error.message);
+      alert("Error: " + error.message);
+    } else {
+      alert("Success! Your gear is now listed on the feed.");
+      // Reset form
+      setItemName('');
+      setDescription('');
+      setCategory('');
+      setCondition('good');
+      setManualAddress('');
+      setTerms('');
+      setPickupBy('');
+      setReturnBy('');
+      setAvailability('You can keep it');
+      setSelectedLocation('');
+    }
+    setLoading(false);
+  };
 
   return (
     <div style={containerStyle}>
       <h1 style={titleStyle}>Offer New Gear</h1>
       
       <form onSubmit={handleSubmit} style={formStyle}>
-        {/* ITEM NAME */}
         <div style={sectionStyle}>
           <label style={labelStyle}>Item Name</label>
           <input type="text" value={itemName} onChange={(e) => setItemName(e.target.value)} style={inputStyle} placeholder="e.g. Heavy Duty Tarp" required />
         </div>
 
-{/* CATEGORY DROPDOWN */}
-<div style={sectionStyle}>
-  <label style={labelStyle}>Category</label>
-  <select 
-    value={category} 
-    onChange={(e) => setCategory(e.target.value)} 
-    style={inputStyle} 
-    required
-  >
-    <option value="">-- Select Category --</option>
-    <option value="camping">Camping</option>
-    <option value="tools">Tools</option>
-    <option value="sports">Sports</option>
-    <option value="electronics">Electronics</option>
-    {/* Add more as needed */}
-  </select>
-</div>
-        {/* CONDITION */}
+        <div style={sectionStyle}>
+          <label style={labelStyle}>Category</label>
+          <select value={category} onChange={(e) => setCategory(e.target.value)} style={inputStyle} required>
+            <option value="">-- Select Category --</option>
+            <option value="Kitchen & Water">Kitchen & Water</option>
+            <option value="Lighting & Electronics">Lighting & Electronics</option>
+            <option value="Power & Solar">Power & Solar</option>
+            <option value="Shelter & Shade">Shelter & Shade</option>
+            <option value="Storage & Coolers">Storage & Coolers</option>
+            <option value="Tools & Hardware">Tools & Hardware</option>
+          </select>
+        </div>
+
         <div style={sectionStyle}>
           <label style={labelStyle}>Condition</label>
           <select value={condition} onChange={(e) => setCondition(e.target.value)} style={inputStyle}>
@@ -116,7 +122,6 @@ const { error } = await supabase
           </select>
         </div>
 
-        {/* DESCRIPTION */}
         <div style={sectionStyle}>
           <label style={labelStyle}>Description</label>
           <textarea 
@@ -127,35 +132,32 @@ const { error } = await supabase
           />
         </div>
 
-        {/* AVAILABILITY RADIO BUTTONS */}
         <div style={sectionStyle}>
           <label style={labelStyle}>Availability</label>
           <div style={radioContainerStyle}>
             <label style={radioLabelStyle}>
-              <input type="radio" value="keep" checked={availability === 'keep'} onChange={(e) => setAvailability(e.target.value)} />
+              <input type="radio" value="You can keep it" checked={availability === 'You can keep it'} onChange={(e) => setAvailability(e.target.value)} />
               You can keep it
             </label>
             <label style={radioLabelStyle}>
-              <input type="radio" value="borrow" checked={availability === 'borrow'} onChange={(e) => setAvailability(e.target.value)} />
+              <input type="radio" value="You can borrow it" checked={availability === 'You can borrow it'} onChange={(e) => setAvailability(e.target.value)} />
               You can borrow it
             </label>
             <label style={radioLabelStyle}>
-              <input type="radio" value="unavailable" checked={availability === 'unavailable'} onChange={(e) => setAvailability(e.target.value)} />
-              Not available - just adding to inventory
-          </label>
+              <input type="radio" value="Not available" checked={availability === 'Not available'} onChange={(e) => setAvailability(e.target.value)} />
+              Not available - just inventory
+            </label>
           </div>
         </div>
 
-        {/* CONDITIONAL: KEEP IT */}
-        {availability === 'keep' && (
+        {availability === 'You can keep it' && (
           <div style={dropdownSectionStyle}>
             <label style={labelStyle}>Must pick up by</label>
             <input type="date" value={pickupBy} onChange={(e) => setPickupBy(e.target.value)} style={inputStyle} required />
           </div>
         )}
 
-        {/* CONDITIONAL: BORROW IT */}
-        {availability === 'borrow' && (
+        {availability === 'You can borrow it' && (
           <div style={dropdownSectionStyle}>
             <div style={{ display: 'flex', gap: '10px' }}>
               <div style={{ flex: 1 }}>
@@ -172,11 +174,10 @@ const { error } = await supabase
           </div>
         )}
 
-        {/* LOCATION DROPDOWN */}
         <div style={sectionStyle}>
           <label style={labelStyle}>Located At:</label>
           <select value={selectedLocation} onChange={(e) => setSelectedLocation(e.target.value)} style={inputStyle} required>
-            <option value="">-- Select a Location --</option>
+            <option value="">-- Select a Saved Location --</option>
             {locations.map((loc) => (
               <option key={loc.id} value={loc.id}>{loc.label}</option>
             ))}
@@ -184,29 +185,28 @@ const { error } = await supabase
           </select>
         </div>
 
-     {selectedLocation === 'other' && (
-  <div style={sectionStyle}>
-    <input 
-      type="text" 
-      placeholder="Specify City/State" 
-      style={inputStyle} 
-      required 
-      /* Add these two lines */
-      value={manualAddress} 
-      onChange={(e) => setManualAddress(e.target.value)} 
-    />
-  </div>
-)}
+        {selectedLocation === 'other' && (
+          <div style={sectionStyle}>
+            <input 
+              type="text" 
+              placeholder="Specify City, State" 
+              style={inputStyle} 
+              required 
+              value={manualAddress} 
+              onChange={(e) => setManualAddress(e.target.value)} 
+            />
+          </div>
+        )}
 
-        <button type="submit" style={buttonStyle}>
-          {loading ? 'Loading...' : 'Post Gear'}
+        <button type="submit" style={buttonStyle} disabled={loading}>
+          {loading ? 'Processing...' : 'Post Gear'}
         </button>
       </form>
     </div>
   );
 }
 
-// --- STYLES ---
+// --- STYLES (Unchanged) ---
 const containerStyle = { padding: '40px', maxWidth: '500px', margin: '0 auto', color: '#fff', fontFamily: 'sans-serif' };
 const titleStyle = { marginBottom: '20px' };
 const formStyle = { display: 'flex', flexDirection: 'column' as const, gap: '20px' };

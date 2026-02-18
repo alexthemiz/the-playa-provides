@@ -4,129 +4,111 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 
+// FIX #1: Move this OUTSIDE the main component so you don't lose focus
+const AddressSection = ({ title, type, values, onAddrChange }: any) => (
+  <section style={sectionStyle}>
+    <h3 style={{ color: '#ff6666', marginTop: 0 }}>{title}</h3>
+    <input 
+      style={inputStyle} 
+      placeholder="Street Address" 
+      value={values.street} 
+      onChange={e => onAddrChange(type, 'street', e.target.value)} 
+    />
+    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '10px' }}>
+      <input style={inputStyle} placeholder="City" value={values.city} onChange={e => onAddrChange(type, 'city', e.target.value)} />
+      <input style={inputStyle} placeholder="State" value={values.state} onChange={e => onAddrChange(type, 'state', e.target.value)} />
+      <input style={inputStyle} placeholder="Zip" value={values.zip} onChange={e => onAddrChange(type, 'zip', e.target.value)} />
+    </div>
+  </section>
+);
+
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [profile, setProfile] = useState({
-    full_name: '',
-    burner_name: '',
-    city: '',
-    state: '',
-    zip_code: '',
-    street_address: '',
-    bio: ''
-  });
+  
+  const [profile, setProfile] = useState({ full_name: '', preferred_name: '', bio: '' });
+  const [home, setHome] = useState({ street: '', city: '', state: '', zip: '' });
+  const [storage, setStorage] = useState({ street: '', city: '', state: '', zip: '' });
+  const [business, setBusiness] = useState({ street: '', city: '', state: '', zip: '' });
 
-  // 1. Load the data as soon as the page opens
-  useEffect(() => {
-    fetchProfile();
-  }, []);
+  useEffect(() => { fetchData(); }, []);
 
-  async function fetchProfile() {
+  async function fetchData() {
     const { data: { user } } = await supabase.auth.getUser();
-    
     if (user) {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
+      const { data: profileData } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+      if (profileData) setProfile(profileData);
 
-      if (data) setProfile(data);
+      const { data: locs } = await supabase.from('locations').select('*').eq('user_id', user.id);
+      if (locs) {
+        locs.forEach(loc => {
+          const addr = { 
+            street: loc.street_address || loc.address_line_1 || '', // Check both columns
+            city: loc.city || '', 
+            state: loc.state || '', 
+            zip: loc.zip_code || '' 
+          };
+          if (loc.location_type === 'home') setHome(addr);
+          if (loc.location_type === 'storage') setStorage(addr);
+          if (loc.location_type === 'business') setBusiness(addr);
+        });
+      }
     }
     setLoading(false);
   }
 
-  // 2. Save the data
+  const handleAddrChange = (type: string, field: string, value: string) => {
+    if (type === 'home') setHome(prev => ({ ...prev, [field]: value }));
+    if (type === 'storage') setStorage(prev => ({ ...prev, [field]: value }));
+    if (type === 'business') setBusiness(prev => ({ ...prev, [field]: value }));
+  };
+
   async function handleSave() {
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
 
-    if (!user) {
-      alert("You must be logged in to save settings.");
-      setSaving(false);
-      return;
-    }
+    // FIX #2: Explicitly map street to address_line_1 for backward compatibility
+    const locEntries = [
+      { user_id: user.id, location_type: 'home', label: 'Home', street_address: home.street, address_line_1: home.street, city: home.city, state: home.state, zip_code: home.zip },
+      { user_id: user.id, location_type: 'storage', label: 'Storage Unit', street_address: storage.street, address_line_1: storage.street, city: storage.city, state: storage.state, zip_code: storage.zip },
+      { user_id: user.id, location_type: 'business', label: 'Business', street_address: business.street, address_line_1: business.street, city: business.city, state: business.state, zip_code: business.zip },
+    ];
 
-    const { error } = await supabase.from('profiles').upsert({
-      id: user.id, // Links the profile to the logged-in user
-      ...profile,
-      updated_at: new Date(),
-    });
+    const { error: pErr } = await supabase.from('profiles').upsert({ id: user.id, ...profile, updated_at: new Date() });
+    const { error: lErr } = await supabase.from('locations').upsert(locEntries, { onConflict: 'user_id,location_type' });
 
-    if (error) {
-      alert("Error: " + error.message);
-    } else {
-      alert("Profile updated successfully! ✨");
-    }
+    if (pErr || lErr) alert("Error saving settings.");
+    else alert("Settings updated! ✨");
     setSaving(false);
   }
 
-  if (loading) return <div style={{color: 'white', textAlign: 'center', padding: '50px'}}>Loading your profile...</div>;
+  if (loading) return <div style={{color: 'white', textAlign: 'center', padding: '50px'}}>Loading...</div>;
 
   return (
-    <div style={{ padding: '40px', maxWidth: '600px', margin: '0 auto', color: 'white', fontFamily: 'sans-serif' }}>
+    <div style={{ padding: '40px', maxWidth: '700px', margin: '0 auto', color: 'white', fontFamily: 'sans-serif' }}>
       <Link href="/inventory" style={{ color: '#aaa', textDecoration: 'none' }}>← Back to Inventory</Link>
-      
       <h1 style={{ margin: '20px 0' }}>Account Settings</h1>
       
       <div style={{ display: 'grid', gap: '20px' }}>
-        {/* PUBLIC INFO */}
-        <section style={{ border: '1px solid #333', padding: '20px', borderRadius: '8px' }}>
-          <h3 style={{ color: '#888', marginTop: 0 }}>Public Info (Visible on Listings)</h3>
-          
-          <label style={labelStyle}>Preferred Name or Burner Name</label>
-          <input 
-            style={inputStyle} 
-            value={profile.burner_name || ''} 
-            onChange={e => setProfile({...profile, burner_name: e.target.value})} 
-          />
-          
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px' }}>
-            <div>
-              <label style={labelStyle}>City</label>
-              <input style={inputStyle} value={profile.city || ''} onChange={e => setProfile({...profile, city: e.target.value})} />
-            </div>
-            <div>
-              <label style={labelStyle}>State</label>
-              <input style={inputStyle} value={profile.state || ''} onChange={e => setProfile({...profile, state: e.target.value})} />
-            </div>
-          </div>
+        <section style={sectionStyle}>
+          <h3 style={{ color: '#888', marginTop: 0 }}>Public Profile</h3>
+          <label style={labelStyle}>Preferred Name</label>
+          <input style={inputStyle} value={profile.preferred_name} onChange={e => setProfile({...profile, preferred_name: e.target.value})} />
         </section>
 
-        {/* PRIVATE INFO */}
-        <section style={{ border: '1px solid #331111', padding: '20px', borderRadius: '8px', backgroundColor: '#110505' }}>
-          <h3 style={{ color: '#ff6666', marginTop: 0 }}>Private Info (Internal Use)</h3>
-          
-          <label style={labelStyle}>Full Legal Name</label>
-          <input style={inputStyle} value={profile.full_name || ''} onChange={e => setProfile({...profile, full_name: e.target.value})} />
-          
-          <label style={{ ...labelStyle, marginTop: '10px' }}>Street Address</label>
-          <input style={inputStyle} value={profile.street_address || ''} onChange={e => setProfile({...profile, street_address: e.target.value})} />
-          
-          <label style={{ ...labelStyle, marginTop: '10px' }}>Zip Code</label>
-          <input style={inputStyle} value={profile.zip_code || ''} onChange={e => setProfile({...profile, zip_code: e.target.value})} />
-        </section>
+        <AddressSection title="Home Address" type="home" values={home} onAddrChange={handleAddrChange} />
+        <AddressSection title="Storage Unit" type="storage" values={storage} onAddrChange={handleAddrChange} />
+        <AddressSection title="Business / Hub" type="business" values={business} onAddrChange={handleAddrChange} />
 
-        <button 
-          onClick={handleSave} 
-          disabled={saving}
-          style={{ 
-            padding: '15px', 
-            background: saving ? '#444' : 'white', 
-            color: 'black', 
-            fontWeight: 'bold', 
-            border: 'none', 
-            borderRadius: '4px', 
-            cursor: saving ? 'not-allowed' : 'pointer' 
-          }}
-        >
-          {saving ? 'Saving...' : 'Save All Changes'}
-        </button>
+        <button onClick={handleSave} disabled={saving} style={buttonStyle}>{saving ? 'Saving...' : 'Save All Changes'}</button>
       </div>
     </div>
   );
 }
 
+// Styles (unchanged)
+const sectionStyle = { border: '1px solid #333', padding: '20px', borderRadius: '8px', backgroundColor: '#111' };
 const labelStyle = { display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '5px' };
-const inputStyle = { width: '100%', padding: '10px', backgroundColor: '#000', border: '1px solid #333', color: 'white', borderRadius: '4px', boxSizing: 'border-box' as 'border-box' };
+const inputStyle = { width: '100%', padding: '10px', backgroundColor: '#000', border: '1px solid #333', color: 'white', borderRadius: '4px', marginBottom: '10px' };
+const buttonStyle = { padding: '15px', background: 'white', color: 'black', fontWeight: 'bold' as 'bold', border: 'none', borderRadius: '4px', cursor: 'pointer' };

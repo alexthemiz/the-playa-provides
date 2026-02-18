@@ -122,7 +122,7 @@ export default function InventoryPage() {
               <div style={{ borderTop: '1px solid #222', paddingTop: '15px', marginTop: 'auto' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '5px' }}>
                     <span style={{ fontSize: '1.2rem' }}>👤</span>
-                    <span style={{ fontWeight: 'bold' }}>{item.burner_name || item.full_name}</span>
+                    <span style={{ fontWeight: 'bold' }}>{item.preferred_name || item.full_name}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#888', fontSize: '0.9rem' }}>
                     <span>📍</span>
