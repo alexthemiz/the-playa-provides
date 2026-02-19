@@ -1,219 +1,214 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import Link from 'next/link';
 
 export default function ListItemPage() {
-  const [locations, setLocations] = useState<any[]>([]);
-  const [selectedLocation, setSelectedLocation] = useState('');
-  const [availability, setAvailability] = useState('You can keep it'); // Matches Feed string
-  const [loading, setLoading] = useState(true);
-  
-  // FORM FIELDS
-  const [itemName, setItemName] = useState('');
-  const [category, setCategory] = useState('');
-  const [description, setDescription] = useState('');
-  const [condition, setCondition] = useState('good');
-  const [pickupBy, setPickupBy] = useState('');
-  const [returnBy, setReturnBy] = useState('');
-  const [terms, setTerms] = useState('');
-  const [manualAddress, setManualAddress] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [availability, setAvailability] = useState('Available to borrow');
+  const [locations, setLocations] = useState<{id: string, label: string}[]>([]);
 
+  // Fetch saved locations from Supabase on load
   useEffect(() => {
-    const fetchLocations = async () => {
+    async function fetchLocations() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('locations')
-          .select('id, label, location_type')
+          .select('id, label')
           .eq('user_id', user.id);
+        
         if (data) setLocations(data);
+        if (error) console.error("Error fetching locations:", error);
       }
-      setLoading(false);
-    };
+    }
     fetchLocations();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
 
+    const formData = new FormData(e.currentTarget);
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      alert("Please log in first!");
+      alert("You must be logged in!");
       setLoading(false);
       return;
     }
 
-    // Identify the location_type (Home, Storage, etc) for the selected ID
-    const activeLoc = locations.find(l => l.id === selectedLocation);
-
-    const { error } = await supabase
-      .from('gear_items')
-      .insert([
-        { 
-          item_name: itemName, 
-          description: description, 
-          condition: condition,
-          category: category,
-          availability_status: availability, 
-          pickup_by: pickupBy || null, 
-          return_by: returnBy || null,
-          terms: terms,
-          // NEW: We save BOTH the ID for the Join and the Type for the label
-          location_id: selectedLocation === 'other' ? null : selectedLocation,
-          location_type: selectedLocation === 'other' ? 'Other' : activeLoc?.location_type, 
-          manual_address: selectedLocation === 'other' ? manualAddress : null,
-          user_id: user.id 
-        },
-      ]);
+    const { error } = await supabase.from('gear_items').insert([
+      {
+        user_id: user.id,
+        item_name: formData.get('item_name'),
+        category: formData.get('category'),
+        condition: formData.get('condition'),
+        location_id: formData.get('location_id'), // The UUID from the dropdown
+        availability_status: availability, 
+        description: formData.get('description'),
+        pickup_by: formData.get('pickup_by') || null,
+        return_by: formData.get('return_by') || null,
+        damage_price: formData.get('damage_price') ? parseFloat(formData.get('damage_price') as string) : null,
+        loss_price: formData.get('loss_price') ? parseFloat(formData.get('loss_price') as string) : null,
+      },
+    ]);
 
     if (error) {
-      console.error("Supabase Error:", error.message);
-      alert("Error: " + error.message);
+      console.error(error);
+      alert("Error saving item: " + error.message);
     } else {
-      alert("Success! Your gear is now listed on the feed.");
-      // Reset form
-      setItemName('');
-      setDescription('');
-      setCategory('');
-      setCondition('good');
-      setManualAddress('');
-      setTerms('');
-      setPickupBy('');
-      setReturnBy('');
-      setAvailability('You can keep it');
-      setSelectedLocation('');
+      alert("Item listed successfully!");
+      window.location.href = '/inventory';
     }
     setLoading(false);
-  };
+  }
 
   return (
-    <div style={containerStyle}>
-      <h1 style={titleStyle}>Offer New Gear</h1>
+    <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto', color: 'white' }}>
+      <Link href="/inventory" style={{ color: '#aaa', textDecoration: 'none' }}>← Back to Inventory Hub</Link>
+      <h1 style={{ marginTop: '20px' }}>List New Gear</h1>
       
-      <form onSubmit={handleSubmit} style={formStyle}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '30px' }}>
+        
         <div style={sectionStyle}>
-          <label style={labelStyle}>Item Name</label>
-          <input type="text" value={itemName} onChange={(e) => setItemName(e.target.value)} style={inputStyle} placeholder="e.g. Heavy Duty Tarp" required />
+          <label style={labelStyle}>Item</label>
+          <input name="item_name" required placeholder="e.g. Coleman 2-Burner Stove" style={inputStyle} />
         </div>
 
         <div style={sectionStyle}>
           <label style={labelStyle}>Category</label>
-          <select value={category} onChange={(e) => setCategory(e.target.value)} style={inputStyle} required>
-            <option value="">-- Select Category --</option>
-            <option value="Kitchen & Water">Kitchen & Water</option>
-            <option value="Lighting & Electronics">Lighting & Electronics</option>
-            <option value="Power & Solar">Power & Solar</option>
-            <option value="Shelter & Shade">Shelter & Shade</option>
-            <option value="Storage & Coolers">Storage & Coolers</option>
-            <option value="Tools & Hardware">Tools & Hardware</option>
+          <select name="category" style={inputStyle}>
+            <option>Bikes & Transport</option>
+            <option>Kitchen & Cooking</option>
+            <option>Lighting & Power</option>
+            <option>Safety & First Aid</option>
+            <option>Shelter & Shade</option>
+            <option>Tools & Hardware</option>
+            <option>Water & Graywater</option>
           </select>
         </div>
 
         <div style={sectionStyle}>
           <label style={labelStyle}>Condition</label>
-          <select value={condition} onChange={(e) => setCondition(e.target.value)} style={inputStyle}>
-            <option value="new">New / Never Used</option>
-            <option value="good">Good (Clean & Functional)</option>
-            <option value="fair">Fair (Shows Wear)</option>
-            <option value="rough">Rough (Still works, but barely)</option>
+          <select name="condition" style={inputStyle}>
+            <option>New</option>
+            <option>Good (Dusty)</option>
+            <option>Well Used</option>
+            <option>Beaten Up but Works</option>
           </select>
         </div>
 
         <div style={sectionStyle}>
           <label style={labelStyle}>Description</label>
-          <textarea 
-            value={description} 
-            onChange={(e) => setDescription(e.target.value)} 
-            placeholder="Tell us more about the item..." 
-            style={{ ...inputStyle, height: '80px', resize: 'vertical' }} 
-          />
+          <textarea name="description" placeholder="Any special instructions?" style={{ ...inputStyle, minHeight: '80px' }} />
+        </div>
+
+        <div style={sectionStyle}>
+          <label style={labelStyle}>Located At</label>
+          <select name="location_id" style={inputStyle} required>
+            <option value="">-- Select a Saved Location --</option>
+            {locations.map((loc) => (
+              <option key={loc.id} value={loc.id}>
+                {loc.label}
+              </option>
+            ))}
+          </select>
+          {locations.length === 0 && (
+            <p style={{ fontSize: '0.8rem', color: '#ffcc00', marginTop: '5px' }}>
+              No locations found. Please add one in Settings first.
+            </p>
+          )}
         </div>
 
         <div style={sectionStyle}>
           <label style={labelStyle}>Availability</label>
           <div style={radioContainerStyle}>
             <label style={radioLabelStyle}>
-              <input type="radio" value="You can keep it" checked={availability === 'You can keep it'} onChange={(e) => setAvailability(e.target.value)} />
-              You can keep it
+              <input 
+                type="radio" 
+                value="Available to keep" 
+                checked={availability === 'Available to keep'} 
+                onChange={(e) => setAvailability(e.target.value)} 
+              />
+              You can keep it (Gift)
             </label>
             <label style={radioLabelStyle}>
-              <input type="radio" value="You can borrow it" checked={availability === 'You can borrow it'} onChange={(e) => setAvailability(e.target.value)} />
+              <input 
+                type="radio" 
+                value="Available to borrow" 
+                checked={availability === 'Available to borrow'} 
+                onChange={(e) => setAvailability(e.target.value)} 
+              />
               You can borrow it
             </label>
             <label style={radioLabelStyle}>
-              <input type="radio" value="Not available" checked={availability === 'Not available'} onChange={(e) => setAvailability(e.target.value)} />
-              Not available - just inventory
+              <input 
+                type="radio" 
+                value="Not Available" 
+                checked={availability === 'Not Available'} 
+                onChange={(e) => setAvailability(e.target.value)} 
+              />
+              Not available - just add to inventory
             </label>
           </div>
-        </div>
 
-        {availability === 'You can keep it' && (
-          <div style={dropdownSectionStyle}>
-            <label style={labelStyle}>Must pick up by</label>
-            <input type="date" value={pickupBy} onChange={(e) => setPickupBy(e.target.value)} style={inputStyle} required />
-          </div>
-        )}
+          {availability === 'Available to keep' && (
+            <div style={{ marginTop: '15px' }}>
+              <label style={labelStyle}>Pick up by</label>
+              <input type="date" name="pickup_by" max="2030-12-31" style={inputStyle} />
+            </div>
+          )}
 
-        {availability === 'You can borrow it' && (
-          <div style={dropdownSectionStyle}>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <div style={{ flex: 1 }}>
-                <label style={labelStyle}>Pick up by</label>
-                <input type="date" value={pickupBy} onChange={(e) => setPickupBy(e.target.value)} style={inputStyle} required />
+          {availability === 'Available to borrow' && (
+            <div style={{ marginTop: '15px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={labelStyle}>Pick up by</label>
+                  <input type="date" name="pickup_by" max="2030-12-31" style={inputStyle} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={labelStyle}>Return by</label>
+                  <input type="date" name="return_by" max="2030-12-31" style={inputStyle} />
+                </div>
               </div>
-              <div style={{ flex: 1 }}>
-                <label style={labelStyle}>Return by</label>
-                <input type="date" value={returnBy} onChange={(e) => setReturnBy(e.target.value)} style={inputStyle} required />
+              <div>
+                <label style={labelStyle}>If returned damaged, you agree to pay me ($)</label>
+                <input type="number" name="damage_price" placeholder="0.00" step="0.01" style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>If not returned, you agree to pay me ($)</label>
+                <input type="number" name="loss_price" placeholder="0.00" step="0.01" style={inputStyle} />
               </div>
             </div>
-            <label style={labelStyle}>Loan Terms</label>
-            <textarea value={terms} onChange={(e) => setTerms(e.target.value)} placeholder="Terms (e.g. Return it clean!)" style={{ ...inputStyle, height: '60px' }} />
-          </div>
-        )}
-
-        <div style={sectionStyle}>
-          <label style={labelStyle}>Located At:</label>
-          <select value={selectedLocation} onChange={(e) => setSelectedLocation(e.target.value)} style={inputStyle} required>
-            <option value="">-- Select a Saved Location --</option>
-            {locations.map((loc) => (
-              <option key={loc.id} value={loc.id}>{loc.label}</option>
-            ))}
-            <option value="other">Other (Manual Entry)</option>
-          </select>
+          )}
         </div>
 
-        {selectedLocation === 'other' && (
-          <div style={sectionStyle}>
-            <input 
-              type="text" 
-              placeholder="Specify City, State" 
-              style={inputStyle} 
-              required 
-              value={manualAddress} 
-              onChange={(e) => setManualAddress(e.target.value)} 
-            />
-          </div>
-        )}
-
-        <button type="submit" style={buttonStyle} disabled={loading}>
-          {loading ? 'Processing...' : 'Post Gear'}
+        <button 
+          type="submit" 
+          disabled={loading}
+          style={{
+            padding: '15px',
+            backgroundColor: '#00ccff',
+            color: 'black',
+            border: 'none',
+            borderRadius: '8px',
+            fontWeight: 'bold',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            fontSize: '1rem'
+          }}
+        >
+          {loading ? 'Listing Item...' : 'List Gear Item'}
         </button>
       </form>
     </div>
   );
 }
 
-// --- STYLES (Unchanged) ---
-const containerStyle = { padding: '40px', maxWidth: '500px', margin: '0 auto', color: '#fff', fontFamily: 'sans-serif' };
-const titleStyle = { marginBottom: '20px' };
-const formStyle = { display: 'flex', flexDirection: 'column' as const, gap: '20px' };
-const sectionStyle = { display: 'flex', flexDirection: 'column' as const, gap: '8px' };
-const labelStyle = { fontWeight: 'bold' as const, fontSize: '0.8rem', color: '#aaa' };
-const inputStyle = { padding: '12px', borderRadius: '4px', border: '1px solid #333', background: '#111', color: '#fff', width: '100%', boxSizing: 'border-box' as const };
-const radioContainerStyle = { display: 'flex', flexDirection: 'column' as const, gap: '10px' };
-const radioLabelStyle = { display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' };
-const buttonStyle = { padding: '15px', background: '#fff', color: '#000', fontWeight: 'bold' as const, border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '10px' };
-const dropdownSectionStyle = { backgroundColor: '#1a1a1a', padding: '15px', borderRadius: '8px', borderLeft: '4px solid #fff', display: 'flex', flexDirection: 'column' as const, gap: '10px' };
+// STYLES
+const sectionStyle = { display: 'flex', flexDirection: 'column' as 'column', gap: '8px' };
+const labelStyle = { fontSize: '0.9rem', color: '#888', fontWeight: 'bold' };
+const inputStyle = { padding: '12px', borderRadius: '8px', border: '1px solid #333', backgroundColor: '#111', color: 'white' };
+const radioContainerStyle = { display: 'flex', flexDirection: 'column' as 'column', gap: '10px', background: '#111', padding: '15px', borderRadius: '8px', border: '1px solid #222' };
+const radioLabelStyle = { display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '1rem' };
