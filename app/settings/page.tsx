@@ -4,32 +4,14 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 
-// FIX #1: Move this OUTSIDE the main component so you don't lose focus
-const AddressSection = ({ title, type, values, onAddrChange }: any) => (
-  <section style={sectionStyle}>
-    <h3 style={{ color: '#ff6666', marginTop: 0 }}>{title}</h3>
-    <input 
-      style={inputStyle} 
-      placeholder="Street Address" 
-      value={values.street} 
-      onChange={e => onAddrChange(type, 'street', e.target.value)} 
-    />
-    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '10px' }}>
-      <input style={inputStyle} placeholder="City" value={values.city} onChange={e => onAddrChange(type, 'city', e.target.value)} />
-      <input style={inputStyle} placeholder="State" value={values.state} onChange={e => onAddrChange(type, 'state', e.target.value)} />
-      <input style={inputStyle} placeholder="Zip" value={values.zip} onChange={e => onAddrChange(type, 'zip', e.target.value)} />
-    </div>
-  </section>
-);
+const US_STATES = ["", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"];
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   
-  const [profile, setProfile] = useState({ full_name: '', preferred_name: '', bio: '' });
-  const [home, setHome] = useState({ street: '', city: '', state: '', zip: '' });
-  const [storage, setStorage] = useState({ street: '', city: '', state: '', zip: '' });
-  const [business, setBusiness] = useState({ street: '', city: '', state: '', zip: '' });
+  const [profile, setProfile] = useState({ full_name: '', preferred_name: '', username: '' });
+  const [locations, setLocations] = useState<any[]>([]);
 
   useEffect(() => { fetchData(); }, []);
 
@@ -37,30 +19,45 @@ export default function SettingsPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       const { data: profileData } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-      if (profileData) setProfile(profileData);
+      if (profileData) setProfile({
+        full_name: profileData.full_name || '',
+        preferred_name: profileData.preferred_name || '',
+        username: profileData.username || ''
+      });
 
       const { data: locs } = await supabase.from('locations').select('*').eq('user_id', user.id);
-      if (locs) {
-        locs.forEach(loc => {
-          const addr = { 
-            street: loc.street_address || loc.address_line_1 || '', // Check both columns
-            city: loc.city || '', 
-            state: loc.state || '', 
-            zip: loc.zip_code || '' 
-          };
-          if (loc.location_type === 'home') setHome(addr);
-          if (loc.location_type === 'storage') setStorage(addr);
-          if (loc.location_type === 'business') setBusiness(addr);
-        });
-      }
+      if (locs) setLocations(locs);
     }
     setLoading(false);
   }
 
-  const handleAddrChange = (type: string, field: string, value: string) => {
-    if (type === 'home') setHome(prev => ({ ...prev, [field]: value }));
-    if (type === 'storage') setStorage(prev => ({ ...prev, [field]: value }));
-    if (type === 'business') setBusiness(prev => ({ ...prev, [field]: value }));
+  const addLocation = () => {
+    setLocations([...locations, { 
+      id: crypto.randomUUID(), 
+      created_at: new Date().toISOString(),
+      label: '', 
+      location_type: 'Home', 
+      address_line_1: '', 
+      city: '', 
+      state: '', // Defaulting to empty string now
+      zip_code: '' 
+    }]);
+  };
+
+  const updateLocation = (index: number, field: string, value: string) => {
+    const newLocs = [...locations];
+    newLocs[index][field] = value;
+    setLocations(newLocs);
+  };
+
+  const removeLocation = async (index: number) => {
+    const locToDelete = locations[index];
+    if (locToDelete.id) {
+       const confirmDelete = confirm("Delete this location? This might affect items listed here.");
+       if (!confirmDelete) return;
+       await supabase.from('locations').delete().eq('id', locToDelete.id);
+    }
+    setLocations(locations.filter((_, i) => i !== index));
   };
 
   async function handleSave() {
@@ -68,19 +65,27 @@ export default function SettingsPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    // FIX #2: Explicitly map street to address_line_1 for backward compatibility
-    const locEntries = [
-      { user_id: user.id, location_type: 'home', label: 'Home', street_address: home.street, address_line_1: home.street, city: home.city, state: home.state, zip_code: home.zip },
-      { user_id: user.id, location_type: 'storage', label: 'Storage Unit', street_address: storage.street, address_line_1: storage.street, city: storage.city, state: storage.state, zip_code: storage.zip },
-      { user_id: user.id, location_type: 'business', label: 'Business', street_address: business.street, address_line_1: business.street, city: business.city, state: business.state, zip_code: business.zip },
-    ];
-
     const { error: pErr } = await supabase.from('profiles').upsert({ id: user.id, ...profile, updated_at: new Date() });
-    const { error: lErr } = await supabase.from('locations').upsert(locEntries, { onConflict: 'user_id,location_type' });
 
-    if (pErr || lErr) alert("Error saving settings.");
+    if (pErr) {
+      if (pErr.code === '23505') alert("Username is taken!");
+      else alert("Error: " + pErr.message);
+      setSaving(false);
+      return;
+    }
+
+    const locationsToSave = locations.map(loc => ({
+      ...loc,
+      user_id: user.id
+    }));
+
+    const { error: lErr } = await supabase.from('locations').upsert(locationsToSave);
+
+    if (lErr) alert("Error saving locations: " + lErr.message);
     else alert("Settings updated! ✨");
+    
     setSaving(false);
+    fetchData();
   }
 
   if (loading) return <div style={{color: 'white', textAlign: 'center', padding: '50px'}}>Loading...</div>;
@@ -90,16 +95,61 @@ export default function SettingsPage() {
       <Link href="/inventory" style={{ color: '#aaa', textDecoration: 'none' }}>← Back to Inventory</Link>
       <h1 style={{ margin: '20px 0' }}>Account Settings</h1>
       
-      <div style={{ display: 'grid', gap: '20px' }}>
+      <div style={{ display: 'grid', gap: '30px' }}>
+        
+        {/* IDENTITY SECTION */}
         <section style={sectionStyle}>
-          <h3 style={{ color: '#888', marginTop: 0 }}>Public Profile</h3>
-          <label style={labelStyle}>Preferred Name</label>
-          <input style={inputStyle} value={profile.preferred_name} onChange={e => setProfile({...profile, preferred_name: e.target.value})} />
+          <h3 style={sectionHeaderStyle}>Identity</h3>
+          <div style={{ display: 'grid', gap: '15px' }}>
+            <div>
+              <label style={labelStyle}>Full Name (Private)</label>
+              <input style={inputStyle} value={profile.full_name} onChange={e => setProfile({...profile, full_name: e.target.value})} placeholder="First Last" />
+            </div>
+            <div>
+              <label style={labelStyle}>Preferred Name (Public)</label>
+              <input style={inputStyle} value={profile.preferred_name} onChange={e => setProfile({...profile, preferred_name: e.target.value})} placeholder="e.g. Dusty Star" />
+            </div>
+            <div>
+              <label style={labelStyle}>Username</label>
+              <input style={inputStyle} value={profile.username} onChange={e => setProfile({...profile, username: e.target.value.toLowerCase().replace(/\s/g, '')})} placeholder="unique_handle" />
+            </div>
+          </div>
         </section>
 
-        <AddressSection title="Home Address" type="home" values={home} onAddrChange={handleAddrChange} />
-        <AddressSection title="Storage Unit" type="storage" values={storage} onAddrChange={handleAddrChange} />
-        <AddressSection title="Business / Hub" type="business" values={business} onAddrChange={handleAddrChange} />
+        {/* ADDRESS MANAGER */}
+        <section style={sectionStyle}>
+          <h3 style={sectionHeaderStyle}>My Locations</h3>
+
+          {locations.map((loc, index) => (
+            <div key={loc.id || index} style={{ borderBottom: '1px solid #222', paddingBottom: '20px', marginBottom: '20px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '10px', marginBottom: '10px' }}>
+                <input style={inputStyle} placeholder="Label (e.g. Home)" value={loc.label} onChange={e => updateLocation(index, 'label', e.target.value)} />
+                <select style={inputStyle} value={loc.location_type} onChange={e => updateLocation(index, 'location_type', e.target.value)}>
+                  <option>Home</option>
+                  <option>Business</option>
+                  <option>Storage Unit</option>
+                  <option>Other</option>
+                </select>
+                <button onClick={() => removeLocation(index)} style={{ ...smallButtonStyle, backgroundColor: '#ff4444' }}>Delete</button>
+              </div>
+              <input style={inputStyle} placeholder="Street Address" value={loc.address_line_1} onChange={e => updateLocation(index, 'address_line_1', e.target.value)} />
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '10px', marginTop: '10px' }}>
+                <input style={inputStyle} placeholder="City" value={loc.city} onChange={e => updateLocation(index, 'city', e.target.value)} />
+                <select style={inputStyle} value={loc.state} onChange={e => updateLocation(index, 'state', e.target.value)}>
+                  {US_STATES.map(s => <option key={s} value={s}>{s === '' ? 'State' : s}</option>)}
+                </select>
+                <input style={inputStyle} placeholder="Zip" value={loc.zip_code} onChange={e => updateLocation(index, 'zip_code', e.target.value)} />
+              </div>
+            </div>
+          ))}
+
+          <button 
+            onClick={addLocation} 
+            style={{ ...smallButtonStyle, width: '100%', padding: '12px', marginTop: '10px', fontSize: '0.9rem', backgroundColor: '#222' }}
+          >
+            + Add Another Location
+          </button>
+        </section>
 
         <button onClick={handleSave} disabled={saving} style={buttonStyle}>{saving ? 'Saving...' : 'Save All Changes'}</button>
       </div>
@@ -107,8 +157,10 @@ export default function SettingsPage() {
   );
 }
 
-// Styles (unchanged)
+// Styles
 const sectionStyle = { border: '1px solid #333', padding: '20px', borderRadius: '8px', backgroundColor: '#111' };
+const sectionHeaderStyle = { color: '#888', marginTop: 0, marginBottom: '15px' };
 const labelStyle = { display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '5px' };
-const inputStyle = { width: '100%', padding: '10px', backgroundColor: '#000', border: '1px solid #333', color: 'white', borderRadius: '4px', marginBottom: '10px' };
-const buttonStyle = { padding: '15px', background: 'white', color: 'black', fontWeight: 'bold' as 'bold', border: 'none', borderRadius: '4px', cursor: 'pointer' };
+const inputStyle = { width: '100%', padding: '10px', backgroundColor: '#000', border: '1px solid #333', color: 'white', borderRadius: '4px' };
+const buttonStyle = { padding: '15px', background: '#00ccff', color: 'black', fontWeight: 'bold' as 'bold', border: 'none', borderRadius: '4px', cursor: 'pointer' };
+const smallButtonStyle = { padding: '5px 10px', background: '#333', color: 'white', fontSize: '0.7rem', border: 'none', borderRadius: '4px', cursor: 'pointer' };
