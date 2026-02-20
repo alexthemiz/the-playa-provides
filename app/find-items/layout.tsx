@@ -1,9 +1,11 @@
+import { ReactNode } from 'react';
+
 export default function FindItemsLayout({
   children,
   modal,
 }: {
-  children: React.ReactNode;
-  modal: React.ReactNode;
+  children: ReactNode;
+  modal?: ReactNode; // The '?' makes it optional, fixing the Vercel error
 }) {
   return (
     <>
