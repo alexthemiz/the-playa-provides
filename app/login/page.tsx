@@ -1,33 +1,57 @@
 'use client'
-import { useState } from 'react'
-import { supabase } from '@/lib/supabaseClient'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 
-export default function LoginPage() {
-  const router = useRouter()
+import { useState } from 'react'
+import { createBrowserClient } from '@supabase/ssr' // Use this instead
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+
+export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
+  
+  const router = useRouter()
 
-  // Handle standard Password Login
+  // Initialize the browser-specific client
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    // ... rest of your handlePasswordLogin code stays exactly the same
     setMessage('')
+    console.log("Attempting login for:", email) // Log for debugging
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-    if (error) {
-      setMessage(`Error: ${error.message}`)
-      setLoading(false)
-    } else {
-      router.push('/inventory')
-      router.refresh()
+      if (error) {
+        console.error("Login error:", error.message)
+        setMessage(`Error: ${error.message}`)
+      } else {
+        console.log("Login successful, syncing cookies...")
+        
+        // 1. Force Next.js to recognize the new session cookies
+        router.refresh() 
+        
+        // 2. Short delay to ensure the refresh 'takes' before moving
+        setTimeout(() => {
+          router.push('/inventory')
+        }, 150)
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err)
+      setMessage("An unexpected error occurred.")
+    } finally {
+      // Always re-enable the button
+      setLoading(false) 
     }
   }
 

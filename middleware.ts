@@ -1,14 +1,9 @@
-import { createServerClient } from '@supabase/ssr' // Remove NextRequest from here
-import { NextResponse, type NextRequest } from 'next/server' // Add it here
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  // HEARTBEAT LOG: Shows you in the terminal which page is being checked
-  console.log("🛡️ Middleware checking path:", request.nextUrl.pathname)
-
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
+  let supabaseResponse = NextResponse.next({
+    request,
   })
 
   const supabase = createServerClient(
@@ -21,47 +16,38 @@ export async function middleware(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
+          supabaseResponse = NextResponse.next({
+            request,
           })
           cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, options)
           )
         },
       },
     }
   )
 
-  // This refreshes the auth token if needed
+  // IMPORTANT: Do not use getSession here, use getUser for the most reliable server check
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Define which pages anyone can see without logging in
-  const isPublicRoute = 
-    request.nextUrl.pathname === '/login' || 
-    request.nextUrl.pathname === '/signup' || 
-    request.nextUrl.pathname === '/' ||
-    request.nextUrl.pathname.startsWith('/auth')
+  const url = request.nextUrl.clone()
+  const isPublicRoute = ['/login', '/signup', '/'].includes(url.pathname) || url.pathname.startsWith('/auth')
 
-  // If no user and not a public page, kick to login
+  console.log(`📡 PATH: ${url.pathname} | AUTH: ${user ? 'YES' : 'NO'}`)
+
   if (!user && !isPublicRoute) {
-    console.log("🚫 Access Denied: Redirecting to /login")
-    return NextResponse.redirect(new URL('/login', request.url))
+    url.pathname = '/login'
+    return NextResponse.redirect(url)
   }
 
-  return response
+  if (user && (url.pathname === '/login' || url.pathname === '/signup')) {
+    url.pathname = '/inventory'
+    return NextResponse.redirect(url)
+  }
+
+  return supabaseResponse
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - Images/SVG in public folder
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 }

@@ -21,16 +21,17 @@ export default function SignUpPage() {
 
     // Sign up the user in Supabase Auth
     // We pass username and preferred_name as 'data' so the SQL trigger can find them
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          username: username.toLowerCase().trim(),
-          preferred_name: preferredName,
-        }
-      }
-    });
+const { error } = await supabase.auth.signUp({
+  email,
+  password,
+options: {
+  data: {
+    username: username.toLowerCase().trim(),
+    preferred_name: preferredName,
+    email: email, 
+  }
+}
+});
 
     if (error) {
       setMessage(`Error: ${error.message}`);

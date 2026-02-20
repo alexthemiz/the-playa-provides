@@ -20,16 +20,29 @@ export default function Header() {
           .from('profiles')
           .select('username')
           .eq('id', user.id)
-          .single()
+          .maybeSingle() // Using maybeSingle to prevent 406 errors
         
         if (profile) setUsername(profile.username)
       }
     }
+
     getUserData()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-      if (!session) setUsername(null)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const currentUser = session?.user ?? null
+      setUser(currentUser)
+      
+      if (currentUser) {
+        // Re-fetch username on login event
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', currentUser.id)
+          .maybeSingle()
+        if (profile) setUsername(profile.username)
+      } else {
+        setUsername(null)
+      }
     })
 
     return () => subscription.unsubscribe()
@@ -37,9 +50,11 @@ export default function Header() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
+    setUser(null)
+    setUsername(null)
+    router.push('/login') // Explicitly move them
     router.refresh()
   }
-
   // Visual Theme
   const headerBg = { backgroundColor: '#C08261' } // Dusty Sienna
   const mainTextColor = 'text-[#2D241E]' // Deep Earth Brown
