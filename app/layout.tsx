@@ -13,8 +13,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  modal, // ADDED THIS
 }: {
   children: React.ReactNode
+  modal: React.ReactNode // ADDED THIS
 }) {
   return (
     <html lang="en">
@@ -24,6 +26,7 @@ export default function RootLayout({
           <main className="flex-grow">
             {children}
           </main>
+          {modal} {/* ADDED THIS: This is where the popup "lives" */}
           <Footer />
         </div>
       </body>

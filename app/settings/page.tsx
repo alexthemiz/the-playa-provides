@@ -9,8 +9,14 @@ const US_STATES = ["", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [userEmail, setUserEmail] = useState(''); // To store the Auth email
   
-  const [profile, setProfile] = useState({ full_name: '', preferred_name: '', username: '' });
+  const [profile, setProfile] = useState({ 
+    full_name: '', 
+    preferred_name: '', 
+    username: '',
+    contact_email: '' 
+  });
   const [locations, setLocations] = useState<any[]>([]);
 
   useEffect(() => { fetchData(); }, []);
@@ -18,11 +24,13 @@ export default function SettingsPage() {
   async function fetchData() {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
+      setUserEmail(user.email || ''); // Get the login email
       const { data: profileData } = await supabase.from('profiles').select('*').eq('id', user.id).single();
       if (profileData) setProfile({
         full_name: profileData.full_name || '',
         preferred_name: profileData.preferred_name || '',
-        username: profileData.username || ''
+        username: profileData.username || '',
+        contact_email: profileData.contact_email || ''
       });
 
       const { data: locs } = await supabase.from('locations').select('*').eq('user_id', user.id);
@@ -39,7 +47,7 @@ export default function SettingsPage() {
       location_type: 'Home', 
       address_line_1: '', 
       city: '', 
-      state: '', // Defaulting to empty string now
+      state: '', 
       zip_code: '' 
     }]);
   };
@@ -65,7 +73,11 @@ export default function SettingsPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const { error: pErr } = await supabase.from('profiles').upsert({ id: user.id, ...profile, updated_at: new Date() });
+    const { error: pErr } = await supabase.from('profiles').upsert({ 
+      id: user.id, 
+      ...profile, 
+      updated_at: new Date() 
+    });
 
     if (pErr) {
       if (pErr.code === '23505') alert("Username is taken!");
@@ -102,6 +114,10 @@ export default function SettingsPage() {
           <h3 style={sectionHeaderStyle}>Identity</h3>
           <div style={{ display: 'grid', gap: '15px' }}>
             <div>
+              <label style={labelStyle}>Primary Account Email (Read-only)</label>
+              <input style={{...inputStyle, color: '#666', cursor: 'not-allowed'}} value={userEmail} readOnly />
+            </div>
+            <div>
               <label style={labelStyle}>Full Name (Private)</label>
               <input style={inputStyle} value={profile.full_name} onChange={e => setProfile({...profile, full_name: e.target.value})} placeholder="First Last" />
             </div>
@@ -113,6 +129,25 @@ export default function SettingsPage() {
               <label style={labelStyle}>Username</label>
               <input style={inputStyle} value={profile.username} onChange={e => setProfile({...profile, username: e.target.value.toLowerCase().replace(/\s/g, '')})} placeholder="unique_handle" />
             </div>
+          </div>
+        </section>
+
+        {/* PRIVACY & CONTACT SECTION */}
+        <section style={sectionStyle}>
+          <h3 style={sectionHeaderStyle}>Privacy & Contact</h3>
+          <div>
+            <label style={labelStyle}>Gear Request Email (Optional)</label>
+            <input 
+              style={inputStyle} 
+              type="email"
+              value={profile.contact_email} 
+              onChange={e => setProfile({...profile, contact_email: e.target.value})} 
+              placeholder="e.g. gear-requests@email.com" 
+            />
+            <p style={{ color: '#666', fontSize: '11px', marginTop: '8px', lineHeight: '1.4' }}>
+              If provided, borrow requests will be sent here instead of your primary account email. 
+              This email remains hidden from other users until you choose to reply.
+            </p>
           </div>
         </section>
 
@@ -159,8 +194,8 @@ export default function SettingsPage() {
 
 // Styles
 const sectionStyle = { border: '1px solid #333', padding: '20px', borderRadius: '8px', backgroundColor: '#111' };
-const sectionHeaderStyle = { color: '#888', marginTop: 0, marginBottom: '15px' };
+const sectionHeaderStyle = { color: 'white', marginTop: 0, marginBottom: '15px' }; // HEADLINE TEXT UPDATED TO WHITE
 const labelStyle = { display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '5px' };
-const inputStyle = { width: '100%', padding: '10px', backgroundColor: '#000', border: '1px solid #333', color: 'white', borderRadius: '4px' };
+const inputStyle = { width: '100%', padding: '10px', backgroundColor: '#000', border: '1px solid #333', color: 'white', borderRadius: '4px', outline: 'none' };
 const buttonStyle = { padding: '15px', background: '#00ccff', color: 'black', fontWeight: 'bold' as 'bold', border: 'none', borderRadius: '4px', cursor: 'pointer' };
 const smallButtonStyle = { padding: '5px 10px', background: '#333', color: 'white', fontSize: '0.7rem', border: 'none', borderRadius: '4px', cursor: 'pointer' };
