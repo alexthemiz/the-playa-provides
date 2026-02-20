@@ -7,17 +7,29 @@ import { useRouter } from 'next/navigation'
 
 export default function Header() {
   const [user, setUser] = useState<any>(null)
+  const [username, setUsername] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
-    const getUser = async () => {
+    const getUserData = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
+
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', user.id)
+          .single()
+        
+        if (profile) setUsername(profile.username)
+      }
     }
-    getUser()
+    getUserData()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
+      if (!session) setUsername(null)
     })
 
     return () => subscription.unsubscribe()
@@ -25,35 +37,50 @@ export default function Header() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
-    router.refresh() // Refresh to update the UI
+    router.refresh()
   }
 
+  // Visual Theme
+  const headerBg = { backgroundColor: '#C08261' } // Dusty Sienna
+  const mainTextColor = 'text-[#2D241E]' // Deep Earth Brown
+  const hoverEffect = 'hover:text-blue-600' // Keeping your blue hover request
+
   return (
-    <header className="border-b bg-white sticky top-0 z-50">
+    <header className="border-b border-[#A66D51] sticky top-0 z-50 shadow-sm" style={headerBg}>
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="font-bold text-xl hover:opacity-80 transition">
+        <Link href="/" className={`font-bold text-xl ${mainTextColor} hover:opacity-80 transition`}>
           The Playa Provides
         </Link>
         
         <nav className="flex gap-6 items-center">
-          <Link href="/gear-feed" className="text-sm font-medium hover:text-blue-600 transition">
-            Search for Gear
+          <Link href="/find-items" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>
+            Find Items
           </Link>
-          <Link href="/list-item" className="text-sm font-medium hover:text-blue-600 transition">
-            Share your Gear
+          <Link href="/list-item" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>
+            Offer an Item
           </Link>
           
           {user ? (
             <>
-              <Link href="/profile" className="text-sm font-medium hover:text-blue-600 transition">
+              {/* Corrected to /inventory */}
+              <Link href="/inventory" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>
                 My Inventory
               </Link>
-              <Link href="/settings" className="text-sm font-medium hover:text-blue-600 transition">
+
+              {/* Dynamic Username Link */}
+              {username && (
+                <Link href={`/profile/${username}`} className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>
+                  My Profile
+                </Link>
+              )}
+
+              <Link href="/settings" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>
                 Settings
               </Link>
+
               <button 
                 onClick={handleSignOut}
-                className="text-sm font-bold text-red-600 hover:text-red-800 transition"
+                className="text-sm font-bold text-red-800 hover:text-red-600 transition"
               >
                 Logout
               </button>
@@ -61,7 +88,7 @@ export default function Header() {
           ) : (
             <Link 
               href="/login" 
-              className="bg-black text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-800 transition"
+              className="bg-[#2D241E] text-[#C08261] px-4 py-2 rounded-lg text-sm font-bold hover:bg-black transition"
             >
               Login
             </Link>
