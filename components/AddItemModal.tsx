@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { createBrowserClient } from '@supabase/ssr'; // The SSR-friendly import
 
 interface Location {
   id: string;
@@ -17,6 +17,12 @@ export default function AddItemModal({
   onSuccess: () => void; 
   itemToEdit?: any; 
 }) {
+  // Initialize the Supabase client inside the component
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [availability, setAvailability] = useState('Available to borrow');
@@ -37,7 +43,7 @@ export default function AddItemModal({
       setAvailability(itemToEdit.availability_status || 'Available to borrow');
       setImageUrls(itemToEdit.image_urls || []);
     }
-  }, [itemToEdit]);
+  }, [itemToEdit, supabase]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -206,54 +212,39 @@ export default function AddItemModal({
               </div>
             )}
           </div>
-<div style={sectionStyle}>
-  <label style={labelStyle}>Photos (Max 4)</label>
-  {/* The input stays empty after selection so you can add another file easily */}
-  <input 
-    type="file" 
-    accept="image/*" 
-    multiple 
-    onChange={handleFileUpload} 
-    disabled={uploading} 
-    style={{...inputStyle, padding: '5px'}} 
-  />
-  
-  <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
-    {imageUrls.map((url, i) => (
-      <div key={url + i} style={{ position: 'relative' }}>
-        <img 
-          src={url} 
-          style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '2px solid #00ccff' }} 
-        />
-        <button
-          type="button"
-          onClick={() => setImageUrls(imageUrls.filter((_, index) => index !== i))}
-          style={{
-            position: 'absolute',
-            top: '-5px',
-            right: '-5px',
-            background: 'red',
-            color: 'white',
-            border: 'none',
-            borderRadius: '50%',
-            width: '20px',
-            height: '20px',
-            fontSize: '12px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 'bold'
-          }}
-        >
-          ✕
-        </button>
-      </div>
-    ))}
-  </div>
-</div>
 
-          <button type="submit" disabled={loading || uploading} style={{ padding: '15px', backgroundColor: '#00ccff', color: 'black', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
+          <div style={sectionStyle}>
+            <label style={labelStyle}>Photos (Max 4)</label>
+            <input 
+              type="file" 
+              accept="image/*" 
+              multiple 
+              onChange={handleFileUpload} 
+              disabled={uploading} 
+              style={{...inputStyle, padding: '5px'}} 
+            />
+            
+            <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
+              {imageUrls.map((url, i) => (
+                <div key={url + i} style={{ position: 'relative' }}>
+                  <img 
+                    src={url} 
+                    alt="Preview"
+                    style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '2px solid #00ccff' }} 
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setImageUrls(imageUrls.filter((_, index) => index !== i))}
+                    style={deleteButtonStyle}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <button type="submit" disabled={loading || uploading} style={submitButtonStyle}>
             {uploading ? 'Uploading...' : loading ? 'Saving...' : itemToEdit ? 'Save Changes' : 'List Gear Item'}
           </button>
         </form>
@@ -261,3 +252,31 @@ export default function AddItemModal({
     </div>
   );
 }
+
+const deleteButtonStyle: React.CSSProperties = {
+  position: 'absolute',
+  top: '-5px',
+  right: '-5px',
+  background: 'red',
+  color: 'white',
+  border: 'none',
+  borderRadius: '50%',
+  width: '20px',
+  height: '20px',
+  fontSize: '12px',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontWeight: 'bold'
+};
+
+const submitButtonStyle: React.CSSProperties = {
+  padding: '15px',
+  backgroundColor: '#00ccff',
+  color: 'black',
+  border: 'none',
+  borderRadius: '8px',
+  fontWeight: 'bold',
+  cursor: 'pointer'
+};

@@ -1,15 +1,22 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+// 1. Swap the import to the SSR-friendly browser client
+import { createBrowserClient } from '@supabase/ssr'; 
 import Link from 'next/link';
 import AddItemModal from '@/components/AddItemModal'; 
 
 export default function InventoryPage() {
+  // 2. Initialize the client inside the component
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<any>(null); // Track which item we are editing
+  const [editingItem, setEditingItem] = useState<any>(null);
   
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -21,7 +28,9 @@ export default function InventoryPage() {
 
   async function fetchMyInventory() {
     setLoading(true);
+    // This will now correctly use the cookie session
     const { data: { user } } = await supabase.auth.getUser();
+    
     if (user) {
       const { data, error } = await supabase
         .from('gear_items')
@@ -34,6 +43,8 @@ export default function InventoryPage() {
     }
     setLoading(false);
   }
+
+  // ... (Keep ALL your existing CSV, Filter, and Style code exactly as it is) ...
 
   // CSV Download Logic
   const downloadCSV = () => {
