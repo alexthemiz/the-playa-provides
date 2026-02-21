@@ -23,9 +23,9 @@ export default function HomePage() {
           color: '#d4a373',
           fontWeight: '500'
         }}>
-          "Why let your stuff collect dust in storage when it could be collecting dust on playa? 
+          Why let your stuff collect dust in storage when it could be collecting dust on playa? 
           Gift or lend your items to others: you’ll save them money, cut into big box store 
-          earnings, and get you partaking in the circular economy."
+          earnings, and get you partaking in the circular economy.
         </p>
         
         <div style={{ marginTop: '50px', display: 'flex', gap: '20px', justifyContent: 'center' }}>
