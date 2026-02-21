@@ -16,15 +16,17 @@ export default function FindItemsPage() {
 
   // Updated to match /list-item options
 // Update this list at the top of your component
+// The absolute source of truth for categories
   const categories = [
-    'All', 
+    'All',
     'Bikes & Transport', 
-    'Kitchen & Cooking', 
-    'Lighting & Power', 
+    'Clothing & Fun', 
+    'Kitchen & Water', 
+    'Power & Lighting', 
     'Safety & First Aid', 
     'Shelter & Shade', 
     'Tools & Hardware', 
-    'Water & Graywater'
+    'Miscellaneous'
   ];
   useEffect(() => {
     fetchItems();

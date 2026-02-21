@@ -4,6 +4,18 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 
+// The Master List
+const CATEGORIES = [
+  "Bikes & Transport", 
+  "Clothing & Fun", 
+  "Kitchen & Water", 
+  "Power & Lighting", 
+  "Safety & First Aid", 
+  "Shelter & Shade", 
+  "Tools & Hardware", 
+  "Miscellaneous"
+];
+
 export default function ListItemPage() {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -97,7 +109,7 @@ export default function ListItemPage() {
 
   return (
     <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto', color: 'white' }}>
-      <Link href="/inventory" style={{ color: '#aaa', textDecoration: 'none' }}>← Back to Inventory Hub</Link>
+      <Link href="/inventory" style={{ color: '#00ccff', textDecoration: 'none' }}>← Back to Inventory Hub</Link>
       <h1 style={{ marginTop: '20px' }}>List New Gear</h1>
       
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '30px' }}>
@@ -110,7 +122,7 @@ export default function ListItemPage() {
         <div style={sectionStyle}>
           <label style={labelStyle}>Category</label>
           <select name="category" style={inputStyle}>
-            {["Bikes & Transport", "Kitchen & Cooking", "Lighting & Power", "Safety & First Aid", "Shelter & Shade", "Tools & Hardware", "Water & Graywater"].map(cat => (
+            {CATEGORIES.map(cat => (
                <option key={cat}>{cat}</option>
             ))}
           </select>
@@ -187,7 +199,7 @@ export default function ListItemPage() {
           <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
             {imageUrls.map((url, i) => (
               <div key={url + i} style={{ position: 'relative' }}>
-                <img src={url} style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '2px solid #00ccff' }} />
+                <img src={url} style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '2px solid #00ccff' }} alt="Preview" />
                 <button
                   type="button"
                   onClick={() => setImageUrls(imageUrls.filter((_, idx) => idx !== i))}

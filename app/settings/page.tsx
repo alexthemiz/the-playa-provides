@@ -9,13 +9,18 @@ const US_STATES = ["", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [userEmail, setUserEmail] = useState(''); // To store the Auth email
+  const [userEmail, setUserEmail] = useState(''); 
   
+  // Updated state to include "silent" fields from the profile page
   const [profile, setProfile] = useState({ 
     full_name: '', 
     preferred_name: '', 
     username: '',
-    contact_email: '' 
+    contact_email: '',
+    bio: '',
+    avatar_url: '',
+    burning_man_years: [] as string[],
+    burning_man_camp: ''
   });
   const [locations, setLocations] = useState<any[]>([]);
 
@@ -24,14 +29,21 @@ export default function SettingsPage() {
   async function fetchData() {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
-      setUserEmail(user.email || ''); // Get the login email
+      setUserEmail(user.email || '');
       const { data: profileData } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-      if (profileData) setProfile({
-        full_name: profileData.full_name || '',
-        preferred_name: profileData.preferred_name || '',
-        username: profileData.username || '',
-        contact_email: profileData.contact_email || ''
-      });
+      
+      if (profileData) {
+        setProfile({
+          full_name: profileData.full_name || '',
+          preferred_name: profileData.preferred_name || '',
+          username: profileData.username || '',
+          contact_email: profileData.contact_email || '',
+          bio: profileData.bio || '',
+          avatar_url: profileData.avatar_url || '',
+          burning_man_years: profileData.burning_man_years || [],
+          burning_man_camp: profileData.burning_man_camp || ''
+        });
+      }
 
       const { data: locs } = await supabase.from('locations').select('*').eq('user_id', user.id);
       if (locs) setLocations(locs);
@@ -73,6 +85,7 @@ export default function SettingsPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
+    // By spreading ...profile here, we ensure bio/avatar are preserved
     const { error: pErr } = await supabase.from('profiles').upsert({ 
       id: user.id, 
       ...profile, 
@@ -194,7 +207,7 @@ export default function SettingsPage() {
 
 // Styles
 const sectionStyle = { border: '1px solid #333', padding: '20px', borderRadius: '8px', backgroundColor: '#111' };
-const sectionHeaderStyle = { color: 'white', marginTop: 0, marginBottom: '15px' }; // HEADLINE TEXT UPDATED TO WHITE
+const sectionHeaderStyle = { color: 'white', marginTop: 0, marginBottom: '15px' };
 const labelStyle = { display: 'block', fontSize: '0.8rem', color: '#888', marginBottom: '5px' };
 const inputStyle = { width: '100%', padding: '10px', backgroundColor: '#000', border: '1px solid #333', color: 'white', borderRadius: '4px', outline: 'none' };
 const buttonStyle = { padding: '15px', background: '#00ccff', color: 'black', fontWeight: 'bold' as 'bold', border: 'none', borderRadius: '4px', cursor: 'pointer' };

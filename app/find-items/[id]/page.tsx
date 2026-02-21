@@ -14,7 +14,6 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
     async function fetchItem() {
       setLoading(true);
       try {
-        // 1. Fetch the base gear item
         const { data: gear, error: gearError } = await supabase
           .from('gear_items')
           .select('*')
@@ -23,7 +22,6 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
 
         if (gearError) throw gearError;
 
-        // 2. Fetch Owner and Location (Manual Join)
         const [profileRes, locationRes] = await Promise.all([
           supabase.from('profiles').select('preferred_name').eq('id', gear.user_id).single(),
           supabase.from('locations').select('city, zip_code').eq('id', gear.location_id).single()
@@ -48,15 +46,16 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
   if (loading) return <div style={containerStyle}><p>Loading gear...</p></div>;
   if (!item) return <div style={containerStyle}><p>Gear not found.</p></div>;
 
+  // Determine if it's a gift or a loan for the button text
+  const isGift = item.availability_status === 'You can keep it';
+
   return (
     <div style={containerStyle}>
-      {/* Navigation */}
       <Link href="/find-items" style={backLinkStyle}>
         <ChevronLeft size={20} /> Back to Search
       </Link>
 
       <div style={contentGrid}>
-        {/* Left Side: Large Image */}
         <div style={imageWrapper}>
           {item.image_urls?.[0] ? (
             <img src={item.image_urls[0]} alt={item.item_name} style={fullImgStyle} />
@@ -65,14 +64,14 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
           )}
         </div>
 
-        {/* Right Side: Details */}
         <div style={detailsPane}>
           <h1 style={titleStyle}>{item.item_name}</h1>
+          {/* Displays your new category names */}
           <p style={categoryStyle}>{item.category} • {item.condition}</p>
           
           <div style={metaGroup}>
             <div style={metaItem}><MapPin size={18} color="#00ccff" /> {item.location_display}</div>
-            <div style={metaItem}><User size={18} color="#00ccff" /> Owned by {item.owner_name}</div>
+            <div style={metaItem}><User size={18} color="#00ccff" /> {isGift ? 'Offered' : 'Owned'} by {item.owner_name}</div>
           </div>
 
           <div style={descSection}>
@@ -80,14 +79,16 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
             <p style={descText}>{item.description || 'No description provided.'}</p>
           </div>
 
-          <button style={borrowButtonStyle}>Request to Borrow</button>
+          <button style={borrowButtonStyle}>
+            {isGift ? 'Request this Gift' : 'Request to Borrow'}
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
-// --- STYLES ---
+// Styles remain identical to your current ones to preserve your layout
 const containerStyle: React.CSSProperties = { padding: '40px 20px', maxWidth: '1100px', margin: '0 auto', color: '#fff' };
 const backLinkStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '5px', color: '#00ccff', textDecoration: 'none', marginBottom: '30px', fontWeight: 'bold' };
 const contentGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '50px' };
