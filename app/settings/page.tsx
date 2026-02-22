@@ -26,12 +26,21 @@ export default function SettingsPage() {
 
   useEffect(() => { fetchData(); }, []);
 
-  async function fetchData() {
+async function fetchData() {
+  try {
+    setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
+
     if (user) {
       setUserEmail(user.email || '');
-      const { data: profileData } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-      
+
+      // Fetch Profile
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .maybeSingle();
+
       if (profileData) {
         setProfile({
           full_name: profileData.full_name || '',
@@ -45,11 +54,22 @@ export default function SettingsPage() {
         });
       }
 
-      const { data: locs } = await supabase.from('locations').select('*').eq('user_id', user.id);
+      // Fetch Locations
+      const { data: locs, error: locError } = await supabase
+        .from('locations')
+        .select('*')
+        .eq('user_id', user.id);
+      
+      if (locError) console.error("Location fetch error:", locError);
       if (locs) setLocations(locs);
     }
-    setLoading(false);
+  } catch (err) {
+    console.error("Critical error in fetchData:", err);
+  } finally {
+    // THIS IS THE KEY: It runs even if the code above fails
+    setLoading(false); 
   }
+}
 
   const addLocation = () => {
     setLocations([...locations, { 
