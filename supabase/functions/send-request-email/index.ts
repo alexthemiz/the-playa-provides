@@ -1,50 +1,64 @@
+// deno-lint-ignore-file no-unused-vars
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
 
-serve(async (req) => {
-  const { itemId, ownerId, message, itemName } = await req.json()
+serve(async (req: Request) => {
+  // 1. Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
 
-  // 1. Initialize Supabase Admin
-  const supabaseAdmin = createClient(
-    Deno.env.get('SUPABASE_URL') ?? '',
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-  )
+  try {
+    const { _itemId, _ownerId, message, itemName } = await req.json()
+    const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
+    
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'The Playa Provides <hello@theplayaprovides.com>',
+        to: ['alex@theplayaprovides.com'], 
+        subject: `New Request for: ${itemName}`,
+        html: `
+          <div style="font-family: sans-serif; color: #333;">
+            <h1 style="color: #d97706;">New Borrow Request!</h1>
+            <p>Someone is interested in your <strong>${itemName}</strong>.</p>
+            <div style="background: #f3f4f6; padding: 15px; border-radius: 8px;">
+              <p><strong>Message:</strong> ${message}</p>
+            </div>
+            <p style="font-size: 0.8em; color: #666; margin-top: 20px;">
+              Sent via The Playa Provides
+            </p>
+          </div>
+        `,
+      }),
+    })
 
-  // 2. Fetch the owner's profile and their Auth email
-  const { data: profile } = await supabaseAdmin
-    .from('profiles')
-    .select('contact_email, preferred_name')
-    .eq('id', ownerId)
-    .single()
+    const data = await res.json()
 
-  const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(ownerId)
-  
-  // 3. Logic: Use contact_email if it exists, otherwise use account email
-  const targetEmail = profile?.contact_email || authUser.user?.email
+    return new Response(
+      JSON.stringify(data),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
+        status: 200 
+      }
+    )
 
-  // 4. Send the email (Example using Resend API)
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${RESEND_API_KEY}`,
-    },
-    body: JSON.stringify({
-      from: 'Playa Provides <gear@yourdomain.com>',
-      to: [targetEmail],
-      subject: `Gear Request: ${itemName}`,
-      html: `
-        <h2>Hi ${profile?.preferred_name},</h2>
-        <p>Someone is interested in your <strong>${itemName}</strong>!</p>
-        <p style="padding: 15px; background: #f4f4f4; border-radius: 5px;">
-          "${message}"
-        </p>
-        <p>Reply to this email to coordinate the handoff.</p>
-      `,
-    }),
-  })
-
-  return new Response(JSON.stringify({ sent: true }), { headers: { 'Content-Type': 'application/json' } })
+  } catch (err: unknown) {
+    const error = err as Error;
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
+        status: 400 
+      }
+    )
+  }
 })
