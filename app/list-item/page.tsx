@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 // The Master List
 const CATEGORIES = [
@@ -17,12 +18,15 @@ const CATEGORIES = [
 ];
 
 export default function ListItemPage() {
+  const router = useRouter(); // This fixes "Cannot find name 'router'"
+  const [message, setMessage] = useState(''); // This fixes "Cannot find name 'setMessage'"
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [availability, setAvailability] = useState('Available to borrow');
   const [locations, setLocations] = useState<{id: string, label: string}[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
-
+const [returnTerms, setReturnTerms] = useState('');
+const [showSuccessModal, setShowSuccessModal] = useState(false);
   useEffect(() => {
     async function fetchLocations() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -92,19 +96,24 @@ export default function ListItemPage() {
         description: formData.get('description'),
         pickup_by: formData.get('pickup_by') || null,
         return_by: formData.get('return_by') || null,
-        damage_price: formData.get('damage_price') ? parseFloat(formData.get('damage_price') as string) : null,
-        loss_price: formData.get('loss_price') ? parseFloat(formData.get('loss_price') as string) : null,
-        image_urls: imageUrls, 
-      },
-    ]);
+       damage_price: formData.get('damage_price') 
+  ? parseInt(formData.get('damage_price') as string, 10) 
+  : null,
+loss_price: formData.get('loss_price') 
+  ? parseInt(formData.get('loss_price') as string, 10) 
+  : null,
+  image_urls: imageUrls, 
+ return_terms: formData.get('return_terms'),
+  },
+]);
 
-    if (error) {
-      alert("Error: " + error.message);
-    } else {
-      alert("Item listed successfully!");
-      window.location.href = '/inventory';
-    }
-    setLoading(false);
+if (error) {
+  setMessage(`Error: ${error.message}`);
+} else {
+  // Instead of router.push, we show the modal
+  setShowSuccessModal(true);
+}
+setLoading(false);
   }
 
   return (
@@ -181,18 +190,31 @@ export default function ListItemPage() {
                 <>
                   <div>
                     <label style={labelStyle}>If returned damaged, you agree to pay me ($)</label>
-                    <input type="number" name="damage_price" placeholder="0.00" step="0.01" style={inputStyle} />
+                    <input type="number" name="damage_price" placeholder="0.00" step="1" style={inputStyle} />
                   </div>
                   <div>
                     <label style={labelStyle}>If not returned, you agree to pay me ($)</label>
-                    <input type="number" name="loss_price" placeholder="0.00" step="0.01" style={inputStyle} />
+                    <input type="number" name="loss_price" placeholder="0.00" step="1" style={inputStyle} />
                   </div>
                 </>
               )}
             </div>
           )}
-        </div>
 
+        </div>
+<div>
+  <label style={labelStyle}>Return Terms & Condition</label>
+  <textarea 
+    placeholder="e.g. Must be returned vinegar-washed and air-dried. Please shake out all dust before returning."
+    style={inputStyle} 
+    rows={3}
+    value={returnTerms}
+    onChange={(e) => setReturnTerms(e.target.value)}
+  />
+  <p style={{ color: '#555', fontSize: '12px', marginTop: '5px' }}>
+    Help the borrower understand exactly how this item should be cleaned or packed when they bring it back.
+  </p>
+</div>
         <div style={sectionStyle}>
           <label style={labelStyle}>Photos (Max 4)</label>
           <input type="file" accept="image/*" multiple onChange={handleFileUpload} disabled={uploading} style={{...inputStyle, padding: '5px'}} />
@@ -218,6 +240,41 @@ export default function ListItemPage() {
           {uploading ? 'Uploading...' : loading ? 'Listing Item...' : 'List Gear Item'}
         </button>
       </form>
+
+                {showSuccessModal && (
+  <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+    <div className="bg-zinc-900 border border-zinc-800 w-full max-w-sm rounded-2xl p-8 text-center shadow-2xl">
+      <div className="w-16 h-16 bg-green-500/10 border border-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+        <svg className="w-8 h-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      
+      <h2 className="text-2xl font-bold text-white mb-2">Item Listed!</h2>
+      <p className="text-zinc-400 mb-8 text-sm">Your gear is now visible to the community.</p>
+
+      <div className="flex flex-col gap-3">
+        <button 
+          onClick={() => {
+            setShowSuccessModal(false);
+            // Reset the form here if you want to add another
+            window.location.reload(); 
+          }}
+          className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-all"
+        >
+          Add Another Item
+        </button>
+        
+        <button 
+          onClick={() => router.push('/inventory')}
+          className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-3 rounded-xl transition-all"
+        >
+          Go to My Inventory
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }

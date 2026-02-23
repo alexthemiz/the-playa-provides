@@ -2,13 +2,15 @@
 
 import { useEffect, useState, use } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { MapPin, User, Package, ChevronLeft } from 'lucide-react';
+import { MapPin, User, Package, ChevronLeft, Shield, AlertTriangle, Calendar } from 'lucide-react';
 import Link from 'next/link';
+import RequestModal from '@/components/RequestModal'; // Assuming this is your path
 
 export default function ItemDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const [item, setItem] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false); // Added for the modal
 
   useEffect(() => {
     async function fetchItem() {
@@ -46,7 +48,6 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
   if (loading) return <div style={containerStyle}><p>Loading gear...</p></div>;
   if (!item) return <div style={containerStyle}><p>Gear not found.</p></div>;
 
-  // Determine if it's a gift or a loan for the button text
   const isGift = item.availability_status === 'You can keep it';
 
   return (
@@ -66,7 +67,6 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
 
         <div style={detailsPane}>
           <h1 style={titleStyle}>{item.item_name}</h1>
-          {/* Displays your new category names */}
           <p style={categoryStyle}>{item.category} • {item.condition}</p>
           
           <div style={metaGroup}>
@@ -74,21 +74,70 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
             <div style={metaItem}><User size={18} color="#00ccff" /> {isGift ? 'Offered' : 'Owned'} by {item.owner_name}</div>
           </div>
 
+          {/* --- NEW: BORROWING TERMS & PRICES SECTION --- */}
+          {!isGift && (
+            <div style={termsSection}>
+              <h4 style={labelStyle}>Lending Terms</h4>
+              
+              <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+                {item.pickup_by && (
+                  <div style={termDetail}><Calendar size={16} /> Pickup by {new Date(item.pickup_by).toLocaleDateString()}</div>
+                )}
+                {item.return_by && (
+                  <div style={termDetail}><Calendar size={16} /> Return by {new Date(item.return_by).toLocaleDateString()}</div>
+                )}
+              </div>
+
+              {item.return_terms && (
+                <div style={returnTermsBox}>
+                  <p style={{ margin: 0, fontSize: '14px', color: '#aaa', marginBottom: '5px', textTransform: 'uppercase', fontWeight: 'bold' }}>Condition of Return</p>
+                  <p style={{ margin: 0, fontStyle: 'italic', color: '#eee' }}>"{item.return_terms}"</p>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: '15px', marginTop: '15px' }}>
+                {item.damage_price && (
+                  <div style={priceTag}>
+                    <Shield size={14} color="#f97316" /> Damage Agreement: ${Math.round(item.damage_price)}
+                  </div>
+                )}
+                {item.loss_price && (
+                  <div style={priceTag}>
+                    <AlertTriangle size={14} color="#ef4444" /> Loss Agreement: ${Math.round(item.loss_price)}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           <div style={descSection}>
             <h4 style={labelStyle}>About this gear</h4>
             <p style={descText}>{item.description || 'No description provided.'}</p>
           </div>
 
-          <button style={borrowButtonStyle}>
-            {isGift ? 'Request this Gift' : 'Request to Borrow'}
-          </button>
+          <button 
+  style={borrowButtonStyle} 
+  onClick={() => setIsModalOpen(true)}
+>
+  Request Item
+</button>
         </div>
       </div>
+
+      {isModalOpen && (
+        <RequestModal item={item} onClose={() => setIsModalOpen(false)} />
+      )}
     </div>
   );
 }
 
-// Styles remain identical to your current ones to preserve your layout
+// --- ADDED STYLES ---
+const termsSection: React.CSSProperties = { backgroundColor: '#111', padding: '25px', borderRadius: '20px', border: '1px solid #222', marginBottom: '10px' };
+const termDetail: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#ccc' };
+const returnTermsBox: React.CSSProperties = { padding: '15px', backgroundColor: '#000', borderRadius: '12px', border: '1px solid #333' };
+const priceTag: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', fontWeight: 'bold' };
+
+// --- EXISTING STYLES (NO CHANGES) ---
 const containerStyle: React.CSSProperties = { padding: '40px 20px', maxWidth: '1100px', margin: '0 auto', color: '#fff' };
 const backLinkStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '5px', color: '#00ccff', textDecoration: 'none', marginBottom: '30px', fontWeight: 'bold' };
 const contentGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '50px' };
