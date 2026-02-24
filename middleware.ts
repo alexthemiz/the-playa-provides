@@ -2,10 +2,12 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  // 1. Create the initial response
   let supabaseResponse = NextResponse.next({
     request,
   })
 
+  // 2. Initialize Supabase with the 'setAll' pattern
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -16,9 +18,7 @@ export async function middleware(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({
-            request,
-          })
+          // IMPORTANT: Modify the existing response, don't re-assign with NextResponse.next()
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           )
@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // IMPORTANT: Do not use getSession here, use getUser for the most reliable server check
+  // 3. Use getUser for the server-side check
   const { data: { user } } = await supabase.auth.getUser()
 
   const url = request.nextUrl.clone()
@@ -35,6 +35,7 @@ export async function middleware(request: NextRequest) {
 
   console.log(`📡 PATH: ${url.pathname} | AUTH: ${user ? 'YES' : 'NO'}`)
 
+  // 4. Redirect Logic
   if (!user && !isPublicRoute) {
     url.pathname = '/login'
     return NextResponse.redirect(url)
