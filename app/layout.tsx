@@ -1,6 +1,6 @@
 import './globals.css'
-import header from '../components/header' // Changed H to h
-import footer from '../components/footer' // Changed F to f
+import Header from '../components/header'
+import Footer from '../components/footer'
 import Script from 'next/script'
 
 export const metadata = {
@@ -31,11 +31,13 @@ export default function RootLayout({
           `}
         </Script>
 
-        <header />
+        <Header />
+        
         <main className="min-h-screen">
           {children}
         </main>
-        <footer />
+        
+        <Footer />
       </body>
     </html>
   )
