@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
 :root {
+  /* Default: Daylight Mode */
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #2D241E; /* Earth Brown */
 }
 
 @theme inline {
@@ -10,12 +11,18 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  
+  --color-sienna: #C08261;
+  --color-playa-blue: #00ccff;
 }
 
+/* This block only activates if the user's SYSTEM is set to Dark Mode */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* A deep charcoal instead of pure black for better readability */
+    --background: #1a1614; 
+    /* A light sand color for text so it's not piercing white */
+    --foreground: #f0eee9; 
   }
 }
 
@@ -23,4 +30,5 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
 }

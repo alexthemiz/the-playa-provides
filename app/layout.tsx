@@ -1,34 +1,41 @@
 import './globals.css'
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import Header from '../components/header'
-import Footer from '../components/footer'
+import header from '../components/header' // Changed H to h
+import footer from '../components/footer' // Changed F to f
+import Script from 'next/script'
 
-const inter = Inter({ subsets: ['latin'] })
-
-export const metadata: Metadata = {
+export const metadata = {
   title: 'The Playa Provides',
-  description: 'Burner-to-Burner marketplace for the playa and beyond.',
+  description: 'A circular economy for the dust.',
 }
 
 export default function RootLayout({
   children,
-  modal, // ADDED THIS
 }: {
   children: React.ReactNode
-  modal: React.ReactNode // ADDED THIS
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <div className="flex flex-col min-h-screen">
-          <Header />
-          <main className="flex-grow">
-            {children}
-          </main>
-          {modal} {/* ADDED THIS: This is where the popup "lives" */}
-          <Footer />
-        </div>
+      <body className="bg-white text-[#2D241E]">
+        {/* Google Analytics - Next.js Optimized Tracking */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-513K8Z20B4"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-513K8Z20B4');
+          `}
+        </Script>
+
+        <header />
+        <main className="min-h-screen">
+          {children}
+        </main>
+        <footer />
       </body>
     </html>
   )

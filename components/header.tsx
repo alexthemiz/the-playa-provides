@@ -20,7 +20,7 @@ export default function Header() {
           .from('profiles')
           .select('username')
           .eq('id', user.id)
-          .maybeSingle() // Using maybeSingle to prevent 406 errors
+          .maybeSingle() 
         
         if (profile) setUsername(profile.username)
       }
@@ -33,7 +33,6 @@ export default function Header() {
       setUser(currentUser)
       
       if (currentUser) {
-        // Re-fetch username on login event
         const { data: profile } = await supabase
           .from('profiles')
           .select('username')
@@ -52,20 +51,21 @@ export default function Header() {
     await supabase.auth.signOut()
     setUser(null)
     setUsername(null)
-    router.push('/login') // Explicitly move them
+    router.push('/login')
     router.refresh()
   }
-  // Visual Theme
-  const headerBg = { backgroundColor: '#C08261' } // Dusty Sienna
-  const mainTextColor = 'text-[#2D241E]' // Deep Earth Brown
-  const hoverEffect = 'hover:text-blue-600' // Keeping your blue hover request
+
+  // Visual Theme - Dusty Sienna Daylight
+  const headerBg = { backgroundColor: '#C08261' } 
+  const mainTextColor = 'text-[#2D241E]' 
+  const hoverEffect = 'hover:text-[#00ccff]' // Updated to match your accent color preference
 
   return (
     <header className="border-b border-[#A66D51] sticky top-0 z-50 shadow-sm" style={headerBg}>
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className={`font-bold text-xl ${mainTextColor} hover:opacity-80 transition`}>
-          The Playa Provides
-        </Link>
+      <Link href="/" className={`font-black text-xl uppercase tracking-tighter ${mainTextColor} hover:opacity-80 transition`}>
+  The Playa Provides
+</Link>
         
         <nav className="flex gap-6 items-center">
           <Link href="/find-items" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>
@@ -77,12 +77,15 @@ export default function Header() {
           
           {user ? (
             <>
-              {/* Corrected to /inventory */}
               <Link href="/inventory" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>
                 My Inventory
               </Link>
 
-              {/* Dynamic Username Link */}
+              {/* Standardized On-Playa Resources Link */}
+              <Link href="/resources" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>
+                On-Playa Resources
+              </Link>
+
               {username && (
                 <Link href={`/profile/${username}`} className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>
                   My Profile
