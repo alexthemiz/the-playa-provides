@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { createBrowserClient } from '@supabase/ssr' // Use this instead
+import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -10,52 +10,29 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
-  
-  const router = useRouter()
 
-  // Initialize the browser-specific client
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  const router = useRouter()
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    // ... rest of your handlePasswordLogin code stays exactly the same
     setMessage('')
-    console.log("Attempting login for:", email) // Log for debugging
 
-try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) {
-        console.error("Login error:", error.message)
         setMessage(`Error: ${error.message}`)
       } else {
-        console.log("Login successful, syncing cookies...")
-        
-        // 1. Force Next.js to recognize the new session cookies
-        router.refresh() 
-        
-        // 2. Short delay to ensure the refresh 'takes' before moving
-        setTimeout(() => {
-          router.push('/inventory')
-        }, 150)
+        router.refresh()
+        setTimeout(() => router.push('/inventory'), 150)
       }
     } catch (err) {
-      console.error("Unexpected error:", err)
-      setMessage("An unexpected error occurred.")
+      setMessage('An unexpected error occurred.')
     } finally {
-      // Always re-enable the button
-      setLoading(false) 
+      setLoading(false)
     }
   }
 
-  // Handle Magic Link (Backup/Forgot Password)
   const handleMagicLink = async () => {
     if (!email) {
       setMessage('Please enter your email first.')
@@ -63,85 +40,110 @@ try {
     }
     setLoading(true)
     setMessage('Sending magic link...')
-
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
     })
-
-    if (error) {
-      setMessage(`Error: ${error.message}`)
-    } else {
-      setMessage('Success! Check your email for the link.')
-    }
+    setMessage(error ? `Error: ${error.message}` : 'Success! Check your email for the link.')
     setLoading(false)
   }
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-8 border rounded-xl shadow-sm bg-black text-white border-zinc-800">
-      <h1 className="text-2xl font-bold mb-2">Sign In</h1>
-      <p className="text-zinc-500 text-sm mb-6">Welcome back to the gear share.</p>
-      
-      <form onSubmit={handlePasswordLogin} className="space-y-4">
+    <div style={cardStyle}>
+      <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '8px', color: '#2D241E' }}>Sign In</h1>
+      <p style={{ color: '#888', fontSize: '0.875rem', marginBottom: '24px' }}>Welcome back to the gear share.</p>
+
+      <form onSubmit={handlePasswordLogin} style={{ display: 'flex', flexDirection: 'column' as const, gap: '16px' }}>
         <div>
-          <label className="block text-xs uppercase tracking-widest text-zinc-500 font-bold mb-2">Email</label>
-          <input 
-            type="email" 
-            placeholder="you@example.com" 
-            value={email} 
+          <label style={labelStyle}>Email</label>
+          <input
+            type="email"
+            placeholder="you@example.com"
+            value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 bg-black border border-zinc-700 rounded-lg text-white outline-none focus:border-blue-500 transition"
-            required 
+            style={inputStyle}
+            required
           />
         </div>
 
         <div>
-          <label className="block text-xs uppercase tracking-widest text-zinc-500 font-bold mb-2">Password</label>
-          <input 
-            type="password" 
-            placeholder="••••••••" 
-            value={password} 
+          <label style={labelStyle}>Password</label>
+          <input
+            type="password"
+            placeholder="••••••••"
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 bg-black border border-zinc-700 rounded-lg text-white outline-none focus:border-blue-500 transition"
-            required 
+            style={inputStyle}
+            required
           />
         </div>
 
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white p-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50"
+          style={{ ...submitButtonStyle, opacity: loading ? 0.5 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
         >
           {loading ? 'Processing...' : 'Sign In'}
         </button>
       </form>
 
-      <div className="relative my-8">
-        <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-zinc-800"></span></div>
-        <div className="relative flex justify-center text-xs uppercase"><span className="bg-black px-2 text-zinc-500">Or use a backup</span></div>
+      {/* DIVIDER */}
+      <div style={{ position: 'relative' as const, margin: '28px 0' }}>
+        <div style={{ position: 'absolute' as const, inset: 0, display: 'flex', alignItems: 'center' }}>
+          <span style={{ width: '100%', borderTop: '1px solid #e5e5e5' }} />
+        </div>
+        <div style={{ position: 'relative' as const, display: 'flex', justifyContent: 'center' }}>
+          <span style={{ backgroundColor: '#fff', padding: '0 10px', fontSize: '0.7rem', textTransform: 'uppercase' as const, color: '#aaa', letterSpacing: '0.08em' }}>
+            Or use a backup
+          </span>
+        </div>
       </div>
 
-      <button 
-        onClick={handleMagicLink}
-        className="w-full border border-zinc-700 text-white p-3 rounded-lg font-semibold hover:bg-zinc-900 transition mb-4"
-      >
+      <button onClick={handleMagicLink} style={magicLinkButtonStyle}>
         Email me a Magic Link
       </button>
 
       {message && (
-        <p className={`mt-4 text-center text-sm font-medium ${message.includes('Error') ? 'text-red-400' : 'text-blue-400'}`}>
+        <p style={{ marginTop: '16px', textAlign: 'center' as const, fontSize: '0.875rem', fontWeight: 500, color: message.includes('Error') ? '#ef4444' : '#00aacc' }}>
           {message}
         </p>
       )}
 
-      <div className="mt-8 pt-6 border-t border-zinc-800 text-center">
-        <p className="text-sm text-zinc-500">Don't have an account?</p>
-        <Link href="/signup" className="inline-block mt-2 text-blue-400 font-semibold hover:text-blue-300 transition">
+      <div style={{ marginTop: '28px', paddingTop: '20px', borderTop: '1px solid #e5e5e5', textAlign: 'center' as const }}>
+        <p style={{ fontSize: '0.875rem', color: '#888' }}>Don't have an account?</p>
+        <Link href="/signup" style={{ display: 'inline-block', marginTop: '8px', color: '#00aacc', fontWeight: 600, textDecoration: 'none' }}>
           Create an Account &rarr;
         </Link>
       </div>
     </div>
   )
 }
+
+const cardStyle: React.CSSProperties = {
+  maxWidth: '448px', margin: '80px auto 40px', padding: '36px',
+  border: '1px solid #e5e5e5', borderRadius: '14px',
+  boxShadow: '0 4px 20px rgba(0,0,0,0.06)', backgroundColor: '#fff',
+};
+
+const labelStyle: React.CSSProperties = {
+  display: 'block', fontSize: '0.75rem', textTransform: 'uppercase',
+  letterSpacing: '0.08em', color: '#888', fontWeight: 'bold', marginBottom: '8px',
+};
+
+const inputStyle: React.CSSProperties = {
+  width: '100%', padding: '12px', backgroundColor: '#fff',
+  border: '1px solid #ddd', borderRadius: '8px', color: '#2D241E',
+  outline: 'none', boxSizing: 'border-box', fontSize: '1rem',
+};
+
+const submitButtonStyle: React.CSSProperties = {
+  width: '100%', backgroundColor: '#00ccff', color: '#000',
+  padding: '13px', borderRadius: '8px', fontWeight: 600,
+  border: 'none', fontSize: '1rem',
+};
+
+const magicLinkButtonStyle: React.CSSProperties = {
+  width: '100%', border: '1px solid #ddd', backgroundColor: '#fff',
+  color: '#2D241E', padding: '13px', borderRadius: '8px',
+  fontWeight: 600, cursor: 'pointer', fontSize: '1rem',
+};

@@ -79,17 +79,17 @@ export default function SettingsPage() {
 
   return (
     <div style={{ backgroundColor: 'white', minHeight: '100vh', width: '100%', color: '#111' }}>
-      <div style={{ padding: '40px 20px', maxWidth: '600px', margin: '0 auto', fontFamily: 'sans-serif' }}>
-        
+      <div style={{ padding: '24px 20px', maxWidth: '600px', margin: '0 auto', fontFamily: 'sans-serif' }}>
+
         <Link href="/inventory" style={{ color: '#00ccff', textDecoration: 'none', fontWeight: 'bold' }}>← Back to Inventory</Link>
-        <h1 style={{ margin: '24px 0', fontSize: '28px' }}>Account Settings</h1>
-        
-        <div style={{ display: 'grid', gap: '30px' }}>
+        <h1 style={{ margin: '16px 0', fontSize: '28px' }}>Account Settings</h1>
+
+        <div style={{ display: 'grid', gap: '20px' }}>
           
           {/* IDENTITY SECTION */}
           <section style={sectionStyle}>
             <h3 style={sectionHeaderStyle}>Identity</h3>
-            <div style={{ display: 'grid', gap: '15px' }}>
+            <div style={{ display: 'grid', gap: '10px' }}>
               <div>
                 <label style={labelStyle}>Full Name</label>
                 <input style={inputStyle} value={profile.full_name || ''} onChange={e => setProfile({...profile, full_name: e.target.value})} />
@@ -125,7 +125,7 @@ export default function SettingsPage() {
           <section style={sectionStyle}>
             <h3 style={sectionHeaderStyle}>My Locations</h3>
             {locations.map((loc, index) => (
-              <div key={loc.id || index} style={{ borderBottom: '1px solid #eee', paddingBottom: '20px', marginBottom: '20px' }}>
+              <div key={loc.id || index} style={{ borderBottom: '1px solid #eee', paddingBottom: '14px', marginBottom: '14px' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
                   <input style={inputStyle} placeholder="Label (e.g. Home)" value={loc.label || ''} onChange={e => updateLocation(index, 'label', e.target.value)} />
                   <select style={inputStyle} value={loc.location_type || 'Home'} onChange={e => updateLocation(index, 'location_type', e.target.value)}>
@@ -154,9 +154,9 @@ export default function SettingsPage() {
   );
 }
 
-const sectionStyle = { border: '1px solid #eee', padding: '24px', borderRadius: '12px', backgroundColor: '#fcfcfc' };
-const sectionHeaderStyle = { margin: '0 0 20px 0', fontSize: '18px', fontWeight: 'bold' };
-const labelStyle = { display: 'block', fontSize: '13px', color: '#333', fontWeight: '600', marginBottom: '6px' };
-const inputStyle = { width: '100%', padding: '12px', backgroundColor: '#fff', border: '1px solid #ddd', borderRadius: '8px', color: '#111', outline: 'none' };
+const sectionStyle = { border: '1px solid #eee', padding: '18px', borderRadius: '12px', backgroundColor: '#fcfcfc' };
+const sectionHeaderStyle = { margin: '0 0 14px 0', fontSize: '18px', fontWeight: 'bold' };
+const labelStyle = { display: 'block', fontSize: '13px', color: '#333', fontWeight: '600', marginBottom: '4px' };
+const inputStyle = { width: '100%', padding: '10px', backgroundColor: '#fff', border: '1px solid #ddd', borderRadius: '8px', color: '#111', outline: 'none' };
 const buttonStyle = { padding: '16px', backgroundColor: '#00ccff', color: 'black', fontWeight: 'bold' as 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer' };
 const smallButtonStyle = { width: '100%', padding: '12px', backgroundColor: '#eee', color: '#333', border: '1px solid #ccc', borderRadius: '6px', cursor: 'pointer' };

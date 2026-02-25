@@ -24,6 +24,9 @@
 .DS_Store
 *.pem
 
+# Claude Code (contains auth tokens)
+.claude/
+
 # debug
 npm-debug.log*
 yarn-debug.log*
