@@ -36,6 +36,10 @@ export default function SubmitCampModal({ onClose }: SubmitCampModalProps) {
     try {
       const { error } = await supabase.from('playa_resources').insert([{ ...formData, is_verified: false }]);
       if (error) throw error;
+
+      // Fire notification email — non-blocking, ignore errors so the user still gets success
+      supabase.functions.invoke('send-camp-submission', { body: formData }).catch(() => {});
+
       setSubmitted(true);
       setTimeout(() => onClose(), 3000);
     } catch (err) {

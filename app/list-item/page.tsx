@@ -21,7 +21,7 @@ export default function ListItemPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [availability, setAvailability] = useState('Available to borrow');
+  const [availability, setAvailability] = useState('Available to Borrow');
   const [locations, setLocations] = useState<{id: string, label: string}[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [returnTerms, setReturnTerms] = useState('');
@@ -141,8 +141,8 @@ export default function ListItemPage() {
             <label style={labelStyle}>Availability</label>
             <div style={radioGroupStyle}>
               {[
-                { id: 'Available to borrow', label: 'Offer to Borrow', sub: 'Must be returned.' },
-                { id: 'Available to keep',   label: 'Offer to Keep',   sub: 'Permanent gift.' },
+                { id: 'Available to Borrow', label: 'Offer to Borrow', sub: 'Must be returned.' },
+                { id: 'Available to Keep',   label: 'Offer to Keep',   sub: 'Permanent gift.' },
                 { id: 'Not Available',       label: 'Keep Private',    sub: 'Just add to my inventory' },
               ].map(status => (
                 <label key={status.id} style={{
@@ -160,7 +160,7 @@ export default function ListItemPage() {
             </div>
 
             {/* Pick up by — only for Keep */}
-            {availability === 'Available to keep' && (
+            {availability === 'Available to Keep' && (
               <div style={{ ...detailsBoxStyle, marginTop: '10px' }}>
                 <label style={labelStyle}>Pick up by</label>
                 <input type="date" name="pickup_by" style={{ ...inputStyle, marginTop: '5px' }} />
@@ -169,7 +169,7 @@ export default function ListItemPage() {
           </div>
 
           {/* TERMS FOR BORROW */}
-          {availability === 'Available to borrow' && (
+          {availability === 'Available to Borrow' && (
             <div style={sectionStyle}>
               <label style={labelStyle}>Terms for Borrowing</label>
               <p style={{ ...hintStyle, fontStyle: 'italic' }}>The more you agree on now, the less chance of a headache later.</p>

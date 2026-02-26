@@ -68,22 +68,20 @@ export default function Header() {
 </Link>
         
         <nav className="flex gap-6 items-center">
+          <Link href="/resources" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>
+            On-Playa Resources
+          </Link>
           <Link href="/find-items" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>
             Find Items
           </Link>
           <Link href="/list-item" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>
             Offer an Item
           </Link>
-          
+
           {user ? (
             <>
               <Link href="/inventory" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>
                 My Inventory
-              </Link>
-
-              {/* Standardized On-Playa Resources Link */}
-              <Link href="/resources" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>
-                On-Playa Resources
               </Link>
 
               {username && (

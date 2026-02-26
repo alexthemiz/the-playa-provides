@@ -50,10 +50,10 @@ export default function Login() {
 
   return (
     <div style={cardStyle}>
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '8px', color: '#2D241E' }}>Sign In</h1>
-      <p style={{ color: '#888', fontSize: '0.875rem', marginBottom: '24px' }}>Welcome back to the gear share.</p>
+      <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '4px', color: '#2D241E' }}>Sign In</h1>
+      <p style={{ color: '#888', fontSize: '0.875rem', marginBottom: '18px' }}>Welcome back to the gear share.</p>
 
-      <form onSubmit={handlePasswordLogin} style={{ display: 'flex', flexDirection: 'column' as const, gap: '16px' }}>
+      <form onSubmit={handlePasswordLogin} style={{ display: 'flex', flexDirection: 'column' as const, gap: '12px' }}>
         <div>
           <label style={labelStyle}>Email</label>
           <input
@@ -88,7 +88,7 @@ export default function Login() {
       </form>
 
       {/* DIVIDER */}
-      <div style={{ position: 'relative' as const, margin: '28px 0' }}>
+      <div style={{ position: 'relative' as const, margin: '18px 0' }}>
         <div style={{ position: 'absolute' as const, inset: 0, display: 'flex', alignItems: 'center' }}>
           <span style={{ width: '100%', borderTop: '1px solid #e5e5e5' }} />
         </div>
@@ -109,7 +109,7 @@ export default function Login() {
         </p>
       )}
 
-      <div style={{ marginTop: '28px', paddingTop: '20px', borderTop: '1px solid #e5e5e5', textAlign: 'center' as const }}>
+      <div style={{ marginTop: '18px', paddingTop: '14px', borderTop: '1px solid #e5e5e5', textAlign: 'center' as const }}>
         <p style={{ fontSize: '0.875rem', color: '#888' }}>Don't have an account?</p>
         <Link href="/signup" style={{ display: 'inline-block', marginTop: '8px', color: '#00aacc', fontWeight: 600, textDecoration: 'none' }}>
           Create an Account &rarr;
@@ -120,7 +120,7 @@ export default function Login() {
 }
 
 const cardStyle: React.CSSProperties = {
-  maxWidth: '448px', margin: '80px auto 40px', padding: '36px',
+  maxWidth: '340px', margin: '40px auto 40px', padding: '28px',
   border: '1px solid #e5e5e5', borderRadius: '14px',
   boxShadow: '0 4px 20px rgba(0,0,0,0.06)', backgroundColor: '#fff',
 };

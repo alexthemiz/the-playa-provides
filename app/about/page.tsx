@@ -2,6 +2,15 @@ export default function AboutPage() {
   return (
     <div className="max-w-3xl mx-auto py-12 px-6">
       <h1 className="text-4xl font-bold mb-8">About The Playa Provides</h1>
+
+      <p style={{ marginBottom: '32px', color: '#555', fontSize: '1rem', lineHeight: '1.6' }}>
+        Have questions or suggestions for The Playa Provides?{' '}
+        Send us an email at{' '}
+        <a href="mailto:hello@theplayaprovides.com" style={{ color: '#00aacc', textDecoration: 'none', fontWeight: 600 }}>
+          hello@theplayaprovides.com
+        </a>
+      </p>
+
       <div className="prose prose-lg text-gray-700 space-y-6">
         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
         <h3 className="text-2xl font-semibold text-black">Our Mission</h3>

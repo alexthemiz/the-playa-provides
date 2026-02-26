@@ -47,7 +47,7 @@ return (
         
         {/* Increased max-width to 4xl to keep everything on one line */}
         <p className="text-stone-600 max-w-4xl text-lg leading-relaxed mb-8">
-          A directory for camps offering community services, from bike repair to greywater disposal.
+          A directory of camps offering community services, from bike repair to greywater disposal.
         </p>
         
         <button 

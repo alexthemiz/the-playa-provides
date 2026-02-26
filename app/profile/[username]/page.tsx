@@ -39,7 +39,7 @@ export default function PublicProfilePage() {
           .from('gear_items')
           .select('*')
           .eq('user_id', profileData.id)
-          .in('availability_status', ['You can keep it', 'You can borrow it']);
+          .in('availability_status', ['Available to Keep', 'Available to Borrow']);
 
         setItems(gearData || []);
       }
