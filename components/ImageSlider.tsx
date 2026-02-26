@@ -34,10 +34,10 @@ export default function ImageSlider({ images, aspectRatio = "aspect-square" }: I
 
   return (
     <div className={`relative w-full h-full overflow-hidden group ${aspectRatio}`}>
-      <img 
-        src={images[currentIndex]} 
-        className="object-cover w-full h-full transition-opacity duration-300" 
-        alt="Gear view" 
+      <img
+        src={images[currentIndex]}
+        className="object-contain w-full h-full transition-opacity duration-300 bg-black"
+        alt="Gear view"
       />
       
       {images.length > 1 && (

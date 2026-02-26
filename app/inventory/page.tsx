@@ -3,12 +3,15 @@
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import AddItemModal from '@/components/AddItemModal';
+import WelcomeModal from '@/components/WelcomeModal';
 
 export default function InventoryPage() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [showWelcome, setShowWelcome] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
@@ -34,6 +37,10 @@ export default function InventoryPage() {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
+      setUserId(user.id);
+      const welcomeKey = `tpp_welcomed_${user.id}`;
+      if (!localStorage.getItem(welcomeKey)) setShowWelcome(true);
+
       const { data, error } = await supabase
         .from('gear_items')
         .select(`*, locations (label)`)
@@ -305,6 +312,10 @@ export default function InventoryPage() {
             fetchMyInventory();
           }}
         />
+      )}
+
+      {showWelcome && userId && (
+        <WelcomeModal userId={userId} onClose={() => setShowWelcome(false)} />
       )}
     </div>
   );

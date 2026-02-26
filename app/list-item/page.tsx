@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Camera, CheckCircle2, ArrowLeft } from 'lucide-react';
 
+const US_STATES = ["", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"];
+
 const CATEGORIES = [
   "Bikes & Transport",
   "Clothing & Fun",
@@ -23,6 +25,8 @@ export default function ListItemPage() {
   const [uploading, setUploading] = useState(false);
   const [availability, setAvailability] = useState('Available to Borrow');
   const [locations, setLocations] = useState<{id: string, label: string}[]>([]);
+  const [selectedLocationId, setSelectedLocationId] = useState('');
+  const [newLocData, setNewLocData] = useState({ label: '', address_line_1: '', city: '', state: '', zip_code: '' });
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [returnTerms, setReturnTerms] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -66,12 +70,26 @@ export default function ListItemPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { alert("You must be logged in!"); setLoading(false); return; }
 
+    // If user is adding a new location inline, insert it first
+    let resolvedLocationId: string | null = selectedLocationId || null;
+    if (selectedLocationId === '__new__') {
+      if (!newLocData.label) { alert("Please give your new location a label (e.g. Home)."); setLoading(false); return; }
+      const { data: newLoc, error: locErr } = await supabase
+        .from('locations')
+        .insert({ ...newLocData, user_id: user.id })
+        .select('id')
+        .single();
+      if (locErr || !newLoc) { alert(`Error saving location: ${locErr?.message}`); setLoading(false); return; }
+      resolvedLocationId = newLoc.id;
+      setLocations(prev => [...prev, { id: newLoc.id, label: newLocData.label }]);
+    }
+
     const { error } = await supabase.from('gear_items').insert([{
       user_id: user.id,
       item_name: formData.get('item_name'),
       category: formData.get('category'),
       condition: formData.get('condition'),
-      location_id: formData.get('location_id'),
+      location_id: resolvedLocationId,
       availability_status: availability,
       description: formData.get('description'),
       pickup_by: formData.get('pickup_by') || null,
@@ -122,10 +140,32 @@ export default function ListItemPage() {
             </div>
             <div style={sectionStyle}>
               <label style={labelStyle}>Stored At</label>
-              <select name="location_id" style={inputStyle} required defaultValue="">
+              <select
+                style={inputStyle}
+                value={selectedLocationId}
+                onChange={e => setSelectedLocationId(e.target.value)}
+                required
+              >
                 <option value="" disabled>— Location —</option>
                 {locations.map(loc => <option key={loc.id} value={loc.id}>{loc.label}</option>)}
+                <option value="__new__">+ Add new location</option>
               </select>
+              {selectedLocationId === '__new__' && (
+                <div style={{ marginTop: '10px', padding: '12px', backgroundColor: '#f9f9f9', borderRadius: '10px', border: '1px solid #eee', display: 'flex', flexDirection: 'column' as const, gap: '8px' }}>
+                  <p style={{ margin: '0 0 4px', fontSize: '11px', color: '#888', fontWeight: 600, textTransform: 'uppercase' as const }}>New Location — saved to your settings</p>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    <input style={inputStyle} placeholder="Label (e.g. Home)" value={newLocData.label} onChange={e => setNewLocData({ ...newLocData, label: e.target.value })} />
+                    <input style={inputStyle} placeholder="Street Address" value={newLocData.address_line_1} onChange={e => setNewLocData({ ...newLocData, address_line_1: e.target.value })} />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '8px' }}>
+                    <input style={inputStyle} placeholder="City" value={newLocData.city} onChange={e => setNewLocData({ ...newLocData, city: e.target.value })} />
+                    <select style={inputStyle} value={newLocData.state} onChange={e => setNewLocData({ ...newLocData, state: e.target.value })}>
+                      {US_STATES.map(s => <option key={s} value={s}>{s || 'State'}</option>)}
+                    </select>
+                    <input style={inputStyle} placeholder="Zip" value={newLocData.zip_code} onChange={e => setNewLocData({ ...newLocData, zip_code: e.target.value })} />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -186,12 +226,14 @@ export default function ListItemPage() {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px' }}>
                   <div>
-                    <label style={labelStyle}>Damage Fee ($)</label>
-                    <input type="number" name="damage_price" placeholder="0" style={{ ...inputStyle, marginTop: '5px' }} />
+                    <label style={labelStyle}>Damage Agreement ($)</label>
+                    <p style={{ ...hintStyle, fontStyle: 'italic', margin: '2px 0 5px' }}>If returned damaged, you agree to pay:</p>
+                    <input type="number" name="damage_price" placeholder="0" style={inputStyle} />
                   </div>
                   <div>
-                    <label style={labelStyle}>Loss Fee ($)</label>
-                    <input type="number" name="loss_price" placeholder="0" style={{ ...inputStyle, marginTop: '5px' }} />
+                    <label style={labelStyle}>Loss Agreement ($)</label>
+                    <p style={{ ...hintStyle, fontStyle: 'italic', margin: '2px 0 5px' }}>If not returned, you agree to pay:</p>
+                    <input type="number" name="loss_price" placeholder="0" style={inputStyle} />
                   </div>
                 </div>
                 <div style={{ marginTop: '10px' }}>
