@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { Leaf, Recycle, Droplets, Wrench, Plus, Beer, Heart, Box } from 'lucide-react'; // Added icons
 import SubmitCampModal from '../../components/SubmitCampModal';
@@ -68,41 +68,39 @@ return (
           <p className="text-stone-600 mb-6">New submissions are being reviewed. Check back soon!</p>
         </div>
       ) : (
-        /* The Grid */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {resources.map((res) => (
-            <div key={res.id} className="bg-white border border-stone-100 rounded-3xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-              <div className="flex items-start justify-between mb-6">
-                <div className="p-4 bg-stone-50 rounded-2xl">
+        <div style={{ display: 'flex', flexDirection: 'column' as const }}>
+          {/* List header */}
+          <div style={listHeaderStyle}>
+            <div />
+            <div>Camp</div>
+            <div>Category</div>
+            <div>Service</div>
+            <div>2026 Playa<br />Address</div>
+            <div>Home Base</div>
+            <div>Website</div>
+            <div>Accepting New<br />Campers?</div>
+          </div>
+          {resources.map((res) => {
+            const homebase = [res.homebase_city, res.homebase_state].filter(Boolean).join(', ');
+            return (
+              <div key={res.id} style={listRowStyle}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {getIcon(res.offering_category)}
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 bg-stone-100 px-4 py-1.5 rounded-full">
-                  {res.location_address || 'TBD'}
-                </span>
+                <div style={{ fontWeight: '600', color: '#111', fontSize: '14px' }}>{res.camp_name}</div>
+                <div style={{ ...listColStyle, fontWeight: '700', color: '#C08261', textTransform: 'uppercase' as const, fontSize: '11px' }}>{res.offering_category}</div>
+                <div style={listColStyle}>{res.description || '—'}</div>
+                <div style={{ ...listColStyle, color: '#999' }}>{res.location_address || 'TBD'}</div>
+                <div style={listColStyle}>{homebase || '—'}</div>
+                <div style={listColStyle}>
+                  {res.website ? <a href={res.website} target="_blank" rel="noreferrer" style={{ color: '#00ccff', textDecoration: 'none' }}>{res.website.replace(/^https?:\/\//, '')}</a> : '—'}
+                </div>
+                <div style={{ textAlign: 'center' as const }}>
+                  {res.accepting_campers ? <span style={{ color: '#16a34a', fontSize: '16px' }}>✓</span> : ''}
+                </div>
               </div>
-              
-              <h3 className="text-2xl font-bold text-[#2D241E] mb-1">{res.camp_name}</h3>
-              
-              {(res.homebase_city || res.homebase_state) && (
-                <p className="text-[11px] font-bold text-[#C08261] uppercase tracking-wider mb-4">
-                  {res.homebase_city}{res.homebase_city && res.homebase_state ? ', ' : ''}{res.homebase_state}
-                </p>
-              )}
-
-              <p className="text-stone-600 text-sm leading-relaxed mb-6">{res.description}</p>
-              
-              <div className="pt-6 border-t border-stone-50 flex justify-between items-center">
-                 <span className="text-xs font-black text-[#2D241E] uppercase tracking-widest">
-                  {res.offering_category}
-                </span>
-                {res.accepting_campers && (
-                  <span className="text-[10px] font-bold text-white bg-green-600 px-3 py-1 rounded-lg shadow-sm shadow-green-100">
-                    RECRUITING
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -113,3 +111,8 @@ return (
   </div>
 );
 }
+
+const LIST_COLS = '40px 160px 120px 1fr 120px 120px 140px 120px';
+const listHeaderStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: LIST_COLS, gap: '10px', padding: '8px 12px', fontSize: '10px', fontWeight: '700', color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '2px solid #eee' };
+const listRowStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: LIST_COLS, gap: '10px', alignItems: 'center', padding: '12px 12px', backgroundColor: '#fff', borderBottom: '1px solid #f5f5f5' };
+const listColStyle: React.CSSProperties = { fontSize: '13px', color: '#555', overflow: 'hidden', whiteSpace: 'nowrap' as const, textOverflow: 'ellipsis' };

@@ -41,7 +41,6 @@ export default function SubmitCampModal({ onClose }: SubmitCampModalProps) {
       supabase.functions.invoke('send-camp-submission', { body: formData }).catch(() => {});
 
       setSubmitted(true);
-      setTimeout(() => onClose(), 3000);
     } catch (err) {
       console.error(err);
       alert('Error submitting camp.');
@@ -62,9 +61,20 @@ export default function SubmitCampModal({ onClose }: SubmitCampModalProps) {
           </div>
 
           {submitted ? (
-            <div className="py-10 text-center">
-              <Send className="w-10 h-10 text-green-600 mx-auto mb-3" />
-              <h3 className="text-lg font-bold text-[#2D241E]">Submission Received!</h3>
+            <div className="py-8 text-center">
+              <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Send className="w-7 h-7 text-green-600" />
+              </div>
+              <h3 className="text-xl font-bold text-[#2D241E] mb-2">Submission Received!</h3>
+              <p className="text-stone-500 text-sm mb-6">We'll review your camp and add it to the directory once approved.</p>
+              <div className="bg-[#fdf3ec] border border-[#f0d8c8] rounded-2xl p-4">
+                <p className="text-sm font-semibold text-[#2D241E] mb-1">Want to list your gear too?</p>
+                <p className="text-xs text-stone-500 mb-3">Create an account to share and borrow gear with the community.</p>
+                <div className="flex gap-2 justify-center">
+                  <a href="/signup" className="px-4 py-2 bg-[#C08261] text-white text-xs font-bold rounded-xl hover:bg-[#A66D51] transition-colors">Sign Up</a>
+                  <a href="/login" className="px-4 py-2 bg-white border border-stone-200 text-[#2D241E] text-xs font-bold rounded-xl hover:bg-stone-50 transition-colors">Log In</a>
+                </div>
+              </div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-3">
