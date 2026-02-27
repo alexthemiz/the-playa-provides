@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import AddItemModal from '@/components/AddItemModal';
 import WelcomeModal from '@/components/WelcomeModal';
+import ImportSpreadsheetModal from '@/components/ImportSpreadsheetModal';
 
 export default function InventoryPage() {
   const [items, setItems] = useState<any[]>([]);
@@ -12,6 +13,7 @@ export default function InventoryPage() {
   const [editingItem, setEditingItem] = useState<any>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
@@ -35,21 +37,26 @@ export default function InventoryPage() {
 
   async function fetchMyInventory() {
     setLoading(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      setUserId(user.id);
-      const welcomeKey = `tpp_welcomed_${user.id}`;
-      if (!localStorage.getItem(welcomeKey)) setShowWelcome(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+        const welcomeKey = `tpp_welcomed_${user.id}`;
+        if (!localStorage.getItem(welcomeKey)) setShowWelcome(true);
 
-      const { data, error } = await supabase
-        .from('gear_items')
-        .select(`*, locations (label)`)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-      if (error) console.error('Supabase Error:', error);
-      else setItems(data || []);
+        const { data, error } = await supabase
+          .from('gear_items')
+          .select(`*, locations (label)`)
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+        if (error) console.error('Supabase Error:', error);
+        else setItems(data || []);
+      }
+    } catch (err) {
+      console.error('fetchMyInventory error:', err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   async function updateStatus(itemId: number, newStatus: string) {
@@ -189,8 +196,14 @@ export default function InventoryPage() {
           )}
         </div>
 
-        {/* Add button */}
-        <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+        {/* Add + Import buttons */}
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
+          <button
+            onClick={() => setShowImport(true)}
+            style={importButtonStyle}
+          >
+            Import Spreadsheet
+          </button>
           <button
             onClick={() => { setEditingItem(null); setIsModalOpen(true); }}
             style={addButtonStyle}
@@ -317,6 +330,17 @@ export default function InventoryPage() {
       {showWelcome && userId && (
         <WelcomeModal userId={userId} onClose={() => setShowWelcome(false)} />
       )}
+
+      {showImport && (
+        <ImportSpreadsheetModal
+          existingItemNames={items.map(i => i.item_name)}
+          onClose={() => setShowImport(false)}
+          onSuccess={() => {
+            setShowImport(false);
+            fetchMyInventory();
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -335,6 +359,7 @@ function getStatusToggleStyle(optionValue: string, currentStatus: string): React
 
 // --- STYLES ---
 const addButtonStyle: React.CSSProperties = { backgroundColor: '#00ccff', color: '#000', padding: '10px 20px', borderRadius: '6px', border: 'none', fontWeight: 'bold', cursor: 'pointer', whiteSpace: 'nowrap' as const, fontSize: '0.9rem' };
+const importButtonStyle: React.CSSProperties = { backgroundColor: '#fff', color: '#2D241E', padding: '10px 16px', borderRadius: '6px', border: '1px solid #ddd', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' as const, fontSize: '0.9rem' };
 const filterBarStyle: React.CSSProperties = { display: 'flex', gap: '12px', marginBottom: '24px', background: '#f7f7f7', padding: '16px', borderRadius: '12px', border: '1px solid #eee', alignItems: 'flex-end' };
 const labelStyle: React.CSSProperties = { display: 'block', fontSize: '0.75rem', color: '#888', marginBottom: '5px' };
 const inputStyle: React.CSSProperties = { width: '100%', padding: '10px', backgroundColor: '#fff', border: '1px solid #ddd', color: '#2D241E', borderRadius: '6px', boxSizing: 'border-box' as const, fontSize: '0.9rem' };
