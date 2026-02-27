@@ -150,24 +150,26 @@ export default function ListItemPage() {
                 {locations.map(loc => <option key={loc.id} value={loc.id}>{loc.label}</option>)}
                 <option value="__new__">+ Add new location</option>
               </select>
-              {selectedLocationId === '__new__' && (
-                <div style={{ marginTop: '10px', padding: '12px', backgroundColor: '#f9f9f9', borderRadius: '10px', border: '1px solid #eee', display: 'flex', flexDirection: 'column' as const, gap: '8px' }}>
-                  <p style={{ margin: '0 0 4px', fontSize: '11px', color: '#888', fontWeight: 600, textTransform: 'uppercase' as const }}>New Location — saved to your settings</p>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                    <input style={inputStyle} placeholder="Label (e.g. Home)" value={newLocData.label} onChange={e => setNewLocData({ ...newLocData, label: e.target.value })} />
-                    <input style={inputStyle} placeholder="Street Address" value={newLocData.address_line_1} onChange={e => setNewLocData({ ...newLocData, address_line_1: e.target.value })} />
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '8px' }}>
-                    <input style={inputStyle} placeholder="City" value={newLocData.city} onChange={e => setNewLocData({ ...newLocData, city: e.target.value })} />
-                    <select style={inputStyle} value={newLocData.state} onChange={e => setNewLocData({ ...newLocData, state: e.target.value })}>
-                      {US_STATES.map(s => <option key={s} value={s}>{s || 'State'}</option>)}
-                    </select>
-                    <input style={inputStyle} placeholder="Zip" value={newLocData.zip_code} onChange={e => setNewLocData({ ...newLocData, zip_code: e.target.value })} />
-                  </div>
-                </div>
-              )}
             </div>
           </div>
+
+          {/* NEW LOCATION FORM — full width, shown below the grid when "+ Add new location" is selected */}
+          {selectedLocationId === '__new__' && (
+            <div style={{ padding: '12px', backgroundColor: '#f9f9f9', borderRadius: '10px', border: '1px solid #eee', display: 'flex', flexDirection: 'column' as const, gap: '8px' }}>
+              <p style={{ margin: '0 0 4px', fontSize: '11px', color: '#888', fontWeight: 600, textTransform: 'uppercase' as const }}>New Location — saved to your settings</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <input style={inputStyle} placeholder="Label (e.g. Home)" value={newLocData.label} onChange={e => setNewLocData({ ...newLocData, label: e.target.value })} />
+                <input style={inputStyle} placeholder="Street Address" value={newLocData.address_line_1} onChange={e => setNewLocData({ ...newLocData, address_line_1: e.target.value })} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '8px' }}>
+                <input style={inputStyle} placeholder="City" value={newLocData.city} onChange={e => setNewLocData({ ...newLocData, city: e.target.value })} />
+                <select style={inputStyle} value={newLocData.state} onChange={e => setNewLocData({ ...newLocData, state: e.target.value })}>
+                  {US_STATES.map(s => <option key={s} value={s}>{s || 'State'}</option>)}
+                </select>
+                <input style={inputStyle} placeholder="Zip" value={newLocData.zip_code} onChange={e => setNewLocData({ ...newLocData, zip_code: e.target.value })} />
+              </div>
+            </div>
+          )}
 
           {/* DESCRIPTION */}
           <div style={sectionStyle}>

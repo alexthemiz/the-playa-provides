@@ -8,6 +8,7 @@ import SubmitCampModal from '../../components/SubmitCampModal';
 export default function ResourcesPage() {
   const [resources, setResources] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
@@ -15,10 +16,30 @@ export default function ResourcesPage() {
       const { data, error } = await supabase
         .from('playa_resources')
         .select('*')
-        .eq('is_verified', true) 
+        .eq('is_verified', true)
         .order('camp_name', { ascending: true });
-      
-      if (!error && data) setResources(data);
+
+      if (error) {
+        console.error('Resources fetch error:', error);
+        // Stale/invalid session — sign out silently and retry as anon
+        if (error.code === 'PGRST301' || error.message?.includes('JWT') || error.message?.includes('token')) {
+          await supabase.auth.signOut();
+          const { data: retryData, error: retryError } = await supabase
+            .from('playa_resources')
+            .select('*')
+            .eq('is_verified', true)
+            .order('camp_name', { ascending: true });
+          if (!retryError && retryData) {
+            setResources(retryData);
+          } else {
+            setFetchError(true);
+          }
+        } else {
+          setFetchError(true);
+        }
+      } else if (data) {
+        setResources(data);
+      }
       setLoading(false);
     }
     fetchResources();
@@ -61,6 +82,11 @@ return (
       {loading ? (
         <div className="flex justify-center items-center py-20">
           <div className="animate-pulse text-stone-400 font-medium italic">Dusting off the records...</div>
+        </div>
+      ) : fetchError ? (
+        <div className="bg-stone-50 border border-stone-100 rounded-3xl p-12 text-center max-w-2xl mx-auto">
+          <h3 className="text-xl font-semibold text-[#2D241E] mb-2">Couldn&apos;t load resources</h3>
+          <p className="text-stone-600 mb-6">Something went wrong fetching the directory. Try refreshing the page.</p>
         </div>
       ) : resources.length === 0 ? (
         <div className="bg-stone-50 border border-stone-100 rounded-3xl p-12 text-center max-w-2xl mx-auto">

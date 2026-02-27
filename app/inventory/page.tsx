@@ -202,7 +202,7 @@ export default function InventoryPage() {
             onClick={() => setShowImport(true)}
             style={importButtonStyle}
           >
-            Import Spreadsheet
+            Import Inventory
           </button>
           <button
             onClick={() => { setEditingItem(null); setIsModalOpen(true); }}
