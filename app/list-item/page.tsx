@@ -48,19 +48,27 @@ export default function ListItemPage() {
     if (files.length + imageUrls.length > 4) { alert("Max 4 photos total."); return; }
 
     setUploading(true);
-    const currentPhotos = [...imageUrls];
-    for (const file of files) {
-      const fileExt = file.name.split('.').pop();
-      const filePath = `items/${Math.random()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage.from('gear-photos').upload(filePath, file);
-      if (!uploadError) {
-        const { data } = supabase.storage.from('gear-photos').getPublicUrl(filePath);
-        currentPhotos.push(data.publicUrl);
+    try {
+      const currentPhotos = [...imageUrls];
+      for (const file of files) {
+        const fileExt = file.name.split('.').pop();
+        const filePath = `items/${Math.random()}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage.from('gear-photos').upload(filePath, file);
+        if (uploadError) {
+          console.error('Photo upload error:', uploadError);
+        } else {
+          const { data } = supabase.storage.from('gear-photos').getPublicUrl(filePath);
+          currentPhotos.push(data.publicUrl);
+        }
       }
+      setImageUrls(currentPhotos);
+      e.target.value = "";
+    } catch (err) {
+      console.error('Photo upload exception:', err);
+      alert('Photo upload failed. Please try again.');
+    } finally {
+      setUploading(false);
     }
-    setImageUrls(currentPhotos);
-    setUploading(false);
-    e.target.value = "";
   };
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
