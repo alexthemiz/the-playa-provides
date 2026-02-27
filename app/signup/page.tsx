@@ -47,7 +47,6 @@ export default function SignUpPage() {
       setMessage('Account created! Redirecting...');
       setTimeout(() => {
         router.push('/inventory');
-        router.refresh();
       }, 1500);
     }
   };

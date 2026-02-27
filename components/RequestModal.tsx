@@ -25,6 +25,7 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
   const [pickupDate, setPickupDate] = useState('');
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [sendError, setSendError] = useState('');
   const [requesterName, setRequesterName] = useState('');
   const [requesterEmail, setRequesterEmail] = useState('');
 
@@ -48,6 +49,7 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
 
   const handleSendRequest = async () => {
     setSending(true);
+    setSendError('');
     try {
       const fullMessage = pickupDate
         ? `Desired pickup date: ${new Date(pickupDate + 'T12:00:00').toLocaleDateString()}\n\n${message}`
@@ -69,7 +71,7 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
       setTimeout(() => onClose(), 2000);
     } catch (err) {
       console.error('Error:', err);
-      alert('Failed to send request.');
+      setSendError('Something went wrong sending your request. Please try again.');
     } finally {
       setSending(false);
     }
@@ -155,6 +157,11 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
                 onChange={(e) => setMessage(e.target.value)}
                 style={{ color: '#111' }}
               />
+              {sendError && (
+                <p style={{ color: '#ef4444', fontSize: '0.85rem', marginTop: '12px', textAlign: 'center' as const }}>
+                  {sendError}
+                </p>
+              )}
               <button
                 onClick={handleSendRequest}
                 disabled={sending || !message.trim()}
