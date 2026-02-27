@@ -148,12 +148,14 @@ export default function InventoryPage() {
           <label style={labelStyle}>Category</label>
           <select style={inputStyle} onChange={(e) => setSelectedCategory(e.target.value)}>
             <option>All</option>
-            <option>Environment</option>
-            <option>Donations</option>
-            <option>Community Service</option>
-            <option>Art</option>
-            <option>Transportation</option>
-            <option>Other</option>
+            <option>Bikes &amp; Transport</option>
+            <option>Clothing &amp; Fun</option>
+            <option>Kitchen &amp; Water</option>
+            <option>Power &amp; Lighting</option>
+            <option>Safety &amp; First Aid</option>
+            <option>Shelter &amp; Shade</option>
+            <option>Tools &amp; Hardware</option>
+            <option>Miscellaneous</option>
           </select>
         </div>
 
