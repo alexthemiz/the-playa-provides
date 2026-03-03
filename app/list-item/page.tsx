@@ -23,6 +23,7 @@ export default function ListItemPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [displayName, setDisplayName] = useState<string | null>(null);
   const [availability, setAvailability] = useState('Available to Borrow');
   const [locations, setLocations] = useState<{id: string, label: string}[]>([]);
   const [selectedLocationId, setSelectedLocationId] = useState('');
@@ -36,6 +37,9 @@ export default function ListItemPage() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
+          const { data: profileData } = await supabase.from('profiles').select('preferred_name').eq('id', user.id).maybeSingle();
+          if (profileData?.preferred_name) setDisplayName(profileData.preferred_name);
+
           const { data, error } = await supabase.from('locations').select('id, label').eq('user_id', user.id);
           if (error) console.error('fetchLocations error:', error);
           else if (data) {
@@ -129,7 +133,7 @@ export default function ListItemPage() {
         </Link>
 
         <div style={{ marginTop: '16px', marginBottom: '4px' }}>
-          <h1 style={{ fontSize: '24px', color: '#111', margin: '0 0 4px 0' }}>List New Gear</h1>
+          <h1 style={{ fontSize: '24px', color: '#111', margin: '0 0 4px 0' }}>{displayName ? `${displayName} Provides: the Below Item` : 'Provide: the Below Item'}</h1>
           <p style={{ color: '#666', fontSize: '14px', margin: 0 }}>Add something to the community pool or your private inventory.</p>
         </div>
 

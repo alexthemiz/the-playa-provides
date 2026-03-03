@@ -97,6 +97,8 @@ export default function PublicProfilePage() {
         )}
       </div>
 
+      <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '24px 0 0 0' }}>The Playa Provides: a Profile</h1>
+
       {/* PROFILE HEADER */}
       <header style={{ marginTop: '30px', borderBottom: '1px solid #e5e5e5', paddingBottom: '30px' }}>
         <div style={{ display: 'flex', gap: '25px' }}>
@@ -245,7 +247,7 @@ export default function PublicProfilePage() {
                   </div>
                   <div style={{ ...listColStyle, fontSize: '11px', color: '#888' }}>{termsSummary || '—'}</div>
                   <div style={{ flexShrink: 0 }}>
-                    <Link href={`/find-items/${item.id}`} style={{ color: '#00ccff', textDecoration: 'none', fontWeight: 'bold', fontSize: '12px' }}>View →</Link>
+                    <a href={`/find-items/${item.id}`} style={{ color: '#00ccff', textDecoration: 'none', fontWeight: 'bold', fontSize: '12px' }}>View →</a>
                   </div>
                 </div>
               );

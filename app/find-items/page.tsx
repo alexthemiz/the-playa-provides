@@ -129,6 +129,8 @@ export default function FindItemsPage() {
 
   return (
     <div style={containerStyle}>
+      <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 20px 0' }}>The Playa Provides: Items to Borrow or Keep</h1>
+
       {/* HEADER / SEARCH & FILTERS */}
       <div style={topBarStyle}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

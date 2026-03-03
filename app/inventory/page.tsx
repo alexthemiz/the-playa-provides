@@ -14,6 +14,7 @@ export default function InventoryPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [showWelcome, setShowWelcome] = useState(false);
   const [showImport, setShowImport] = useState(false);
+  const [displayName, setDisplayName] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
@@ -41,6 +42,9 @@ export default function InventoryPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserId(user.id);
+        const { data: profileData } = await supabase.from('profiles').select('preferred_name').eq('id', user.id).maybeSingle();
+        if (profileData?.preferred_name) setDisplayName(profileData.preferred_name);
+
         const welcomeKey = `tpp_welcomed_${user.id}`;
         if (!localStorage.getItem(welcomeKey)) setShowWelcome(true);
 
@@ -128,7 +132,7 @@ export default function InventoryPage() {
 
       {/* HEADER */}
       <div style={{ marginBottom: '16px' }}>
-        <h1 style={{ margin: 0, color: '#2D241E', fontWeight: 'bold' }}>My Inventory Hub</h1>
+        <h1 style={{ margin: 0, color: '#2D241E', fontWeight: 'bold' }}>{displayName ? `${displayName} Could Provide: these Items` : 'My Inventory'}</h1>
       </div>
 
       {/* FILTERS + ADD BUTTON */}

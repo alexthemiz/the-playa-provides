@@ -90,7 +90,7 @@ export default function SettingsPage() {
       <div style={{ padding: '20px', maxWidth: '480px', margin: '0 auto', fontFamily: 'sans-serif' }}>
 
         <Link href="/inventory" style={{ color: '#00ccff', textDecoration: 'none', fontWeight: 'bold' }}>← Back to Inventory</Link>
-        <h1 style={{ margin: '12px 0 16px', fontSize: '24px' }}>Account Settings</h1>
+        <h1 style={{ margin: '12px 0 16px', fontSize: '24px' }}>The Playa Provides: Account Settings</h1>
 
         <div style={{ display: 'grid', gap: '14px' }}>
 

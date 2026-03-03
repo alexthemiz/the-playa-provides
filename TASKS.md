@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-02-27_
+_Last updated: 2026-03-03_
 
 ---
 
@@ -52,3 +52,5 @@ _(nothing queued yet)_
 - [x] Fix: /resources page showed empty list with stale session (silent retry as anon)
 - [x] Fix: Photo upload stuck on "Uploading..." (missing try/catch/finally)
 - [x] Fix: Category filter on /inventory had wrong options (synced with list-item categories)
+- [x] Fix: Locations dropdown broken for new users (auto-select "Add new location" when no saved locations)
+- [x] Fix: Logout button unresponsive — removed router.refresh() race condition from handleSignOut + added try/catch for broken auth states

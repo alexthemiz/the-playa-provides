@@ -48,11 +48,14 @@ export default function Header() {
   }, [])
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
+    try {
+      await supabase.auth.signOut()
+    } catch (err) {
+      console.error('signOut error:', err)
+    }
     setUser(null)
     setUsername(null)
     router.push('/login')
-    router.refresh()
   }
 
   // Visual Theme - Dusty Sienna Daylight

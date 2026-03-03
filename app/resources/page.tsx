@@ -62,21 +62,22 @@ return (
   <div className="w-full bg-white min-h-screen"> 
     <div className="max-w-6xl mx-auto px-4 py-16">
       
-      {/* Header Section: Centered & Widened */}
-      <div className="flex flex-col items-center text-center mb-16">
-        <h1 className="text-5xl font-bold text-[#2D241E] mb-4">On-Playa Resources</h1>
-        
-        {/* Increased max-width to 4xl to keep everything on one line */}
+      {/* Header Section */}
+      <div className="flex flex-col mb-16">
+        <h1 className="text-5xl font-bold text-[#2D241E] mb-4">The Playa Provides: Resources</h1>
+
         <p className="text-stone-600 max-w-4xl text-lg leading-relaxed mb-8">
           A directory of camps offering community services, from bike repair to greywater disposal.
         </p>
-        
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="bg-[#C08261] text-white px-10 py-4 rounded-2xl font-bold hover:bg-[#A66D51] transition-all shadow-lg shadow-stone-200 active:scale-95"
-        >
-          Submit Your Camp
-        </button>
+
+        <div>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-[#C08261] text-white px-10 py-4 rounded-2xl font-bold hover:bg-[#A66D51] transition-all shadow-lg shadow-stone-200 active:scale-95"
+          >
+            Submit Your Camp
+          </button>
+        </div>
       </div>
 
       {loading ? (
