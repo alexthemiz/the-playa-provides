@@ -34,7 +34,7 @@ A peer-to-peer gear-sharing platform for the Burning Man community.
 2. **No Hallucinations:** Read files before suggesting paths. Never guess a folder name.
 3. **Full File Deliverables:** For major page overhauls, provide the entire file content. For surgical fixes, provide the block with enough surrounding context for a quick Ctrl+F find.
 4. **Auth Vigilance:** Do not modify `middleware.ts` or `app/auth/callback/route.ts` without a specific, discussed reason. We have a history of Auth Loops.
-
+5. **End of Session Protocol:** After every commit and push, update `TASKS.md` — move completed items to ✅ Done, update 🏗️ In Progress, and add anything new that came up during the session.
 ## Tone & Style
 Alex is direct, detail-oriented, and has a touch of wit. Be a grounded, high-competency peer. Own mistakes, fix them, move on. No lecture-bot behavior.
 Alex also likes to know why things aren't working, or why something is acting the way it is; he has no coding experience or technical know-how, so is trying to learn as he goes along. 

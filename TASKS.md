@@ -31,7 +31,7 @@ _(nothing queued yet)_
 ---
 
 ## 💡 Ideas & Long Term
-_(nothing queued yet)_
+- [ ] **Custom Supabase Auth domain** — Upgrade to Supabase Pro, set `auth.theplayaprovides.com` as custom auth domain + DNS config. Fixes Google OAuth consent screen showing `bklycpitofjrjhizttny.supabase.co` instead of the app domain.
 
 ---
 
@@ -54,3 +54,5 @@ _(nothing queued yet)_
 - [x] Fix: Category filter on /inventory had wrong options (synced with list-item categories)
 - [x] Fix: Locations dropdown broken for new users (auto-select "Add new location" when no saved locations)
 - [x] Fix: Logout button unresponsive — removed router.refresh() race condition from handleSignOut + added try/catch for broken auth states
+- [x] Design: Page headline updates across all routes — "The Playa Provides: ..." branding, personalised with preferred_name on /list-item and /inventory, left-justified
+- [x] Fix: "View →" link on /profile/[username] items list — was triggering intercepting route silently; changed to hard nav via &lt;a href&gt;

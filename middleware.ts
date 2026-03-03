@@ -31,7 +31,7 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   const url = request.nextUrl.clone()
-  const isPublicRoute = ['/login', '/signup', '/'].includes(url.pathname) || url.pathname.startsWith('/auth') || url.pathname.startsWith('/resources') || url.pathname.startsWith('/about')
+  const isPublicRoute = ['/login', '/signup', '/'].includes(url.pathname) || url.pathname.startsWith('/auth') || url.pathname.startsWith('/resources') || url.pathname.startsWith('/about') || url.pathname.startsWith('/privacy') || url.pathname.startsWith('/terms')
 
   console.log(`📡 PATH: ${url.pathname} | AUTH: ${user ? 'YES' : 'NO'}`)
 

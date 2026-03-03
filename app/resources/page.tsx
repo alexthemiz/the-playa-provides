@@ -67,7 +67,7 @@ return (
         <h1 className="text-5xl font-bold text-[#2D241E] mb-4">The Playa Provides: Resources</h1>
 
         <p className="text-stone-600 max-w-4xl text-lg leading-relaxed mb-8">
-          A directory of camps offering community services, from bike repair to greywater disposal.
+          A directory of camps that offer community services at the Burn, from compost collecting to bike repair.
         </p>
 
         <div>
