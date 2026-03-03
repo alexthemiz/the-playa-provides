@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-03-03_
+_Last updated: 2026-03-03 (session 2)_
 
 ---
 
@@ -56,3 +56,6 @@ _(nothing queued yet)_
 - [x] Fix: Logout button unresponsive — removed router.refresh() race condition from handleSignOut + added try/catch for broken auth states
 - [x] Design: Page headline updates across all routes — "The Playa Provides: ..." branding, personalised with preferred_name on /list-item and /inventory, left-justified
 - [x] Fix: "View →" link on /profile/[username] items list — was triggering intercepting route silently; changed to hard nav via &lt;a href&gt;
+- [x] Feature: Google OAuth sign-in on /login and /signup
+- [x] Feature: Privacy Policy page at /privacy — includes required Google Limited Use disclosure
+- [x] Fix: /privacy and /terms added to middleware public routes (footer links now work without auth)
