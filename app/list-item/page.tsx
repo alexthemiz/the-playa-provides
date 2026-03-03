@@ -33,10 +33,19 @@ export default function ListItemPage() {
 
   useEffect(() => {
     async function fetchLocations() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data } = await supabase.from('locations').select('id, label').eq('user_id', user.id);
-        if (data) setLocations(data);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data, error } = await supabase.from('locations').select('id, label').eq('user_id', user.id);
+          if (error) console.error('fetchLocations error:', error);
+          else if (data) {
+            setLocations(data);
+            // Auto-open the new location form for users who haven't saved any locations yet
+            if (data.length === 0) setSelectedLocationId('__new__');
+          }
+        }
+      } catch (err) {
+        console.error('fetchLocations exception:', err);
       }
     }
     fetchLocations();
