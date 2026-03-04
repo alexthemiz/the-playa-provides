@@ -41,7 +41,7 @@ _(nothing queued yet)_
 
 ## ✅ Done
 - [x] Fix: Email sender switched to hello@theplayaprovides.com via Resend SMTP (Supabase dashboard config)
-- [x] Fix: Profile page stuck on "Loading..." — missing try/catch/finally in fetchProfileAndGear
+- [x] Fix: Profile pages stuck on "Loading..." — root cause: getUser() makes a network call that can hang on expired/refreshing tokens; swapped to getSession() (reads local cache, no network call) for the owner-check
 - [x] Fix: Logout button not working — root cause was middleware redirect loop; router.push('/login') raced with getUser() in middleware which still saw a valid session and bounced back; fixed with window.location.href for a clean hard nav
 - [x] Design: WelcomeModal tightened — smaller icon, line break in title, X close button, tighter padding
 - [x] Fix: `/auth/auth-code-error` page missing (magic link 404)
