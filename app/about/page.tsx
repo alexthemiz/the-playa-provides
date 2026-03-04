@@ -91,7 +91,7 @@ const introStyle: React.CSSProperties = {
 };
 
 const sectionStyle: React.CSSProperties = {
-  marginBottom: '8px',
+  marginBottom: '32px',
 };
 
 const dividerStyle: React.CSSProperties = {
