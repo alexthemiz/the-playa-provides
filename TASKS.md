@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-03-03 (session 2)_
+_Last updated: 2026-03-04 (session 3)_
 
 ---
 
@@ -41,6 +41,9 @@ _(nothing queued yet)_
 ---
 
 ## ✅ Done
+- [x] Fix: Profile page stuck on "Loading..." — missing try/catch/finally in fetchProfileAndGear
+- [x] Fix: Logout button cursor not changing to pointer on hover
+- [x] Design: WelcomeModal tightened — smaller icon, line break in title, X close button, tighter padding
 - [x] Fix: `/auth/auth-code-error` page missing (magic link 404)
 - [x] Fix: signup stuck on "Loading..." (router.refresh() race)
 - [x] Fix: RequestModal stuck on "Sending..." (replaced alert with inline error state)
