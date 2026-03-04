@@ -5,6 +5,8 @@ import { supabase } from '@/lib/supabaseClient';
 import AddItemModal from '@/components/AddItemModal';
 import WelcomeModal from '@/components/WelcomeModal';
 import ImportSpreadsheetModal from '@/components/ImportSpreadsheetModal';
+import TransferModal from '@/components/TransferModal';
+import LendModal from '@/components/LendModal';
 
 export default function InventoryPage() {
   const [items, setItems] = useState<any[]>([]);
@@ -20,6 +22,14 @@ export default function InventoryPage() {
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [locationDropdownOpen, setLocationDropdownOpen] = useState(false);
   const locationDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Transfer & Loan state
+  const [activeTransfers, setActiveTransfers] = useState<any[]>([]);
+  const [activeLoans, setActiveLoans] = useState<any[]>([]);
+  const [inboundTransfers, setInboundTransfers] = useState<any[]>([]);
+  const [inboundLoans, setInboundLoans] = useState<any[]>([]);
+  const [transferItem, setTransferItem] = useState<any>(null);
+  const [lendItem, setLendItem] = useState<any>(null);
 
   useEffect(() => {
     fetchMyInventory();
@@ -55,6 +65,38 @@ export default function InventoryPage() {
           .order('created_at', { ascending: false });
         if (error) console.error('Supabase Error:', error);
         else setItems(data || []);
+
+        // Fetch active transfers (owner side)
+        const { data: transferData } = await supabase
+          .from('item_transfers')
+          .select('id, item_id, status, owner_confirmed, recipient_confirmed, recipient:profiles!item_transfers_recipient_id_fkey(preferred_name, username)')
+          .eq('owner_id', user.id)
+          .in('status', ['pending_handover']);
+        setActiveTransfers(transferData || []);
+
+        // Fetch active loans (owner side)
+        const { data: loanData } = await supabase
+          .from('item_loans')
+          .select('id, item_id, status, owner_confirmed_pickup, borrower_confirmed_pickup, return_by, borrower:profiles!item_loans_borrower_id_fkey(preferred_name, username)')
+          .eq('owner_id', user.id)
+          .in('status', ['pending_handover', 'active', 'return_pending']);
+        setActiveLoans(loanData || []);
+
+        // Inbound transfers (recipient side)
+        const { data: inboundTransferData } = await supabase
+          .from('item_transfers')
+          .select('id, item_id, status, owner_confirmed, recipient_confirmed, owner:profiles!item_transfers_owner_id_fkey(preferred_name, username), gear_items(item_name)')
+          .eq('recipient_id', user.id)
+          .in('status', ['pending_handover']);
+        setInboundTransfers(inboundTransferData || []);
+
+        // Inbound loans (borrower side)
+        const { data: inboundLoanData } = await supabase
+          .from('item_loans')
+          .select('id, item_id, status, owner_confirmed_pickup, borrower_confirmed_pickup, borrower_confirmed_return, return_by, owner:profiles!item_loans_owner_id_fkey(preferred_name, username), gear_items(item_name)')
+          .eq('borrower_id', user.id)
+          .in('status', ['pending_handover', 'active']);
+        setInboundLoans(inboundLoanData || []);
       }
     } catch (err) {
       console.error('fetchMyInventory error:', err);
@@ -95,7 +137,109 @@ export default function InventoryPage() {
     document.body.removeChild(link);
   };
 
-  // Unique location labels from loaded items
+  // --- Transfer & Loan action handlers ---
+
+  async function handleOwnerConfirmTransfer(transfer: any) {
+    const { error } = await supabase
+      .from('item_transfers')
+      .update({ owner_confirmed: true })
+      .eq('id', transfer.id);
+    if (!error) {
+      await supabase.functions.invoke('send-transfer-notification', {
+        body: { type: 'owner_confirmed', transfer_id: transfer.id },
+      });
+      fetchMyInventory();
+    }
+  }
+
+  async function handleCancelTransfer(transfer: any) {
+    const { error } = await supabase
+      .from('item_transfers')
+      .update({ status: 'cancelled' })
+      .eq('id', transfer.id);
+    if (!error) fetchMyInventory();
+  }
+
+  async function handleSendTransferReminder(transfer: any) {
+    await supabase.functions.invoke('send-transfer-notification', {
+      body: { type: 'owner_confirmed', transfer_id: transfer.id },
+    });
+  }
+
+  async function handleOwnerConfirmPickup(loan: any) {
+    const { error } = await supabase
+      .from('item_loans')
+      .update({ owner_confirmed_pickup: true })
+      .eq('id', loan.id);
+    if (!error) {
+      await supabase.functions.invoke('send-loan-notification', {
+        body: { type: 'owner_confirmed_pickup', loan_id: loan.id },
+      });
+      fetchMyInventory();
+    }
+  }
+
+  async function handleCancelLoan(loan: any) {
+    const { error } = await supabase
+      .from('item_loans')
+      .update({ status: 'cancelled' })
+      .eq('id', loan.id);
+    if (!error) fetchMyInventory();
+  }
+
+  async function handleSendLoanReminder(loan: any) {
+    await supabase.functions.invoke('send-loan-notification', {
+      body: { type: 'owner_confirmed_pickup', loan_id: loan.id },
+    });
+  }
+
+  async function handleDisputeReturn(loan: any) {
+    await supabase
+      .from('item_loans')
+      .update({ status: 'disputed' })
+      .eq('id', loan.id);
+    fetchMyInventory();
+  }
+
+  async function handleOwnerConfirmReturn(loan: any) {
+    await supabase
+      .from('item_loans')
+      .update({ owner_confirmed_return: true, status: 'complete' })
+      .eq('id', loan.id);
+    fetchMyInventory();
+  }
+
+  async function handleRecipientConfirmTransfer(transfer: any) {
+    const { error } = await supabase
+      .from('item_transfers')
+      .update({ recipient_confirmed: true, status: 'complete' })
+      .eq('id', transfer.id);
+    if (!error) fetchMyInventory();
+  }
+
+  async function handleBorrowerConfirmPickup(loan: any) {
+    const { error } = await supabase
+      .from('item_loans')
+      .update({ borrower_confirmed_pickup: true, status: 'active' })
+      .eq('id', loan.id);
+    if (!error) fetchMyInventory();
+  }
+
+  async function handleBorrowerConfirmReturn(loan: any) {
+    const { error } = await supabase
+      .from('item_loans')
+      .update({ borrower_confirmed_return: true, status: 'return_pending' })
+      .eq('id', loan.id);
+    if (!error) {
+      await supabase.functions.invoke('send-loan-notification', {
+        body: { type: 'borrower_confirmed_return', loan_id: loan.id },
+      });
+      fetchMyInventory();
+    }
+  }
+
+  // --- Filters ---
+
   const uniqueLocations = Array.from(new Set(
     items.map(item => item.locations?.label || item.location_type || 'Unset')
   )).sort();
@@ -116,8 +260,53 @@ export default function InventoryPage() {
 
   function renderActionButton(item: any) {
     const status = item.availability_status;
-    if (status === 'Available to Borrow') return <button style={lendButtonStyle}>Lend To</button>;
-    if (status === 'Available to Keep') return <button style={transferButtonStyle}>Transfer To</button>;
+
+    // Check for active transfer on this item
+    const transfer = activeTransfers.find(t => t.item_id === item.id);
+    if (transfer) {
+      const recipientName = transfer.recipient?.preferred_name || transfer.recipient?.username || 'recipient';
+      if (transfer.owner_confirmed) {
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '4px' }}>
+            <span style={pendingBadgeStyle}>Pending Handover</span>
+            <span style={{ fontSize: '0.75rem', color: '#888' }}>Waiting for {recipientName}…</span>
+            <button onClick={() => handleSendTransferReminder(transfer)} style={reminderButtonStyle}>Send Reminder</button>
+          </div>
+        );
+      }
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '4px' }}>
+          <span style={pendingBadgeStyle}>Pending Handover</span>
+          <button onClick={() => handleOwnerConfirmTransfer(transfer)} style={handsOverButtonStyle}>I've Handed It Over</button>
+          <button onClick={() => handleCancelTransfer(transfer)} style={cancelActionButtonStyle}>Cancel</button>
+        </div>
+      );
+    }
+
+    // Check for active loan on this item (pending_handover only — active/return_pending show in the section below)
+    const loan = activeLoans.find(l => l.item_id === item.id && l.status === 'pending_handover');
+    if (loan) {
+      const borrowerName = loan.borrower?.preferred_name || loan.borrower?.username || 'borrower';
+      if (loan.owner_confirmed_pickup) {
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '4px' }}>
+            <span style={pendingBadgeStyle}>Pending Handover</span>
+            <span style={{ fontSize: '0.75rem', color: '#888' }}>Waiting for {borrowerName}…</span>
+            <button onClick={() => handleSendLoanReminder(loan)} style={reminderButtonStyle}>Send Reminder</button>
+          </div>
+        );
+      }
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '4px' }}>
+          <span style={pendingBadgeStyle}>Pending Handover</span>
+          <button onClick={() => handleOwnerConfirmPickup(loan)} style={handsOverButtonStyle}>I've Handed It Over</button>
+          <button onClick={() => handleCancelLoan(loan)} style={cancelActionButtonStyle}>Cancel</button>
+        </div>
+      );
+    }
+
+    if (status === 'Available to Borrow') return <button onClick={() => setLendItem(item)} style={lendButtonStyle}>Lend To</button>;
+    if (status === 'Available to Keep') return <button onClick={() => setTransferItem(item)} style={transferButtonStyle}>Transfer To</button>;
     return <button style={makeAvailableButtonStyle}>Make Available</button>;
   }
 
@@ -315,6 +504,153 @@ export default function InventoryPage() {
         </div>
       )}
 
+      {/* ITEMS OUT ON LOAN */}
+      {activeLoans.filter(l => ['active', 'return_pending'].includes(l.status)).length > 0 && (
+        <div style={{ marginTop: '40px' }}>
+          <h2 style={{ color: '#2D241E', fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
+            Items Out on Loan
+          </h2>
+          <div style={tableContainerStyle}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const }}>
+              <thead>
+                <tr style={headerRowStyle}>
+                  <th style={thStyle}>Item</th>
+                  <th style={thStyle}>Borrower</th>
+                  <th style={thStyle}>Return By</th>
+                  <th style={thStyle}>Status</th>
+                  <th style={thStyle}>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {activeLoans
+                  .filter(l => ['active', 'return_pending'].includes(l.status))
+                  .map(loan => {
+                    const borrowerName = loan.borrower?.preferred_name || loan.borrower?.username || '—';
+                    const returnBy = loan.return_by ? new Date(loan.return_by).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+                    const itemName = items.find(i => i.id === loan.item_id)?.item_name || '—';
+                    return (
+                      <tr key={loan.id} style={rowStyle}>
+                        <td style={{ ...tdStyle, fontWeight: 600, color: '#2D241E' }}>{itemName}</td>
+                        <td style={tdStyle}>{borrowerName}</td>
+                        <td style={tdStyle}>{returnBy}</td>
+                        <td style={tdStyle}>
+                          <span style={{ fontSize: '0.8rem', color: loan.status === 'return_pending' ? '#92400e' : '#555' }}>
+                            {loan.status === 'return_pending' ? 'Return Pending' : 'Out on Loan'}
+                          </span>
+                        </td>
+                        <td style={tdStyle}>
+                          {loan.status === 'return_pending' && (
+                            <div style={{ display: 'flex', gap: '6px' }}>
+                              <button onClick={() => handleOwnerConfirmReturn(loan)} style={handsOverButtonStyle}>Got It Back</button>
+                              <button onClick={() => handleDisputeReturn(loan)} style={cancelActionButtonStyle}>Dispute</button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ITEMS BEING TRANSFERRED TO ME */}
+      {inboundTransfers.length > 0 && (
+        <div style={{ marginTop: '40px' }}>
+          <h2 style={{ color: '#2D241E', fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
+            Items Being Transferred to Me
+          </h2>
+          <div style={tableContainerStyle}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const }}>
+              <thead>
+                <tr style={headerRowStyle}>
+                  <th style={thStyle}>Item</th>
+                  <th style={thStyle}>From</th>
+                  <th style={thStyle}>Status</th>
+                  <th style={thStyle}>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {inboundTransfers.map(transfer => {
+                  const ownerName = transfer.owner?.preferred_name || transfer.owner?.username || '—';
+                  const itemName = transfer.gear_items?.item_name || '—';
+                  return (
+                    <tr key={transfer.id} style={rowStyle}>
+                      <td style={{ ...tdStyle, fontWeight: 600, color: '#2D241E' }}>{itemName}</td>
+                      <td style={tdStyle}>{ownerName}</td>
+                      <td style={tdStyle}>
+                        <span style={{ fontSize: '0.8rem', color: '#555' }}>
+                          {transfer.owner_confirmed ? 'Handed over — confirm receipt' : 'Pending handover'}
+                        </span>
+                      </td>
+                      <td style={tdStyle}>
+                        {transfer.owner_confirmed && (
+                          <button onClick={() => handleRecipientConfirmTransfer(transfer)} style={handsOverButtonStyle}>
+                            Got It
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ITEMS I'M BORROWING */}
+      {inboundLoans.length > 0 && (
+        <div style={{ marginTop: '40px' }}>
+          <h2 style={{ color: '#2D241E', fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
+            Items I'm Borrowing
+          </h2>
+          <div style={tableContainerStyle}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const }}>
+              <thead>
+                <tr style={headerRowStyle}>
+                  <th style={thStyle}>Item</th>
+                  <th style={thStyle}>From</th>
+                  <th style={thStyle}>Return By</th>
+                  <th style={thStyle}>Status</th>
+                  <th style={thStyle}>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {inboundLoans.map(loan => {
+                  const ownerName = loan.owner?.preferred_name || loan.owner?.username || '—';
+                  const itemName = loan.gear_items?.item_name || '—';
+                  const returnBy = loan.return_by ? new Date(loan.return_by).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+                  return (
+                    <tr key={loan.id} style={rowStyle}>
+                      <td style={{ ...tdStyle, fontWeight: 600, color: '#2D241E' }}>{itemName}</td>
+                      <td style={tdStyle}>{ownerName}</td>
+                      <td style={tdStyle}>{returnBy}</td>
+                      <td style={tdStyle}>
+                        <span style={{ fontSize: '0.8rem', color: '#555' }}>
+                          {loan.status === 'pending_handover'
+                            ? loan.owner_confirmed_pickup ? 'Confirm you have it' : 'Waiting for handover'
+                            : 'Active loan'}
+                        </span>
+                      </td>
+                      <td style={tdStyle}>
+                        {loan.status === 'pending_handover' && loan.owner_confirmed_pickup && (
+                          <button onClick={() => handleBorrowerConfirmPickup(loan)} style={handsOverButtonStyle}>Got It</button>
+                        )}
+                        {loan.status === 'active' && (
+                          <button onClick={() => handleBorrowerConfirmReturn(loan)} style={cancelActionButtonStyle}>I've Returned It</button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {/* CSV DOWNLOAD */}
       <div style={{ marginTop: '20px', textAlign: 'right' as const }}>
         <button onClick={downloadCSV} style={csvButtonStyle}>
@@ -345,6 +681,24 @@ export default function InventoryPage() {
             setShowImport(false);
             fetchMyInventory();
           }}
+        />
+      )}
+
+      {transferItem && userId && (
+        <TransferModal
+          item={transferItem}
+          ownerId={userId}
+          onClose={() => setTransferItem(null)}
+          onSuccess={() => { setTransferItem(null); fetchMyInventory(); }}
+        />
+      )}
+
+      {lendItem && userId && (
+        <LendModal
+          item={lendItem}
+          ownerId={userId}
+          onClose={() => setLendItem(null)}
+          onSuccess={() => { setLendItem(null); fetchMyInventory(); }}
         />
       )}
     </div>
@@ -384,3 +738,7 @@ const locationOptionStyle: React.CSSProperties = { display: 'flex', alignItems: 
 const lendButtonStyle: React.CSSProperties = { height: '30px', padding: '0 14px', fontSize: '0.75rem', backgroundColor: '#00ccff', color: '#000', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' as const };
 const transferButtonStyle: React.CSSProperties = { height: '30px', padding: '0 14px', fontSize: '0.75rem', backgroundColor: '#C08261', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' as const };
 const makeAvailableButtonStyle: React.CSSProperties = { height: '30px', padding: '0 14px', fontSize: '0.75rem', backgroundColor: '#f0f0f0', color: '#666', border: '1px solid #ddd', borderRadius: '5px', cursor: 'pointer', fontWeight: 'normal', whiteSpace: 'nowrap' as const };
+const pendingBadgeStyle: React.CSSProperties = { display: 'inline-block', padding: '2px 8px', backgroundColor: '#fef3c7', color: '#92400e', borderRadius: '10px', fontSize: '0.7rem', fontWeight: 700 };
+const handsOverButtonStyle: React.CSSProperties = { height: '28px', padding: '0 10px', fontSize: '0.7rem', backgroundColor: '#16a34a', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' as const };
+const reminderButtonStyle: React.CSSProperties = { height: '24px', padding: '0 8px', fontSize: '0.7rem', backgroundColor: '#f0f0f0', color: '#666', border: '1px solid #ddd', borderRadius: '4px', cursor: 'pointer', whiteSpace: 'nowrap' as const };
+const cancelActionButtonStyle: React.CSSProperties = { height: '24px', padding: '0 8px', fontSize: '0.7rem', backgroundColor: '#fff', color: '#dc2626', border: '1px solid #fca5a5', borderRadius: '4px', cursor: 'pointer', whiteSpace: 'nowrap' as const };

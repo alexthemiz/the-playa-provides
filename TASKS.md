@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-03-04 (session 3)_
+_Last updated: 2026-03-04 (session 5)_
 
 ---
 
@@ -15,7 +15,7 @@ _Last updated: 2026-03-04 (session 3)_
 ---
 
 ## ⚡ Quick Wins
-- [ ] **Lend To / Transfer buttons** — Buttons exist on /inventory action column but have no onClick. Brainstorm the flow first, then implement.
+_(nothing queued)_
 
 ---
 
@@ -31,6 +31,9 @@ _(nothing queued yet)_
 
 ## 💡 Ideas & Long Term
 - [ ] **Custom Supabase Auth domain** — Upgrade to Supabase Pro, set `auth.theplayaprovides.com` as custom auth domain + DNS config. Fixes Google OAuth consent screen showing `bklycpitofjrjhizttny.supabase.co` instead of the app domain.
+- [ ] **Dispute arbitration UI** — Loans with `status = disputed` have no admin UI yet; flagged for future resolution flow.
+- [ ] **On-site / push notifications** — Email only in v1. Future: in-app notification bell for transfer/loan events.
+- [ ] **Loan renewal / extension** — Extend return_by date without completing and re-creating the loan.
 
 ---
 
@@ -40,6 +43,7 @@ _(nothing queued yet)_
 ---
 
 ## ✅ Done
+- [x] Fix: Regular-mode loading hangs (GoTrue lock contention) — header was calling getUser() which held the lock during a network request; switched to getSession() (local cache, ~1ms). Added lockAcquireTimeout: 5000 to fail faster. Added try/catch/finally to resources page so setLoading(false) always fires.
 - [x] Fix: Email sender switched to hello@theplayaprovides.com via Resend SMTP (Supabase dashboard config)
 - [x] Fix: Profile pages stuck on "Loading..." — root cause: getUser() makes a network call that can hang on expired/refreshing tokens; swapped to getSession() (reads local cache, no network call) for the owner-check
 - [x] Fix: Logout button not working — root cause was middleware redirect loop; router.push('/login') raced with getUser() in middleware which still saw a valid session and bounced back; fixed with window.location.href for a clean hard nav
@@ -63,3 +67,4 @@ _(nothing queued yet)_
 - [x] Feature: Privacy Policy page at /privacy — includes required Google Limited Use disclosure
 - [x] Fix: /privacy and /terms added to middleware public routes (footer links now work without auth)
 - [x] Design: /about page — replaced lorem ipsum with mission, contact, support, and contribute sections
+- [x] Feature: Lend To / Transfer To flows — escrow-style dual confirmation, email notifications via Resend, new `item_transfers` + `item_loans` tables, TransferModal + LendModal components, pending handover state in /inventory action column, "Items Out on Loan" + "Items I'm Borrowing" + "Items Being Transferred to Me" sections
