@@ -28,20 +28,20 @@ export default function WelcomeModal({ userId, onClose }: WelcomeModalProps) {
         <div style={{ textAlign: 'center' as const, marginBottom: '28px' }}>
           <div style={{ fontSize: '2.4rem', marginBottom: '12px' }}>🔥</div>
           <h1 style={{ margin: '0 0 10px', fontSize: '1.6rem', color: '#2D241E', fontWeight: 'bold' }}>
-            Welcome to The Playa Provides
+            The Playa Provides you with a Welcome
           </h1>
           <p style={{ margin: 0, color: '#666', fontSize: '1rem', lineHeight: '1.6' }}>
-            You&rsquo;re now part of a community of Burners sharing gear,
-            reducing costs and waste, and helping each other get to the playa.
+            You&rsquo;re now part of a community of Burners sharing gear and supplies,
+            making it more affordable for more people to get to the playa.
           </p>
         </div>
 
         {/* How it works */}
         <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '14px', marginBottom: '32px' }}>
           {[
-            { num: '1', title: 'List your gear', desc: 'Add anything you\'re willing to lend or give away. You\'ll be asked where it\'s stored — you can add that right on the form.' },
-            { num: '2', title: 'Browse the community', desc: 'Find what you need for your build. Filter by category, location, borrow or keep.' },
-            { num: '3', title: 'Connect directly', desc: 'Send a request to the owner. It goes straight to their inbox so you can coordinate the handoff.' },
+            { num: '1', title: 'List items you\'re willing to lend or gift.', desc: 'Use the site as your online inventory, then toggle items when they become available or unavailable.' },
+            { num: '2', title: 'Search the listings for items you need', desc: 'Filter by category and location, to borrow or to keep.' },
+            { num: '3', title: 'Connect and cover your bases right from the start', desc: 'When requesting to borrow an item, you and its owner can discuss any terms directly.' },
           ].map(step => (
             <div key={step.num} style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
               <div style={{ width: '30px', height: '30px', borderRadius: '50%', backgroundColor: '#C08261', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.85rem', flexShrink: 0 }}>
@@ -58,7 +58,7 @@ export default function WelcomeModal({ userId, onClose }: WelcomeModalProps) {
         {/* CTAs */}
         <div style={{ display: 'flex', gap: '10px' }}>
           <button onClick={() => goTo('/find-items')} style={secondaryBtnStyle}>
-            Browse Gear
+            Browse Items
           </button>
           <button onClick={() => goTo('/list-item')} style={primaryBtnStyle}>
             List My First Item →
@@ -84,6 +84,7 @@ const modalStyle: React.CSSProperties = {
   backgroundColor: '#fff', borderRadius: '20px', padding: '36px',
   width: '100%', maxWidth: '480px',
   boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+  maxHeight: 'calc(100vh - 40px)', overflowY: 'auto' as const,
 };
 
 const primaryBtnStyle: React.CSSProperties = {

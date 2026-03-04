@@ -66,9 +66,10 @@ export default function Header() {
   return (
     <header className="border-b border-[#A66D51] sticky top-0 z-50 shadow-sm" style={headerBg}>
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-      <Link href="/" className={`font-black text-xl uppercase tracking-tighter ${mainTextColor} hover:opacity-80 transition`}>
-  The Playa Provides
-</Link>
+      <Link href="/" className="hover:opacity-80 transition flex flex-col leading-tight">
+        <span className={`font-black text-xl uppercase tracking-tighter ${mainTextColor}`}>The Playa Provides</span>
+        <span className={`text-[10px] font-medium ${mainTextColor} opacity-60 normal-case tracking-normal`}>Why let your stuff collect dust in storage when it could be earning dust on playa?</span>
+      </Link>
         
         <nav className="flex gap-6 items-center">
           <Link href="/resources" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>
