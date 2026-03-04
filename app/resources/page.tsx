@@ -13,34 +13,40 @@ export default function ResourcesPage() {
 
   useEffect(() => {
     async function fetchResources() {
-      const { data, error } = await supabase
-        .from('playa_resources')
-        .select('*')
-        .eq('is_verified', true)
-        .order('camp_name', { ascending: true });
+      try {
+        const { data, error } = await supabase
+          .from('playa_resources')
+          .select('*')
+          .eq('is_verified', true)
+          .order('camp_name', { ascending: true });
 
-      if (error) {
-        console.error('Resources fetch error:', error);
-        // Stale/invalid session — sign out silently and retry as anon
-        if (error.code === 'PGRST301' || error.message?.includes('JWT') || error.message?.includes('token')) {
-          await supabase.auth.signOut();
-          const { data: retryData, error: retryError } = await supabase
-            .from('playa_resources')
-            .select('*')
-            .eq('is_verified', true)
-            .order('camp_name', { ascending: true });
-          if (!retryError && retryData) {
-            setResources(retryData);
+        if (error) {
+          console.error('Resources fetch error:', error);
+          // Stale/invalid session — sign out locally and retry as anon
+          if (error.code === 'PGRST301' || error.message?.includes('JWT') || error.message?.includes('token')) {
+            await supabase.auth.signOut({ scope: 'local' }); // local only, no network call
+            const { data: retryData, error: retryError } = await supabase
+              .from('playa_resources')
+              .select('*')
+              .eq('is_verified', true)
+              .order('camp_name', { ascending: true });
+            if (!retryError && retryData) {
+              setResources(retryData);
+            } else {
+              setFetchError(true);
+            }
           } else {
             setFetchError(true);
           }
-        } else {
-          setFetchError(true);
+        } else if (data) {
+          setResources(data);
         }
-      } else if (data) {
-        setResources(data);
+      } catch (err) {
+        console.error('Resources fetch error (caught):', err);
+        setFetchError(true);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     fetchResources();
   }, []);

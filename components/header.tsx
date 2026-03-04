@@ -12,17 +12,23 @@ export default function Header() {
 
   useEffect(() => {
     const getUserData = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
+      try {
+        // getSession reads local cookie cache — no network call, won't hold lock
+        const { data: { session } } = await supabase.auth.getSession()
+        const user = session?.user ?? null
+        setUser(user)
 
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('username')
-          .eq('id', user.id)
-          .maybeSingle() 
-        
-        if (profile) setUsername(profile.username)
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('username')
+            .eq('id', user.id)
+            .maybeSingle()
+
+          if (profile) setUsername(profile.username)
+        }
+      } catch (err) {
+        console.error('Header auth error:', err)
       }
     }
 
