@@ -53,9 +53,7 @@ export default function Header() {
     } catch (err) {
       console.error('signOut error:', err)
     }
-    setUser(null)
-    setUsername(null)
-    router.push('/login')
+    window.location.href = '/login'
   }
 
   // Visual Theme - Dusty Sienna Daylight
