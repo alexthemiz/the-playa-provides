@@ -33,7 +33,7 @@ export default function Footer() {
         {/* Right Side: Credit */}
         <div className="flex-1 text-center md:text-right">
           <p className="text-[11px] text-[#2D241E] font-medium italic leading-tight">
-            Vibe coded with Gemini;<br />
+            Built with Claude Code;<br />
             ideated with human brains.
           </p>
         </div>
