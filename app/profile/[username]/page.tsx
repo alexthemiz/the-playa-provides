@@ -25,7 +25,9 @@ export default function PublicProfilePage() {
     async function fetchProfileAndGear() {
       setLoading(true);
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        // getSession reads the local cache — no network call, won't hang
+        const { data: { session } } = await supabase.auth.getSession();
+        const currentUserId = session?.user?.id ?? null;
 
         const { data: profileData } = await supabase
           .from('profiles')
@@ -35,7 +37,7 @@ export default function PublicProfilePage() {
 
         if (profileData) {
           setProfile(profileData);
-          if (user && user.id === profileData.id) setIsOwner(true);
+          if (currentUserId && currentUserId === profileData.id) setIsOwner(true);
 
           const { data: gearData } = await supabase
             .from('gear_items')
