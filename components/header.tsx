@@ -68,7 +68,9 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
       <Link href="/" className="hover:opacity-80 transition flex flex-col leading-tight">
         <span className={`font-black text-xl uppercase tracking-tighter ${mainTextColor}`}>The Playa Provides</span>
-        <span className={`text-[10px] font-medium ${mainTextColor} opacity-60 normal-case tracking-normal`}>Why let your stuff collect dust in storage when it could be earning dust on playa?</span>
+        {user && (
+          <span className={`text-[13px] font-medium ${mainTextColor} opacity-60 normal-case tracking-normal`}>Why let your stuff collect dust in storage when it could be earning dust on playa?</span>
+        )}
       </Link>
         
         <nav className="flex gap-6 items-center">
