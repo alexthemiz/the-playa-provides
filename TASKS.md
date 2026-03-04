@@ -59,3 +59,4 @@ _(nothing queued yet)_
 - [x] Feature: Google OAuth sign-in on /login and /signup
 - [x] Feature: Privacy Policy page at /privacy — includes required Google Limited Use disclosure
 - [x] Fix: /privacy and /terms added to middleware public routes (footer links now work without auth)
+- [x] Design: /about page — replaced lorem ipsum with mission, contact, support, and contribute sections
