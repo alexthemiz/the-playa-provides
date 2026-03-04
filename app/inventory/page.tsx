@@ -684,19 +684,19 @@ export default function InventoryPage() {
         />
       )}
 
-      {transferItem && userId && (
+      {transferItem && (
         <TransferModal
           item={transferItem}
-          ownerId={userId}
+          ownerId={userId ?? ''}
           onClose={() => setTransferItem(null)}
           onSuccess={() => { setTransferItem(null); fetchMyInventory(); }}
         />
       )}
 
-      {lendItem && userId && (
+      {lendItem && (
         <LendModal
           item={lendItem}
-          ownerId={userId}
+          ownerId={userId ?? ''}
           onClose={() => setLendItem(null)}
           onSuccess={() => { setLendItem(null); fetchMyInventory(); }}
         />
