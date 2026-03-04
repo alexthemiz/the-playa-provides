@@ -24,27 +24,32 @@ export default function PublicProfilePage() {
   useEffect(() => {
     async function fetchProfileAndGear() {
       setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
 
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('username', username)
-        .single();
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('username', username)
+          .single();
 
-      if (profileData) {
-        setProfile(profileData);
-        if (user && user.id === profileData.id) setIsOwner(true);
+        if (profileData) {
+          setProfile(profileData);
+          if (user && user.id === profileData.id) setIsOwner(true);
 
-        const { data: gearData } = await supabase
-          .from('gear_items')
-          .select('*, locations(city, state)')
-          .eq('user_id', profileData.id)
-          .in('availability_status', ['Available to Keep', 'Available to Borrow']);
+          const { data: gearData } = await supabase
+            .from('gear_items')
+            .select('*, locations(city, state)')
+            .eq('user_id', profileData.id)
+            .in('availability_status', ['Available to Keep', 'Available to Borrow']);
 
-        setItems(gearData || []);
+          setItems(gearData || []);
+        }
+      } catch (err) {
+        console.error('Profile fetch error:', err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     if (username) fetchProfileAndGear();
   }, [username]);

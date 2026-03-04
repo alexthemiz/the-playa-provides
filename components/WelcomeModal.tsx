@@ -23,12 +23,13 @@ export default function WelcomeModal({ userId, onClose }: WelcomeModalProps) {
   return (
     <div style={overlayStyle}>
       <div style={modalStyle}>
+        <button onClick={dismiss} style={{ position: 'absolute' as const, top: '14px', right: '16px', background: 'none', border: 'none', fontSize: '1.2rem', color: '#aaa', cursor: 'pointer', lineHeight: 1 }}>✕</button>
 
         {/* Header */}
-        <div style={{ textAlign: 'center' as const, marginBottom: '28px' }}>
-          <div style={{ fontSize: '2.4rem', marginBottom: '12px' }}>🔥</div>
-          <h1 style={{ margin: '0 0 10px', fontSize: '1.6rem', color: '#2D241E', fontWeight: 'bold' }}>
-            The Playa Provides you with a Welcome
+        <div style={{ textAlign: 'center' as const, marginBottom: '20px' }}>
+          <div style={{ fontSize: '1.6rem', marginBottom: '6px' }}>🔥</div>
+          <h1 style={{ margin: '0 0 10px', fontSize: '1.6rem', color: '#2D241E', fontWeight: 'bold', lineHeight: 1.2 }}>
+            The Playa Provides you<br />with a Welcome
           </h1>
           <p style={{ margin: 0, color: '#666', fontSize: '1rem', lineHeight: '1.6' }}>
             You&rsquo;re now part of a community of Burners sharing gear and supplies,
@@ -81,7 +82,8 @@ const overlayStyle: React.CSSProperties = {
 };
 
 const modalStyle: React.CSSProperties = {
-  backgroundColor: '#fff', borderRadius: '20px', padding: '36px',
+  position: 'relative' as const,
+  backgroundColor: '#fff', borderRadius: '20px', padding: '28px 32px',
   width: '100%', maxWidth: '480px',
   boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
   maxHeight: 'calc(100vh - 40px)', overflowY: 'auto' as const,

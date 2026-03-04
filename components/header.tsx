@@ -102,7 +102,7 @@ export default function Header() {
 
               <button 
                 onClick={handleSignOut}
-                className="text-sm font-bold text-red-800 hover:text-red-600 transition"
+                className="text-sm font-bold text-red-800 hover:text-red-600 transition cursor-pointer"
               >
                 Logout
               </button>
