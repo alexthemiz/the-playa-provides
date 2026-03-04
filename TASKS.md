@@ -42,7 +42,7 @@ _(nothing queued yet)_
 
 ## ✅ Done
 - [x] Fix: Profile page stuck on "Loading..." — missing try/catch/finally in fetchProfileAndGear
-- [x] Fix: Logout button cursor not changing to pointer on hover
+- [x] Fix: Logout button not working — root cause was middleware redirect loop; router.push('/login') raced with getUser() in middleware which still saw a valid session and bounced back; fixed with window.location.href for a clean hard nav
 - [x] Design: WelcomeModal tightened — smaller icon, line break in title, X close button, tighter padding
 - [x] Fix: `/auth/auth-code-error` page missing (magic link 404)
 - [x] Fix: signup stuck on "Loading..." (router.refresh() race)
@@ -56,7 +56,7 @@ _(nothing queued yet)_
 - [x] Fix: Photo upload stuck on "Uploading..." (missing try/catch/finally)
 - [x] Fix: Category filter on /inventory had wrong options (synced with list-item categories)
 - [x] Fix: Locations dropdown broken for new users (auto-select "Add new location" when no saved locations)
-- [x] Fix: Logout button unresponsive — removed router.refresh() race condition from handleSignOut + added try/catch for broken auth states
+- [x] Fix: Logout button unresponsive (attempt 1) — removed router.refresh() race + added try/catch; root cause turned out to be middleware redirect loop (see above)
 - [x] Design: Page headline updates across all routes — "The Playa Provides: ..." branding, personalised with preferred_name on /list-item and /inventory, left-justified
 - [x] Fix: "View →" link on /profile/[username] items list — was triggering intercepting route silently; changed to hard nav via &lt;a href&gt;
 - [x] Feature: Google OAuth sign-in on /login and /signup
