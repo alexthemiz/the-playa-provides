@@ -34,19 +34,18 @@ export default function Header() {
 
     getUserData()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       const currentUser = session?.user ?? null
       setUser(currentUser)
-      
-      if (currentUser) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('username')
-          .eq('id', currentUser.id)
-          .maybeSingle()
-        if (profile) setUsername(profile.username)
-      } else {
+
+      if (!currentUser) {
         setUsername(null)
+      } else if (event !== 'INITIAL_SESSION') {
+        // Defer profile fetch until AFTER the onAuthStateChange lock releases.
+        // Calling supabase inside an async onAuthStateChange callback queues all
+        // subsequent Supabase calls behind it in pendingInLock, blocking every
+        // data fetch on the page until the profile query completes.
+        setTimeout(getUserData, 0)
       }
     })
 
