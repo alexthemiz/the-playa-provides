@@ -19,7 +19,7 @@ export type LoanStatus = 'pending_handover' | 'active' | 'return_pending' | 'com
 
 export interface ItemTransfer {
   id: string;
-  item_id: string;
+  item_id: number;
   owner_id: string;
   recipient_id: string;
   status: TransferStatus;
@@ -35,7 +35,7 @@ export interface ItemTransfer {
 
 export interface ItemLoan {
   id: string;
-  item_id: string;
+  item_id: number;
   owner_id: string;
   borrower_id: string;
   status: LoanStatus;
