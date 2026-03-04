@@ -11,7 +11,6 @@ _Last updated: 2026-03-04 (session 3)_
 
 ## 🔧 Bugs & Fixes
 - [ ] **Magic link → 6-digit OTP** — Gmail pre-fetches magic links and burns them before the user clicks. Fix: switch to email OTP code in Supabase dashboard (Auth → Email OTP) + small login page change to show code input field.
-- [ ] **Email sender: hello@theplayaprovides.com** — Currently sends from Supabase noreply. Fix: configure Resend SMTP in Supabase dashboard (Project Settings → Auth → SMTP). Already using Resend for request emails so credentials are on hand.
 
 ---
 
@@ -41,6 +40,7 @@ _(nothing queued yet)_
 ---
 
 ## ✅ Done
+- [x] Fix: Email sender switched to hello@theplayaprovides.com via Resend SMTP (Supabase dashboard config)
 - [x] Fix: Profile page stuck on "Loading..." — missing try/catch/finally in fetchProfileAndGear
 - [x] Fix: Logout button not working — root cause was middleware redirect loop; router.push('/login') raced with getUser() in middleware which still saw a valid session and bounced back; fixed with window.location.href for a clean hard nav
 - [x] Design: WelcomeModal tightened — smaller icon, line break in title, X close button, tighter padding
