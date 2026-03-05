@@ -34,11 +34,18 @@ _(nothing queued yet)_
 - [ ] **Dispute arbitration UI** — Loans with `status = disputed` have no admin UI yet; flagged for future resolution flow.
 - [ ] **On-site / push notifications** — Email only in v1. Future: in-app notification bell for transfer/loan events.
 - [ ] **Loan renewal / extension** — Extend return_by date without completing and re-creating the loan.
+- [ ] **Friends-only gear visibility** — `visibility` column already stubbed on `gear_items`. Build UI toggle + RLS enforcement when critical mass warrants it.
+- [ ] **Explicit friend requests / Camps layer** — Mutual follows = friends in v1. Future: explicit friend request flow, camp groups, camp-scoped gear sharing.
 
 ---
 
 ## 🧠 Brainstorming
-- [ ] **Camps & Friends layers** — new feature area, brainstorm before building
+_(nothing queued)_
+
+---
+
+## 🚀 Features (Designed, Ready to Build)
+- [ ] **Following & Notifications** — design doc at `docs/plans/2026-03-05-following-notifications-design.md`. `user_follows` table, `notifications` table, DB trigger for fan-out, bell icon in header, Follow button on profiles, relationship filter on /find-items, email opt-in in /settings, `visibility` stub on gear_items.
 
 ---
 
