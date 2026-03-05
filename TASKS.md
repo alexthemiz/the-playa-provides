@@ -1,11 +1,12 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-03-04 (session 5)_
+_Last updated: 2026-03-05 (session 6)_
 
 ---
 
 ## 🏗️ In Progress
 - [ ] **Test spreadsheet import end-to-end in browser** — CSV upload, Excel upload, duplicate detection, error cases
+- [ ] **End-to-end test: Following & Notifications** — Follow a user, list a new item as them, verify bell badge + dropdown appears; test mark-as-read and mark-all-read; verify email opt-in; verify /find-items relationship filter
 
 ---
 
@@ -32,7 +33,7 @@ _(nothing queued yet)_
 ## 💡 Ideas & Long Term
 - [ ] **Custom Supabase Auth domain** — Upgrade to Supabase Pro, set `auth.theplayaprovides.com` as custom auth domain + DNS config. Fixes Google OAuth consent screen showing `bklycpitofjrjhizttny.supabase.co` instead of the app domain.
 - [ ] **Dispute arbitration UI** — Loans with `status = disputed` have no admin UI yet; flagged for future resolution flow.
-- [ ] **On-site / push notifications** — Email only in v1. Future: in-app notification bell for transfer/loan events.
+- [ ] **Notifications for loan/transfer events** — Bell + email only covers new item listings in v1. Future: wire transfer/loan confirmations into the `notifications` table too.
 - [ ] **Loan renewal / extension** — Extend return_by date without completing and re-creating the loan.
 - [ ] **Friends-only gear visibility** — `visibility` column already stubbed on `gear_items`. Build UI toggle + RLS enforcement when critical mass warrants it.
 - [ ] **Explicit friend requests / Camps layer** — Mutual follows = friends in v1. Future: explicit friend request flow, camp groups, camp-scoped gear sharing.
@@ -45,7 +46,7 @@ _(nothing queued)_
 ---
 
 ## 🚀 Features (Designed, Ready to Build)
-- [ ] **Following & Notifications** — design doc at `docs/plans/2026-03-05-following-notifications-design.md`. `user_follows` table, `notifications` table, DB trigger for fan-out, bell icon in header, Follow button on profiles, relationship filter on /find-items, email opt-in in /settings, `visibility` stub on gear_items.
+_(nothing queued)_
 
 ---
 
@@ -74,4 +75,5 @@ _(nothing queued)_
 - [x] Feature: Privacy Policy page at /privacy — includes required Google Limited Use disclosure
 - [x] Fix: /privacy and /terms added to middleware public routes (footer links now work without auth)
 - [x] Design: /about page — replaced lorem ipsum with mission, contact, support, and contribute sections
+- [x] Feature: Following & Notifications — `user_follows` + `notifications` tables, DB trigger fan-out, Follow/Unfollow button on profiles, bell icon in header with 30s polling + dropdown, `send-follow-notification` edge function, /find-items relationship filter, /settings email opt-in
 - [x] Feature: Lend To / Transfer To flows — escrow-style dual confirmation, email notifications via Resend, new `item_transfers` + `item_loans` tables, TransferModal + LendModal components, pending handover state in /inventory action column, "Items Out on Loan" + "Items I'm Borrowing" + "Items Being Transferred to Me" sections
