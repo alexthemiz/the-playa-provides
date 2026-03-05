@@ -4,13 +4,30 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useRouter } from 'next/navigation'
+import { Bell } from 'lucide-react'
 
 export default function Header() {
   const [user, setUser] = useState<any>(null)
   const [username, setUsername] = useState<string | null>(null)
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [notifications, setNotifications] = useState<any[]>([])
+  const [bellOpen, setBellOpen] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
+    let pollInterval: ReturnType<typeof setInterval> | undefined
+
+    const fetchUnread = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+      const { count } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('recipient_id', session.user.id)
+        .eq('read', false)
+      setUnreadCount(count ?? 0)
+    }
+
     const getUserData = async () => {
       try {
         // getSession reads local cookie cache — no network call, won't hold lock
@@ -26,6 +43,12 @@ export default function Header() {
             .maybeSingle()
 
           if (profile) setUsername(profile.username)
+
+          // Start polling only for logged-in users
+          fetchUnread()
+          if (!pollInterval) {
+            pollInterval = setInterval(fetchUnread, 30000)
+          }
         }
       } catch (err) {
         console.error('Header auth error:', err)
@@ -49,7 +72,10 @@ export default function Header() {
       }
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      subscription.unsubscribe()
+      clearInterval(pollInterval)
+    }
   }, [])
 
   const handleSignOut = async () => {
@@ -61,9 +87,54 @@ export default function Header() {
     window.location.href = '/login'
   }
 
+  const fetchNotifications = async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return
+    const { data } = await supabase
+      .from('notifications')
+      .select(`
+        id, type, read, created_at,
+        actor:profiles!notifications_actor_id_fkey(username, preferred_name),
+        item:gear_items!notifications_item_id_fkey(item_name)
+      `)
+      .eq('recipient_id', session.user.id)
+      .order('created_at', { ascending: false })
+      .limit(10)
+    setNotifications(data || [])
+  }
+
+  const handleMarkAllRead = async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('recipient_id', session.user.id)
+        .eq('read', false)
+      if (error) throw error
+      setUnreadCount(0)
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+    } catch (err) {
+      console.error('markAllRead error:', err)
+    }
+  }
+
+  const handleNotificationClick = async (notificationId: string) => {
+    try {
+      const { error } = await supabase.from('notifications').update({ read: true }).eq('id', notificationId)
+      if (error) throw error
+      setNotifications(prev => prev.map(n => n.id === notificationId ? { ...n, read: true } : n))
+      setUnreadCount(prev => Math.max(0, prev - 1))
+    } catch (err) {
+      console.error('notificationClick error:', err)
+    }
+    setBellOpen(false)
+  }
+
   // Visual Theme - Dusty Sienna Daylight
-  const headerBg = { backgroundColor: '#C08261' } 
-  const mainTextColor = 'text-[#2D241E]' 
+  const headerBg = { backgroundColor: '#C08261' }
+  const mainTextColor = 'text-[#2D241E]'
   const hoverEffect = 'hover:text-[#00ccff]' // Updated to match your accent color preference
 
   return (
@@ -75,7 +146,7 @@ export default function Header() {
           <span className={`text-[13px] font-medium ${mainTextColor} opacity-60 normal-case tracking-normal`}>Why let your stuff collect dust in storage when it could be earning dust on playa?</span>
         )}
       </Link>
-        
+
         <nav className="flex gap-6 items-center">
           <Link href="/resources" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>
             On-Playa Resources
@@ -103,7 +174,84 @@ export default function Header() {
                 Settings
               </Link>
 
-              <button 
+              {/* BELL */}
+              <div style={{ position: 'relative' as const }}>
+                <button
+                  onClick={() => {
+                    const willOpen = !bellOpen
+                    setBellOpen(willOpen)
+                    if (willOpen) fetchNotifications()
+                  }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative' as const, padding: '4px', display: 'flex', alignItems: 'center' }}
+                >
+                  <Bell size={20} color="#2D241E" />
+                  {unreadCount > 0 && (
+                    <span style={{
+                      position: 'absolute' as const, top: '-4px', right: '-4px',
+                      backgroundColor: '#dc2626', color: '#fff', borderRadius: '50%',
+                      width: '16px', height: '16px', fontSize: '10px', fontWeight: 'bold',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                {bellOpen && (
+                  <>
+                    {/* Backdrop to close on outside click */}
+                    <div
+                      onClick={() => setBellOpen(false)}
+                      style={{ position: 'fixed' as const, inset: 0, zIndex: 49 }}
+                    />
+                    <div style={{
+                      position: 'absolute' as const, right: 0, top: '36px',
+                      backgroundColor: '#fff', border: '1px solid #eee', borderRadius: '12px',
+                      boxShadow: '0 8px 32px rgba(0,0,0,0.12)', width: '320px', zIndex: 50,
+                      maxHeight: '400px', overflowY: 'auto' as const,
+                    }}>
+                      <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontWeight: 700, color: '#2D241E', fontSize: '0.9rem' }}>Notifications</span>
+                        {unreadCount > 0 && (
+                          <button onClick={handleMarkAllRead} style={{ background: 'none', border: 'none', color: '#00aacc', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}>
+                            Mark all read
+                          </button>
+                        )}
+                      </div>
+                      {notifications.length === 0 ? (
+                        <div style={{ padding: '24px 16px', color: '#aaa', fontSize: '0.85rem', textAlign: 'center' as const }}>
+                          No notifications yet
+                        </div>
+                      ) : (
+                        notifications.map(n => {
+                          const actorName = (n.actor as any)?.preferred_name || (n.actor as any)?.username || 'Someone'
+                          const itemName = (n.item as any)?.item_name || 'an item'
+                          const timeAgo = formatTimeAgo(n.created_at)
+                          return (
+                            <a
+                              key={n.id}
+                              href="/find-items"
+                              onClick={() => handleNotificationClick(n.id)}
+                              style={{
+                                display: 'block', padding: '12px 16px', borderBottom: '1px solid #f5f5f5',
+                                backgroundColor: n.read ? '#fff' : '#f0fdf4',
+                                textDecoration: 'none', color: '#2D241E',
+                              }}
+                            >
+                              <div style={{ fontSize: '0.85rem', lineHeight: 1.4 }}>
+                                <strong>{actorName}</strong> posted: {itemName}
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: '#aaa', marginTop: '3px' }}>{timeAgo}</div>
+                            </a>
+                          )
+                        })
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <button
                 onClick={handleSignOut}
                 className="text-sm font-bold text-red-800 hover:text-red-600 transition cursor-pointer"
               >
@@ -111,8 +259,8 @@ export default function Header() {
               </button>
             </>
           ) : (
-            <Link 
-              href="/login" 
+            <Link
+              href="/login"
               className="bg-[#2D241E] text-[#C08261] px-4 py-2 rounded-lg text-sm font-bold hover:bg-black transition"
             >
               Login
@@ -122,4 +270,14 @@ export default function Header() {
       </div>
     </header>
   )
+}
+
+function formatTimeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return 'just now'
+  if (mins < 60) return `${mins}m ago`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `${hours}h ago`
+  return `${Math.floor(hours / 24)}d ago`
 }

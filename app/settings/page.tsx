@@ -28,18 +28,23 @@ export default function SettingsPage() {
 
   useEffect(() => {
     async function loadAllData() {
-      const { data: { user: activeUser } } = await supabase.auth.getUser();
+      try {
+        const { data: { user: activeUser } } = await supabase.auth.getUser();
 
-      if (activeUser) {
-        setUser(activeUser);
+        if (activeUser) {
+          setUser(activeUser);
 
-        const { data: pData } = await supabase.from('profiles').select('*').eq('id', activeUser.id).maybeSingle();
-        if (pData) setProfile({ ...pData });
+          const { data: pData } = await supabase.from('profiles').select('*').eq('id', activeUser.id).maybeSingle();
+          if (pData) setProfile({ ...pData });
 
-        const { data: lData } = await supabase.from('locations').select('*').eq('user_id', activeUser.id).order('created_at', { ascending: true });
-        if (lData) setLocations(lData);
+          const { data: lData } = await supabase.from('locations').select('*').eq('user_id', activeUser.id).order('created_at', { ascending: true });
+          if (lData) setLocations(lData);
+        }
+      } catch (err) {
+        console.error('Settings load error:', err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     loadAllData();
   }, []);
@@ -170,6 +175,27 @@ export default function SettingsPage() {
               </div>
             ))}
             <button onClick={addLocation} style={smallButtonStyle}>+ Add Another Location</button>
+          </section>
+
+          {/* NOTIFICATIONS */}
+          <section style={sectionStyle}>
+            <h3 style={sectionHeaderStyle}>Notifications</h3>
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={profile.notify_new_items_email || false}
+                onChange={e => setProfile({ ...profile, notify_new_items_email: e.target.checked })}
+                style={{ marginTop: '2px', accentColor: '#00ccff', cursor: 'pointer', width: '16px', height: '16px' }}
+              />
+              <div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#111' }}>
+                  Email me when someone I follow posts a new item
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#888', marginTop: '3px', lineHeight: 1.4 }}>
+                  Off by default. You can always check the bell icon in the header for in-app notifications.
+                </div>
+              </div>
+            </label>
           </section>
 
           <button onClick={handleSave} disabled={saving} style={buttonStyle}>

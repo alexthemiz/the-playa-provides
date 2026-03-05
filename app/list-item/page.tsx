@@ -87,42 +87,54 @@ export default function ListItemPage() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
-    const formData = new FormData(e.currentTarget);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { alert("You must be logged in!"); setLoading(false); return; }
+    try {
+      const formData = new FormData(e.currentTarget);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { alert("You must be logged in!"); return; }
 
-    // If user is adding a new location inline, insert it first
-    let resolvedLocationId: string | null = selectedLocationId || null;
-    if (selectedLocationId === '__new__') {
-      if (!newLocData.label) { alert("Please give your new location a label (e.g. Home)."); setLoading(false); return; }
-      const { data: newLoc, error: locErr } = await supabase
-        .from('locations')
-        .insert({ ...newLocData, user_id: user.id })
-        .select('id')
-        .single();
-      if (locErr || !newLoc) { alert(`Error saving location: ${locErr?.message}`); setLoading(false); return; }
-      resolvedLocationId = newLoc.id;
-      setLocations(prev => [...prev, { id: newLoc.id, label: newLocData.label }]);
+      // If user is adding a new location inline, insert it first
+      let resolvedLocationId: string | null = selectedLocationId || null;
+      if (selectedLocationId === '__new__') {
+        if (!newLocData.label) { alert("Please give your new location a label (e.g. Home)."); return; }
+        const { data: newLoc, error: locErr } = await supabase
+          .from('locations')
+          .insert({ ...newLocData, user_id: user.id })
+          .select('id')
+          .single();
+        if (locErr || !newLoc) { alert(`Error saving location: ${locErr?.message}`); return; }
+        resolvedLocationId = newLoc.id;
+        setLocations(prev => [...prev, { id: newLoc.id, label: newLocData.label }]);
+      }
+
+      const { data: newItem, error } = await supabase.from('gear_items').insert([{
+        user_id: user.id,
+        item_name: formData.get('item_name'),
+        category: formData.get('category'),
+        condition: formData.get('condition'),
+        location_id: resolvedLocationId,
+        availability_status: availability,
+        description: formData.get('description'),
+        pickup_by: formData.get('pickup_by') || null,
+        return_by: formData.get('return_by') || null,
+        damage_price: formData.get('damage_price') ? parseInt(formData.get('damage_price') as string, 10) : null,
+        loss_price: formData.get('loss_price') ? parseInt(formData.get('loss_price') as string, 10) : null,
+        image_urls: imageUrls,
+        return_terms: formData.get('return_terms'),
+      }]).select('id').single();
+
+      if (error || !newItem) { alert(`Error: ${error?.message ?? 'Item was not saved. Please try again.'}`); } else {
+        // Fire-and-forget: notify followers who have email opt-in
+        supabase.functions.invoke('send-follow-notification', {
+          body: { item_id: newItem.id, poster_id: user.id },
+        });
+        setShowSuccessModal(true);
+      }
+    } catch (err) {
+      console.error('handleSubmit exception:', err);
+      alert('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
     }
-
-    const { error } = await supabase.from('gear_items').insert([{
-      user_id: user.id,
-      item_name: formData.get('item_name'),
-      category: formData.get('category'),
-      condition: formData.get('condition'),
-      location_id: resolvedLocationId,
-      availability_status: availability,
-      description: formData.get('description'),
-      pickup_by: formData.get('pickup_by') || null,
-      return_by: formData.get('return_by') || null,
-      damage_price: formData.get('damage_price') ? parseInt(formData.get('damage_price') as string, 10) : null,
-      loss_price: formData.get('loss_price') ? parseInt(formData.get('loss_price') as string, 10) : null,
-      image_urls: imageUrls,
-      return_terms: formData.get('return_terms'),
-    }]);
-
-    if (error) { alert(`Error: ${error.message}`); } else { setShowSuccessModal(true); }
-    setLoading(false);
   }
 
   return (

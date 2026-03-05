@@ -17,6 +17,12 @@ export default function FindItemsPage() {
   // Multi-select states
   const [categoryFilters, setCategoryFilters] = useState<string[]>(['All']);
   const [availabilityFilters, setAvailabilityFilters] = useState<string[]>(['Keep', 'Borrow']);
+
+  // Relationship filter states
+  const [userId, setUserId] = useState<string | null>(null);
+  const [relationshipFilter, setRelationshipFilter] = useState<'everyone' | 'following' | 'followers' | 'both'>('everyone');
+  const [followingIds, setFollowingIds] = useState<string[]>([]);
+  const [followerIds, setFollowerIds] = useState<string[]>([]);
   
   // Modal States
   const [selectedItem, setSelectedItem] = useState<any>(null);
@@ -30,6 +36,7 @@ export default function FindItemsPage() {
 
   useEffect(() => {
     fetchItems();
+    fetchRelationships();
   }, []);
 
   // URL Sync Logic: Handles refresh and browser back/forward buttons
@@ -53,6 +60,24 @@ export default function FindItemsPage() {
     }
     return () => window.removeEventListener('popstate', syncModalWithUrl);
   }, [items, loading]);
+
+  async function fetchRelationships() {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+      setUserId(session.user.id)
+
+      const [followingRes, followersRes] = await Promise.all([
+        supabase.from('user_follows').select('following_id').eq('follower_id', session.user.id),
+        supabase.from('user_follows').select('follower_id').eq('following_id', session.user.id),
+      ])
+
+      setFollowingIds((followingRes.data || []).map((r: any) => r.following_id))
+      setFollowerIds((followersRes.data || []).map((r: any) => r.follower_id))
+    } catch (err: any) {
+      console.error('fetchRelationships error:', err.message)
+    }
+  }
 
   async function fetchItems() {
     setLoading(true);
@@ -124,7 +149,14 @@ export default function FindItemsPage() {
     const matchesCategory = categoryFilters.includes('All') || categoryFilters.includes(item.category);
     const itemStatus = item.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow';
     const matchesAvailability = availabilityFilters.includes(itemStatus);
-    return isAvailable && matchesSearch && matchesZip && matchesCategory && matchesAvailability;
+    const matchesRelationship = (() => {
+      if (!userId || relationshipFilter === 'everyone') return true;
+      if (relationshipFilter === 'following') return followingIds.includes(item.user_id);
+      if (relationshipFilter === 'followers') return followerIds.includes(item.user_id);
+      if (relationshipFilter === 'both') return followingIds.includes(item.user_id) || followerIds.includes(item.user_id);
+      return true;
+    })();
+    return isAvailable && matchesSearch && matchesZip && matchesCategory && matchesAvailability && matchesRelationship;
   });
 
   return (
@@ -175,6 +207,22 @@ export default function FindItemsPage() {
             </label>
           ))}
         </div>
+
+        {userId && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={filterLabelStyle}>Show items from:</span>
+            <select
+              value={relationshipFilter}
+              onChange={e => setRelationshipFilter(e.target.value as any)}
+              style={{ padding: '8px 10px', border: '1px solid #eee', borderRadius: '8px', backgroundColor: '#f9f9f9', fontSize: '0.82rem', color: '#111', cursor: 'pointer' }}
+            >
+              <option value="everyone">Everyone</option>
+              <option value="following">People I Follow</option>
+              <option value="followers">People Who Follow Me</option>
+              <option value="both">Both</option>
+            </select>
+          </div>
+        )}
 
         <div style={{ ...toggleGroupStyle, marginLeft: 'auto' }}>
           <button onClick={() => setViewMode('grid')} style={{...toggleButtonStyle, backgroundColor: viewMode === 'grid' ? '#eee' : 'transparent'}}>

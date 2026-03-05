@@ -16,6 +16,11 @@ export default function PublicProfilePage() {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followLoading, setFollowLoading] = useState(false);
+  const [followError, setFollowError] = useState<string | null>(null);
 
   const startYear = 1986;
   const currentYear = 2026;
@@ -27,7 +32,7 @@ export default function PublicProfilePage() {
       try {
         // getSession reads the local cache — no network call, won't hang
         const { data: { session } } = await supabase.auth.getSession();
-        const currentUserId = session?.user?.id ?? null;
+        const sessionUserId = session?.user?.id ?? null;
 
         const { data: profileData } = await supabase
           .from('profiles')
@@ -37,7 +42,26 @@ export default function PublicProfilePage() {
 
         if (profileData) {
           setProfile(profileData);
-          if (currentUserId && currentUserId === profileData.id) setIsOwner(true);
+          if (sessionUserId && sessionUserId === profileData.id) setIsOwner(true);
+          setCurrentUserId(sessionUserId);
+
+          // Fetch follower count
+          const { count } = await supabase
+            .from('user_follows')
+            .select('*', { count: 'exact', head: true })
+            .eq('following_id', profileData.id);
+          setFollowerCount(count ?? 0);
+
+          // Check if current user follows this profile
+          if (sessionUserId && sessionUserId !== profileData.id) {
+            const { data: followRow } = await supabase
+              .from('user_follows')
+              .select('follower_id')
+              .eq('follower_id', sessionUserId)
+              .eq('following_id', profileData.id)
+              .maybeSingle();
+            setIsFollowing(!!followRow);
+          }
 
           const { data: gearData } = await supabase
             .from('gear_items')
@@ -55,6 +79,36 @@ export default function PublicProfilePage() {
     }
     if (username) fetchProfileAndGear();
   }, [username]);
+
+  const handleFollowToggle = async () => {
+    if (!currentUserId || !profile) return;
+    setFollowLoading(true);
+    setFollowError(null);
+    try {
+      if (isFollowing) {
+        const { error: delErr } = await supabase
+          .from('user_follows')
+          .delete()
+          .eq('follower_id', currentUserId)
+          .eq('following_id', profile.id);
+        if (delErr) throw new Error(delErr.message);
+        setIsFollowing(false);
+        setFollowerCount(c => c - 1);
+      } else {
+        const { error: insErr } = await supabase
+          .from('user_follows')
+          .insert({ follower_id: currentUserId, following_id: profile.id });
+        if (insErr) throw new Error(insErr.message);
+        setIsFollowing(true);
+        setFollowerCount(c => c + 1);
+      }
+    } catch (err) {
+      console.error('Follow toggle error:', err);
+      setFollowError('Could not update. Please try again.');
+    } finally {
+      setFollowLoading(false);
+    }
+  };
 
   const handleSave = async () => {
     const { error } = await supabase.from('profiles').update({
@@ -86,21 +140,50 @@ export default function PublicProfilePage() {
   return (
     <div style={{ padding: '40px 20px', maxWidth: '960px', margin: '0 auto', color: '#2D241E' }}>
 
-      {/* NAV ROW */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Link href="/find-items" style={{ color: '#888', textDecoration: 'none' }}>← Find Items</Link>
-        {isOwner && (
-          <button
-            onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-            style={{
-              padding: '8px 20px',
-              backgroundColor: isEditing ? '#4CAF50' : '#00ccff',
-              color: isEditing ? '#fff' : '#000',
-              border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold',
-            }}
-          >
-            {isEditing ? 'Save Profile' : 'Edit Profile'}
-          </button>
+      {/* NAV ROW + error */}
+      <div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Link href="/find-items" style={{ color: '#888', textDecoration: 'none' }}>← Find Items</Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {followerCount > 0 && (
+              <span style={{ fontSize: '0.85rem', color: '#888' }}>
+                {followerCount} {followerCount === 1 ? 'follower' : 'followers'}
+              </span>
+            )}
+            {isOwner ? (
+              <button
+                onClick={() => isEditing ? handleSave() : setIsEditing(true)}
+                style={{
+                  padding: '8px 20px',
+                  backgroundColor: isEditing ? '#4CAF50' : '#00ccff',
+                  color: isEditing ? '#fff' : '#000',
+                  border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold',
+                }}
+              >
+                {isEditing ? 'Save Profile' : 'Edit Profile'}
+              </button>
+            ) : currentUserId ? (
+              <button
+                onClick={handleFollowToggle}
+                disabled={followLoading}
+                style={{
+                  padding: '8px 20px',
+                  backgroundColor: isFollowing ? '#f0f0f0' : '#00ccff',
+                  color: isFollowing ? '#666' : '#000',
+                  border: isFollowing ? '1px solid #ddd' : 'none',
+                  borderRadius: '6px', cursor: followLoading ? 'default' : 'pointer',
+                  fontWeight: 'bold', opacity: followLoading ? 0.6 : 1,
+                }}
+              >
+                {followLoading ? '...' : isFollowing ? 'Following' : 'Follow'}
+              </button>
+            ) : null}
+          </div>
+        </div>
+        {followError && (
+          <p style={{ fontSize: '0.8rem', color: '#dc2626', margin: '6px 0 0', textAlign: 'right' as const }}>
+            {followError}
+          </p>
         )}
       </div>
 
