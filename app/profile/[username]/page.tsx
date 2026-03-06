@@ -124,6 +124,91 @@ export default function PublicProfilePage() {
     }
   };
 
+  const fetchList = async (type: 'followers' | 'following') => {
+    // Skip if already loaded
+    if (type === 'followers' && followersList.length > 0) return;
+    if (type === 'following' && followingList.length > 0) return;
+
+    setListLoading(true);
+    try {
+      let profiles: any[] = [];
+
+      if (type === 'followers') {
+        const { data, error } = await supabase
+          .from('user_follows')
+          .select('follower:profiles!follower_id(id, username, preferred_name, avatar_url)')
+          .eq('following_id', profile.id);
+        if (error) console.error('fetchList followers error:', error.message);
+        profiles = (data || []).map((r: any) => r.follower).filter(Boolean);
+      } else {
+        const { data, error } = await supabase
+          .from('user_follows')
+          .select('following:profiles!following_id(id, username, preferred_name, avatar_url)')
+          .eq('follower_id', profile.id);
+        if (error) console.error('fetchList following error:', error.message);
+        profiles = (data || []).map((r: any) => r.following).filter(Boolean);
+      }
+
+      const userIds = profiles.map((p: any) => p.id);
+
+      if (userIds.length === 0) {
+        if (type === 'followers') setFollowersList([]);
+        else setFollowingList([]);
+        return;
+      }
+
+      // Batch-fetch gear counts
+      const { data: gearRows, error: gearErr } = await supabase
+        .from('gear_items')
+        .select('user_id, availability_status')
+        .in('user_id', userIds)
+        .in('availability_status', ['Available to Borrow', 'Available to Keep']);
+      if (gearErr) console.error('fetchList gear error:', gearErr.message);
+
+      const borrowCounts: Record<string, number> = {};
+      const keepCounts: Record<string, number> = {};
+      for (const row of gearRows || []) {
+        if (row.availability_status === 'Available to Borrow') {
+          borrowCounts[row.user_id] = (borrowCounts[row.user_id] || 0) + 1;
+        } else {
+          keepCounts[row.user_id] = (keepCounts[row.user_id] || 0) + 1;
+        }
+      }
+
+      // Check which ones the owner follows
+      let followingSet = new Set<string>();
+      if (type === 'followers' && currentUserId) {
+        const { data: followRows, error: followErr } = await supabase
+          .from('user_follows')
+          .select('following_id')
+          .eq('follower_id', currentUserId)
+          .in('following_id', userIds);
+        if (followErr) console.error('fetchList follow check error:', followErr.message);
+        followingSet = new Set((followRows || []).map((r: any) => r.following_id));
+      } else if (type === 'following') {
+        followingSet = new Set(userIds); // owner follows all of them by definition
+      }
+
+      const entries = profiles.map((p: any) => ({
+        id: p.id,
+        username: p.username,
+        preferred_name: p.preferred_name,
+        avatar_url: p.avatar_url,
+        borrowCount: borrowCounts[p.id] || 0,
+        keepCount: keepCounts[p.id] || 0,
+        isFollowing: followingSet.has(p.id),
+      }));
+
+      if (type === 'followers') setFollowersList(entries);
+      else setFollowingList(entries);
+
+    } catch (err: any) {
+      console.error('fetchList unexpected error:', err.message);
+    } finally {
+      setListLoading(false);
+    }
+  };
+
   const handleSave = async () => {
     const { error } = await supabase.from('profiles').update({
       bio: profile.bio,
@@ -165,6 +250,7 @@ export default function PublicProfilePage() {
                   onClick={() => {
                     const next = openList === 'followers' ? null : 'followers' as const;
                     setOpenList(next);
+                    if (next === 'followers') fetchList('followers');
                   }}
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: 0,
@@ -180,6 +266,7 @@ export default function PublicProfilePage() {
                   onClick={() => {
                     const next = openList === 'following' ? null : 'following' as const;
                     setOpenList(next);
+                    if (next === 'following') fetchList('following');
                   }}
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: 0,
