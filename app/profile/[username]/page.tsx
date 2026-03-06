@@ -322,6 +322,91 @@ export default function PublicProfilePage() {
         )}
       </div>
 
+      {/* FOLLOWERS / FOLLOWING EXPANDABLE LIST */}
+      {isOwner && openList && (
+        <div style={{ marginTop: '12px', border: '1px solid #e5e5e5', borderRadius: '10px', overflow: 'hidden' as const }}>
+          {/* Column headers */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '40px 1fr 110px 90px 80px',
+            gap: '12px', alignItems: 'center',
+            padding: '8px 16px',
+            fontSize: '10px', fontWeight: 700, color: '#aaa',
+            textTransform: 'uppercase' as const, letterSpacing: '0.06em',
+            borderBottom: '1px solid #f0f0f0',
+          }}>
+            <div />
+            <div>{openList === 'followers' ? 'Follower' : 'Following'}</div>
+            <div />
+            <div>To Borrow</div>
+            <div>To Keep</div>
+          </div>
+
+          {listLoading ? (
+            <div style={{ padding: '20px 16px', color: '#aaa', fontSize: '0.875rem' }}>Loading...</div>
+          ) : (openList === 'followers' ? followersList : followingList).length === 0 ? (
+            <div style={{ padding: '20px 16px', color: '#aaa', fontSize: '0.875rem', fontStyle: 'italic' as const }}>
+              {openList === 'followers' ? 'No followers yet.' : 'Not following anyone yet.'}
+            </div>
+          ) : (
+            (openList === 'followers' ? followersList : followingList).map((entry) => (
+              <div key={entry.id} style={{
+                display: 'grid',
+                gridTemplateColumns: '40px 1fr 110px 90px 80px',
+                gap: '12px', alignItems: 'center',
+                padding: '10px 16px',
+                borderBottom: '1px solid #f9f9f9',
+              }}>
+                {/* Avatar */}
+                <div style={{
+                  width: '40px', height: '40px', borderRadius: '50%',
+                  backgroundColor: '#f0f0f0',
+                  backgroundImage: entry.avatar_url ? `url(${entry.avatar_url})` : 'none',
+                  backgroundSize: 'cover', backgroundPosition: 'center',
+                  border: '2px solid #e5e5e5',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '1rem', color: '#C08261', fontWeight: 'bold',
+                  flexShrink: 0,
+                }}>
+                  {!entry.avatar_url && (entry.preferred_name?.charAt(0) || entry.username?.charAt(0) || '?')}
+                </div>
+
+                {/* Name + username */}
+                <a href={`/profile/${entry.username}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                  <div style={{ fontWeight: 600, fontSize: '14px', color: '#2D241E' }}>
+                    {entry.preferred_name || entry.username}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#aaa' }}>@{entry.username}</div>
+                </a>
+
+                {/* Follow button — placeholder, wired in Task 5 */}
+                <button
+                  onClick={() => {}}
+                  style={{
+                    padding: '5px 14px',
+                    backgroundColor: entry.isFollowing ? '#f0f0f0' : '#00ccff',
+                    color: entry.isFollowing ? '#666' : '#000',
+                    border: entry.isFollowing ? '1px solid #ddd' : 'none',
+                    borderRadius: '6px', cursor: 'pointer',
+                    fontWeight: 600, fontSize: '12px',
+                  }}
+                >
+                  {entry.isFollowing ? 'Following' : 'Follow'}
+                </button>
+
+                {/* Gear counts */}
+                <div style={{ fontSize: '13px', color: '#444', textAlign: 'center' as const }}>
+                  {entry.borrowCount > 0 ? entry.borrowCount : <span style={{ color: '#ccc' }}>—</span>}
+                </div>
+                <div style={{ fontSize: '13px', color: '#444', textAlign: 'center' as const }}>
+                  {entry.keepCount > 0 ? entry.keepCount : <span style={{ color: '#ccc' }}>—</span>}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
       <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '24px 0 0 0' }}>The Playa Provides: a Profile</h1>
 
       {/* PROFILE HEADER */}
