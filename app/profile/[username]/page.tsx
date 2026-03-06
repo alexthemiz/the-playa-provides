@@ -51,17 +51,19 @@ export default function PublicProfilePage() {
           setCurrentUserId(sessionUserId);
 
           // Fetch follower count
-          const { count } = await supabase
+          const { count, error: followerErr } = await supabase
             .from('user_follows')
             .select('*', { count: 'exact', head: true })
             .eq('following_id', profileData.id);
+          if (followerErr) console.error('follower count error:', followerErr.message);
           setFollowerCount(count ?? 0);
 
           // Fetch following count
-          const { count: followingCnt } = await supabase
+          const { count: followingCnt, error: followingErr } = await supabase
             .from('user_follows')
             .select('*', { count: 'exact', head: true })
             .eq('follower_id', profileData.id);
+          if (followingErr) console.error('following count error:', followingErr.message);
           setFollowingCount(followingCnt ?? 0);
 
           // Check if current user follows this profile
