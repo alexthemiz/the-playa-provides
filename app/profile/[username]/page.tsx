@@ -184,7 +184,7 @@ export default function PublicProfilePage() {
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: 0,
                     color: openList === 'following' ? '#00aacc' : '#888',
-                    fontWeight: openList === 'following' ? 400 : 400,
+                    fontWeight: openList === 'following' ? 600 : 400,
                     fontSize: '0.85rem',
                   }}
                 >
