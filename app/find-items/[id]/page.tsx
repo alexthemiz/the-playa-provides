@@ -120,7 +120,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
           )}
 
           <div style={descSection}>
-            <h4 style={labelStyle}>About this gear</h4>
+            <h4 style={labelStyle}>About this item</h4>
             <p style={descText}>{item.description || 'No description provided.'}</p>
           </div>
         </div>
