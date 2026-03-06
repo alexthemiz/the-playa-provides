@@ -159,10 +159,44 @@ export default function PublicProfilePage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Link href="/find-items" style={{ color: '#888', textDecoration: 'none' }}>← Find Items</Link>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            {followerCount > 0 && (
-              <span style={{ fontSize: '0.85rem', color: '#888' }}>
-                {followerCount} {followerCount === 1 ? 'follower' : 'followers'}
-              </span>
+            {isOwner ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
+                <button
+                  onClick={() => {
+                    const next = openList === 'followers' ? null : 'followers' as const;
+                    setOpenList(next);
+                  }}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                    color: openList === 'followers' ? '#00aacc' : '#888',
+                    fontWeight: openList === 'followers' ? 600 : 400,
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  {followerCount} {followerCount === 1 ? 'follower' : 'followers'}
+                </button>
+                <span style={{ color: '#ccc' }}>·</span>
+                <button
+                  onClick={() => {
+                    const next = openList === 'following' ? null : 'following' as const;
+                    setOpenList(next);
+                  }}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                    color: openList === 'following' ? '#00aacc' : '#888',
+                    fontWeight: openList === 'following' ? 400 : 400,
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  {followingCount} following
+                </button>
+              </div>
+            ) : (
+              followerCount > 0 && (
+                <span style={{ fontSize: '0.85rem', color: '#888' }}>
+                  {followerCount} {followerCount === 1 ? 'follower' : 'followers'}
+                </span>
+              )
             )}
             {isOwner ? (
               <button
