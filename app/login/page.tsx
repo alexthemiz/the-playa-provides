@@ -43,21 +43,6 @@ export default function Login() {
     if (error) setMessage(`Error: ${error.message}`)
   }
 
-  const handleMagicLink = async () => {
-    if (!email) {
-      setMessage('Please enter your email first.')
-      return
-    }
-    setLoading(true)
-    setMessage('Sending magic link...')
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
-    })
-    setMessage(error ? `Error: ${error.message}` : 'Success! Check your email for the link.')
-    setLoading(false)
-  }
-
   return (
     <div style={cardStyle}>
       <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '4px', color: '#2D241E' }}>Sign In</h1>
@@ -105,22 +90,6 @@ export default function Login() {
         </button>
       </div>
 
-      {/* DIVIDER */}
-      <div style={{ position: 'relative' as const, margin: '18px 0' }}>
-        <div style={{ position: 'absolute' as const, inset: 0, display: 'flex', alignItems: 'center' }}>
-          <span style={{ width: '100%', borderTop: '1px solid #e5e5e5' }} />
-        </div>
-        <div style={{ position: 'relative' as const, display: 'flex', justifyContent: 'center' }}>
-          <span style={{ backgroundColor: '#fff', padding: '0 10px', fontSize: '0.7rem', textTransform: 'uppercase' as const, color: '#aaa', letterSpacing: '0.08em' }}>
-            Or sign in with email
-          </span>
-        </div>
-      </div>
-
-      <button onClick={handleMagicLink} style={magicLinkButtonStyle}>
-        Email me a Magic Link
-      </button>
-
       {message && (
         <p style={{ marginTop: '16px', textAlign: 'center' as const, fontSize: '0.875rem', fontWeight: 500, color: message.includes('Error') ? '#ef4444' : '#00aacc' }}>
           {message}
@@ -158,12 +127,6 @@ const submitButtonStyle: React.CSSProperties = {
   width: '100%', backgroundColor: '#00ccff', color: '#000',
   padding: '13px', borderRadius: '8px', fontWeight: 600,
   border: 'none', fontSize: '1rem',
-};
-
-const magicLinkButtonStyle: React.CSSProperties = {
-  width: '100%', border: '1px solid #ddd', backgroundColor: '#fff',
-  color: '#2D241E', padding: '13px', borderRadius: '8px',
-  fontWeight: 600, cursor: 'pointer', fontSize: '1rem',
 };
 
 const googleButtonStyle: React.CSSProperties = {
