@@ -209,6 +209,35 @@ export default function PublicProfilePage() {
     }
   };
 
+  const handleListFollowToggle = async (targetId: string, listType: 'followers' | 'following') => {
+    if (!currentUserId) return;
+
+    const list = listType === 'followers' ? followersList : followingList;
+    const setList = listType === 'followers' ? setFollowersList : setFollowingList;
+    const entry = list.find((e: any) => e.id === targetId);
+    if (!entry) return;
+
+    try {
+      if (entry.isFollowing) {
+        const { error } = await supabase
+          .from('user_follows')
+          .delete()
+          .eq('follower_id', currentUserId)
+          .eq('following_id', targetId);
+        if (error) throw new Error(error.message);
+        setList((prev: any[]) => prev.map((e: any) => e.id === targetId ? { ...e, isFollowing: false } : e));
+      } else {
+        const { error } = await supabase
+          .from('user_follows')
+          .insert({ follower_id: currentUserId, following_id: targetId });
+        if (error) throw new Error(error.message);
+        setList((prev: any[]) => prev.map((e: any) => e.id === targetId ? { ...e, isFollowing: true } : e));
+      }
+    } catch (err: any) {
+      console.error('List follow toggle error:', err.message);
+    }
+  };
+
   const handleSave = async () => {
     const { error } = await supabase.from('profiles').update({
       bio: profile.bio,
@@ -379,9 +408,9 @@ export default function PublicProfilePage() {
                   <div style={{ fontSize: '12px', color: '#aaa' }}>@{entry.username}</div>
                 </a>
 
-                {/* Follow button — placeholder, wired in Task 5 */}
+                {/* Follow button */}
                 <button
-                  onClick={() => {}}
+                  onClick={() => handleListFollowToggle(entry.id, openList!)}
                   style={{
                     padding: '5px 14px',
                     backgroundColor: entry.isFollowing ? '#f0f0f0' : '#00ccff',
