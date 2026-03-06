@@ -361,18 +361,18 @@ export default function PublicProfilePage() {
                 <div style={{
                   width: '40px', height: '40px', borderRadius: '50%',
                   backgroundColor: '#f0f0f0',
-                  backgroundImage: entry.avatar_url ? `url(${entry.avatar_url})` : 'none',
-                  backgroundSize: 'cover', backgroundPosition: 'center',
+                  backgroundImage: entry.avatar_url ? `url(${entry.avatar_url})` : 'none' as const,
+                  backgroundSize: 'cover' as const, backgroundPosition: 'center' as const,
                   border: '2px solid #e5e5e5',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '1rem', color: '#C08261', fontWeight: 'bold',
+                  fontSize: '1rem', color: '#C08261', fontWeight: 'bold' as const,
                   flexShrink: 0,
                 }}>
                   {!entry.avatar_url && (entry.preferred_name?.charAt(0) || entry.username?.charAt(0) || '?')}
                 </div>
 
                 {/* Name + username */}
-                <a href={`/profile/${entry.username}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                <a href={`/profile/${entry.username}`} style={{ textDecoration: 'none' as const, color: 'inherit' as const }}>
                   <div style={{ fontWeight: 600, fontSize: '14px', color: '#2D241E' }}>
                     {entry.preferred_name || entry.username}
                   </div>
