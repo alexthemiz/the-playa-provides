@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-03-06 (session 7)_
+_Last updated: 2026-03-06 (session 8)_
 
 ---
 
@@ -11,7 +11,7 @@ _Last updated: 2026-03-06 (session 7)_
 ---
 
 ## 🔧 Bugs & Fixes
-- [ ] **Magic link → 6-digit OTP** — Gmail pre-fetches magic links and burns them before the user clicks. Fix: switch to email OTP code in Supabase dashboard (Auth → Email OTP) + small login page change to show code input field.
+_(nothing queued)_
 
 ---
 
@@ -79,3 +79,6 @@ _(nothing queued)_
 - [x] Fix: New users redirected to /login from /find-items and /list-item after signup — root cause was stale Next.js router cache (pre-login redirects cached); fixed by adding router.refresh() to signup page (login page already had it)
 - [x] Feature: Followers/Following expandable lists on profile page — owner-only clickable "X followers · Y following" counts in nav row; inline list with avatar, name, follow/unfollow toggle, gear counts (to borrow / to keep); lazy-loaded and cached
 - [x] Feature: Lend To / Transfer To flows — escrow-style dual confirmation, email notifications via Resend, new `item_transfers` + `item_loans` tables, TransferModal + LendModal components, pending handover state in /inventory action column, "Items Out on Loan" + "Items I'm Borrowing" + "Items Being Transferred to Me" sections
+- [x] Fix: Magic link removed from login page — Gmail pre-fetches single-use tokens and burns them; password + Google OAuth are sufficient
+- [x] Design: Item detail page (/find-items/[id]) — light mode redesign, tighter layout, photo 260px, Request Item button below photo, "About this item" label
+- [x] Design: Followers/following list table — narrower name column, "Items Available" super-label, show 0 instead of —
