@@ -21,6 +21,11 @@ export default function PublicProfilePage() {
   const [followerCount, setFollowerCount] = useState(0);
   const [followLoading, setFollowLoading] = useState(false);
   const [followError, setFollowError] = useState<string | null>(null);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [openList, setOpenList] = useState<'followers' | 'following' | null>(null);
+  const [followersList, setFollowersList] = useState<any[]>([]);
+  const [followingList, setFollowingList] = useState<any[]>([]);
+  const [listLoading, setListLoading] = useState(false);
 
   const startYear = 1986;
   const currentYear = 2026;
@@ -51,6 +56,13 @@ export default function PublicProfilePage() {
             .select('*', { count: 'exact', head: true })
             .eq('following_id', profileData.id);
           setFollowerCount(count ?? 0);
+
+          // Fetch following count
+          const { count: followingCnt } = await supabase
+            .from('user_follows')
+            .select('*', { count: 'exact', head: true })
+            .eq('follower_id', profileData.id);
+          setFollowingCount(followingCnt ?? 0);
 
           // Check if current user follows this profile
           if (sessionUserId && sessionUserId !== profileData.id) {
