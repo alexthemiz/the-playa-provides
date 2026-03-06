@@ -357,7 +357,7 @@ export default function PublicProfilePage() {
           {/* Column headers */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: '40px 1fr 110px 90px 80px',
+            gridTemplateColumns: '40px minmax(100px, 200px) 110px 90px 80px',
             gap: '12px', alignItems: 'center',
             padding: '8px 16px',
             fontSize: '10px', fontWeight: 700, color: '#aaa',
@@ -367,7 +367,10 @@ export default function PublicProfilePage() {
             <div />
             <div>{openList === 'followers' ? 'Follower' : 'Following'}</div>
             <div />
-            <div>To Borrow</div>
+            <div>
+              <div style={{ fontSize: '8px', fontWeight: 400, color: '#bbb', textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: '2px' }}>Items Available</div>
+              To Borrow
+            </div>
             <div>To Keep</div>
           </div>
 
@@ -381,7 +384,7 @@ export default function PublicProfilePage() {
             (openList === 'followers' ? followersList : followingList).map((entry) => (
               <div key={entry.id} style={{
                 display: 'grid',
-                gridTemplateColumns: '40px 1fr 110px 90px 80px',
+                gridTemplateColumns: '40px minmax(100px, 200px) 110px 90px 80px',
                 gap: '12px', alignItems: 'center',
                 padding: '10px 16px',
                 borderBottom: '1px solid #f9f9f9',
@@ -425,10 +428,10 @@ export default function PublicProfilePage() {
 
                 {/* Gear counts */}
                 <div style={{ fontSize: '13px', color: '#444', textAlign: 'center' as const }}>
-                  {entry.borrowCount > 0 ? entry.borrowCount : <span style={{ color: '#ccc' }}>—</span>}
+                  {entry.borrowCount}
                 </div>
                 <div style={{ fontSize: '13px', color: '#444', textAlign: 'center' as const }}>
-                  {entry.keepCount > 0 ? entry.keepCount : <span style={{ color: '#ccc' }}>—</span>}
+                  {entry.keepCount}
                 </div>
               </div>
             ))

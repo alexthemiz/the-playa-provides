@@ -57,53 +57,62 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
       </Link>
 
       <div style={contentGrid}>
-        <div style={imageWrapper}>
-          {item.image_urls?.[0] ? (
-            <img src={item.image_urls[0]} alt={item.item_name} style={fullImgStyle} />
-          ) : (
-            <div style={noImgStyle}><Package size={64} /></div>
-          )}
+        {/* Left column: photo + button */}
+        <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '12px' }}>
+          <div style={imageWrapper}>
+            {item.image_urls?.[0] ? (
+              <img src={item.image_urls[0]} alt={item.item_name} style={fullImgStyle} />
+            ) : (
+              <div style={noImgStyle}><Package size={48} /></div>
+            )}
+          </div>
+          <button
+            style={borrowButtonStyle}
+            onClick={() => setIsModalOpen(true)}
+          >
+            Request Item
+          </button>
         </div>
 
+        {/* Right column: details */}
         <div style={detailsPane}>
           <h1 style={titleStyle}>{item.item_name}</h1>
           <p style={categoryStyle}>{item.category} • {item.condition}</p>
-          
+
           <div style={metaGroup}>
-            <div style={metaItem}><MapPin size={18} color="#00ccff" /> {item.location_display}</div>
-            <div style={metaItem}><User size={18} color="#00ccff" /> {isGift ? 'Offered' : 'Owned'} by {item.owner_name}</div>
+            <div style={metaItem}><MapPin size={15} color="#00ccff" /> {item.location_display}</div>
+            <div style={metaItem}><User size={15} color="#00ccff" /> {isGift ? 'Offered' : 'Owned'} by {item.owner_name}</div>
           </div>
 
-          {/* --- NEW: BORROWING TERMS & PRICES SECTION --- */}
           {!isGift && (
             <div style={termsSection}>
               <h4 style={labelStyle}>Lending Terms</h4>
-              
-              <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+
+              <div style={{ display: 'flex', gap: '20px', marginBottom: '16px' }}>
                 {item.pickup_by && (
-                  <div style={termDetail}><Calendar size={16} /> Pickup by {new Date(item.pickup_by).toLocaleDateString()}</div>
+                  <div style={termDetail}><Calendar size={14} /> Pickup by {new Date(item.pickup_by).toLocaleDateString()}</div>
                 )}
                 {item.return_by && (
-                  <div style={termDetail}><Calendar size={16} /> Return by {new Date(item.return_by).toLocaleDateString()}</div>
+                  <div style={termDetail}><Calendar size={14} /> Return by {new Date(item.return_by).toLocaleDateString()}</div>
                 )}
               </div>
 
               {item.return_terms && (
                 <div style={returnTermsBox}>
-                  <p style={{ margin: 0, fontSize: '14px', color: '#aaa', marginBottom: '5px', textTransform: 'uppercase', fontWeight: 'bold' }}>Condition of Return</p>
-                  <p style={{ margin: 0, fontStyle: 'italic', color: '#eee' }}>"{item.return_terms}"</p>
+                  <p style={{ margin: 0, fontSize: '12px', color: '#888', marginBottom: '4px', textTransform: 'uppercase' as const, fontWeight: 'bold' }}>Condition of Return</p>
+                  <p style={{ margin: 0, fontStyle: 'italic' as const, color: '#444' }}>"{item.return_terms}"</p>
                 </div>
               )}
 
-              <div style={{ display: 'flex', gap: '15px', marginTop: '15px' }}>
+              <div style={{ display: 'flex', gap: '15px', marginTop: '12px' }}>
                 {item.damage_price && (
                   <div style={priceTag}>
-                    <Shield size={14} color="#f97316" /> Damage Agreement: ${Math.round(item.damage_price)}
+                    <Shield size={13} color="#f97316" /> Damage: ${Math.round(item.damage_price)}
                   </div>
                 )}
                 {item.loss_price && (
                   <div style={priceTag}>
-                    <AlertTriangle size={14} color="#ef4444" /> Loss Agreement: ${Math.round(item.loss_price)}
+                    <AlertTriangle size={13} color="#ef4444" /> Loss: ${Math.round(item.loss_price)}
                   </div>
                 )}
               </div>
@@ -114,13 +123,6 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
             <h4 style={labelStyle}>About this gear</h4>
             <p style={descText}>{item.description || 'No description provided.'}</p>
           </div>
-
-          <button 
-  style={borrowButtonStyle} 
-  onClick={() => setIsModalOpen(true)}
->
-  Request Item
-</button>
         </div>
       </div>
 
@@ -131,25 +133,23 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
   );
 }
 
-// --- ADDED STYLES ---
-const termsSection: React.CSSProperties = { backgroundColor: '#111', padding: '25px', borderRadius: '20px', border: '1px solid #222', marginBottom: '10px' };
-const termDetail: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#ccc' };
-const returnTermsBox: React.CSSProperties = { padding: '15px', backgroundColor: '#000', borderRadius: '12px', border: '1px solid #333' };
-const priceTag: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', fontWeight: 'bold' };
+const termsSection: React.CSSProperties = { backgroundColor: '#f7f7f7', padding: '16px', borderRadius: '12px', border: '1px solid #e5e5e5', marginBottom: '8px' };
+const termDetail: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#444' };
+const returnTermsBox: React.CSSProperties = { padding: '12px', backgroundColor: '#efefef', borderRadius: '8px', border: '1px solid #ddd' };
+const priceTag: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 'bold', color: '#2D241E' };
 
-// --- EXISTING STYLES (NO CHANGES) ---
-const containerStyle: React.CSSProperties = { padding: '40px 20px', maxWidth: '1100px', margin: '0 auto', color: '#fff' };
-const backLinkStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '5px', color: '#00ccff', textDecoration: 'none', marginBottom: '30px', fontWeight: 'bold' };
-const contentGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '50px' };
-const imageWrapper: React.CSSProperties = { borderRadius: '24px', overflow: 'hidden', backgroundColor: '#111', height: '500px', border: '1px solid #222' };
-const fullImgStyle: React.CSSProperties = { width: '100%', height: '100%', objectFit: 'cover' };
-const noImgStyle: React.CSSProperties = { height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#222' };
-const detailsPane: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: '10px' };
-const titleStyle: React.CSSProperties = { fontSize: '42px', fontWeight: 'bold', margin: 0 };
-const categoryStyle: React.CSSProperties = { color: '#00ccff', fontWeight: 'bold', fontSize: '18px', textTransform: 'uppercase', marginBottom: '20px' };
-const metaGroup: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '20px' };
-const metaItem: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '10px', fontSize: '18px' };
-const descSection: React.CSSProperties = { backgroundColor: '#0a0a0a', padding: '25px', borderRadius: '20px', border: '1px solid #222' };
-const labelStyle: React.CSSProperties = { color: '#666', fontSize: '12px', textTransform: 'uppercase', marginBottom: '10px', letterSpacing: '1px' };
-const descText: React.CSSProperties = { lineHeight: '1.7', color: '#ccc', fontSize: '16px' };
-const borrowButtonStyle: React.CSSProperties = { marginTop: '30px', padding: '20px', borderRadius: '14px', border: 'none', backgroundColor: '#00ccff', color: '#000', fontWeight: 'bold', fontSize: '18px', cursor: 'pointer' };
+const containerStyle: React.CSSProperties = { padding: '32px 20px', maxWidth: '1000px', margin: '0 auto', color: '#2D241E' };
+const backLinkStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '5px', color: '#00ccff', textDecoration: 'none', marginBottom: '20px', fontWeight: 'bold' };
+const contentGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '28px' };
+const imageWrapper: React.CSSProperties = { borderRadius: '16px', overflow: 'hidden', backgroundColor: '#f0f0f0', height: '260px', border: '1px solid #e5e5e5' };
+const fullImgStyle: React.CSSProperties = { width: '100%', height: '100%', objectFit: 'cover' as const };
+const noImgStyle: React.CSSProperties = { height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccc' };
+const detailsPane: React.CSSProperties = { display: 'flex', flexDirection: 'column' as const, gap: '8px' };
+const titleStyle: React.CSSProperties = { fontSize: '26px', fontWeight: 'bold', margin: 0, color: '#2D241E' };
+const categoryStyle: React.CSSProperties = { color: '#00aacc', fontWeight: 'bold', fontSize: '13px', textTransform: 'uppercase' as const, marginBottom: '8px', letterSpacing: '0.05em' };
+const metaGroup: React.CSSProperties = { display: 'flex', flexDirection: 'column' as const, gap: '8px', marginBottom: '8px' };
+const metaItem: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#444' };
+const descSection: React.CSSProperties = { backgroundColor: '#f7f7f7', padding: '16px', borderRadius: '12px', border: '1px solid #e5e5e5' };
+const labelStyle: React.CSSProperties = { color: '#888', fontSize: '11px', textTransform: 'uppercase' as const, marginBottom: '8px', letterSpacing: '1px', fontWeight: 700 };
+const descText: React.CSSProperties = { lineHeight: '1.7', color: '#444', fontSize: '14px', margin: 0 };
+const borrowButtonStyle: React.CSSProperties = { padding: '14px', borderRadius: '10px', border: 'none', backgroundColor: '#00ccff', color: '#000', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer', width: '100%' };
