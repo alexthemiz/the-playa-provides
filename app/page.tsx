@@ -80,7 +80,7 @@ export default function HomePage() {
             }}
           >
             {[...marqueeItems, ...marqueeItems].map((item: any, i: number) => (
-              <Link
+              <a
                 key={i}
                 href={`/find-items/${item.id}`}
                 style={{ textDecoration: 'none', flexShrink: 0 }}
@@ -91,7 +91,7 @@ export default function HomePage() {
                   itemId={item.id}
                   imageSize={160}
                 />
-              </Link>
+              </a>
             ))}
           </div>
         </div>
