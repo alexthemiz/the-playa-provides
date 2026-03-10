@@ -58,17 +58,19 @@ const figureStyle: React.CSSProperties = {
 };
 
 const chartStyle: React.CSSProperties = {
-  width: '75%',
+  width: '56%',
   height: 'auto',
   display: 'block',
   borderRadius: '8px',
   border: '1px solid #e5e5e5',
+  margin: '0 auto',
 };
 
 const captionStyle: React.CSSProperties = {
   fontSize: '0.75rem',
   color: '#aaa',
   marginTop: '6px',
+  textAlign: 'center' as const,
 };
 
 const emailLinkStyle: React.CSSProperties = {
