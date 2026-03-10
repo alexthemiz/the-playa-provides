@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import ImageSlider from '@/components/ImageSlider';
+import PolaroidPhoto from '@/components/PolaroidPhoto';
 import { Search, LayoutGrid, List, MapPin, User, Package, Map as MapIcon, X } from 'lucide-react';
 import Link from 'next/link';
 import RequestModal from '@/components/RequestModal';
@@ -377,7 +378,7 @@ function CardView({ item }: { item: any }) {
   return (
     <div style={cardStyle}>
       <div style={imageWrapperStyle}>
-        <ImageSlider images={item.image_urls} />
+        <PolaroidPhoto src={item.image_urls?.[0]} alt={item.item_name} itemId={item.id} imageHeight={160} />
         <div style={badgeStyle}>{item.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}</div>
       </div>
       <div style={cardContentStyle}>
@@ -460,8 +461,8 @@ const chipContainerStyle: React.CSSProperties = { display: 'flex', gap: '8px', f
 const chipStyle: React.CSSProperties = { padding: '6px 14px', borderRadius: '20px', border: '1px solid', fontSize: '13px', cursor: 'pointer', fontWeight: '500', display: 'flex', alignItems: 'center' };
 const gridStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' };
 const listContainerStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: '2px' };
-const cardStyle: React.CSSProperties = { backgroundColor: '#fff', border: '1px solid #eee', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' };
-const imageWrapperStyle: React.CSSProperties = { height: '180px', position: 'relative', backgroundColor: '#f0f0f0' };
+const cardStyle: React.CSSProperties = { backgroundColor: '#fff', border: '1px solid #eee', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' };
+const imageWrapperStyle: React.CSSProperties = { position: 'relative' as const, backgroundColor: 'transparent', padding: '12px 12px 0 12px' };
 const badgeStyle: React.CSSProperties = { position: 'absolute', top: '10px', left: '10px', backgroundColor: '#00ccff', color: '#000', padding: '3px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', zIndex: 5 };
 const cardContentStyle: React.CSSProperties = { padding: '15px' };
 const itemTitleStyle: React.CSSProperties = { margin: 0, color: '#111', fontSize: '16px', fontWeight: '600' };
