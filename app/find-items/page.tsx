@@ -377,7 +377,7 @@ function CardView({ item }: { item: any }) {
   return (
     <div style={cardStyle}>
       <div style={imageWrapperStyle}>
-        <PolaroidPhoto src={item.image_urls?.[0]} alt={item.item_name} itemId={item.id} />
+        <PolaroidPhoto src={item.image_urls?.[0]} alt={item.item_name} itemId={item.id} imageSize={300} />
         <div style={badgeStyle}>{item.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}</div>
       </div>
       <div style={cardContentStyle}>
