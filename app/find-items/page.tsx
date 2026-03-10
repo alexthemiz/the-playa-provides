@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import ImageSlider from '@/components/ImageSlider';
 import PolaroidPhoto from '@/components/PolaroidPhoto';
 import { Search, LayoutGrid, List, MapPin, User, Package, Map as MapIcon, X } from 'lucide-react';
 import Link from 'next/link';
