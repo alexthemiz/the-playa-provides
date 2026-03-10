@@ -108,25 +108,25 @@ export default function HomePage() {
       }}>
         <div style={cardStyle}>
           <div style={iconStyle}>🎁</div>
-          <h3 style={{ fontSize: '1.4rem', marginBottom: '8px', color: '#2D241E' }}>Gift or Lend</h3>
+          <h3 style={{ fontSize: '1.4rem', marginBottom: '8px', color: '#2D241E' }}>Practice Radical Interdependence</h3>
           <p style={{ color: '#666', fontSize: '0.95rem', lineHeight: '1.5' }}>
-            Pass on gear you no longer need or lend high-quality items to the community.
+            Getting to the playa is expensive enough. Help a fellow burner cut costs by lending or passing on gear you're not using.
           </p>
         </div>
 
         <div style={cardStyle}>
           <div style={iconStyle}>📋</div>
-          <h3 style={{ fontSize: '1.4rem', marginBottom: '8px', color: '#2D241E' }}>Digital Inventory</h3>
+          <h3 style={{ fontSize: '1.4rem', marginBottom: '8px', color: '#2D241E' }}>Track Your Inventory</h3>
           <p style={{ color: '#666', fontSize: '0.95rem', lineHeight: '1.5' }}>
-            A cloud-based home for your gear. Keep track of every stake and strut, whether you're sharing or just staying organized.
+            Your list stays private until you choose what you're open to sharing, when, and how.
           </p>
         </div>
 
         <div style={cardStyle}>
           <div style={iconStyle}>♻️</div>
-          <h3 style={{ fontSize: '1.4rem', marginBottom: '8px', color: '#2D241E' }}>Reduce</h3>
+          <h3 style={{ fontSize: '1.4rem', marginBottom: '8px', color: '#2D241E' }}>Cut Down on Purchasing New Things</h3>
           <p style={{ color: '#666', fontSize: '0.95rem', lineHeight: '1.5' }}>
-            Stop the "Buy-and-Dump" cycle. Protect the desert and your wallet by sharing what we already own.
+            The world has enough stuff already. Let yours go to the playa this year even if you can't.
           </p>
         </div>
       </section>
