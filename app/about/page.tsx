@@ -58,7 +58,7 @@ const figureStyle: React.CSSProperties = {
 };
 
 const chartStyle: React.CSSProperties = {
-  width: '56%',
+  width: '50%',
   height: 'auto',
   display: 'block',
   borderRadius: '8px',
