@@ -60,7 +60,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
       <div style={contentGrid}>
         {/* Left column: photo + button */}
         <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '12px' }}>
-          <PolaroidPhoto src={item.image_urls?.[0]} alt={item.item_name} itemId={item.id} imageHeight={220} />
+          <PolaroidPhoto src={item.image_urls?.[0]} alt={item.item_name} itemId={item.id} />
           <button
             style={borrowButtonStyle}
             onClick={() => setIsModalOpen(true)}

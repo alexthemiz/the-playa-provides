@@ -4,10 +4,9 @@ interface PolaroidPhotoProps {
   src?: string;
   alt: string;
   itemId: number;
-  imageHeight?: number;
 }
 
-export default function PolaroidPhoto({ src, alt, itemId, imageHeight = 220 }: PolaroidPhotoProps) {
+export default function PolaroidPhoto({ src, alt, itemId }: PolaroidPhotoProps) {
   const rotation = ((itemId % 7) - 3) * 0.7;
 
   return (
@@ -19,19 +18,17 @@ export default function PolaroidPhoto({ src, alt, itemId, imageHeight = 220 }: P
       boxSizing: 'border-box' as const,
       width: '100%',
     }}>
-      <div style={{ width: '100%', height: `${imageHeight}px`, overflow: 'hidden' as const, backgroundColor: '#f0f0f0' }}>
-        {src ? (
-          <img
-            src={src}
-            alt={alt}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' as const, display: 'block' }}
-          />
-        ) : (
-          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccc' }}>
-            <Package size={48} />
-          </div>
-        )}
-      </div>
+      {src ? (
+        <img
+          src={src}
+          alt={alt}
+          style={{ width: '100%', height: 'auto', display: 'block' }}
+        />
+      ) : (
+        <div style={{ width: '100%', minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccc', backgroundColor: '#f0f0f0' }}>
+          <Package size={48} />
+        </div>
+      )}
     </div>
   );
 }

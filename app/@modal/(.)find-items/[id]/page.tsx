@@ -60,7 +60,7 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
         ) : item ? (
           <div>
             {/* Image Preview */}
-            <PolaroidPhoto src={item.image_urls?.[0]} alt={item.item_name} itemId={item.id} imageHeight={200} />
+            <PolaroidPhoto src={item.image_urls?.[0]} alt={item.item_name} itemId={item.id} />
 
             <div style={{ marginTop: '20px' }}>
               <h2 style={titleStyle}>{item.item_name}</h2>

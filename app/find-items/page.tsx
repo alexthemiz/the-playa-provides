@@ -298,7 +298,7 @@ export default function FindItemsPage() {
             <button onClick={handleCloseModal} style={closeButtonStyle}><X size={24} /></button>
             
             <div style={{ marginBottom: '20px' }}>
-              <PolaroidPhoto src={selectedItem.image_urls?.[0]} alt={selectedItem.item_name} itemId={selectedItem.id} imageHeight={220} />
+              <PolaroidPhoto src={selectedItem.image_urls?.[0]} alt={selectedItem.item_name} itemId={selectedItem.id} />
             </div>
 
             <h2 style={{ margin: '0 0 5px 0', color: '#111', fontSize: '24px' }}>{selectedItem.item_name}</h2>
@@ -377,7 +377,7 @@ function CardView({ item }: { item: any }) {
   return (
     <div style={cardStyle}>
       <div style={imageWrapperStyle}>
-        <PolaroidPhoto src={item.image_urls?.[0]} alt={item.item_name} itemId={item.id} imageHeight={160} />
+        <PolaroidPhoto src={item.image_urls?.[0]} alt={item.item_name} itemId={item.id} />
         <div style={badgeStyle}>{item.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}</div>
       </div>
       <div style={cardContentStyle}>
