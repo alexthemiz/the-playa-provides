@@ -58,7 +58,7 @@ const figureStyle: React.CSSProperties = {
 };
 
 const chartStyle: React.CSSProperties = {
-  width: '100%',
+  width: '75%',
   height: 'auto',
   display: 'block',
   borderRadius: '8px',
@@ -80,6 +80,11 @@ const emailLinkStyle: React.CSSProperties = {
   textDecoration: 'none',
 };
 
+const inlineLinkStyle: React.CSSProperties = {
+  color: '#00aacc',
+  textDecoration: 'underline',
+};
+
 const SECTIONS = [
   {
     title: 'What Is This?',
@@ -98,8 +103,11 @@ const SECTIONS = [
     content: (
       <div>
         <p style={pStyle}>
-          Getting to Black Rock City isn't cheap. According to the 2024 Burning Man Census, the
-          median participant spends around $2,000 just to get to and from BRC.
+          Getting to Black Rock City isn't cheap. According to the{' '}
+          <a href="https://blackrockcitycensus.org/" target="_blank" rel="noopener noreferrer" style={inlineLinkStyle}>
+            2024 Burning Man Census
+          </a>
+          , the median participant spends around $2,000 just to get to and from BRC.
         </p>
         <figure style={figureStyle}>
           <img src="/Spend_to_and_from_BRC.png" alt="Chart: travel spend to/from BRC" style={chartStyle} />
@@ -144,33 +152,22 @@ const SECTIONS = [
   {
     title: 'Support the Project',
     content: (
-      <p style={pStyle}>
-        This site is free to use and we plan to keep it that way. But it takes real time and
-        money to build and maintain. If you've gotten value out of it and want to kick in a few
-        bucks, we'd be genuinely grateful. Drop us a line and we'll send you details.
-      </p>
-    ),
-  },
-  {
-    title: 'Help Build It',
-    content: (
-      <p style={pStyle}>
-        This is a community project and we're genuinely open to collaborators. Got a feature
-        idea? Think something should work differently? Know how to code or design and want to
-        contribute? We'd love to hear from you.
-      </p>
-    ),
-  },
-  {
-    title: 'Get in Touch',
-    content: (
-      <p style={pStyle}>
-        Questions, bug reports, feedback, ideas; we want to hear all of it.{' '}
-        <br />
-        <a href="mailto:hello@theplayaprovides.com" style={emailLinkStyle}>
-          📧 hello@theplayaprovides.com
-        </a>
-      </p>
+      <div>
+        <p style={pStyle}>
+          This is a community project and we're genuinely open to collaborators. Got a feature
+          idea? Think something should work differently? Know how to code or design and want to
+          contribute? Questions, bug reports, other ideas? We'd love to hear from you.{' '}
+          <a href="mailto:hello@theplayaprovides.com" style={emailLinkStyle}>
+            📧 hello@theplayaprovides.com
+          </a>
+        </p>
+        <p style={pStyle}>
+          While the site is free to use and we plan to keep it that way, it takes real time and
+          money to build and maintain. If you're getting value out of it or simply believe in our
+          mission and want to kick in a few bucks, we'd be genuinely grateful. Reach out and
+          we'll send a Venmo link over.
+        </p>
+      </div>
     ),
   },
 ];
