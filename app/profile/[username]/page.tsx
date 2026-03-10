@@ -28,6 +28,7 @@ export default function PublicProfilePage() {
   const [listLoading, setListLoading] = useState(false);
   const [wishTags, setWishTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
+  const [tagSaving, setTagSaving] = useState(false);
 
   const startYear = 1986;
   const currentYear = 2026;
@@ -255,7 +256,7 @@ export default function PublicProfilePage() {
   };
 
   const addTag = async () => {
-    const tag = tagInput.trim();
+    const tag = tagInput.trim().toLowerCase();
     if (!tag || wishTags.includes(tag)) {
       setTagInput('');
       return;
@@ -263,13 +264,17 @@ export default function PublicProfilePage() {
     const updated = [...wishTags, tag];
     setWishTags(updated);
     setTagInput('');
+    setTagSaving(true);
     await supabase.from('profiles').update({ wish_list: updated }).eq('id', profile.id);
+    setTagSaving(false);
   };
 
   const removeTag = async (tag: string) => {
     const updated = wishTags.filter(t => t !== tag);
     setWishTags(updated);
+    setTagSaving(true);
     await supabase.from('profiles').update({ wish_list: updated }).eq('id', profile.id);
+    setTagSaving(false);
   };
 
   const toggleYear = (year: string) => {
@@ -559,19 +564,23 @@ export default function PublicProfilePage() {
                   placeholder="Add an item..."
                   onChange={e => setTagInput(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }}
+                  disabled={tagSaving}
                   style={{
                     flex: 1, backgroundColor: '#fff', color: '#2D241E',
                     border: '1px solid #ddd', padding: '6px 10px',
                     borderRadius: '6px', fontSize: '13px', outline: 'none',
+                    opacity: tagSaving ? 0.5 : 1,
                   }}
                 />
                 <button
                   onClick={addTag}
+                  disabled={tagSaving}
                   style={{
                     backgroundColor: '#00ccff', color: '#000',
                     border: 'none', borderRadius: '6px',
                     padding: '6px 14px', fontWeight: 600,
-                    fontSize: '13px', cursor: 'pointer',
+                    fontSize: '13px', cursor: tagSaving ? 'default' as const : 'pointer' as const,
+                    opacity: tagSaving ? 0.5 : 1,
                   }}
                 >
                   Add
