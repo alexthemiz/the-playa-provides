@@ -3,7 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, use } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { MapPin, User, Package, X } from 'lucide-react';
+import { MapPin, User, X } from 'lucide-react';
+import PolaroidPhoto from '@/components/PolaroidPhoto';
 
 export default function ItemModal({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -59,13 +60,7 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
         ) : item ? (
           <div>
             {/* Image Preview */}
-            <div style={imagePreviewStyle}>
-              {item.image_urls?.[0] ? (
-                <img src={item.image_urls[0]} alt={item.item_name} style={imgStyle} />
-              ) : (
-                <div style={noImgStyle}><Package size={48} /></div>
-              )}
-            </div>
+            <PolaroidPhoto src={item.image_urls?.[0]} alt={item.item_name} itemId={item.id} imageHeight={200} />
 
             <div style={{ marginTop: '20px' }}>
               <h2 style={titleStyle}>{item.item_name}</h2>
@@ -120,12 +115,6 @@ const closeButtonStyle: React.CSSProperties = {
   justifyContent: 'center', zIndex: 10
 };
 
-const imagePreviewStyle: React.CSSProperties = {
-  width: '100%', height: '250px', borderRadius: '16px', overflow: 'hidden', backgroundColor: '#111'
-};
-
-const imgStyle: React.CSSProperties = { width: '100%', height: '100%', objectFit: 'cover' };
-const noImgStyle: React.CSSProperties = { height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#333' };
 const titleStyle: React.CSSProperties = { color: '#fff', fontSize: '24px', margin: '0 0 5px 0' };
 const categoryStyle: React.CSSProperties = { color: '#00ccff', fontSize: '14px', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '20px' };
 const infoGridStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: '10px', color: '#fff', fontSize: '14px' };
