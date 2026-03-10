@@ -298,8 +298,8 @@ export default function FindItemsPage() {
           <div style={modalContentStyle} onClick={e => e.stopPropagation()}>
             <button onClick={handleCloseModal} style={closeButtonStyle}><X size={24} /></button>
             
-            <div style={{ height: '280px', borderRadius: '12px', overflow: 'hidden', marginBottom: '20px', backgroundColor: '#f0f0f0' }}>
-              <ImageSlider images={selectedItem.image_urls} />
+            <div style={{ marginBottom: '20px' }}>
+              <PolaroidPhoto src={selectedItem.image_urls?.[0]} alt={selectedItem.item_name} itemId={selectedItem.id} imageHeight={220} />
             </div>
 
             <h2 style={{ margin: '0 0 5px 0', color: '#111', fontSize: '24px' }}>{selectedItem.item_name}</h2>
