@@ -26,6 +26,8 @@ export default function PublicProfilePage() {
   const [followersList, setFollowersList] = useState<any[]>([]);
   const [followingList, setFollowingList] = useState<any[]>([]);
   const [listLoading, setListLoading] = useState(false);
+  const [wishTags, setWishTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
 
   const startYear = 1986;
   const currentYear = 2026;
@@ -47,6 +49,7 @@ export default function PublicProfilePage() {
 
         if (profileData) {
           setProfile(profileData);
+          setWishTags(Array.isArray(profileData.wish_list) ? profileData.wish_list : []);
           if (sessionUserId && sessionUserId === profileData.id) setIsOwner(true);
           setCurrentUserId(sessionUserId);
 
@@ -241,7 +244,6 @@ export default function PublicProfilePage() {
   const handleSave = async () => {
     const { error } = await supabase.from('profiles').update({
       bio: profile.bio,
-      wish_list: profile.wish_list,
       preferred_name: profile.preferred_name,
       burning_man_years: profile.burning_man_years,
       burning_man_camp: profile.burning_man_camp,
@@ -250,6 +252,24 @@ export default function PublicProfilePage() {
 
     if (error) alert('Error updating profile');
     else setIsEditing(false);
+  };
+
+  const addTag = async () => {
+    const tag = tagInput.trim();
+    if (!tag || wishTags.includes(tag)) {
+      setTagInput('');
+      return;
+    }
+    const updated = [...wishTags, tag];
+    setWishTags(updated);
+    setTagInput('');
+    await supabase.from('profiles').update({ wish_list: updated }).eq('id', profile.id);
+  };
+
+  const removeTag = async (tag: string) => {
+    const updated = wishTags.filter(t => t !== tag);
+    setWishTags(updated);
+    await supabase.from('profiles').update({ wish_list: updated }).eq('id', profile.id);
   };
 
   const toggleYear = (year: string) => {
@@ -499,17 +519,64 @@ export default function PublicProfilePage() {
           </div>
           <div>
             <h4 style={subheadStyle}>Wish List</h4>
-            {isEditing ? (
-              <textarea
-                placeholder="Items I'm on the lookout for"
-                style={editTextareaStyle}
-                value={profile.wish_list || ''}
-                onChange={e => setProfile({ ...profile, wish_list: e.target.value })}
-              />
-            ) : (
-              <p style={{ fontSize: '1rem', color: profile.wish_list ? '#444' : '#aaa', fontStyle: profile.wish_list ? 'normal' as const : 'italic' as const, margin: 0, lineHeight: '1.6' }}>
-                {profile.wish_list || 'Items I\'m on the lookout for'}
-              </p>
+
+            {/* Tags display — always visible */}
+            <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '8px', marginBottom: wishTags.length > 0 ? '12px' : '0' }}>
+              {wishTags.length === 0 && !isOwner && (
+                <span style={{ color: '#aaa', fontStyle: 'italic' as const, fontSize: '0.9rem' }}>No wishlist yet.</span>
+              )}
+              {wishTags.map(tag => (
+                <span key={tag} style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '6px',
+                  backgroundColor: '#00ccff', color: '#000',
+                  borderRadius: '20px', padding: '4px 12px',
+                  fontSize: '13px', fontWeight: 600,
+                }}>
+                  {tag}
+                  {isOwner && (
+                    <button
+                      onClick={() => removeTag(tag)}
+                      style={{
+                        background: 'transparent', border: 'none',
+                        cursor: 'pointer', padding: '0', lineHeight: 1,
+                        color: '#005566', fontSize: '14px', fontWeight: 'bold',
+                      }}
+                      aria-label={`Remove ${tag}`}
+                    >
+                      ×
+                    </button>
+                  )}
+                </span>
+              ))}
+            </div>
+
+            {/* Tag input — owner only, always visible (not tied to isEditing) */}
+            {isOwner && (
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input
+                  type="text"
+                  value={tagInput}
+                  placeholder="Add an item..."
+                  onChange={e => setTagInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }}
+                  style={{
+                    flex: 1, backgroundColor: '#fff', color: '#2D241E',
+                    border: '1px solid #ddd', padding: '6px 10px',
+                    borderRadius: '6px', fontSize: '13px', outline: 'none',
+                  }}
+                />
+                <button
+                  onClick={addTag}
+                  style={{
+                    backgroundColor: '#00ccff', color: '#000',
+                    border: 'none', borderRadius: '6px',
+                    padding: '6px 14px', fontWeight: 600,
+                    fontSize: '13px', cursor: 'pointer',
+                  }}
+                >
+                  Add
+                </button>
+              </div>
             )}
           </div>
         </div>
