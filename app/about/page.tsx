@@ -4,6 +4,82 @@ import { useState } from 'react';
 import type React from 'react';
 import { ChevronDown } from 'lucide-react';
 
+const pageStyle: React.CSSProperties = {
+  backgroundColor: '#fff',
+  minHeight: '100vh',
+  padding: '40px 20px',
+};
+
+const containerStyle: React.CSSProperties = {
+  maxWidth: '720px',
+  margin: '0 auto',
+};
+
+const h1Style: React.CSSProperties = {
+  fontSize: '2rem',
+  fontWeight: 800,
+  color: '#2D241E',
+  marginBottom: '32px',
+};
+
+const headerBtnStyle: React.CSSProperties = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  width: '100%',
+  background: 'none',
+  border: 'none',
+  padding: '20px 0',
+  cursor: 'pointer',
+  textAlign: 'left' as const,
+};
+
+const sectionTitleStyle: React.CSSProperties = {
+  fontSize: '1rem',
+  fontWeight: 700,
+  color: '#2D241E',
+  textTransform: 'uppercase' as const,
+  letterSpacing: '0.05em',
+};
+
+const bodyStyle: React.CSSProperties = {
+  paddingBottom: '20px',
+};
+
+const pStyle: React.CSSProperties = {
+  fontSize: '0.95rem',
+  color: '#555',
+  lineHeight: 1.7,
+  marginBottom: '16px',
+};
+
+const figureStyle: React.CSSProperties = {
+  margin: '16px 0 24px',
+};
+
+const chartStyle: React.CSSProperties = {
+  width: '100%',
+  height: 'auto',
+  display: 'block',
+  borderRadius: '8px',
+  border: '1px solid #e5e5e5',
+};
+
+const captionStyle: React.CSSProperties = {
+  fontSize: '0.75rem',
+  color: '#aaa',
+  marginTop: '6px',
+};
+
+const emailLinkStyle: React.CSSProperties = {
+  display: 'inline-block',
+  marginTop: '6px',
+  fontSize: '1rem',
+  fontWeight: 600,
+  color: '#00aacc',
+  textDecoration: 'none',
+};
+
 const SECTIONS = [
   {
     title: 'What Is This?',
@@ -18,7 +94,7 @@ const SECTIONS = [
     ),
   },
   {
-    title: 'Why It\'s Needed',
+    title: "Why It's Needed",
     content: (
       <div>
         <p style={pStyle}>
@@ -149,79 +225,3 @@ export default function AboutPage() {
     </div>
   );
 }
-
-const pageStyle: React.CSSProperties = {
-  backgroundColor: '#fff',
-  minHeight: '100vh',
-  padding: '40px 20px',
-};
-
-const containerStyle: React.CSSProperties = {
-  maxWidth: '720px',
-  margin: '0 auto',
-};
-
-const h1Style: React.CSSProperties = {
-  fontSize: '2rem',
-  fontWeight: 800,
-  color: '#2D241E',
-  marginBottom: '32px',
-};
-
-const headerBtnStyle: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  width: '100%',
-  background: 'none',
-  border: 'none',
-  padding: '20px 0',
-  cursor: 'pointer',
-  textAlign: 'left' as const,
-};
-
-const sectionTitleStyle: React.CSSProperties = {
-  fontSize: '1rem',
-  fontWeight: 700,
-  color: '#2D241E',
-  textTransform: 'uppercase' as const,
-  letterSpacing: '0.05em',
-};
-
-const bodyStyle: React.CSSProperties = {
-  paddingBottom: '20px',
-};
-
-const pStyle: React.CSSProperties = {
-  fontSize: '0.95rem',
-  color: '#555',
-  lineHeight: 1.7,
-  marginBottom: '16px',
-};
-
-const figureStyle: React.CSSProperties = {
-  margin: '16px 0 24px',
-};
-
-const chartStyle: React.CSSProperties = {
-  width: '100%',
-  height: 'auto',
-  display: 'block',
-  borderRadius: '8px',
-  border: '1px solid #e5e5e5',
-};
-
-const captionStyle: React.CSSProperties = {
-  fontSize: '0.75rem',
-  color: '#aaa',
-  marginTop: '6px',
-};
-
-const emailLinkStyle: React.CSSProperties = {
-  display: 'inline-block',
-  marginTop: '6px',
-  fontSize: '1rem',
-  fontWeight: 600,
-  color: '#00aacc',
-  textDecoration: 'none',
-};
