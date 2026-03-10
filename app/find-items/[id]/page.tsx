@@ -2,9 +2,10 @@
 
 import { useEffect, useState, use } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { MapPin, User, Package, ChevronLeft, Shield, AlertTriangle, Calendar } from 'lucide-react';
+import { MapPin, User, ChevronLeft, Shield, AlertTriangle, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import RequestModal from '@/components/RequestModal'; // Assuming this is your path
+import PolaroidPhoto from '@/components/PolaroidPhoto';
 
 export default function ItemDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -59,13 +60,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
       <div style={contentGrid}>
         {/* Left column: photo + button */}
         <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '12px' }}>
-          <div style={imageWrapper}>
-            {item.image_urls?.[0] ? (
-              <img src={item.image_urls[0]} alt={item.item_name} style={fullImgStyle} />
-            ) : (
-              <div style={noImgStyle}><Package size={48} /></div>
-            )}
-          </div>
+          <PolaroidPhoto src={item.image_urls?.[0]} alt={item.item_name} itemId={item.id} imageHeight={220} />
           <button
             style={borrowButtonStyle}
             onClick={() => setIsModalOpen(true)}
@@ -141,9 +136,6 @@ const priceTag: React.CSSProperties = { display: 'flex', alignItems: 'center', g
 const containerStyle: React.CSSProperties = { padding: '32px 20px', maxWidth: '1000px', margin: '0 auto', color: '#2D241E' };
 const backLinkStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '5px', color: '#00ccff', textDecoration: 'none', marginBottom: '20px', fontWeight: 'bold' };
 const contentGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '28px' };
-const imageWrapper: React.CSSProperties = { borderRadius: '16px', overflow: 'hidden', backgroundColor: '#f0f0f0', height: '260px', border: '1px solid #e5e5e5' };
-const fullImgStyle: React.CSSProperties = { width: '100%', height: '100%', objectFit: 'cover' as const };
-const noImgStyle: React.CSSProperties = { height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccc' };
 const detailsPane: React.CSSProperties = { display: 'flex', flexDirection: 'column' as const, gap: '8px' };
 const titleStyle: React.CSSProperties = { fontSize: '26px', fontWeight: 'bold', margin: 0, color: '#2D241E' };
 const categoryStyle: React.CSSProperties = { color: '#00aacc', fontWeight: 'bold', fontSize: '13px', textTransform: 'uppercase' as const, marginBottom: '8px', letterSpacing: '0.05em' };
