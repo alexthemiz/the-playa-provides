@@ -138,12 +138,12 @@ export default function Header() {
   const hoverEffect = 'hover:text-[#00ccff]' // Updated to match your accent color preference
 
   return (
-    <header className="border-b border-[#A66D51] sticky top-0 z-50 shadow-sm" style={headerBg}>
+    <header className="w-full border-b border-[#A66D51] sticky top-0 z-50 shadow-sm" style={headerBg}>
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
       <Link href="/" className="hover:opacity-80 transition flex flex-col leading-tight">
         <span className={`font-black text-xl uppercase tracking-tighter ${mainTextColor}`}>The Playa Provides</span>
         {user && (
-          <span className={`hidden sm:block text-[13px] font-medium ${mainTextColor} opacity-60 normal-case tracking-normal`}>Why let your stuff collect dust in storage when it could be earning dust on playa?</span>
+          <span className={`hidden lg:block text-[13px] font-medium ${mainTextColor} opacity-60 normal-case tracking-normal`}>Why let your stuff collect dust in storage when it could be earning dust on playa?</span>
         )}
       </Link>
 
