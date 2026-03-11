@@ -143,7 +143,7 @@ export default function Header() {
       <Link href="/" className="hover:opacity-80 transition flex flex-col leading-tight">
         <span className={`font-black text-xl uppercase tracking-tighter ${mainTextColor}`}>The Playa Provides</span>
         {user && (
-          <span className={`text-[13px] font-medium ${mainTextColor} opacity-60 normal-case tracking-normal`}>Why let your stuff collect dust in storage when it could be earning dust on playa?</span>
+          <span className={`hidden sm:block text-[13px] font-medium ${mainTextColor} opacity-60 normal-case tracking-normal`}>Why let your stuff collect dust in storage when it could be earning dust on playa?</span>
         )}
       </Link>
 
@@ -154,7 +154,7 @@ export default function Header() {
           <Link href="/find-items" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>
             Find Items
           </Link>
-          <Link href="/list-item" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>
+          <Link href="/list-item" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition whitespace-nowrap`}>
             Offer an Item
           </Link>
 
