@@ -101,35 +101,56 @@ return (
           <p className="text-stone-600 mb-6">New submissions are being reviewed. Check back soon!</p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column' as const }}>
-          {/* List header */}
-          <div style={listHeaderStyle}>
-            <div />
-            <div>Camp</div>
-            <div>Category</div>
-            <div>Service</div>
-            <div>2026 Playa<br />Address</div>
-            <div>Home Base</div>
-            <div>Website</div>
-            <div>Accepting New<br />Campers?</div>
-          </div>
+        <div style={cardGridStyle}>
           {resources.map((res) => {
             const homebase = [res.homebase_city, res.homebase_state].filter(Boolean).join(', ');
             return (
-              <div key={res.id} style={listRowStyle}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div key={res.id} style={cardStyle}>
+                {/* Card header: icon + category pill */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                  <span style={categoryPillStyle}>{res.offering_category}</span>
                   {getIcon(res.offering_category)}
                 </div>
-                <div style={{ fontWeight: '600', color: '#111', fontSize: '14px' }}>{res.camp_name}</div>
-                <div style={{ ...listColStyle, fontWeight: '700', color: '#C08261', textTransform: 'uppercase' as const, fontSize: '11px' }}>{res.offering_category}</div>
-                <div style={listColStyle}>{res.description || '—'}</div>
-                <div style={{ ...listColStyle, color: '#999' }}>{res.location_address || 'TBD'}</div>
-                <div style={listColStyle}>{homebase || '—'}</div>
-                <div style={listColStyle}>
-                  {res.website ? <a href={res.website} target="_blank" rel="noreferrer" style={{ color: '#00ccff', textDecoration: 'none' }}>{res.website.replace(/^https?:\/\//, '')}</a> : '—'}
+
+                {/* Camp name */}
+                <div style={{ fontWeight: '700', color: '#2D241E', fontSize: '16px', marginBottom: '6px', lineHeight: 1.3 }}>
+                  {res.camp_name}
                 </div>
-                <div style={{ textAlign: 'center' as const }}>
-                  {res.accepting_campers ? <span style={{ color: '#16a34a', fontSize: '16px' }}>✓</span> : ''}
+
+                {/* Service description */}
+                {res.description && (
+                  <div style={{ fontSize: '13px', color: '#666', lineHeight: 1.5, marginBottom: '12px' }}>
+                    {res.description}
+                  </div>
+                )}
+
+                {/* Footer meta */}
+                <div style={{ marginTop: 'auto', borderTop: '1px solid #f0f0f0', paddingTop: '10px', display: 'flex', flexDirection: 'column' as const, gap: '4px' }}>
+                  {res.location_address && (
+                    <div style={metaRowStyle}>
+                      <span style={metaLabelStyle}>Playa</span>
+                      <span style={metaValueStyle}>{res.location_address}</span>
+                    </div>
+                  )}
+                  {homebase && (
+                    <div style={metaRowStyle}>
+                      <span style={metaLabelStyle}>Home base</span>
+                      <span style={metaValueStyle}>{homebase}</span>
+                    </div>
+                  )}
+                  {res.website && (
+                    <div style={metaRowStyle}>
+                      <span style={metaLabelStyle}>Web</span>
+                      <a href={res.website} target="_blank" rel="noreferrer" style={{ fontSize: '12px', color: '#00aacc', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>
+                        {res.website.replace(/^https?:\/\//, '')}
+                      </a>
+                    </div>
+                  )}
+                  {res.accepting_campers && (
+                    <div style={{ marginTop: '6px' }}>
+                      <span style={acceptingBadgeStyle}>Accepting new campers</span>
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -145,7 +166,61 @@ return (
 );
 }
 
-const LIST_COLS = '40px 160px 120px 1fr 120px 120px 140px 120px';
-const listHeaderStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: LIST_COLS, gap: '10px', padding: '8px 12px', fontSize: '10px', fontWeight: '700', color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '2px solid #eee' };
-const listRowStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: LIST_COLS, gap: '10px', alignItems: 'center', padding: '12px 12px', backgroundColor: '#fff', borderBottom: '1px solid #f5f5f5' };
-const listColStyle: React.CSSProperties = { fontSize: '13px', color: '#555', overflow: 'hidden', whiteSpace: 'nowrap' as const, textOverflow: 'ellipsis' };
+const cardGridStyle: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+  gap: '20px',
+};
+
+const cardStyle: React.CSSProperties = {
+  backgroundColor: '#fff',
+  border: '1px solid #eee',
+  borderRadius: '16px',
+  padding: '18px',
+  display: 'flex',
+  flexDirection: 'column' as const,
+  boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+};
+
+const categoryPillStyle: React.CSSProperties = {
+  fontSize: '10px',
+  fontWeight: '700',
+  color: '#C08261',
+  textTransform: 'uppercase' as const,
+  letterSpacing: '0.07em',
+  backgroundColor: '#fdf3ec',
+  borderRadius: '99px',
+  padding: '3px 10px',
+};
+
+const metaRowStyle: React.CSSProperties = {
+  display: 'flex',
+  gap: '8px',
+  alignItems: 'baseline',
+};
+
+const metaLabelStyle: React.CSSProperties = {
+  fontSize: '10px',
+  fontWeight: '700',
+  color: '#bbb',
+  textTransform: 'uppercase' as const,
+  letterSpacing: '0.05em',
+  flexShrink: 0,
+  width: '58px',
+};
+
+const metaValueStyle: React.CSSProperties = {
+  fontSize: '12px',
+  color: '#555',
+};
+
+const acceptingBadgeStyle: React.CSSProperties = {
+  display: 'inline-block',
+  fontSize: '11px',
+  fontWeight: '600',
+  color: '#16a34a',
+  backgroundColor: '#f0fdf4',
+  border: '1px solid #bbf7d0',
+  borderRadius: '99px',
+  padding: '2px 10px',
+};
