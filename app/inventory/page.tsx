@@ -28,6 +28,8 @@ export default function InventoryPage() {
   const [activeLoans, setActiveLoans] = useState<any[]>([]);
   const [inboundTransfers, setInboundTransfers] = useState<any[]>([]);
   const [inboundLoans, setInboundLoans] = useState<any[]>([]);
+  const [incomingRequests, setIncomingRequests] = useState<any[]>([]);
+  const [outgoingRequests, setOutgoingRequests] = useState<any[]>([]);
   const [transferItem, setTransferItem] = useState<any>(null);
   const [lendItem, setLendItem] = useState<any>(null);
 
@@ -97,6 +99,44 @@ export default function InventoryPage() {
           .eq('borrower_id', user.id)
           .in('status', ['pending_handover', 'active']);
         setInboundLoans(inboundLoanData || []);
+
+        const { data: incomingRequestData } = await supabase
+          .from('item_requests')
+          .select(`
+            id,
+            item_id,
+            request_kind,
+            message,
+            requester_name,
+            requester_email,
+            desired_pickup_date,
+            created_at,
+            gear_items(item_name),
+            requester:profiles!item_requests_requester_id_fkey(preferred_name, username)
+          `)
+          .eq('owner_id', user.id)
+          .eq('status', 'pending')
+          .order('created_at', { ascending: false });
+        setIncomingRequests(incomingRequestData || []);
+
+        const { data: outgoingRequestData } = await supabase
+          .from('item_requests')
+          .select(`
+            id,
+            item_id,
+            request_kind,
+            message,
+            requester_name,
+            requester_email,
+            desired_pickup_date,
+            created_at,
+            gear_items(item_name),
+            owner:profiles!item_requests_owner_id_fkey(preferred_name, username)
+          `)
+          .eq('requester_id', user.id)
+          .eq('status', 'pending')
+          .order('created_at', { ascending: false });
+        setOutgoingRequests(outgoingRequestData || []);
       }
     } catch (err) {
       console.error('fetchMyInventory error:', err);
@@ -277,7 +317,7 @@ export default function InventoryPage() {
       return (
         <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '4px' }}>
           <span style={pendingBadgeStyle}>Pending Handover</span>
-          <button onClick={() => handleOwnerConfirmTransfer(transfer)} style={handsOverButtonStyle}>I've Handed It Over</button>
+          <button onClick={() => handleOwnerConfirmTransfer(transfer)} style={handsOverButtonStyle}>I&apos;ve Handed It Over</button>
           <button onClick={() => handleCancelTransfer(transfer)} style={cancelActionButtonStyle}>Cancel</button>
         </div>
       );
@@ -299,8 +339,24 @@ export default function InventoryPage() {
       return (
         <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '4px' }}>
           <span style={pendingBadgeStyle}>Pending Handover</span>
-          <button onClick={() => handleOwnerConfirmPickup(loan)} style={handsOverButtonStyle}>I've Handed It Over</button>
+          <button onClick={() => handleOwnerConfirmPickup(loan)} style={handsOverButtonStyle}>I&apos;ve Handed It Over</button>
           <button onClick={() => handleCancelLoan(loan)} style={cancelActionButtonStyle}>Cancel</button>
+        </div>
+      );
+    }
+
+    const pendingRequest = incomingRequests.find(request => request.item_id === item.id);
+    if (pendingRequest) {
+      const requesterName =
+        pendingRequest.requester?.preferred_name ||
+        pendingRequest.requester?.username ||
+        pendingRequest.requester_name ||
+        'requester';
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '4px' }}>
+          <span style={pendingBadgeStyle}>Requested</span>
+          <span style={{ fontSize: '0.75rem', color: '#888' }}>Requested by {requesterName}</span>
+          <span style={{ fontSize: '0.7rem', color: '#a06040' }}>{formatRequestKind(pendingRequest.request_kind)}</span>
         </div>
       );
     }
@@ -504,6 +560,59 @@ export default function InventoryPage() {
         </div>
       )}
 
+      {/* INCOMING ITEM REQUESTS */}
+      {incomingRequests.length > 0 && (
+        <div style={{ marginTop: '40px' }}>
+          <h2 style={{ color: '#2D241E', fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
+            Incoming Item Requests
+          </h2>
+          <div style={tableContainerStyle}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const }}>
+              <thead>
+                <tr style={headerRowStyle}>
+                  <th style={thStyle}>Item</th>
+                  <th style={thStyle}>Requested By</th>
+                  <th style={thStyle}>Request</th>
+                  <th style={thStyle}>Pickup</th>
+                  <th style={thStyle}>Message</th>
+                  <th style={thStyle}>Contact</th>
+                </tr>
+              </thead>
+              <tbody>
+                {incomingRequests.map(request => {
+                  const requesterName =
+                    request.requester?.preferred_name ||
+                    request.requester?.username ||
+                    request.requester_name ||
+                    '—';
+                  const itemName = request.gear_items?.item_name || '—';
+                  const requestedAt = request.created_at ? formatShortDate(request.created_at) : '—';
+                  return (
+                    <tr key={request.id} style={rowStyle}>
+                      <td style={{ ...tdStyle, fontWeight: 600, color: '#2D241E' }}>{itemName}</td>
+                      <td style={tdStyle}>
+                        <div>{requesterName}</div>
+                        <div style={secondaryCellTextStyle}>Requested {requestedAt}</div>
+                      </td>
+                      <td style={tdStyle}>{formatRequestKind(request.request_kind)}</td>
+                      <td style={tdStyle}>{request.desired_pickup_date ? formatShortDate(request.desired_pickup_date) : 'Flexible'}</td>
+                      <td style={{ ...tdStyle, maxWidth: '320px' }}>{request.message || '—'}</td>
+                      <td style={tdStyle}>
+                        {request.requester_email ? (
+                          <a href={`mailto:${request.requester_email}`} style={contactLinkStyle}>
+                            {request.requester_email}
+                          </a>
+                        ) : '—'}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {/* ITEMS OUT ON LOAN */}
       {activeLoans.filter(l => ['active', 'return_pending'].includes(l.status)).length > 0 && (
         <div style={{ marginTop: '40px' }}>
@@ -600,11 +709,59 @@ export default function InventoryPage() {
         </div>
       )}
 
+      {/* REQUESTED ITEMS */}
+      {outgoingRequests.length > 0 && (
+        <div style={{ marginTop: '40px' }}>
+          <h2 style={{ color: '#2D241E', fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
+            Requested Items
+          </h2>
+          <div style={tableContainerStyle}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const }}>
+              <thead>
+                <tr style={headerRowStyle}>
+                  <th style={thStyle}>Item</th>
+                  <th style={thStyle}>Provider</th>
+                  <th style={thStyle}>Request</th>
+                  <th style={thStyle}>Pickup</th>
+                  <th style={thStyle}>Message</th>
+                  <th style={thStyle}>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {outgoingRequests.map(request => {
+                  const ownerName =
+                    request.owner?.preferred_name ||
+                    request.owner?.username ||
+                    '—';
+                  const itemName = request.gear_items?.item_name || '—';
+                  const requestedAt = request.created_at ? formatShortDate(request.created_at) : '—';
+                  return (
+                    <tr key={request.id} style={rowStyle}>
+                      <td style={{ ...tdStyle, fontWeight: 600, color: '#2D241E' }}>{itemName}</td>
+                      <td style={tdStyle}>
+                        <div>{ownerName}</div>
+                        <div style={secondaryCellTextStyle}>Requested {requestedAt}</div>
+                      </td>
+                      <td style={tdStyle}>{formatRequestKind(request.request_kind)}</td>
+                      <td style={tdStyle}>{request.desired_pickup_date ? formatShortDate(request.desired_pickup_date) : 'Flexible'}</td>
+                      <td style={{ ...tdStyle, maxWidth: '320px' }}>{request.message || '—'}</td>
+                      <td style={tdStyle}>
+                        <span style={pendingBadgeStyle}>Pending</span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {/* ITEMS I'M BORROWING */}
       {inboundLoans.length > 0 && (
         <div style={{ marginTop: '40px' }}>
           <h2 style={{ color: '#2D241E', fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
-            Items I'm Borrowing
+            Items I&apos;m Borrowing
           </h2>
           <div style={tableContainerStyle}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const }}>
@@ -639,7 +796,7 @@ export default function InventoryPage() {
                           <button onClick={() => handleBorrowerConfirmPickup(loan)} style={handsOverButtonStyle}>Got It</button>
                         )}
                         {loan.status === 'active' && (
-                          <button onClick={() => handleBorrowerConfirmReturn(loan)} style={cancelActionButtonStyle}>I've Returned It</button>
+                          <button onClick={() => handleBorrowerConfirmReturn(loan)} style={cancelActionButtonStyle}>I&apos;ve Returned It</button>
                         )}
                       </td>
                     </tr>
@@ -706,6 +863,22 @@ export default function InventoryPage() {
 }
 
 // --- STATUS TOGGLE STYLE ---
+function formatShortDate(value: string) {
+  const normalizedValue = /^\d{4}-\d{2}-\d{2}$/.test(value)
+    ? `${value}T12:00:00`
+    : value;
+
+  return new Date(normalizedValue).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+function formatRequestKind(requestKind: string | null | undefined) {
+  return requestKind === 'keep' ? 'Asked to Keep' : 'Asked to Borrow';
+}
+
 function getStatusToggleStyle(optionValue: string, currentStatus: string): React.CSSProperties {
   const isActive = optionValue === currentStatus;
   if (optionValue === 'Available to Borrow') {
@@ -731,6 +904,8 @@ const rowStyle: React.CSSProperties = { borderBottom: '1px solid #f0f0f0' };
 const thumbnailStyle: React.CSSProperties = { width: '50px', height: '50px', backgroundColor: '#f0f0f0', borderRadius: '6px', overflow: 'hidden', flexShrink: 0, border: '1px solid #e5e5e5' };
 const editLinkStyle: React.CSSProperties = { background: 'none', border: 'none', color: '#00aacc', fontSize: '0.75rem', padding: 0, cursor: 'pointer', textDecoration: 'underline', marginTop: '4px', display: 'block' };
 const csvButtonStyle: React.CSSProperties = { background: 'none', border: 'none', color: '#aaa', cursor: 'pointer', fontSize: '0.85rem', textDecoration: 'underline' };
+const secondaryCellTextStyle: React.CSSProperties = { marginTop: '4px', fontSize: '0.75rem', color: '#888' };
+const contactLinkStyle: React.CSSProperties = { color: '#00aacc', textDecoration: 'none', fontSize: '0.85rem', wordBreak: 'break-word' as const };
 const locationDropdownStyle: React.CSSProperties = { position: 'absolute' as const, top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #ddd', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', zIndex: 100, marginTop: '4px', padding: '8px' };
 const locationOptionStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 4px', cursor: 'pointer', borderRadius: '4px' };
 

@@ -5,6 +5,7 @@ import { X, Send, AlertTriangle, Calendar, Shield } from 'lucide-react';
 interface RequestModalProps {
   item: any;
   onClose: () => void;
+  onRequested?: () => void;
 }
 
 function buildInitialMessage(item: any): string {
@@ -20,7 +21,7 @@ function buildInitialMessage(item: any): string {
   return `Hi! I'm interested in your ${item.item_name}. Is it still available?`;
 }
 
-export default function RequestModal({ item, onClose }: RequestModalProps) {
+export default function RequestModal({ item, onClose, onRequested }: RequestModalProps) {
   const [message, setMessage] = useState(() => buildInitialMessage(item));
   const [pickupDate, setPickupDate] = useState('');
   const [sending, setSending] = useState(false);
@@ -51,27 +52,35 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
     setSending(true);
     setSendError('');
     try {
-      const fullMessage = pickupDate
-        ? `Desired pickup date: ${new Date(pickupDate + 'T12:00:00').toLocaleDateString()}\n\n${message}`
-        : message;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('Please log in to send a request.');
+      }
 
-      const { data, error } = await supabase.functions.invoke('send-request-email', {
+      const { error } = await supabase.functions.invoke('send-request-email', {
         body: {
           itemId: item.id,
           ownerId: item.user_id,
-          message: fullMessage,
+          message,
           itemName: item.item_name,
           requesterName,
           requesterEmail,
+          desiredPickupDate: pickupDate || null,
         },
       });
 
       if (error) throw error;
       setSent(true);
-      setTimeout(() => onClose(), 2000);
-    } catch (err) {
+      setTimeout(() => {
+        if (onRequested) onRequested();
+        else onClose();
+      }, 2000);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error
+        ? err.message
+        : 'Something went wrong sending your request. Please try again.';
       console.error('Error:', err);
-      setSendError('Something went wrong sending your request. Please try again.');
+      setSendError(errorMessage);
     } finally {
       setSending(false);
     }
@@ -133,7 +142,7 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
                   {item.return_terms && (
                     <div className="bg-gray-50 rounded-xl border border-gray-100 p-3 flex-1">
                       <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Return Condition</h4>
-                      <p className="text-sm text-gray-800 italic">"{item.return_terms}"</p>
+                      <p className="text-sm text-gray-800 italic">&quot;{item.return_terms}&quot;</p>
                     </div>
                   )}
                 </div>
@@ -141,7 +150,7 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
               {/* --- END BORROWING TERMS --- */}
 
               <div className="mb-4">
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">When I'd like to pick up by</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">When I&apos;d like to pick up by</label>
                 <input
                   type="date"
                   value={pickupDate}

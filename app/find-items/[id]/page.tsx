@@ -49,7 +49,8 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
   if (loading) return <div style={containerStyle}><p>Loading gear...</p></div>;
   if (!item) return <div style={containerStyle}><p>Gear not found.</p></div>;
 
-  const isGift = item.availability_status === 'You can keep it';
+  const isGift = item.availability_status === 'Available to Keep';
+  const isUnavailable = item.availability_status === 'Not Available';
 
   return (
     <div style={containerStyle}>
@@ -61,11 +62,22 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
         {/* Left column: photo + button */}
         <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '12px' }}>
           <PolaroidPhoto src={item.image_urls?.[0]} alt={item.item_name} itemId={item.id} />
+          {isUnavailable && (
+            <div style={unavailableBannerStyle}>
+              This item is no longer available. The owner may reopen it later if the request falls through.
+            </div>
+          )}
           <button
-            style={borrowButtonStyle}
-            onClick={() => setIsModalOpen(true)}
+            style={{
+              ...borrowButtonStyle,
+              ...(isUnavailable ? disabledBorrowButtonStyle : null),
+            }}
+            onClick={() => {
+              if (!isUnavailable) setIsModalOpen(true);
+            }}
+            disabled={isUnavailable}
           >
-            Request Item
+            {isUnavailable ? 'No Longer Available' : 'Request Item'}
           </button>
         </div>
 
@@ -95,7 +107,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
               {item.return_terms && (
                 <div style={returnTermsBox}>
                   <p style={{ margin: 0, fontSize: '12px', color: '#888', marginBottom: '4px', textTransform: 'uppercase' as const, fontWeight: 'bold' }}>Condition of Return</p>
-                  <p style={{ margin: 0, fontStyle: 'italic' as const, color: '#444' }}>"{item.return_terms}"</p>
+                  <p style={{ margin: 0, fontStyle: 'italic' as const, color: '#444' }}>&quot;{item.return_terms}&quot;</p>
                 </div>
               )}
 
@@ -122,7 +134,14 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
       </div>
 
       {isModalOpen && (
-        <RequestModal item={item} onClose={() => setIsModalOpen(false)} />
+        <RequestModal
+          item={item}
+          onClose={() => setIsModalOpen(false)}
+          onRequested={() => {
+            setIsModalOpen(false);
+            setItem((current: typeof item) => current ? { ...current, availability_status: 'Not Available' } : current);
+          }}
+        />
       )}
     </div>
   );
@@ -145,3 +164,5 @@ const descSection: React.CSSProperties = { backgroundColor: '#f7f7f7', padding: 
 const labelStyle: React.CSSProperties = { color: '#888', fontSize: '11px', textTransform: 'uppercase' as const, marginBottom: '8px', letterSpacing: '1px', fontWeight: 700 };
 const descText: React.CSSProperties = { lineHeight: '1.7', color: '#444', fontSize: '14px', margin: 0 };
 const borrowButtonStyle: React.CSSProperties = { padding: '14px', borderRadius: '10px', border: 'none', backgroundColor: '#00ccff', color: '#000', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer', width: '100%' };
+const disabledBorrowButtonStyle: React.CSSProperties = { backgroundColor: '#e5e7eb', color: '#6b7280', cursor: 'not-allowed' };
+const unavailableBannerStyle: React.CSSProperties = { padding: '12px 14px', borderRadius: '10px', border: '1px solid #fdba74', backgroundColor: '#fff7ed', color: '#9a3412', fontSize: '0.88rem', lineHeight: 1.5 };

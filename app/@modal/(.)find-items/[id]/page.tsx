@@ -49,6 +49,7 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
   }, [resolvedParams.id]);
 
   const close = () => router.back();
+  const isUnavailable = item?.availability_status === 'Not Available';
 
   return (
     <div style={overlayStyle} onClick={close}>
@@ -81,9 +82,20 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
               
               <h4 style={sectionLabelStyle}>Description</h4>
               <p style={descriptionStyle}>{item.description || 'No description provided.'}</p>
+              {isUnavailable && (
+                <div style={unavailableBannerStyle}>
+                  This item is no longer available.
+                </div>
+              )}
               
-              <button style={actionButtonStyle}>
-                Request to Borrow
+              <button
+                style={{
+                  ...actionButtonStyle,
+                  ...(isUnavailable ? disabledActionButtonStyle : null),
+                }}
+                disabled={isUnavailable}
+              >
+                {isUnavailable ? 'No Longer Available' : 'Request to Borrow'}
               </button>
             </div>
           </div>
@@ -126,3 +138,5 @@ const actionButtonStyle: React.CSSProperties = {
   width: '100%', padding: '15px', borderRadius: '12px', border: 'none',
   backgroundColor: '#00ccff', color: '#000', fontWeight: 'bold', cursor: 'pointer', fontSize: '16px'
 };
+const disabledActionButtonStyle: React.CSSProperties = { backgroundColor: '#374151', color: '#9ca3af', cursor: 'not-allowed' };
+const unavailableBannerStyle: React.CSSProperties = { marginBottom: '20px', padding: '12px 14px', borderRadius: '10px', border: '1px solid #92400e', backgroundColor: '#1c1917', color: '#fdba74', fontSize: '0.88rem', lineHeight: 1.5 };

@@ -118,6 +118,11 @@ export default function FindItemsPage() {
     window.history.pushState(null, '', '/find-items');
   };
 
+  const handleRequestCreated = (itemId: string) => {
+    setItems(prev => prev.filter(item => item.id !== itemId));
+    handleCloseModal();
+  };
+
   const toggleCategory = (cat: string) => {
     if (cat === 'All') {
       setCategoryFilters(['All']);
@@ -296,6 +301,11 @@ export default function FindItemsPage() {
         <div style={modalOverlayStyle} onClick={handleCloseModal}>
           <div style={modalContentStyle} onClick={e => e.stopPropagation()}>
             <button onClick={handleCloseModal} style={closeButtonStyle}><X size={24} /></button>
+            {selectedItem.availability_status === 'Not Available' && (
+              <div style={unavailableNoticeStyle}>
+                This item is no longer available. Check back later in case the owner reopens it.
+              </div>
+            )}
             
             <div style={{ marginBottom: '20px' }}>
               <PolaroidPhoto src={selectedItem.image_urls?.[0]} alt={selectedItem.item_name} itemId={selectedItem.id} />
@@ -339,16 +349,22 @@ export default function FindItemsPage() {
                   </div>
                 )}
                 {selectedItem.return_terms && (
-                  <div style={{ color: '#666', fontStyle: 'italic' }}>"{selectedItem.return_terms}"</div>
+                  <div style={{ color: '#666', fontStyle: 'italic' }}>&quot;{selectedItem.return_terms}&quot;</div>
                 )}
               </div>
             )}
 
             <button
               onClick={() => setShowRequestForm(true)}
-              style={primaryButtonStyle}
+              disabled={selectedItem.availability_status === 'Not Available'}
+              style={{
+                ...primaryButtonStyle,
+                ...(selectedItem.availability_status === 'Not Available' ? disabledPrimaryButtonStyle : null),
+              }}
             >
-              Request to {selectedItem.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}
+              {selectedItem.availability_status === 'Not Available'
+                ? 'No Longer Available'
+                : `Request to ${selectedItem.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}`}
             </button>
           </div>
         </div>
@@ -358,7 +374,8 @@ export default function FindItemsPage() {
       {showRequestForm && selectedItem && (
         <RequestModal 
           item={selectedItem} 
-          onClose={() => setShowRequestForm(false)} 
+          onClose={() => setShowRequestForm(false)}
+          onRequested={() => handleRequestCreated(selectedItem.id)}
         />
       )}
     </div>
@@ -502,4 +519,20 @@ const primaryButtonStyle: React.CSSProperties = {
   width: '100%', padding: '18px', backgroundColor: '#00ccff', color: '#000', 
   border: 'none', borderRadius: '14px', fontWeight: 'bold', fontSize: '16px', 
   cursor: 'pointer', boxShadow: '0 4px 14px rgba(0,204,255,0.4)'
+};
+const disabledPrimaryButtonStyle: React.CSSProperties = {
+  backgroundColor: '#e5e7eb',
+  color: '#6b7280',
+  cursor: 'not-allowed',
+  boxShadow: 'none',
+};
+const unavailableNoticeStyle: React.CSSProperties = {
+  marginBottom: '16px',
+  padding: '12px 14px',
+  backgroundColor: '#fff7ed',
+  border: '1px solid #fdba74',
+  borderRadius: '12px',
+  color: '#9a3412',
+  fontSize: '0.9rem',
+  lineHeight: 1.5,
 };
