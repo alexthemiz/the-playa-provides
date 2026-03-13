@@ -53,23 +53,30 @@ const pStyle: React.CSSProperties = {
   marginBottom: '16px',
 };
 
-const figureStyle: React.CSSProperties = {
-  margin: '16px 0 24px',
+const whyRowStyle: React.CSSProperties = {
+  display: 'flex',
+  gap: '20px',
+  alignItems: 'flex-start',
+  marginBottom: '20px',
 };
 
-const chartStyle: React.CSSProperties = {
-  width: '50%',
+const sideFigureStyle: React.CSSProperties = {
+  flexShrink: 0,
+  width: '180px',
+};
+
+const sideChartStyle: React.CSSProperties = {
+  width: '100%',
   height: 'auto',
   display: 'block',
-  borderRadius: '8px',
+  borderRadius: '6px',
   border: '1px solid #e5e5e5',
-  margin: '0 auto',
 };
 
 const captionStyle: React.CSSProperties = {
-  fontSize: '0.75rem',
+  fontSize: '0.7rem',
   color: '#aaa',
-  marginTop: '6px',
+  marginTop: '4px',
   textAlign: 'center' as const,
 };
 
@@ -104,47 +111,55 @@ const SECTIONS = [
     title: "Why It's Needed",
     content: (
       <div>
-        <p style={pStyle}>
-          Getting to Black Rock City isn't cheap. According to the{' '}
-          <a href="https://blackrockcitycensus.org/" target="_blank" rel="noopener noreferrer" style={inlineLinkStyle}>
-            2024 Burning Man Census
-          </a>
-          , the median participant spends around $2,000 just to get to and from BRC.
-        </p>
-        <figure style={figureStyle}>
-          <img src="/Spend_to_and_from_BRC.png" alt="Chart: travel spend to/from BRC" style={chartStyle} />
-          <figcaption style={captionStyle}>Source: 2024 Burning Man Census</figcaption>
-        </figure>
+        <div style={whyRowStyle}>
+          <p style={{ ...pStyle, marginBottom: 0, flex: 1 }}>
+            Getting to Black Rock City isn't cheap. According to the{' '}
+            <a href="https://blackrockcitycensus.org/" target="_blank" rel="noopener noreferrer" style={inlineLinkStyle}>
+              2024 Burning Man Census
+            </a>
+            , the median participant spends around $2,000 just to get to and from BRC.
+          </p>
+          <figure style={sideFigureStyle}>
+            <img src="/Spend_to_and_from_BRC.png" alt="Chart: travel spend to/from BRC" style={sideChartStyle} />
+            <figcaption style={captionStyle}>Source: 2024 Burning Man Census</figcaption>
+          </figure>
+        </div>
 
-        <p style={pStyle}>
-          In Nevada alone, participants spend an average of around $750 per person on food,
-          fuel, lodging, and supplies.
-        </p>
-        <figure style={figureStyle}>
-          <img src="/Avg_spend_in_Nevada_per_participant.png" alt="Chart: average Nevada spend per participant" style={chartStyle} />
-          <figcaption style={captionStyle}>Source: 2024 Burning Man Census</figcaption>
-        </figure>
+        <div style={whyRowStyle}>
+          <p style={{ ...pStyle, marginBottom: 0, flex: 1 }}>
+            In Nevada alone, participants spend an average of around $750 per person on food,
+            fuel, lodging, and supplies.
+          </p>
+          <figure style={sideFigureStyle}>
+            <img src="/Avg_spend_in_Nevada_per_participant.png" alt="Chart: average Nevada spend per participant" style={sideChartStyle} />
+            <figcaption style={captionStyle}>Source: 2024 Burning Man Census</figcaption>
+          </figure>
+        </div>
 
-        <p style={pStyle}>
-          About 1 in 3 attendees at any given Burn is a first-timer, buying gear from scratch,
-          often never to use it again.
-        </p>
-        <figure style={figureStyle}>
-          <img src="/Proportion_of_virgins.png" alt="Chart: proportion of first-timers" style={chartStyle} />
-          <figcaption style={captionStyle}>Source: 2024 Burning Man Census</figcaption>
-        </figure>
+        <div style={whyRowStyle}>
+          <p style={{ ...pStyle, marginBottom: 0, flex: 1 }}>
+            About 1 in 3 attendees at any given Burn is a first-timer, buying gear from scratch,
+            often never to use it again.
+          </p>
+          <figure style={sideFigureStyle}>
+            <img src="/Proportion_of_virgins.png" alt="Chart: proportion of first-timers" style={sideChartStyle} />
+            <figcaption style={captionStyle}>Source: 2024 Burning Man Census</figcaption>
+          </figure>
+        </div>
 
-        <p style={pStyle}>
-          And most people who have ever been to Burning Man have only gone once or twice.
-          That's a lot of tents, shade structures, and camp gear sitting in storage; gear that
-          could be going to the playa instead.
-        </p>
-        <figure style={figureStyle}>
-          <img src="/Number_of_burns_attended.png" alt="Chart: number of burns attended" style={chartStyle} />
-          <figcaption style={captionStyle}>Source: 2024 Burning Man Census</figcaption>
-        </figure>
+        <div style={whyRowStyle}>
+          <p style={{ ...pStyle, marginBottom: 0, flex: 1 }}>
+            And most people who have ever been to Burning Man have only gone once or twice.
+            That's a lot of tents, shade structures, and camp gear sitting in storage; gear that
+            could be going to the playa instead.
+          </p>
+          <figure style={sideFigureStyle}>
+            <img src="/Number_of_burns_attended.png" alt="Chart: number of burns attended" style={sideChartStyle} />
+            <figcaption style={captionStyle}>Source: 2024 Burning Man Census</figcaption>
+          </figure>
+        </div>
 
-        <p style={pStyle}>
+        <p style={{ ...pStyle, marginBottom: 0 }}>
           The gear already exists. It's sitting in storage units across the country. The Playa
           Provides gets it moving.
         </p>
