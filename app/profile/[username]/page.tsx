@@ -471,102 +471,46 @@ export default function PublicProfilePage() {
       {/* PROFILE HEADER */}
       <header style={{ marginTop: '30px', borderBottom: '1px solid #e5e5e5', paddingBottom: '30px' }}>
 
-        {/* ROW 1: Avatar + Name/Location | Wish List */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-          <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
-            {isEditing ? (
-              <AvatarUpload url={profile.avatar_url} onUpload={(url) => setProfile({ ...profile, avatar_url: url })} />
-            ) : (
-              <div style={{
-                width: '90px', height: '90px', borderRadius: '50%',
-                backgroundColor: '#f0f0f0',
-                backgroundImage: profile.avatar_url ? `url(${profile.avatar_url})` : 'none',
-                backgroundSize: 'cover', backgroundPosition: 'center',
-                border: '4px solid #C08261', flexShrink: 0,
-              }}>
-                {!profile.avatar_url && (
-                  <span style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', fontSize: '2rem', color: '#C08261' }}>
-                    {profile.preferred_name?.charAt(0)}
-                  </span>
-                )}
-              </div>
-            )}
-            <div style={{ flex: 1 }}>
-              {isEditing ? (
-                <input
-                  style={{ backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', fontSize: '1.5rem', width: '100%', padding: '5px', borderRadius: '6px' }}
-                  value={profile.preferred_name || ''}
-                  onChange={e => setProfile({ ...profile, preferred_name: e.target.value })}
-                />
-              ) : (
-                <h1 style={{ fontSize: '2.2rem', margin: 0, color: '#2D241E' }}>{profile.preferred_name || username}</h1>
-              )}
-              <p style={{ color: '#888', margin: '4px 0 0' }}>@{username}</p>
-              {locationStr && (
-                <p style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#999', fontSize: '0.85rem', margin: '4px 0 0' }}>
-                  <MapPin size={13} />{locationStr}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Wish List — always editable inline */}
-          <div>
-            <h4 style={subheadStyle}>Wish List</h4>
-            <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '8px', marginBottom: wishTags.length > 0 ? '12px' : '0' }}>
-              {wishTags.length === 0 && !isOwner && (
-                <span style={{ color: '#aaa', fontStyle: 'italic' as const, fontSize: '0.9rem' }}>No wishlist yet.</span>
-              )}
-              {wishTags.map(tag => (
-                <span key={tag} style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '6px',
-                  backgroundColor: '#00ccff', color: '#000',
-                  borderRadius: '20px', padding: '4px 12px',
-                  fontSize: '13px', fontWeight: 600,
-                }}>
-                  {tag}
-                  {isOwner && (
-                    <button onClick={() => removeTag(tag)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '0', lineHeight: 1, color: '#005566', fontSize: '14px', fontWeight: 'bold' }} aria-label={`Remove ${tag}`}>×</button>
-                  )}
+        {/* ROW 1: Avatar + Name / @username / Location / Social Links */}
+        <div style={{ display: 'flex', gap: '25px', alignItems: 'flex-start' }}>
+          {isEditing ? (
+            <AvatarUpload url={profile.avatar_url} onUpload={(url) => setProfile({ ...profile, avatar_url: url })} />
+          ) : (
+            <div style={{
+              width: '90px', height: '90px', borderRadius: '50%',
+              backgroundColor: '#f0f0f0',
+              backgroundImage: profile.avatar_url ? `url(${profile.avatar_url})` : 'none',
+              backgroundSize: 'cover', backgroundPosition: 'center',
+              border: '4px solid #C08261', flexShrink: 0,
+            }}>
+              {!profile.avatar_url && (
+                <span style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', fontSize: '2rem', color: '#C08261' }}>
+                  {profile.preferred_name?.charAt(0)}
                 </span>
-              ))}
+              )}
             </div>
-            {isOwner && (
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <input
-                  type="text"
-                  value={tagInput}
-                  placeholder="Add an item..."
-                  onChange={e => setTagInput(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }}
-                  disabled={tagSaving}
-                  style={{ flex: 1, backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', padding: '6px 10px', borderRadius: '6px', fontSize: '13px', outline: 'none', opacity: tagSaving ? 0.5 : 1 }}
-                />
-                <button onClick={addTag} disabled={tagSaving} style={{ backgroundColor: '#00ccff', color: '#000', border: 'none', borderRadius: '6px', padding: '6px 14px', fontWeight: 600, fontSize: '13px', cursor: tagSaving ? 'default' as const : 'pointer' as const, opacity: tagSaving ? 0.5 : 1 }}>
-                  Add
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+          )}
 
-        {/* ROW 2: Bio | Social Links */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginTop: '25px' }}>
-          <div>
-            <h4 style={subheadStyle}>Bio</h4>
+          <div style={{ flex: 1 }}>
             {isEditing ? (
-              <textarea style={editTextareaStyle} value={profile.bio || ''} onChange={e => setProfile({ ...profile, bio: e.target.value })} />
+              <input
+                style={{ backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', fontSize: '1.5rem', width: '100%', padding: '5px', borderRadius: '6px' }}
+                value={profile.preferred_name || ''}
+                onChange={e => setProfile({ ...profile, preferred_name: e.target.value })}
+              />
             ) : (
-              <p style={{ fontSize: '1rem', color: '#444', margin: 0, lineHeight: '1.6' }}>
-                {profile.bio || <span style={{ color: '#aaa', fontStyle: 'italic' as const }}>No bio yet.</span>}
+              <h1 style={{ fontSize: '2.2rem', margin: 0, color: '#2D241E' }}>{profile.preferred_name || username}</h1>
+            )}
+            <p style={{ color: '#888', margin: '4px 0 0' }}>@{username}</p>
+            {locationStr && (
+              <p style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#999', fontSize: '0.85rem', margin: '4px 0 0' }}>
+                <MapPin size={13} />{locationStr}
               </p>
             )}
-          </div>
 
-          <div>
-            <h4 style={subheadStyle}>Social Links</h4>
+            {/* Social links — view mode inline, edit form below */}
             {isEditing ? (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginTop: '12px' }}>
                 {[
                   { key: 'facebook',  label: 'Facebook' },
                   { key: 'instagram', label: 'Instagram' },
@@ -597,9 +541,9 @@ export default function PublicProfilePage() {
                 { key: 'eplaya',    label: 'ePlaya',    icon: null,                    color: '#8B4513' },
                 { key: 'website',   label: 'Website',   icon: <Globe size={14} />,     color: '#00aacc' },
               ].filter(s => links[s.key]);
-              if (SOCIAL.length === 0) return <span style={{ color: '#aaa', fontStyle: 'italic' as const, fontSize: '0.9rem' }}>No links yet.</span>;
+              if (SOCIAL.length === 0) return null;
               return (
-                <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '6px' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '6px', marginTop: '10px' }}>
                   {SOCIAL.map(s => (
                     <a key={s.key} href={links[s.key]} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 11px', borderRadius: '99px', backgroundColor: '#f5f5f5', border: '1px solid #e5e5e5', textDecoration: 'none', fontSize: '12px', fontWeight: 600, color: s.color }}>
                       {s.icon}{s.label}
@@ -611,43 +555,76 @@ export default function PublicProfilePage() {
           </div>
         </div>
 
-        {/* ROW 3: Playa Story | Playa History */}
+        {/* ROW 2: Bio | Wish List */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginTop: '25px' }}>
           <div>
-            <h4 style={subheadStyle}>Got a good "playa provides" story?</h4>
+            <h4 style={subheadStyle}>Bio</h4>
             {isEditing ? (
-              <textarea style={editTextareaStyle} value={profile.playa_story || ''} onChange={e => setProfile({ ...profile, playa_story: e.target.value })} placeholder="Share a time the playa provided..." />
+              <textarea style={editTextareaStyle} value={profile.bio || ''} onChange={e => setProfile({ ...profile, bio: e.target.value })} />
             ) : (
               <p style={{ fontSize: '1rem', color: '#444', margin: 0, lineHeight: '1.6' }}>
-                {profile.playa_story || <span style={{ color: '#aaa', fontStyle: 'italic' as const }}>No story yet.</span>}
+                {profile.bio || <span style={{ color: '#aaa', fontStyle: 'italic' as const }}>No bio yet.</span>}
               </p>
             )}
           </div>
 
           <div>
-            <h4 style={subheadStyle}>Playa History</h4>
-            {isEditing ? (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '5px', maxHeight: '150px', overflowY: 'auto' as const, border: '1px solid #e5e5e5', padding: '10px', borderRadius: '6px' }}>
-                {YEAR_OPTIONS.map(year => (
-                  <label key={year} style={{ fontSize: '0.75rem', color: '#2D241E', cursor: 'pointer' }}>
-                    <input type="checkbox" checked={profile.burning_man_years?.includes(year)} onChange={() => toggleYear(year)} style={{ marginRight: '4px' }} />
-                    {year}
-                  </label>
-                ))}
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '8px' }}>
-                {(profile.burning_man_years || []).map((year: string) => (
-                  <span key={year} style={{ backgroundColor: '#fdf3ec', padding: '5px 12px', borderRadius: '20px', color: '#C08261', border: '1px solid #f0d8c8', fontSize: '0.85rem', fontWeight: 'bold' }}>
-                    {year}
-                  </span>
-                ))}
-                {(!profile.burning_man_years || profile.burning_man_years.length === 0) && (
-                  <span style={{ color: '#aaa', fontStyle: 'italic' as const, fontSize: '0.9rem' }}>No years listed yet.</span>
-                )}
+            <h4 style={subheadStyle}>Wish List</h4>
+            <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '8px', marginBottom: wishTags.length > 0 ? '12px' : '0' }}>
+              {wishTags.length === 0 && !isOwner && (
+                <span style={{ color: '#aaa', fontStyle: 'italic' as const, fontSize: '0.9rem' }}>No wishlist yet.</span>
+              )}
+              {wishTags.map(tag => (
+                <span key={tag} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#00ccff', color: '#000', borderRadius: '20px', padding: '4px 12px', fontSize: '13px', fontWeight: 600 }}>
+                  {tag}
+                  {isOwner && (
+                    <button onClick={() => removeTag(tag)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '0', lineHeight: 1, color: '#005566', fontSize: '14px', fontWeight: 'bold' }} aria-label={`Remove ${tag}`}>×</button>
+                  )}
+                </span>
+              ))}
+            </div>
+            {isOwner && (
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input type="text" value={tagInput} placeholder="Add an item..." onChange={e => setTagInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }} disabled={tagSaving} style={{ flex: 1, backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', padding: '6px 10px', borderRadius: '6px', fontSize: '13px', outline: 'none', opacity: tagSaving ? 0.5 : 1 }} />
+                <button onClick={addTag} disabled={tagSaving} style={{ backgroundColor: '#00ccff', color: '#000', border: 'none', borderRadius: '6px', padding: '6px 14px', fontWeight: 600, fontSize: '13px', cursor: tagSaving ? 'default' as const : 'pointer' as const, opacity: tagSaving ? 0.5 : 1 }}>Add</button>
               </div>
             )}
           </div>
+        </div>
+
+        {/* ROW 3: Playa Story, then Playa History below */}
+        <div style={{ marginTop: '25px' }}>
+          <h4 style={subheadStyle}>Got a good "playa provides" story?</h4>
+          {isEditing ? (
+            <textarea style={editTextareaStyle} value={profile.playa_story || ''} onChange={e => setProfile({ ...profile, playa_story: e.target.value })} placeholder="Share a time the playa provided..." />
+          ) : (
+            <p style={{ fontSize: '1rem', color: '#444', margin: 0, lineHeight: '1.6' }}>
+              {profile.playa_story || <span style={{ color: '#aaa', fontStyle: 'italic' as const }}>No story yet.</span>}
+            </p>
+          )}
+        </div>
+
+        <div style={{ marginTop: '20px' }}>
+          <h4 style={subheadStyle}>Playa History</h4>
+          {isEditing ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '5px', maxHeight: '150px', overflowY: 'auto' as const, border: '1px solid #e5e5e5', padding: '10px', borderRadius: '6px' }}>
+              {YEAR_OPTIONS.map(year => (
+                <label key={year} style={{ fontSize: '0.75rem', color: '#2D241E', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={profile.burning_man_years?.includes(year)} onChange={() => toggleYear(year)} style={{ marginRight: '4px' }} />
+                  {year}
+                </label>
+              ))}
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '8px' }}>
+              {(profile.burning_man_years || []).map((year: string) => (
+                <span key={year} style={{ backgroundColor: '#fdf3ec', padding: '5px 12px', borderRadius: '20px', color: '#C08261', border: '1px solid #f0d8c8', fontSize: '0.85rem', fontWeight: 'bold' }}>{year}</span>
+              ))}
+              {(!profile.burning_man_years || profile.burning_man_years.length === 0) && (
+                <span style={{ color: '#aaa', fontStyle: 'italic' as const, fontSize: '0.9rem' }}>No years listed yet.</span>
+              )}
+            </div>
+          )}
         </div>
       </header>
 
