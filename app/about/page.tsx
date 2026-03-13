@@ -175,7 +175,7 @@ const SECTIONS = [
 ];
 
 export default function AboutPage() {
-  const [openSections, setOpenSections] = useState<Set<number>>(new Set([0]));
+  const [openSections, setOpenSections] = useState<Set<number>>(new Set([0, 1, 2]));
 
   const toggle = (i: number) => {
     setOpenSections(prev => {
