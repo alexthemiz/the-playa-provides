@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 import AvatarUpload from '@/components/AvatarUpload';
-import { MapPin, Package } from 'lucide-react';
+import { MapPin, Package, Globe, Linkedin, Instagram, Facebook } from 'lucide-react';
 
 export default function PublicProfilePage() {
   const params = useParams();
@@ -249,6 +249,7 @@ export default function PublicProfilePage() {
       burning_man_years: profile.burning_man_years,
       burning_man_camp: profile.burning_man_camp,
       avatar_url: profile.avatar_url,
+      social_links: profile.social_links || {},
     }).eq('id', profile.id);
 
     if (error) alert('Error updating profile');
@@ -503,6 +504,43 @@ export default function PublicProfilePage() {
                 <MapPin size={13} />{locationStr}
               </p>
             )}
+
+            {/* Social links — view mode only */}
+            {!isEditing && (() => {
+              const links = profile.social_links || {};
+              const SOCIAL = [
+                { key: 'facebook',    label: 'Facebook',     icon: <Facebook size={14} />,  color: '#1877F2' },
+                { key: 'instagram',   label: 'Instagram',    icon: <Instagram size={14} />, color: '#E4405F' },
+                { key: 'bluesky',     label: 'Bluesky',      icon: null,                    color: '#0085FF' },
+                { key: 'linkedin',    label: 'LinkedIn',     icon: <Linkedin size={14} />,  color: '#0A66C2' },
+                { key: 'burning_man', label: 'Burning Man',  icon: null,                    color: '#C08261' },
+                { key: 'eplaya',      label: 'ePlaya',       icon: null,                    color: '#8B4513' },
+                { key: 'website',     label: 'Website',      icon: <Globe size={14} />,     color: '#00aacc' },
+              ].filter(s => links[s.key]);
+              if (SOCIAL.length === 0) return null;
+              return (
+                <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '6px', marginTop: '10px' }}>
+                  {SOCIAL.map(s => (
+                    <a
+                      key={s.key}
+                      href={links[s.key]}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '5px',
+                        padding: '4px 11px', borderRadius: '99px',
+                        backgroundColor: '#f5f5f5', border: '1px solid #e5e5e5',
+                        textDecoration: 'none', fontSize: '12px',
+                        fontWeight: 600, color: s.color,
+                      }}
+                    >
+                      {s.icon}
+                      {s.label}
+                    </a>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
         </div>
 
@@ -615,6 +653,45 @@ export default function PublicProfilePage() {
             </div>
           )}
         </div>
+
+        {/* SOCIAL LINKS EDIT — owner edit mode only */}
+        {isEditing && (
+          <div style={{ marginTop: '25px' }}>
+            <h4 style={subheadStyle}>Social Links</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              {[
+                { key: 'facebook',    label: 'Facebook' },
+                { key: 'instagram',   label: 'Instagram' },
+                { key: 'bluesky',     label: 'Bluesky' },
+                { key: 'linkedin',    label: 'LinkedIn' },
+                { key: 'burning_man', label: 'Burning Man Profile' },
+                { key: 'eplaya',      label: 'ePlaya Profile' },
+                { key: 'website',     label: 'Personal Website' },
+              ].map(({ key, label }) => (
+                <div key={key}>
+                  <label style={{ fontSize: '11px', color: '#aaa', display: 'block', marginBottom: '3px', textTransform: 'uppercase' as const, letterSpacing: '0.05em' }}>
+                    {label}
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="https://..."
+                    value={(profile.social_links || {})[key] || ''}
+                    onChange={e => setProfile({
+                      ...profile,
+                      social_links: { ...(profile.social_links || {}), [key]: e.target.value },
+                    })}
+                    style={{
+                      width: '100%', backgroundColor: '#fff', color: '#2D241E',
+                      border: '1px solid #ddd', padding: '7px 10px',
+                      borderRadius: '6px', fontSize: '13px',
+                      boxSizing: 'border-box' as const, outline: 'none',
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </header>
 
       {/* AVAILABLE ITEMS */}
