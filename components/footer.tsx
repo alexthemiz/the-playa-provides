@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { Instagram } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -30,9 +31,18 @@ export default function Footer() {
           </Link>
         </nav>
 
-        {/* Right Side: Credit */}
-        <div className="flex-1 text-center md:text-right">
-          <p className="text-[11px] text-[#2D241E] font-medium italic leading-tight">
+        {/* Right Side: Instagram + Credit */}
+        <div className="flex-1 flex flex-col items-center md:items-end gap-2">
+          <a
+            href="https://www.instagram.com/theplayaprovides_/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-[#2D241E] hover:text-white transition-colors text-sm font-bold"
+          >
+            <Instagram size={16} />
+            @theplayaprovides_
+          </a>
+          <p className="text-[11px] text-[#2D241E] font-medium italic leading-tight text-center md:text-right">
             Built with Claude Code;<br />
             ideated with human brains.
           </p>

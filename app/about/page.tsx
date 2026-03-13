@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type React from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Instagram } from 'lucide-react';
 
 const pageStyle: React.CSSProperties = {
   backgroundColor: '#fff',
@@ -152,6 +152,30 @@ const SECTIONS = [
     ),
   },
   {
+    title: 'Who Made This?',
+    content: (
+      <div>
+        <p style={pStyle}>
+          The Playa Provides was built by a small group of burners who got tired of watching perfectly
+          good gear sit in storage every year. It's a side project, built with love and a lot of
+          late nights.
+        </p>
+        <p style={{ ...pStyle, marginBottom: 0 }}>
+          Follow along:{' '}
+          <a
+            href="https://www.instagram.com/theplayaprovides_/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={inlineLinkStyle}
+          >
+            <Instagram size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px', marginBottom: '2px' }} />
+            @theplayaprovides_
+          </a>
+        </p>
+      </div>
+    ),
+  },
+  {
     title: 'Support the Project',
     content: (
       <div>
@@ -175,7 +199,7 @@ const SECTIONS = [
 ];
 
 export default function AboutPage() {
-  const [openSections, setOpenSections] = useState<Set<number>>(new Set([0, 1, 2]));
+  const [openSections, setOpenSections] = useState<Set<number>>(new Set([0, 1, 2, 3]));
 
   const toggle = (i: number) => {
     setOpenSections(prev => {
