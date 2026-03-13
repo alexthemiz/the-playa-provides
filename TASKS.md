@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-03-09 (session 9)_
+_Last updated: 2026-03-12 (session 10)_
 
 ---
 
@@ -26,7 +26,7 @@ _(nothing queued yet)_
 ---
 
 ## 🎨 Design & Brand
-_(nothing queued yet)_
+- [ ] **Profile page mobile layout** — 2-col grid rows may need responsive stacking on small screens
 
 ---
 
@@ -88,3 +88,9 @@ _(nothing queued)_
 - [x] Copy: Homepage triptych updated — "Practice Radical Interdependence", "Track Your Inventory", "Cut Down on Purchasing New Things"
 - [x] Design: On-Playa Resources section moved below the triptych on homepage
 - [x] Fix: Homepage marquee polaroid links not navigating — root cause: `<Link>` triggered `(.)find-items/[id]` intercepting route, which populated `@modal` slot that root layout doesn't render; fixed with `<a href>` hard nav
+- [x] Design: Mobile header — tagline hidden below lg breakpoint (1024px), `w-full` on header fixes background not reaching screen edges, `whitespace-nowrap` on "Offer an Item" link
+- [x] Design: /about page — accordion layout (5→3 sections), 4 census charts at 50% width centered, census link, merged Support/Help/Contact into one section
+- [x] Design: /resources page — replaced list table with responsive card grid (auto-fill, 260px min)
+- [x] Feature: Social links on profile — `social_links jsonb` column on profiles, 6-field edit form inline in profile header, pill buttons in view mode (Lucide icons for FB/IG/LI/Globe; text for Bluesky/ePlaya)
+- [x] Feature: Playa story field on profile — `playa_story text` column, textarea in edit mode, displayed in view mode below bio section
+- [x] Design: Profile page layout restructure — Row 1: avatar+name/location/social links; Row 2: bio | wishlist; Row 3: story + playa history stacked
