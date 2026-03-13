@@ -188,7 +188,7 @@ export default function AboutPage() {
   return (
     <div style={pageStyle}>
       <div style={containerStyle}>
-        <h1 style={h1Style}>The Playa Provides<span style={{ textDecoration: 'underline' }}> An About Page </span></h1>
+        <h1 style={h1Style}>The Playa Provides<span style={{ textDecoration: 'underline' }}> An About Page{'\u00a0'}</span></h1>
 
         <div>
           {SECTIONS.map((section, i) => {

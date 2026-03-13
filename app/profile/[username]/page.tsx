@@ -466,7 +466,7 @@ export default function PublicProfilePage() {
         </div>
       )}
 
-      <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '24px 0 0 0' }}>The Playa Provides<span style={{ textDecoration: 'underline' }}> a Profile </span></h1>
+      <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '24px 0 0 0' }}>The Playa Provides<span style={{ textDecoration: 'underline' }}> a Profile{'\u00a0'}</span></h1>
 
       {/* PROFILE HEADER */}
       <header style={{ marginTop: '30px', borderBottom: '1px solid #e5e5e5', paddingBottom: '30px' }}>

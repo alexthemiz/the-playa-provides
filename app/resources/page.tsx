@@ -70,7 +70,7 @@ return (
       
       {/* Header Section */}
       <div className="flex flex-col mb-16">
-        <h1 className="text-5xl font-bold text-[#2D241E] mb-4">The Playa Provides<span style={{ textDecoration: 'underline' }}> Resources </span></h1>
+        <h1 className="text-5xl font-bold text-[#2D241E] mb-4">The Playa Provides<span style={{ textDecoration: 'underline' }}> Resources{'\u00a0'}</span></h1>
 
         <p className="text-stone-600 max-w-4xl text-lg leading-relaxed mb-8">
           A directory of camps that offer community services at the Burn, from compost collecting to bike repair.

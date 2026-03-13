@@ -161,7 +161,7 @@ export default function FindItemsPage() {
 
   return (
     <div style={containerStyle}>
-      <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 20px 0' }}>The Playa Provides<span style={{ textDecoration: 'underline' }}> Items to Borrow or Keep </span></h1>
+      <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 20px 0' }}>The Playa Provides<span style={{ textDecoration: 'underline' }}> Items to Borrow or Keep{'\u00a0'}</span></h1>
 
       {/* HEADER / SEARCH & FILTERS */}
       <div style={topBarStyle}>
