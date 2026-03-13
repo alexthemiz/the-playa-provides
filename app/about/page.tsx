@@ -62,7 +62,7 @@ const whyRowStyle: React.CSSProperties = {
 
 const sideFigureStyle: React.CSSProperties = {
   flexShrink: 0,
-  width: '180px',
+  width: '225px',
 };
 
 const sideChartStyle: React.CSSProperties = {
