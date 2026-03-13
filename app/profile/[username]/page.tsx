@@ -250,6 +250,7 @@ export default function PublicProfilePage() {
       burning_man_camp: profile.burning_man_camp,
       avatar_url: profile.avatar_url,
       social_links: profile.social_links || {},
+      playa_story: profile.playa_story || null,
     }).eq('id', profile.id);
 
     if (error) alert('Error updating profile');
@@ -469,101 +470,49 @@ export default function PublicProfilePage() {
 
       {/* PROFILE HEADER */}
       <header style={{ marginTop: '30px', borderBottom: '1px solid #e5e5e5', paddingBottom: '30px' }}>
-        <div style={{ display: 'flex', gap: '25px' }}>
-          {isEditing ? (
-            <AvatarUpload url={profile.avatar_url} onUpload={(url) => setProfile({ ...profile, avatar_url: url })} />
-          ) : (
-            <div style={{
-              width: '90px', height: '90px', borderRadius: '50%',
-              backgroundColor: '#f0f0f0',
-              backgroundImage: profile.avatar_url ? `url(${profile.avatar_url})` : 'none',
-              backgroundSize: 'cover', backgroundPosition: 'center',
-              border: '4px solid #C08261', flexShrink: 0,
-            }}>
-              {!profile.avatar_url && (
-                <span style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', fontSize: '2rem', color: '#C08261' }}>
-                  {profile.preferred_name?.charAt(0)}
-                </span>
+
+        {/* ROW 1: Avatar + Name/Location | Wish List */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+          <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+            {isEditing ? (
+              <AvatarUpload url={profile.avatar_url} onUpload={(url) => setProfile({ ...profile, avatar_url: url })} />
+            ) : (
+              <div style={{
+                width: '90px', height: '90px', borderRadius: '50%',
+                backgroundColor: '#f0f0f0',
+                backgroundImage: profile.avatar_url ? `url(${profile.avatar_url})` : 'none',
+                backgroundSize: 'cover', backgroundPosition: 'center',
+                border: '4px solid #C08261', flexShrink: 0,
+              }}>
+                {!profile.avatar_url && (
+                  <span style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', fontSize: '2rem', color: '#C08261' }}>
+                    {profile.preferred_name?.charAt(0)}
+                  </span>
+                )}
+              </div>
+            )}
+            <div style={{ flex: 1 }}>
+              {isEditing ? (
+                <input
+                  style={{ backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', fontSize: '1.5rem', width: '100%', padding: '5px', borderRadius: '6px' }}
+                  value={profile.preferred_name || ''}
+                  onChange={e => setProfile({ ...profile, preferred_name: e.target.value })}
+                />
+              ) : (
+                <h1 style={{ fontSize: '2.2rem', margin: 0, color: '#2D241E' }}>{profile.preferred_name || username}</h1>
+              )}
+              <p style={{ color: '#888', margin: '4px 0 0' }}>@{username}</p>
+              {locationStr && (
+                <p style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#999', fontSize: '0.85rem', margin: '4px 0 0' }}>
+                  <MapPin size={13} />{locationStr}
+                </p>
               )}
             </div>
-          )}
-
-          <div style={{ flex: 1 }}>
-            {isEditing ? (
-              <input
-                style={{ backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', fontSize: '2rem', width: '100%', padding: '5px', borderRadius: '6px' }}
-                value={profile.preferred_name || ''}
-                onChange={e => setProfile({ ...profile, preferred_name: e.target.value })}
-              />
-            ) : (
-              <h1 style={{ fontSize: '2.8rem', margin: 0, color: '#2D241E' }}>{profile.preferred_name || username}</h1>
-            )}
-            <p style={{ color: '#888', margin: '4px 0 0' }}>@{username}</p>
-            {locationStr && (
-              <p style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#999', fontSize: '0.85rem', margin: '4px 0 0' }}>
-                <MapPin size={13} />{locationStr}
-              </p>
-            )}
-
-            {/* Social links — view mode only */}
-            {!isEditing && (() => {
-              const links = profile.social_links || {};
-              const SOCIAL = [
-                { key: 'facebook',    label: 'Facebook',     icon: <Facebook size={14} />,  color: '#1877F2' },
-                { key: 'instagram',   label: 'Instagram',    icon: <Instagram size={14} />, color: '#E4405F' },
-                { key: 'bluesky',     label: 'Bluesky',      icon: null,                    color: '#0085FF' },
-                { key: 'linkedin',    label: 'LinkedIn',     icon: <Linkedin size={14} />,  color: '#0A66C2' },
-                { key: 'burning_man', label: 'Burning Man',  icon: null,                    color: '#C08261' },
-                { key: 'eplaya',      label: 'ePlaya',       icon: null,                    color: '#8B4513' },
-                { key: 'website',     label: 'Website',      icon: <Globe size={14} />,     color: '#00aacc' },
-              ].filter(s => links[s.key]);
-              if (SOCIAL.length === 0) return null;
-              return (
-                <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '6px', marginTop: '10px' }}>
-                  {SOCIAL.map(s => (
-                    <a
-                      key={s.key}
-                      href={links[s.key]}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        display: 'inline-flex', alignItems: 'center', gap: '5px',
-                        padding: '4px 11px', borderRadius: '99px',
-                        backgroundColor: '#f5f5f5', border: '1px solid #e5e5e5',
-                        textDecoration: 'none', fontSize: '12px',
-                        fontWeight: 600, color: s.color,
-                      }}
-                    >
-                      {s.icon}
-                      {s.label}
-                    </a>
-                  ))}
-                </div>
-              );
-            })()}
           </div>
-        </div>
 
-        {/* BIO + WISH LIST side by side */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginTop: '25px' }}>
-          <div>
-            <h4 style={subheadStyle}>Bio</h4>
-            {isEditing ? (
-              <textarea
-                style={editTextareaStyle}
-                value={profile.bio || ''}
-                onChange={e => setProfile({ ...profile, bio: e.target.value })}
-              />
-            ) : (
-              <p style={{ fontSize: '1rem', color: '#444', margin: 0, lineHeight: '1.6' }}>
-                {profile.bio || <span style={{ color: '#aaa', fontStyle: 'italic' as const }}>No bio yet.</span>}
-              </p>
-            )}
-          </div>
+          {/* Wish List — always editable inline */}
           <div>
             <h4 style={subheadStyle}>Wish List</h4>
-
-            {/* Tags display — always visible */}
             <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '8px', marginBottom: wishTags.length > 0 ? '12px' : '0' }}>
               {wishTags.length === 0 && !isOwner && (
                 <span style={{ color: '#aaa', fontStyle: 'italic' as const, fontSize: '0.9rem' }}>No wishlist yet.</span>
@@ -577,23 +526,11 @@ export default function PublicProfilePage() {
                 }}>
                   {tag}
                   {isOwner && (
-                    <button
-                      onClick={() => removeTag(tag)}
-                      style={{
-                        background: 'transparent', border: 'none',
-                        cursor: 'pointer', padding: '0', lineHeight: 1,
-                        color: '#005566', fontSize: '14px', fontWeight: 'bold',
-                      }}
-                      aria-label={`Remove ${tag}`}
-                    >
-                      ×
-                    </button>
+                    <button onClick={() => removeTag(tag)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '0', lineHeight: 1, color: '#005566', fontSize: '14px', fontWeight: 'bold' }} aria-label={`Remove ${tag}`}>×</button>
                   )}
                 </span>
               ))}
             </div>
-
-            {/* Tag input — owner only, always visible (not tied to isEditing) */}
             {isOwner && (
               <div style={{ display: 'flex', gap: '8px' }}>
                 <input
@@ -603,24 +540,9 @@ export default function PublicProfilePage() {
                   onChange={e => setTagInput(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }}
                   disabled={tagSaving}
-                  style={{
-                    flex: 1, backgroundColor: '#fff', color: '#2D241E',
-                    border: '1px solid #ddd', padding: '6px 10px',
-                    borderRadius: '6px', fontSize: '13px', outline: 'none',
-                    opacity: tagSaving ? 0.5 : 1,
-                  }}
+                  style={{ flex: 1, backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', padding: '6px 10px', borderRadius: '6px', fontSize: '13px', outline: 'none', opacity: tagSaving ? 0.5 : 1 }}
                 />
-                <button
-                  onClick={addTag}
-                  disabled={tagSaving}
-                  style={{
-                    backgroundColor: '#00ccff', color: '#000',
-                    border: 'none', borderRadius: '6px',
-                    padding: '6px 14px', fontWeight: 600,
-                    fontSize: '13px', cursor: tagSaving ? 'default' as const : 'pointer' as const,
-                    opacity: tagSaving ? 0.5 : 1,
-                  }}
-                >
+                <button onClick={addTag} disabled={tagSaving} style={{ backgroundColor: '#00ccff', color: '#000', border: 'none', borderRadius: '6px', padding: '6px 14px', fontWeight: 600, fontSize: '13px', cursor: tagSaving ? 'default' as const : 'pointer' as const, opacity: tagSaving ? 0.5 : 1 }}>
                   Add
                 </button>
               </div>
@@ -628,70 +550,105 @@ export default function PublicProfilePage() {
           </div>
         </div>
 
-        {/* PLAYA HISTORY */}
-        <div style={{ marginTop: '25px' }}>
-          <h4 style={subheadStyle}>Playa History</h4>
-          {isEditing ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '5px', maxHeight: '150px', overflowY: 'auto' as const, border: '1px solid #e5e5e5', padding: '10px', borderRadius: '6px' }}>
-              {YEAR_OPTIONS.map(year => (
-                <label key={year} style={{ fontSize: '0.75rem', color: '#2D241E', cursor: 'pointer' }}>
-                  <input type="checkbox" checked={profile.burning_man_years?.includes(year)} onChange={() => toggleYear(year)} style={{ marginRight: '4px' }} />
-                  {year}
-                </label>
-              ))}
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '8px' }}>
-              {(profile.burning_man_years || []).map((year: string) => (
-                <span key={year} style={{ backgroundColor: '#fdf3ec', padding: '5px 12px', borderRadius: '20px', color: '#C08261', border: '1px solid #f0d8c8', fontSize: '0.85rem', fontWeight: 'bold' }}>
-                  {year}
-                </span>
-              ))}
-              {(!profile.burning_man_years || profile.burning_man_years.length === 0) && (
-                <span style={{ color: '#aaa', fontStyle: 'italic' as const, fontSize: '0.9rem' }}>No years listed yet.</span>
-              )}
-            </div>
-          )}
+        {/* ROW 2: Bio | Social Links */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginTop: '25px' }}>
+          <div>
+            <h4 style={subheadStyle}>Bio</h4>
+            {isEditing ? (
+              <textarea style={editTextareaStyle} value={profile.bio || ''} onChange={e => setProfile({ ...profile, bio: e.target.value })} />
+            ) : (
+              <p style={{ fontSize: '1rem', color: '#444', margin: 0, lineHeight: '1.6' }}>
+                {profile.bio || <span style={{ color: '#aaa', fontStyle: 'italic' as const }}>No bio yet.</span>}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <h4 style={subheadStyle}>Social Links</h4>
+            {isEditing ? (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                {[
+                  { key: 'facebook',  label: 'Facebook' },
+                  { key: 'instagram', label: 'Instagram' },
+                  { key: 'bluesky',   label: 'Bluesky' },
+                  { key: 'linkedin',  label: 'LinkedIn' },
+                  { key: 'eplaya',    label: 'ePlaya Profile' },
+                  { key: 'website',   label: 'Personal Website' },
+                ].map(({ key, label }) => (
+                  <div key={key}>
+                    <label style={{ fontSize: '10px', color: '#aaa', display: 'block', marginBottom: '2px', textTransform: 'uppercase' as const, letterSpacing: '0.05em' }}>{label}</label>
+                    <input
+                      type="url"
+                      placeholder="https://..."
+                      value={(profile.social_links || {})[key] || ''}
+                      onChange={e => setProfile({ ...profile, social_links: { ...(profile.social_links || {}), [key]: e.target.value } })}
+                      style={{ width: '100%', backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', padding: '6px 8px', borderRadius: '6px', fontSize: '12px', boxSizing: 'border-box' as const, outline: 'none' }}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (() => {
+              const links = profile.social_links || {};
+              const SOCIAL = [
+                { key: 'facebook',  label: 'Facebook',  icon: <Facebook size={14} />,  color: '#1877F2' },
+                { key: 'instagram', label: 'Instagram', icon: <Instagram size={14} />, color: '#E4405F' },
+                { key: 'bluesky',   label: 'Bluesky',   icon: null,                    color: '#0085FF' },
+                { key: 'linkedin',  label: 'LinkedIn',  icon: <Linkedin size={14} />,  color: '#0A66C2' },
+                { key: 'eplaya',    label: 'ePlaya',    icon: null,                    color: '#8B4513' },
+                { key: 'website',   label: 'Website',   icon: <Globe size={14} />,     color: '#00aacc' },
+              ].filter(s => links[s.key]);
+              if (SOCIAL.length === 0) return <span style={{ color: '#aaa', fontStyle: 'italic' as const, fontSize: '0.9rem' }}>No links yet.</span>;
+              return (
+                <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '6px' }}>
+                  {SOCIAL.map(s => (
+                    <a key={s.key} href={links[s.key]} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 11px', borderRadius: '99px', backgroundColor: '#f5f5f5', border: '1px solid #e5e5e5', textDecoration: 'none', fontSize: '12px', fontWeight: 600, color: s.color }}>
+                      {s.icon}{s.label}
+                    </a>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
         </div>
 
-        {/* SOCIAL LINKS EDIT — owner edit mode only */}
-        {isEditing && (
-          <div style={{ marginTop: '25px' }}>
-            <h4 style={subheadStyle}>Social Links</h4>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              {[
-                { key: 'facebook',    label: 'Facebook' },
-                { key: 'instagram',   label: 'Instagram' },
-                { key: 'bluesky',     label: 'Bluesky' },
-                { key: 'linkedin',    label: 'LinkedIn' },
-                { key: 'burning_man', label: 'Burning Man Profile' },
-                { key: 'eplaya',      label: 'ePlaya Profile' },
-                { key: 'website',     label: 'Personal Website' },
-              ].map(({ key, label }) => (
-                <div key={key}>
-                  <label style={{ fontSize: '11px', color: '#aaa', display: 'block', marginBottom: '3px', textTransform: 'uppercase' as const, letterSpacing: '0.05em' }}>
-                    {label}
-                  </label>
-                  <input
-                    type="url"
-                    placeholder="https://..."
-                    value={(profile.social_links || {})[key] || ''}
-                    onChange={e => setProfile({
-                      ...profile,
-                      social_links: { ...(profile.social_links || {}), [key]: e.target.value },
-                    })}
-                    style={{
-                      width: '100%', backgroundColor: '#fff', color: '#2D241E',
-                      border: '1px solid #ddd', padding: '7px 10px',
-                      borderRadius: '6px', fontSize: '13px',
-                      boxSizing: 'border-box' as const, outline: 'none',
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
+        {/* ROW 3: Playa Story | Playa History */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginTop: '25px' }}>
+          <div>
+            <h4 style={subheadStyle}>Got a good "playa provides" story?</h4>
+            {isEditing ? (
+              <textarea style={editTextareaStyle} value={profile.playa_story || ''} onChange={e => setProfile({ ...profile, playa_story: e.target.value })} placeholder="Share a time the playa provided..." />
+            ) : (
+              <p style={{ fontSize: '1rem', color: '#444', margin: 0, lineHeight: '1.6' }}>
+                {profile.playa_story || <span style={{ color: '#aaa', fontStyle: 'italic' as const }}>No story yet.</span>}
+              </p>
+            )}
           </div>
-        )}
+
+          <div>
+            <h4 style={subheadStyle}>Playa History</h4>
+            {isEditing ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '5px', maxHeight: '150px', overflowY: 'auto' as const, border: '1px solid #e5e5e5', padding: '10px', borderRadius: '6px' }}>
+                {YEAR_OPTIONS.map(year => (
+                  <label key={year} style={{ fontSize: '0.75rem', color: '#2D241E', cursor: 'pointer' }}>
+                    <input type="checkbox" checked={profile.burning_man_years?.includes(year)} onChange={() => toggleYear(year)} style={{ marginRight: '4px' }} />
+                    {year}
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '8px' }}>
+                {(profile.burning_man_years || []).map((year: string) => (
+                  <span key={year} style={{ backgroundColor: '#fdf3ec', padding: '5px 12px', borderRadius: '20px', color: '#C08261', border: '1px solid #f0d8c8', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                    {year}
+                  </span>
+                ))}
+                {(!profile.burning_man_years || profile.burning_man_years.length === 0) && (
+                  <span style={{ color: '#aaa', fontStyle: 'italic' as const, fontSize: '0.9rem' }}>No years listed yet.</span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       </header>
 
       {/* AVAILABLE ITEMS */}
