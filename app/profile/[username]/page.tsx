@@ -29,6 +29,8 @@ export default function PublicProfilePage() {
   const [wishTags, setWishTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [tagSaving, setTagSaving] = useState(false);
+  const [affiliations, setAffiliations] = useState<any[]>([]);
+  const [draftAffiliations, setDraftAffiliations] = useState<any[]>([]);
 
   const startYear = 1986;
   const currentYear = 2026;
@@ -88,6 +90,13 @@ export default function PublicProfilePage() {
             .in('availability_status', ['Available to Keep', 'Available to Borrow']);
 
           setItems(gearData || []);
+
+          const { data: affData } = await supabase
+            .from('user_camp_affiliations')
+            .select('id, year, is_open_camping, camp_id, camps(display_name, slug)')
+            .eq('user_id', profileData.id)
+            .order('year', { ascending: false });
+          setAffiliations(affData || []);
         }
       } catch (err) {
         console.error('Profile fetch error:', err);
@@ -243,18 +252,45 @@ export default function PublicProfilePage() {
   };
 
   const handleSave = async () => {
+    // burning_man_camp intentionally excluded — deprecated, new system uses user_camp_affiliations
     const { error } = await supabase.from('profiles').update({
       bio: profile.bio,
       preferred_name: profile.preferred_name,
       burning_man_years: profile.burning_man_years,
-      burning_man_camp: profile.burning_man_camp,
       avatar_url: profile.avatar_url,
       social_links: profile.social_links || {},
       playa_story: profile.playa_story || null,
     }).eq('id', profile.id);
 
-    if (error) alert('Error updating profile');
-    else setIsEditing(false);
+    if (error) { alert('Error updating profile'); return; }
+
+    // Delete and reinsert all affiliations
+    await supabase.from('user_camp_affiliations').delete().eq('user_id', profile.id);
+
+    for (const draft of draftAffiliations) {
+      if (draft.is_open_camping) {
+        await supabase.from('user_camp_affiliations').insert({
+          user_id: profile.id, camp_id: null, year: draft.year, is_open_camping: true,
+        });
+        continue;
+      }
+      if (!draft.campInput.trim()) continue;
+      let campId = draft.campId;
+      if (!campId) campId = await findOrCreateCamp(draft.campInput);
+      if (!campId) continue;
+      await supabase.from('user_camp_affiliations').insert({
+        user_id: profile.id, camp_id: campId, year: draft.year, is_open_camping: false,
+      });
+    }
+
+    const { data: affData } = await supabase
+      .from('user_camp_affiliations')
+      .select('id, year, is_open_camping, camp_id, camps(display_name, slug)')
+      .eq('user_id', profile.id)
+      .order('year', { ascending: false });
+    setAffiliations(affData || []);
+
+    setIsEditing(false);
   };
 
   const addTag = async () => {
@@ -277,6 +313,54 @@ export default function PublicProfilePage() {
     setTagSaving(true);
     await supabase.from('profiles').update({ wish_list: updated }).eq('id', profile.id);
     setTagSaving(false);
+  };
+
+  function toSlug(name: string): string {
+    return name.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
+  }
+
+  async function findOrCreateCamp(name: string): Promise<string | null> {
+    const { data: exact } = await supabase.from('camps').select('id').ilike('display_name', name.trim()).maybeSingle();
+    if (exact) return exact.id;
+    let slug = toSlug(name);
+    const { data: slugRows } = await supabase.from('camps').select('slug').ilike('slug', `${slug}%`);
+    const slugSet = new Set((slugRows || []).map((c: any) => c.slug));
+    if (slugSet.has(slug)) { let i = 2; while (slugSet.has(`${slug}-${i}`)) i++; slug = `${slug}-${i}`; }
+    const { data: newCamp, error } = await supabase.from('camps').insert({ display_name: name.trim(), slug, is_claimed: false }).select('id').single();
+    if (error) { console.error('findOrCreateCamp:', error.message); return null; }
+    return newCamp.id;
+  }
+
+  async function searchCampsDB(query: string): Promise<any[]> {
+    if (!query.trim()) return [];
+    const { data } = await supabase.from('camps').select('id, display_name, slug').ilike('display_name', `%${query.trim()}%`).limit(8);
+    return data || [];
+  }
+
+  const updateDraft = (tempId: string, changes: Record<string, any>) => {
+    setDraftAffiliations(prev => prev.map(d => d.tempId === tempId ? { ...d, ...changes } : d));
+  };
+
+  const addDraftEntry = () => {
+    setDraftAffiliations(prev => [...prev, { tempId: Math.random().toString(36).slice(2), year: currentYear, is_open_camping: false, campInput: '', campId: null, searchResults: [], showDropdown: false }]);
+  };
+
+  const removeDraftEntry = (tempId: string) => {
+    setDraftAffiliations(prev => prev.filter(d => d.tempId !== tempId));
+  };
+
+  const handleCampInputChange = async (tempId: string, value: string) => {
+    updateDraft(tempId, { campInput: value, campId: null, showDropdown: !!value.trim() });
+    if (value.trim()) {
+      const results = await searchCampsDB(value);
+      setDraftAffiliations(prev => prev.map(d => d.tempId === tempId ? { ...d, searchResults: results, showDropdown: true } : d));
+    } else {
+      updateDraft(tempId, { searchResults: [], showDropdown: false });
+    }
+  };
+
+  const selectCamp = (tempId: string, camp: any) => {
+    updateDraft(tempId, { campInput: camp.display_name, campId: camp.id, searchResults: [], showDropdown: false });
   };
 
   const toggleYear = (year: string) => {
@@ -343,7 +427,22 @@ export default function PublicProfilePage() {
             )}
             {isOwner ? (
               <button
-                onClick={() => isEditing ? handleSave() : setIsEditing(true)}
+                onClick={() => {
+                  if (isEditing) {
+                    handleSave();
+                  } else {
+                    setDraftAffiliations(affiliations.map(a => ({
+                      tempId: a.id,
+                      year: a.year,
+                      is_open_camping: a.is_open_camping,
+                      campInput: (a.camps as any)?.display_name || '',
+                      campId: a.camp_id || null,
+                      searchResults: [],
+                      showDropdown: false,
+                    })));
+                    setIsEditing(true);
+                  }
+                }}
                 style={{
                   padding: '8px 20px',
                   backgroundColor: isEditing ? '#4CAF50' : '#00ccff',
@@ -607,13 +706,94 @@ export default function PublicProfilePage() {
         <div style={{ marginTop: '20px' }}>
           <h4 style={subheadStyle}>Playa History</h4>
           {isEditing ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '5px', maxHeight: '150px', overflowY: 'auto' as const, border: '1px solid #e5e5e5', padding: '10px', borderRadius: '6px' }}>
-              {YEAR_OPTIONS.map(year => (
-                <label key={year} style={{ fontSize: '0.75rem', color: '#2D241E', cursor: 'pointer' }}>
-                  <input type="checkbox" checked={profile.burning_man_years?.includes(year)} onChange={() => toggleYear(year)} style={{ marginRight: '4px' }} />
-                  {year}
-                </label>
+            <div>
+              <p style={{ fontSize: '0.8rem', color: '#999', margin: '0 0 10px' }}>
+                Add each year you attended with your camp, or tick Open Camping.
+              </p>
+              {draftAffiliations.map(draft => (
+                <div key={draft.tempId} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginBottom: '8px' }}>
+                  {/* Year selector */}
+                  <select
+                    value={draft.year}
+                    onChange={e => updateDraft(draft.tempId, { year: parseInt(e.target.value) })}
+                    style={{ padding: '6px 8px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', backgroundColor: '#fff', color: '#2D241E', flexShrink: 0, width: '90px' }}
+                  >
+                    {YEAR_OPTIONS.map(y => <option key={y} value={y}>{y}</option>)}
+                  </select>
+
+                  {/* Open Camping toggle */}
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', color: '#555', whiteSpace: 'nowrap' as const, flexShrink: 0, paddingTop: '7px' }}>
+                    <input
+                      type="checkbox"
+                      checked={draft.is_open_camping}
+                      onChange={e => updateDraft(draft.tempId, { is_open_camping: e.target.checked, campInput: '', campId: null })}
+                    />
+                    Open Camping
+                  </label>
+
+                  {/* Camp name autocomplete */}
+                  {!draft.is_open_camping && (
+                    <div style={{ flex: 1, position: 'relative' as const }}>
+                      <input
+                        type="text"
+                        placeholder="Camp name..."
+                        value={draft.campInput}
+                        onChange={e => handleCampInputChange(draft.tempId, e.target.value)}
+                        onFocus={() => { if (draft.campInput.trim()) updateDraft(draft.tempId, { showDropdown: true }); }}
+                        onBlur={() => setTimeout(() => updateDraft(draft.tempId, { showDropdown: false }), 150)}
+                        style={{ width: '100%', padding: '6px 8px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', backgroundColor: '#fff', color: '#2D241E', boxSizing: 'border-box' as const, outline: 'none' }}
+                      />
+                      {draft.showDropdown && (draft.searchResults.length > 0 || draft.campInput.trim()) && (
+                        <div style={{ position: 'absolute' as const, top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #ddd', borderRadius: '6px', zIndex: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', overflow: 'hidden' as const }}>
+                          {draft.searchResults.map((camp: any) => (
+                            <div
+                              key={camp.id}
+                              onMouseDown={() => selectCamp(draft.tempId, camp)}
+                              style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '0.875rem', color: '#2D241E' }}
+                            >
+                              {camp.display_name}
+                            </div>
+                          ))}
+                          {draft.campInput.trim() && !draft.searchResults.some((c: any) => c.display_name.toLowerCase() === draft.campInput.trim().toLowerCase()) && (
+                            <div
+                              onMouseDown={() => updateDraft(draft.tempId, { showDropdown: false })}
+                              style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '0.875rem', color: '#00aacc', borderTop: draft.searchResults.length > 0 ? '1px solid #f0f0f0' : undefined }}
+                            >
+                              Add "{draft.campInput}" as a new camp
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Remove entry */}
+                  <button
+                    onClick={() => removeDraftEntry(draft.tempId)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ccc', fontSize: '1.2rem', lineHeight: 1, flexShrink: 0, padding: '4px', paddingTop: '6px' }}
+                    aria-label="Remove"
+                  >×</button>
+                </div>
               ))}
+              <button
+                onClick={addDraftEntry}
+                style={{ marginTop: '4px', fontSize: '0.8rem', color: '#00aacc', background: 'none', border: '1px dashed #00aacc', borderRadius: '6px', padding: '5px 14px', cursor: 'pointer' }}
+              >
+                + Add year
+              </button>
+
+              {/* Legacy year checkboxes */}
+              <div style={{ marginTop: '16px' }}>
+                <p style={{ fontSize: '0.7rem', color: '#ccc', margin: '0 0 6px', textTransform: 'uppercase' as const, letterSpacing: '0.05em' }}>Years attended (legacy)</p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '5px', maxHeight: '120px', overflowY: 'auto' as const, border: '1px solid #e5e5e5', padding: '10px', borderRadius: '6px' }}>
+                  {YEAR_OPTIONS.map(year => (
+                    <label key={year} style={{ fontSize: '0.75rem', color: '#2D241E', cursor: 'pointer' }}>
+                      <input type="checkbox" checked={profile.burning_man_years?.includes(year)} onChange={() => toggleYear(year)} style={{ marginRight: '4px' }} />
+                      {year}
+                    </label>
+                  ))}
+                </div>
+              </div>
             </div>
           ) : (
             <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '8px' }}>
