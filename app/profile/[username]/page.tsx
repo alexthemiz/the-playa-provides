@@ -795,15 +795,47 @@ export default function PublicProfilePage() {
                 </div>
               </div>
             </div>
+          ) : affiliations.length > 0 ? (
+            // New: affiliations from user_camp_affiliations, sorted newest first
+            <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '6px' }}>
+              {affiliations.map((aff: any) => {
+                const campName = (aff.camps as any)?.display_name ?? null;
+                const campSlug = (aff.camps as any)?.slug ?? null;
+                return (
+                  <div key={aff.id} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ backgroundColor: '#fdf3ec', padding: '3px 10px', borderRadius: '20px', color: '#C08261', border: '1px solid #f0d8c8', fontSize: '0.85rem', fontWeight: 'bold', flexShrink: 0 }}>
+                      {aff.year}
+                    </span>
+                    {aff.is_open_camping ? (
+                      <span style={{ fontSize: '0.875rem', color: '#aaa', fontStyle: 'italic' as const }}>Open Camping</span>
+                    ) : campSlug ? (
+                      <a href={`/camps/${campSlug}`} style={{ fontSize: '0.875rem', color: '#00aacc', textDecoration: 'none', fontWeight: 500 }}>{campName}</a>
+                    ) : campName ? (
+                      <span style={{ fontSize: '0.875rem', color: '#555' }}>{campName}</span>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
           ) : (
-            <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '8px' }}>
-              {(profile.burning_man_years || []).map((year: string) => (
-                <span key={year} style={{ backgroundColor: '#fdf3ec', padding: '5px 12px', borderRadius: '20px', color: '#C08261', border: '1px solid #f0d8c8', fontSize: '0.85rem', fontWeight: 'bold' }}>{year}</span>
-              ))}
-              {(!profile.burning_man_years || profile.burning_man_years.length === 0) && (
+            // Legacy: year pills from burning_man_years + plain-text burning_man_camp fallback
+            <>
+              {(profile.burning_man_years || []).length > 0 ? (
+                <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '8px' }}>
+                  {(profile.burning_man_years || []).map((year: string) => (
+                    <span key={year} style={{ backgroundColor: '#fdf3ec', padding: '5px 12px', borderRadius: '20px', color: '#C08261', border: '1px solid #f0d8c8', fontSize: '0.85rem', fontWeight: 'bold' }}>{year}</span>
+                  ))}
+                </div>
+              ) : null}
+              {profile.burning_man_camp ? (
+                <p style={{ fontSize: '0.875rem', color: '#555', margin: (profile.burning_man_years || []).length > 0 ? '8px 0 0' : '0' }}>
+                  {profile.burning_man_camp}
+                </p>
+              ) : null}
+              {!(profile.burning_man_years || []).length && !profile.burning_man_camp && (
                 <span style={{ color: '#aaa', fontStyle: 'italic' as const, fontSize: '0.9rem' }}>No years listed yet.</span>
               )}
-            </div>
+            </>
           )}
         </div>
       </header>
