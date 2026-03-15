@@ -5,17 +5,23 @@ import { useEffect, useState, use } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { MapPin, User, X } from 'lucide-react';
 import PolaroidPhoto from '@/components/PolaroidPhoto';
+import RequestModal from '@/components/RequestModal';
 
 export default function ItemModal({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const resolvedParams = use(params);
   const [item, setItem] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState<any>(undefined);
+  const [isRequestOpen, setIsRequestOpen] = useState(false);
 
   useEffect(() => {
     async function fetchEnrichedItem() {
       setLoading(true);
       try {
+        const { data: { session: s } } = await supabase.auth.getSession();
+        setSession(s);
+
         // 1. Fetch the base gear item
         const { data: gear, error: gearError } = await supabase
           .from('gear_items')
@@ -82,15 +88,24 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
               <h4 style={sectionLabelStyle}>Description</h4>
               <p style={descriptionStyle}>{item.description || 'No description provided.'}</p>
               
-              <button style={actionButtonStyle}>
-                Request to Borrow
-              </button>
+              {session ? (
+                <button style={actionButtonStyle} onClick={() => setIsRequestOpen(true)}>
+                  Request Item
+                </button>
+              ) : (
+                <a href="/login" style={{ ...actionButtonStyle, display: 'block', textAlign: 'center' as const, textDecoration: 'none' }}>
+                  Log In to Request
+                </a>
+              )}
             </div>
           </div>
         ) : (
-          <p style={{ color: '#fff' }}>Item not found.</p>
+          <p style={{ color: '#fff' }}>This item isn't available, or you may need to log in to view it.</p>
         )}
       </div>
+      {isRequestOpen && item && (
+        <RequestModal item={item} onClose={() => setIsRequestOpen(false)} />
+      )}
     </div>
   );
 }

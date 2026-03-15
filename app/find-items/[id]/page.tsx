@@ -11,12 +11,16 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
   const resolvedParams = use(params);
   const [item, setItem] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false); // Added for the modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [session, setSession] = useState<any>(undefined); // undefined = not yet checked
 
   useEffect(() => {
     async function fetchItem() {
       setLoading(true);
       try {
+        const { data: { session: s } } = await supabase.auth.getSession();
+        setSession(s);
+
         const { data: gear, error: gearError } = await supabase
           .from('gear_items')
           .select('*')
@@ -47,7 +51,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
   }, [resolvedParams.id]);
 
   if (loading) return <div style={containerStyle}><p>Loading gear...</p></div>;
-  if (!item) return <div style={containerStyle}><p>Gear not found.</p></div>;
+  if (!item) return <div style={containerStyle}><p>This item isn't available, or you may need to log in to view it.</p></div>;
 
   const isGift = item.availability_status === 'You can keep it';
 
@@ -61,12 +65,15 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
         {/* Left column: photo + button */}
         <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '12px' }}>
           <PolaroidPhoto src={item.image_urls?.[0]} alt={item.item_name} itemId={item.id} />
-          <button
-            style={borrowButtonStyle}
-            onClick={() => setIsModalOpen(true)}
-          >
-            Request Item
-          </button>
+          {session ? (
+            <button style={borrowButtonStyle} onClick={() => setIsModalOpen(true)}>
+              Request Item
+            </button>
+          ) : (
+            <a href="/login" style={{ ...borrowButtonStyle, display: 'block', textAlign: 'center' as const, textDecoration: 'none' }}>
+              Log In to Request
+            </a>
+          )}
         </div>
 
         {/* Right column: details */}

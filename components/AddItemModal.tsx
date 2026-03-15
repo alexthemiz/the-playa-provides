@@ -29,6 +29,7 @@ export default function AddItemModal({
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [availability, setAvailability] = useState('Available to Borrow');
+  const [visibility, setVisibility] = useState('public');
   const [locations, setLocations] = useState<Location[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [returnTerms, setReturnTerms] = useState('');
@@ -45,6 +46,7 @@ export default function AddItemModal({
 
     if (itemToEdit) {
       setAvailability(itemToEdit.availability_status || 'Available to Borrow');
+      setVisibility(itemToEdit.visibility || 'public');
       setImageUrls(itemToEdit.image_urls || []);
       setReturnTerms(itemToEdit.return_terms || '');
     }
@@ -86,6 +88,7 @@ export default function AddItemModal({
       condition: formData.get('condition'),
       location_id: formData.get('location_id'),
       availability_status: availability,
+      visibility: availability === 'Not Available' ? 'private' : visibility,
       description: formData.get('description'),
       pickup_by: formData.get('pickup_by') || null,
       return_by: formData.get('return_by') || null,
@@ -185,6 +188,23 @@ export default function AddItemModal({
               </div>
             )}
           </div>
+
+          {/* VISIBILITY — only shown when item is available */}
+          {availability !== 'Not Available' && (
+            <div style={sectionStyle}>
+              <label style={labelStyle}>Who Can See This?</label>
+              <select
+                value={visibility}
+                onChange={e => setVisibility(e.target.value)}
+                style={inputStyle}
+              >
+                <option value="public">Everyone</option>
+                <option value="followers">People you follow</option>
+                <option value="campmates">Campmates only</option>
+                <option value="followers_and_campmates">Followers &amp; campmates</option>
+              </select>
+            </div>
+          )}
 
           {/* TERMS FOR BORROW */}
           {availability === 'Available to Borrow' && (

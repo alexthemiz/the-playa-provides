@@ -344,12 +344,15 @@ export default function FindItemsPage() {
               </div>
             )}
 
-            <button
-              onClick={() => setShowRequestForm(true)}
-              style={primaryButtonStyle}
-            >
-              Request to {selectedItem.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}
-            </button>
+            {userId ? (
+              <button onClick={() => setShowRequestForm(true)} style={primaryButtonStyle}>
+                Request to {selectedItem.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}
+              </button>
+            ) : (
+              <a href="/login" style={{ ...primaryButtonStyle, display: 'block', textAlign: 'center' as const, textDecoration: 'none' }}>
+                Log In to Request
+              </a>
+            )}
           </div>
         </div>
       )}

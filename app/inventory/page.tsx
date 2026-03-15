@@ -108,10 +108,27 @@ export default function InventoryPage() {
   async function updateStatus(itemId: number, newStatus: string) {
     const { error } = await supabase
       .from('gear_items')
-      .update({ availability_status: newStatus })
+      .update({
+        availability_status: newStatus,
+        visibility: newStatus === 'Not Available' ? 'private' : 'public',
+      })
       .eq('id', itemId);
     if (!error) {
-      setItems(prev => prev.map(i => i.id === itemId ? { ...i, availability_status: newStatus } : i));
+      setItems(prev => prev.map(i => i.id === itemId ? {
+        ...i,
+        availability_status: newStatus,
+        visibility: newStatus === 'Not Available' ? 'private' : 'public',
+      } : i));
+    }
+  }
+
+  async function updateVisibility(itemId: number, newVisibility: string) {
+    const { error } = await supabase
+      .from('gear_items')
+      .update({ visibility: newVisibility })
+      .eq('id', itemId);
+    if (!error) {
+      setItems(prev => prev.map(i => i.id === itemId ? { ...i, visibility: newVisibility } : i));
     }
   }
 
@@ -479,6 +496,18 @@ export default function InventoryPage() {
                           </button>
                         ))}
                       </div>
+                      {item.availability_status !== 'Not Available' && (
+                        <select
+                          value={item.visibility || 'public'}
+                          onChange={e => updateVisibility(item.id, e.target.value)}
+                          style={visibilitySelectStyle}
+                        >
+                          <option value="public">Everyone</option>
+                          <option value="followers">People you follow</option>
+                          <option value="campmates">Campmates only</option>
+                          <option value="followers_and_campmates">Followers &amp; campmates</option>
+                        </select>
+                      )}
                     </td>
 
                     {/* CATEGORY */}
@@ -742,3 +771,4 @@ const pendingBadgeStyle: React.CSSProperties = { display: 'inline-block', paddin
 const handsOverButtonStyle: React.CSSProperties = { height: '28px', padding: '0 10px', fontSize: '0.7rem', backgroundColor: '#16a34a', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' as const };
 const reminderButtonStyle: React.CSSProperties = { height: '24px', padding: '0 8px', fontSize: '0.7rem', backgroundColor: '#f0f0f0', color: '#666', border: '1px solid #ddd', borderRadius: '4px', cursor: 'pointer', whiteSpace: 'nowrap' as const };
 const cancelActionButtonStyle: React.CSSProperties = { height: '24px', padding: '0 8px', fontSize: '0.7rem', backgroundColor: '#fff', color: '#dc2626', border: '1px solid #fca5a5', borderRadius: '4px', cursor: 'pointer', whiteSpace: 'nowrap' as const };
+const visibilitySelectStyle: React.CSSProperties = { marginTop: '6px', width: '100%', padding: '3px 6px', fontSize: '0.7rem', border: '1px solid #ddd', borderRadius: '4px', backgroundColor: '#fff', color: '#555', cursor: 'pointer' };

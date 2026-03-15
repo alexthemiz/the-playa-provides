@@ -25,6 +25,7 @@ export default function ListItemPage() {
   const [uploading, setUploading] = useState(false);
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [availability, setAvailability] = useState('Available to Borrow');
+  const [visibility, setVisibility] = useState('public');
   const [locations, setLocations] = useState<{id: string, label: string}[]>([]);
   const [selectedLocationId, setSelectedLocationId] = useState('');
   const [newLocData, setNewLocData] = useState({ label: '', address_line_1: '', city: '', state: '', zip_code: '' });
@@ -113,6 +114,7 @@ export default function ListItemPage() {
         condition: formData.get('condition'),
         location_id: resolvedLocationId,
         availability_status: availability,
+        visibility: availability === 'Not Available' ? 'private' : visibility,
         description: formData.get('description'),
         pickup_by: formData.get('pickup_by') || null,
         return_by: formData.get('return_by') || null,
@@ -242,6 +244,23 @@ export default function ListItemPage() {
               </div>
             )}
           </div>
+
+          {/* VISIBILITY — only shown when item is available */}
+          {availability !== 'Not Available' && (
+            <div style={sectionStyle}>
+              <label style={labelStyle}>Who Can See This?</label>
+              <select
+                value={visibility}
+                onChange={e => setVisibility(e.target.value)}
+                style={inputStyle}
+              >
+                <option value="public">Everyone</option>
+                <option value="followers">People you follow</option>
+                <option value="campmates">Campmates only</option>
+                <option value="followers_and_campmates">Followers &amp; campmates</option>
+              </select>
+            </div>
+          )}
 
           {/* TERMS FOR BORROW */}
           {availability === 'Available to Borrow' && (

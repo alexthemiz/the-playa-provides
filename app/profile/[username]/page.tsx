@@ -880,6 +880,20 @@ export default function PublicProfilePage() {
                     <div style={{ fontSize: '10px', color: '#00ccff', fontWeight: 'bold', textTransform: 'uppercase' as const, marginTop: '2px' }}>
                       {item.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}
                     </div>
+                    {isOwner && item.visibility && item.visibility !== 'public' && (
+                      <div style={{
+                        display: 'inline-block', marginTop: '3px',
+                        fontSize: '9px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.04em',
+                        padding: '1px 6px', borderRadius: '10px',
+                        backgroundColor: '#fdf3ec', color: '#C08261', border: '1px solid #f0d8c8',
+                      }}>
+                        {{
+                          followers: 'Followers',
+                          campmates: 'Campmates',
+                          followers_and_campmates: 'Followers + Campmates',
+                        }[item.visibility as string] ?? item.visibility}
+                      </div>
+                    )}
                   </div>
                   <div style={listColStyle}>{item.description || '—'}</div>
                   <div style={listColStyle}>{item.category}</div>
