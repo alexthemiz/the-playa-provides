@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-03-12 (session 10)_
+_Last updated: 2026-03-15 (session 11)_
 
 ---
 
@@ -36,7 +36,9 @@ _(nothing queued yet)_
 - [ ] **Notifications for loan/transfer events** — Bell + email only covers new item listings in v1. Future: wire transfer/loan confirmations into the `notifications` table too.
 - [ ] **Loan renewal / extension** — Extend return_by date without completing and re-creating the loan.
 - [ ] **Friends-only gear visibility** — `visibility` column already stubbed on `gear_items`. Build UI toggle + RLS enforcement when critical mass warrants it.
-- [ ] **Explicit friend requests / Camps layer** — Mutual follows = friends in v1. Future: explicit friend request flow, camp groups, camp-scoped gear sharing.
+- [ ] **Camp page claim flow** — Currently claim requests go via email. Future: self-serve claim with verification step.
+- [ ] **Camp page editing** — Claimed pages need a UI to edit description, founded year, avatar, banner.
+- [ ] **Camp-scoped gear sharing** — Share items with your camp only using `visibility` column + camp membership check.
 
 ---
 
@@ -94,3 +96,4 @@ _(nothing queued)_
 - [x] Feature: Social links on profile — `social_links jsonb` column on profiles, 6-field edit form inline in profile header, pill buttons in view mode (Lucide icons for FB/IG/LI/Globe; text for Bluesky/ePlaya)
 - [x] Feature: Playa story field on profile — `playa_story text` column, textarea in edit mode, displayed in view mode below bio section
 - [x] Design: Profile page layout restructure — Row 1: avatar+name/location/social links; Row 2: bio | wishlist; Row 3: story + playa history stacked
+- [x] Feature: Camps layer Phase 1 — `camps` + `user_camp_affiliations` tables with RLS; multi-entry camp affiliation editor on profile (year dropdown, camp autocomplete with freeform stub creation, Open Camping option); profile view mode reads affiliations first with legacy burning_man_years/burning_man_camp fallback; /camps/[slug] page with unclaimed banner + member list + claimed layout
