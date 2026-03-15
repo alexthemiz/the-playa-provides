@@ -50,6 +50,7 @@ _(nothing queued)_
 ---
 
 ## 🚀 Features (Designed, Ready to Build)
+- [ ] **Find-items campmates filter** — Add "My campmates" and "People I follow + campmates" options to the "Show items from" dropdown on /find-items. Requires fetching campmate user IDs (users sharing a `user_camp_affiliations` camp with the viewer) and updating `filteredItems` logic. Current options (Everyone / People I Follow / People Who Follow Me / Both) were built for Session 6; campmates options were missed in the visibility tiers step.
 - [ ] **Notification bell: link to item pages** — Clicking a notification in the bell dropdown should navigate to the relevant item page. Defer full messaging system until lending flow warrants it.
 
 ---
