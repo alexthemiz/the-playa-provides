@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-03-15 (session 11)_
+_Last updated: 2026-03-15 (session 12)_
 
 ---
 
@@ -39,7 +39,9 @@ _(nothing queued yet)_
 - [ ] **Camp page claim flow** — Currently claim requests go via email. Future: self-serve claim with verification step.
 - [ ] **Camp page editing** — Claimed pages need a UI to edit description, founded year, avatar, banner.
 - [ ] **Camp-scoped gear sharing** — Share items with your camp only using `visibility` column + camp membership check.
-
+- [ ] **Inventory-first reframe** — Shift site messaging to lead with gear organization as primary value prop; lending as optional bonus. Affects homepage copy, onboarding flow, and item-add form.
+- [ ] **Camps Phase 2** — Needs further scoping. Includes: campmates filter on find-items, self-serve camp page claiming UI, BM API integration for official camp autocomplete, camp gear inventory, playa_resources linking to camp pages.
+- [ ] **SEO / noindex for restricted items** — Public items indexable by search engines; campmates-only and followers-only items should have noindex meta tag.
 ---
 
 ## 🧠 Brainstorming
@@ -48,11 +50,12 @@ _(nothing queued)_
 ---
 
 ## 🚀 Features (Designed, Ready to Build)
-_(nothing queued)_
+- [ ] **Notification bell: link to item pages** — Clicking a notification in the bell dropdown should navigate to the relevant item page. Defer full messaging system until lending flow warrants it.
 
 ---
 
 ## ✅ Done
+- [x] Feature: Item visibility tiers — `visibility` column on `gear_items` with RLS enforcing public/followers/campmates/private; visibility selector on list-item form, edit modal, and inventory inline toggle; availability↔visibility coupling ('Not Available' → 'private'); owner visibility badge on profile page; "Log In to Request" gate on detail page, parallel modal, and find-items quick-view modal
 - [x] Fix: Regular-mode loading hangs (GoTrue lock contention) — header was calling getUser() which held the lock during a network request; switched to getSession() (local cache, ~1ms). Added lockAcquireTimeout: 5000 to fail faster. Added try/catch/finally to resources page so setLoading(false) always fires.
 - [x] Fix: Email sender switched to hello@theplayaprovides.com via Resend SMTP (Supabase dashboard config)
 - [x] Fix: Profile pages stuck on "Loading..." — root cause: getUser() makes a network call that can hang on expired/refreshing tokens; swapped to getSession() (reads local cache, no network call) for the owner-check
