@@ -20,9 +20,10 @@ export default function FindItemsPage() {
 
   // Relationship filter states
   const [userId, setUserId] = useState<string | null>(null);
-  const [relationshipFilter, setRelationshipFilter] = useState<'everyone' | 'following' | 'followers' | 'both'>('everyone');
+  const [relationshipFilters, setRelationshipFilters] = useState<string[]>(['Everyone']);
   const [followingIds, setFollowingIds] = useState<string[]>([]);
   const [followerIds, setFollowerIds] = useState<string[]>([]);
+  const [campMateIds, setCampMateIds] = useState<string[]>([]);
   
   // Modal States
   const [selectedItem, setSelectedItem] = useState<any>(null);
@@ -74,6 +75,23 @@ export default function FindItemsPage() {
 
       setFollowingIds((followingRes.data || []).map((r: any) => r.following_id))
       setFollowerIds((followersRes.data || []).map((r: any) => r.follower_id))
+
+      const { data: myAffiliations } = await supabase
+        .from('user_camp_affiliations')
+        .select('camp_id')
+        .eq('user_id', session.user.id)
+      const myCampIds = (myAffiliations || []).map((r: any) => r.camp_id)
+      if (myCampIds.length === 0) {
+        setCampMateIds([])
+      } else {
+        const { data: campMembers } = await supabase
+          .from('user_camp_affiliations')
+          .select('user_id')
+          .in('camp_id', myCampIds)
+          .neq('user_id', session.user.id)
+        const unique = [...new Set((campMembers || []).map((r: any) => r.user_id))]
+        setCampMateIds(unique)
+      }
     } catch (err: any) {
       console.error('fetchRelationships error:', err.message)
     }
@@ -142,6 +160,21 @@ export default function FindItemsPage() {
     });
   };
 
+  const toggleRelationship = (option: string) => {
+    if (option === 'Everyone') {
+      setRelationshipFilters(['Everyone']);
+    } else {
+      setRelationshipFilters(prev => {
+        const without = prev.filter(f => f !== 'Everyone');
+        if (without.includes(option)) {
+          const filtered = without.filter(f => f !== option);
+          return filtered.length === 0 ? ['Everyone'] : filtered;
+        }
+        return [...without, option];
+      });
+    }
+  };
+
   const filteredItems = items.filter(item => {
     const isAvailable = item.availability_status !== 'Not Available';
     const matchesSearch = item.item_name?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -150,11 +183,11 @@ export default function FindItemsPage() {
     const itemStatus = item.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow';
     const matchesAvailability = availabilityFilters.includes(itemStatus);
     const matchesRelationship = (() => {
-      if (!userId || relationshipFilter === 'everyone') return true;
-      if (relationshipFilter === 'following') return followingIds.includes(item.user_id);
-      if (relationshipFilter === 'followers') return followerIds.includes(item.user_id);
-      if (relationshipFilter === 'both') return followingIds.includes(item.user_id) || followerIds.includes(item.user_id);
-      return true;
+      if (relationshipFilters.includes('Everyone')) return true;
+      if (relationshipFilters.includes('People I Follow') && followingIds.includes(item.user_id)) return true;
+      if (relationshipFilters.includes('People Who Follow Me') && followerIds.includes(item.user_id)) return true;
+      if (relationshipFilters.includes('My Campmates') && campMateIds.includes(item.user_id)) return true;
+      return false;
     })();
     return isAvailable && matchesSearch && matchesZip && matchesCategory && matchesAvailability && matchesRelationship;
   });
@@ -163,68 +196,49 @@ export default function FindItemsPage() {
     <div style={containerStyle}>
       <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 20px 0' }}>The Playa Provides<span style={{ textDecoration: 'underline' }}> Items to Borrow or Keep{'\u00a0'}</span></h1>
 
-      {/* HEADER / SEARCH & FILTERS */}
+      {/* ROW 1: Search + Zip + Availability chips + Toggle */}
       <div style={topBarStyle}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={filterLabelStyle}>Search by Keyword:</span>
-          <div style={searchWrapperStyle}>
-            <Search size={18} style={searchIconStyle} />
-            <input
-              type="text"
-              placeholder="Item name or type..."
-              style={searchInputStyle}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+        <div style={searchWrapperStyle}>
+          <Search size={18} style={searchIconStyle} />
+          <input
+            type="text"
+            placeholder="Search items..."
+            style={searchInputStyle}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={filterLabelStyle}>Search by Distance from:</span>
-          <div style={searchWrapperStyle}>
-            <MapPin size={18} style={searchIconStyle} />
-            <input
-              type="text"
-              placeholder="Zip Code"
-              style={searchInputStyle}
-              value={zipQuery}
-              onChange={(e) => setZipQuery(e.target.value)}
-            />
-          </div>
+        <div style={{ ...searchWrapperStyle, flex: '0 0 80px', minWidth: '80px' }}>
+          <MapPin size={18} style={searchIconStyle} />
+          <input
+            type="text"
+            placeholder="Zip"
+            style={searchInputStyle}
+            value={zipQuery}
+            onChange={(e) => setZipQuery(e.target.value)}
+          />
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '8px 12px', backgroundColor: '#f5f5f5', borderRadius: '8px', border: '1px solid #eee' }}>
-          <span style={{ fontSize: '0.78rem', fontWeight: '600', color: '#555', whiteSpace: 'nowrap' as const }}>Availability:</span>
-          {[{ value: 'Keep', label: 'To Keep' }, { value: 'Borrow', label: 'To Borrow' }].map(({ value, label }) => (
-            <label key={value} style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', fontSize: '0.82rem', color: '#333', whiteSpace: 'nowrap' as const }}>
-              <input
-                type="checkbox"
-                checked={availabilityFilters.includes(value)}
-                onChange={() => toggleAvailability(value)}
-                style={{ cursor: 'pointer', accentColor: '#00ccff' }}
-              />
-              {label}
-            </label>
-          ))}
-        </div>
-
-        {userId && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={filterLabelStyle}>Show items from:</span>
-            <select
-              value={relationshipFilter}
-              onChange={e => setRelationshipFilter(e.target.value as any)}
-              style={{ padding: '8px 10px', border: '1px solid #eee', borderRadius: '8px', backgroundColor: '#f9f9f9', fontSize: '0.82rem', color: '#111', cursor: 'pointer' }}
+        {[{ value: 'Keep', label: 'To Keep' }, { value: 'Borrow', label: 'To Borrow' }].map(({ value, label }) => {
+          const isActive = availabilityFilters.includes(value);
+          return (
+            <button
+              key={value}
+              onClick={() => toggleAvailability(value)}
+              style={{
+                ...chipStyle,
+                backgroundColor: isActive ? '#00ccff' : '#fff',
+                color: isActive ? '#000' : '#555',
+                borderColor: isActive ? '#00ccff' : '#ccc',
+              }}
             >
-              <option value="everyone">Everyone</option>
-              <option value="following">People I Follow</option>
-              <option value="followers">People Who Follow Me</option>
-              <option value="both">Both</option>
-            </select>
-          </div>
-        )}
+              {label}
+            </button>
+          );
+        })}
 
-        <div style={{ ...toggleGroupStyle, marginLeft: 'auto' }}>
+        <div style={{ ...toggleGroupStyle, marginLeft: 'auto', minWidth: '108px' }}>
           <button onClick={() => setViewMode('grid')} style={{...toggleButtonStyle, backgroundColor: viewMode === 'grid' ? '#eee' : 'transparent'}}>
             <LayoutGrid size={20} color={viewMode === 'grid' ? '#000' : '#666'} />
           </button>
@@ -238,6 +252,29 @@ export default function FindItemsPage() {
       </div>
 
       {/* CATEGORY FILTERS */}
+      {/* ROW 2: Relationship filter chips */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' as const, marginBottom: '12px' }}>
+        <span style={filterLabelStyle}>Show items from:</span>
+        {['Everyone', 'People I Follow', 'People Who Follow Me', 'My Campmates'].map((option) => {
+          const isActive = relationshipFilters.includes(option);
+          return (
+            <button
+              key={option}
+              onClick={() => toggleRelationship(option)}
+              style={{
+                ...chipStyle,
+                backgroundColor: isActive ? '#00ccff' : '#fff',
+                color: isActive ? '#000' : '#555',
+                borderColor: isActive ? '#00ccff' : '#ccc',
+              }}
+            >
+              {option}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ROW 3: Category chips */}
       <div style={filterRowStyle}>
         <div style={chipContainerStyle}>
           {categories.map((cat) => {
