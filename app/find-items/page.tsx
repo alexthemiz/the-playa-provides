@@ -198,9 +198,9 @@ export default function FindItemsPage() {
 
       {/* ROW 1: Search + Zip + Toggle */}
       <div style={topBarStyle}>
-        <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={filterLabelStyle}>Search by keyword</span>
-          <div style={{ ...searchWrapperStyle, marginTop: '4px' }}>
+          <div style={searchWrapperStyle}>
             <Search size={18} style={searchIconStyle} />
             <input
               type="text"
@@ -212,9 +212,9 @@ export default function FindItemsPage() {
           </div>
         </div>
 
-        <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={filterLabelStyle}>Search by location</span>
-          <div style={{ ...searchWrapperStyle, flex: '0 0 80px', minWidth: '80px', marginTop: '4px' }}>
+          <div style={{ ...searchWrapperStyle, flex: '0 0 80px', minWidth: '80px' }}>
             <MapPin size={18} style={searchIconStyle} />
             <input
               type="text"
@@ -227,8 +227,7 @@ export default function FindItemsPage() {
         </div>
 
         <div style={{ marginLeft: 'auto' }}>
-          <span style={filterLabelStyle}>&nbsp;</span>
-          <div style={{ ...toggleGroupStyle, minWidth: '108px', marginTop: '4px' }}>
+          <div style={{ ...toggleGroupStyle, minWidth: '108px' }}>
             <button onClick={() => setViewMode('grid')} style={{...toggleButtonStyle, backgroundColor: viewMode === 'grid' ? '#eee' : 'transparent'}}>
               <LayoutGrid size={20} color={viewMode === 'grid' ? '#000' : '#666'} />
             </button>
@@ -262,7 +261,7 @@ export default function FindItemsPage() {
             </button>
           );
         })}
-        <span style={{ ...filterLabelStyle, marginLeft: '12px' }}>Available to:</span>
+        <span style={{ ...filterLabelStyle, marginLeft: 'auto' }}>Available to:</span>
         {[{ value: 'Keep', label: 'Keep' }, { value: 'Borrow', label: 'Borrow' }].map(({ value, label }) => {
           const isActive = availabilityFilters.includes(value);
           return (
