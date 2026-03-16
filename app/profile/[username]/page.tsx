@@ -608,7 +608,7 @@ export default function PublicProfilePage() {
                 ...(locationStr ? [<span key="location" style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#999', fontSize: '0.85rem' }}><MapPin size={13} />{locationStr}</span>] : []),
               ];
               return (
-                <div style={{ display: 'flex', justifyContent: items.length > 1 ? 'space-between' as const : 'flex-start' as const, alignItems: 'center', marginTop: '4px', gap: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: items.length > 1 ? 'space-between' as const : 'flex-start' as const, alignItems: 'center', marginTop: '4px', gap: '8px', maxWidth: 'calc(50% - 70px)' }}>
                   {items}
                 </div>
               );
