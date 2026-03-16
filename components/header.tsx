@@ -88,9 +88,10 @@ export default function Header() {
     const { data } = await supabase
       .from('notifications')
       .select(`
-        id, type, read, created_at,
+        id, type, read, created_at, item_id, camp_id,
         actor:profiles!notifications_actor_id_fkey(username, preferred_name),
-        item:gear_items!notifications_item_id_fkey(item_name)
+        item:gear_items!notifications_item_id_fkey(item_name),
+        camp:camps!notifications_camp_id_fkey(display_name, slug)
       `)
       .eq('recipient_id', session.user.id)
       .order('created_at', { ascending: false })
@@ -170,7 +171,7 @@ export default function Header() {
         {/* Logo */}
         <Link href="/" className="hover:opacity-80 transition flex flex-col leading-tight">
           <span className={`font-black text-xl uppercase tracking-tighter ${mainTextColor}`}>
-            The Playa Provides<span className="text-[#2D241E]">_</span>
+            The Playa Provides<span>______</span>
           </span>
           {user && (
             <span className={`hidden lg:block text-[13px] font-medium ${mainTextColor} opacity-60 normal-case tracking-normal`}>
@@ -239,11 +240,26 @@ export default function Header() {
                         notifications.map(n => {
                           const actorName = (n.actor as any)?.preferred_name || (n.actor as any)?.username || 'Someone'
                           const itemName = (n.item as any)?.item_name || 'an item'
+                          const campName = (n.camp as any)?.display_name || 'a camp'
+                          const campSlug = (n.camp as any)?.slug || ''
                           const timeAgo = formatTimeAgo(n.created_at)
+                          const { text, href } = (() => {
+                            switch (n.type) {
+                              case 'new_item': return { text: `posted a new item: ${itemName}`, href: `/find-items/${n.item_id}` }
+                              case 'new_follower': return { text: 'started following you', href: `/profile/${(n.actor as any)?.username}` }
+                              case 'transfer_accepted': return { text: `accepted your transfer of ${itemName}`, href: '/inventory' }
+                              case 'transfer_declined': return { text: `declined your transfer of ${itemName}`, href: '/inventory' }
+                              case 'loan_accepted': return { text: `accepted your borrow request for ${itemName}`, href: '/inventory' }
+                              case 'loan_declined': return { text: `declined your borrow request for ${itemName}`, href: '/inventory' }
+                              case 'item_request': return { text: `requested your ${itemName}`, href: '/inventory' }
+                              case 'camp_join': return { text: `joined ${campName}`, href: `/camps/${campSlug}` }
+                              default: return { text: 'sent you a notification', href: '/inventory' }
+                            }
+                          })()
                           return (
                             <a
                               key={n.id}
-                              href="/find-items"
+                              href={href}
                               onClick={() => handleNotificationClick(n.id)}
                               style={{
                                 display: 'block', padding: '12px 16px', borderBottom: '1px solid #f5f5f5',
@@ -252,7 +268,7 @@ export default function Header() {
                               }}
                             >
                               <div style={{ fontSize: '0.85rem', lineHeight: 1.4 }}>
-                                <strong>{actorName}</strong> posted: {itemName}
+                                <strong>{actorName}</strong> {text}
                               </div>
                               <div style={{ fontSize: '0.75rem', color: '#aaa', marginTop: '3px' }}>{timeAgo}</div>
                             </a>
@@ -326,11 +342,26 @@ export default function Header() {
                       notifications.map(n => {
                         const actorName = (n.actor as any)?.preferred_name || (n.actor as any)?.username || 'Someone'
                         const itemName = (n.item as any)?.item_name || 'an item'
+                        const campName = (n.camp as any)?.display_name || 'a camp'
+                        const campSlug = (n.camp as any)?.slug || ''
                         const timeAgo = formatTimeAgo(n.created_at)
+                        const { text, href } = (() => {
+                          switch (n.type) {
+                            case 'new_item': return { text: `posted a new item: ${itemName}`, href: `/find-items/${n.item_id}` }
+                            case 'new_follower': return { text: 'started following you', href: `/profile/${(n.actor as any)?.username}` }
+                            case 'transfer_accepted': return { text: `accepted your transfer of ${itemName}`, href: '/inventory' }
+                            case 'transfer_declined': return { text: `declined your transfer of ${itemName}`, href: '/inventory' }
+                            case 'loan_accepted': return { text: `accepted your borrow request for ${itemName}`, href: '/inventory' }
+                            case 'loan_declined': return { text: `declined your borrow request for ${itemName}`, href: '/inventory' }
+                            case 'item_request': return { text: `requested your ${itemName}`, href: '/inventory' }
+                            case 'camp_join': return { text: `joined ${campName}`, href: `/camps/${campSlug}` }
+                            default: return { text: 'sent you a notification', href: '/inventory' }
+                          }
+                        })()
                         return (
                           <a
                             key={n.id}
-                            href="/find-items"
+                            href={href}
                             onClick={() => handleNotificationClick(n.id)}
                             style={{
                               display: 'block', padding: '12px 16px', borderBottom: '1px solid #f5f5f5',
@@ -339,7 +370,7 @@ export default function Header() {
                             }}
                           >
                             <div style={{ fontSize: '0.85rem', lineHeight: 1.4 }}>
-                              <strong>{actorName}</strong> posted: {itemName}
+                              <strong>{actorName}</strong> {text}
                             </div>
                             <div style={{ fontSize: '0.75rem', color: '#aaa', marginTop: '3px' }}>{timeAgo}</div>
                           </a>

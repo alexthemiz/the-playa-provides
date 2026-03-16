@@ -11,7 +11,8 @@ _Last updated: 2026-03-16 (session 13)_
 ---
 
 ## 🔧 Bugs & Fixes
-_(nothing queued)_
+- [ ] **Visibility constraint error — user-friendly copy** — When a user selects "People I Follow" or "Campmates" visibility but has no followers or camp affiliations, the site shows a raw database constraint error. Replace with friendly copy explaining why the option isn't available.
+- [ ] **Item request notifications not wired to bell** — Requests currently only trigger an email via the `send-request-email` edge function; no row is inserted into the `notifications` table. Add a notification insert to the request flow (edge function or client-side after send) so the bell picks it up.
 
 
 
@@ -37,7 +38,6 @@ _(nothing queued yet)_
 - [ ] **Dispute arbitration UI** — Loans with `status = disputed` have no admin UI yet; flagged for future resolution flow.
 - [ ] **Notifications for loan/transfer events** — Bell + email only covers new item listings in v1. Future: wire transfer/loan confirmations into the `notifications` table too.
 - [ ] **Loan renewal / extension** — Extend return_by date without completing and re-creating the loan.
-- [ ] **Friends-only gear visibility** — `visibility` column already stubbed on `gear_items`. Build UI toggle + RLS enforcement when critical mass warrants it.
 - [ ] **Camp page claim flow** — Currently claim requests go via email. Future: self-serve claim with verification step.
 - [ ] **Camp page editing** — Claimed pages need a UI to edit description, founded year, avatar, banner.
 - [ ] **Camp-scoped gear sharing** — Share items with your camp only using `visibility` column + camp membership check.
@@ -55,6 +55,7 @@ _(nothing queued)_
 ## 🚀 Features (Designed, Ready to Build)
 - [ ] **Find-items campmates filter** — Add "My campmates" and "People I follow + campmates" options to the "Show items from" dropdown on /find-items. Requires fetching campmate user IDs (users sharing a `user_camp_affiliations` camp with the viewer) and updating `filteredItems` logic. Current options (Everyone / People I Follow / People Who Follow Me / Both) were built for Session 6; campmates options were missed in the visibility tiers step.
 - [ ] **Notification bell: link to item pages** — Clicking a notification in the bell dropdown should navigate to the relevant item page. Defer full messaging system until lending flow warrants it.
+- [ ] **Signup page required fields** — Add Preferred Name, Username, and Full Name fields to the signup form so new users aren't created with NULL required fields. Redirect to /settings is the fallback but capturing at signup is cleaner.
 
 ---
 
