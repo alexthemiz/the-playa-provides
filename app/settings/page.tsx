@@ -153,7 +153,14 @@ export default function SettingsPage() {
       const { error } = await supabase.functions.invoke('delete-account', {
         body: { user_id: session.user.id },
       });
-      if (error) throw new Error(error.message);
+      if (error) {
+        let msg = error.message;
+        try {
+          const body = await (error as any).context?.json();
+          if (body?.error) msg = body.error;
+        } catch (_) {}
+        throw new Error(msg);
+      }
       await supabase.auth.signOut();
       window.location.href = '/?deleted=true';
     } catch (err: any) {
