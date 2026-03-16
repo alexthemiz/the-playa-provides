@@ -31,6 +31,7 @@ export default function AddItemModal({
   const [availability, setAvailability] = useState('Available to Borrow');
   const [visibility, setVisibility] = useState('public');
   const [locations, setLocations] = useState<Location[]>([]);
+  const [selectedLocationId, setSelectedLocationId] = useState('');
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [returnTerms, setReturnTerms] = useState('');
 
@@ -38,8 +39,14 @@ export default function AddItemModal({
     async function fetchLocations() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data } = await supabase.from('locations').select('id, label').eq('user_id', user.id);
-        if (data) setLocations(data);
+        const { data } = await supabase.from('locations').select('id, label, is_default').eq('user_id', user.id);
+        if (data) {
+          setLocations(data);
+          if (!itemToEdit) {
+            const defaultLoc = data.find((l: any) => l.is_default);
+            if (defaultLoc) setSelectedLocationId(defaultLoc.id);
+          }
+        }
       }
     }
     fetchLocations();
@@ -47,6 +54,7 @@ export default function AddItemModal({
     if (itemToEdit) {
       setAvailability(itemToEdit.availability_status || 'Available to Borrow');
       setVisibility(itemToEdit.visibility || 'public');
+      setSelectedLocationId(itemToEdit.location_id || '');
       setImageUrls(itemToEdit.image_urls || []);
       setReturnTerms(itemToEdit.return_terms || '');
     }
@@ -86,7 +94,7 @@ export default function AddItemModal({
       item_name: formData.get('item_name'),
       category: formData.get('category'),
       condition: formData.get('condition'),
-      location_id: formData.get('location_id'),
+      location_id: selectedLocationId || null,
       availability_status: availability,
       visibility: availability === 'Not Available' ? 'private' : visibility,
       description: formData.get('description'),
@@ -143,7 +151,7 @@ export default function AddItemModal({
             </div>
             <div style={sectionStyle}>
               <label style={labelStyle}>Stored At</label>
-              <select name="location_id" defaultValue={itemToEdit?.location_id || ""} style={inputStyle} required>
+              <select value={selectedLocationId} onChange={e => setSelectedLocationId(e.target.value)} style={inputStyle} required>
                 <option value="" disabled>— Location —</option>
                 {locations.map(loc => <option key={loc.id} value={loc.id}>{loc.label}</option>)}
               </select>

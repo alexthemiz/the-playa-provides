@@ -600,7 +600,7 @@ export default function PublicProfilePage() {
             ) : (
               <h1 style={{ fontSize: '2.2rem', margin: 0, color: '#2D241E' }}>{profile.preferred_name || username}</h1>
             )}
-            <p style={{ color: '#888', margin: '4px 0 0' }}>@{username}</p>
+            <p style={{ color: '#888', margin: '4px 0 0' }}>@{username}{profile.pronouns ? <span style={{ marginLeft: '8px' }}>{profile.pronouns}</span> : null}</p>
             {locationStr && (
               <p style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#999', fontSize: '0.85rem', margin: '4px 0 0' }}>
                 <MapPin size={13} />{locationStr}

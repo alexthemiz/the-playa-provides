@@ -41,12 +41,16 @@ export default function ListItemPage() {
           const { data: profileData } = await supabase.from('profiles').select('preferred_name').eq('id', user.id).maybeSingle();
           if (profileData?.preferred_name) setDisplayName(profileData.preferred_name);
 
-          const { data, error } = await supabase.from('locations').select('id, label').eq('user_id', user.id);
+          const { data, error } = await supabase.from('locations').select('id, label, is_default').eq('user_id', user.id);
           if (error) console.error('fetchLocations error:', error);
           else if (data) {
             setLocations(data);
-            // Auto-open the new location form for users who haven't saved any locations yet
-            if (data.length === 0) setSelectedLocationId('__new__');
+            if (data.length === 0) {
+              setSelectedLocationId('__new__');
+            } else {
+              const defaultLoc = data.find((l: any) => l.is_default);
+              if (defaultLoc) setSelectedLocationId(defaultLoc.id);
+            }
           }
         }
       } catch (err) {
