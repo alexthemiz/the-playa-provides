@@ -20,7 +20,7 @@ serve(async (req: Request) => {
       auth: { autoRefreshToken: false, persistSession: false }
     })
 
-    // 1. Verify JWT from Authorization header to get user_id
+    // 1. Verify JWT from Authorization header
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
       return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
@@ -38,7 +38,7 @@ serve(async (req: Request) => {
       })
     }
 
-    // 2. Parse body and verify user_id matches JWT
+    // 2. Verify user_id in body matches JWT
     const { user_id } = await req.json()
     if (callerUser.id !== user_id) {
       return new Response(JSON.stringify({ error: 'Unauthorized: user_id mismatch' }), {
@@ -47,21 +47,19 @@ serve(async (req: Request) => {
       })
     }
 
-    // 3. Delete auth user first — if this fails, abort entirely
-    const { error: deleteAuthError } = await adminClient.auth.admin.deleteUser(user_id)
-    if (deleteAuthError) {
-      console.error('deleteUser failed:', deleteAuthError.message)
-      return new Response(JSON.stringify({ error: 'Failed to delete auth account: ' + deleteAuthError.message }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
-      })
-    }
-
-    // Auth account is gone. Continue cleaning up data.
-    // Errors from here are logged but don't stop the process.
+    // All data scrubbing happens BEFORE deleteUser.
+    // FK rules now handle the rest: profiles + locations CASCADE on auth delete,
+    // gear_items.user_id and playa_resources.submitted_by SET NULL.
     const errors: string[] = []
 
-    // 4. Scrub personal data from profiles and set deleted_at
+    // 3. Mark gear items as owner_deleted and private — must happen while user_id is still set
+    const { error: gearErr } = await adminClient
+      .from('gear_items')
+      .update({ owner_deleted: true, visibility: 'private' })
+      .eq('user_id', user_id)
+    if (gearErr) errors.push('gear_items: ' + gearErr.message)
+
+    // 4. Scrub personal data from profile and set deleted_at
     const { error: profileErr } = await adminClient
       .from('profiles')
       .update({
@@ -87,28 +85,14 @@ serve(async (req: Request) => {
       .eq('id', user_id)
     if (profileErr) errors.push('profiles scrub: ' + profileErr.message)
 
-    // 5. Mark gear items as owner_deleted and private
-    const { error: gearErr } = await adminClient
-      .from('gear_items')
-      .update({ owner_deleted: true, visibility: 'private' })
-      .eq('user_id', user_id)
-    if (gearErr) errors.push('gear_items: ' + gearErr.message)
+    // 5. Unclaim camps owned by this user
+    const { error: campsErr } = await adminClient
+      .from('camps')
+      .update({ page_owner_id: null, is_claimed: false })
+      .eq('page_owner_id', user_id)
+    if (campsErr) errors.push('camps: ' + campsErr.message)
 
-    // 6. Delete locations
-    const { error: locErr } = await adminClient
-      .from('locations')
-      .delete()
-      .eq('user_id', user_id)
-    if (locErr) errors.push('locations: ' + locErr.message)
-
-    // 7. Delete camp affiliations
-    const { error: campAffErr } = await adminClient
-      .from('user_camp_affiliations')
-      .delete()
-      .eq('user_id', user_id)
-    if (campAffErr) errors.push('user_camp_affiliations: ' + campAffErr.message)
-
-    // 8. Delete follows (both directions)
+    // 6. Delete follows (both directions)
     const { error: followsErr1 } = await adminClient
       .from('user_follows')
       .delete()
@@ -121,7 +105,7 @@ serve(async (req: Request) => {
       .eq('following_id', user_id)
     if (followsErr2) errors.push('user_follows (following): ' + followsErr2.message)
 
-    // 9. Delete notifications (both directions)
+    // 7. Delete notifications (both directions)
     const { error: notifErr1 } = await adminClient
       .from('notifications')
       .delete()
@@ -134,7 +118,14 @@ serve(async (req: Request) => {
       .eq('actor_id', user_id)
     if (notifErr2) errors.push('notifications (actor): ' + notifErr2.message)
 
-    // 10. Delete item loans (both directions)
+    // 8. Delete camp affiliations
+    const { error: campAffErr } = await adminClient
+      .from('user_camp_affiliations')
+      .delete()
+      .eq('user_id', user_id)
+    if (campAffErr) errors.push('user_camp_affiliations: ' + campAffErr.message)
+
+    // 9. Delete item loans (both directions)
     const { error: loanErr1 } = await adminClient
       .from('item_loans')
       .delete()
@@ -147,7 +138,7 @@ serve(async (req: Request) => {
       .eq('borrower_id', user_id)
     if (loanErr2) errors.push('item_loans (borrower): ' + loanErr2.message)
 
-    // 11. Delete item transfers (both directions)
+    // 10. Delete item transfers (both directions)
     const { error: transferErr1 } = await adminClient
       .from('item_transfers')
       .delete()
@@ -160,14 +151,14 @@ serve(async (req: Request) => {
       .eq('recipient_id', user_id)
     if (transferErr2) errors.push('item_transfers (recipient): ' + transferErr2.message)
 
-    // 12. Unclaim camps owned by this user
-    const { error: campsErr } = await adminClient
-      .from('camps')
-      .update({ page_owner_id: null, is_claimed: false })
-      .eq('page_owner_id', user_id)
-    if (campsErr) errors.push('camps: ' + campsErr.message)
+    // 11. Explicitly delete locations (CASCADE will also handle this, but belt-and-suspenders)
+    const { error: locErr } = await adminClient
+      .from('locations')
+      .delete()
+      .eq('user_id', user_id)
+    if (locErr) errors.push('locations: ' + locErr.message)
 
-    // 13. Nullify submitted_by on playa_resources
+    // 12. Explicitly null playa_resources.submitted_by (SET NULL CASCADE will also handle this)
     const { error: resourcesErr } = await adminClient
       .from('playa_resources')
       .update({ submitted_by: null })
@@ -175,7 +166,19 @@ serve(async (req: Request) => {
     if (resourcesErr) errors.push('playa_resources: ' + resourcesErr.message)
 
     if (errors.length > 0) {
-      console.error('Data cleanup errors after auth deletion:', errors)
+      console.error('Pre-deletion cleanup errors:', errors)
+    }
+
+    // 13. Delete auth user — FK rules now allow this to succeed cleanly.
+    //     CASCADE deletes the profiles row and any remaining locations.
+    //     SET NULL nulls gear_items.user_id and playa_resources.submitted_by.
+    const { error: deleteAuthError } = await adminClient.auth.admin.deleteUser(user_id)
+    if (deleteAuthError) {
+      console.error('deleteUser failed:', deleteAuthError.message)
+      return new Response(JSON.stringify({ error: 'Failed to delete auth account: ' + deleteAuthError.message }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      })
     }
 
     return new Response(
