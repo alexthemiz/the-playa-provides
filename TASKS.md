@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-03-16 (session 13)_
+_Last updated: 2026-03-16 (session 14)_
 
 ---
 
@@ -38,7 +38,6 @@ _(nothing queued yet)_
 - [ ] **Dispute arbitration UI** — Loans with `status = disputed` have no admin UI yet; flagged for future resolution flow.
 - [ ] **Notifications for loan/transfer events** — Bell + email only covers new item listings in v1. Future: wire transfer/loan confirmations into the `notifications` table too.
 - [ ] **Loan renewal / extension** — Extend return_by date without completing and re-creating the loan.
-- [ ] **Camp page claim flow** — Currently claim requests go via email. Future: self-serve claim with verification step.
 - [ ] **Camp page editing** — Claimed pages need a UI to edit description, founded year, avatar, banner.
 - [ ] **Camp-scoped gear sharing** — Share items with your camp only using `visibility` column + camp membership check.
 - [ ] **Inventory-first reframe** — Shift site messaging to lead with gear organization as primary value prop; lending as optional bonus. Affects homepage copy, onboarding flow, and item-add form.
@@ -53,8 +52,6 @@ _(nothing queued)_
 ---
 
 ## 🚀 Features (Designed, Ready to Build)
-- [ ] **Find-items campmates filter** — Add "My campmates" and "People I follow + campmates" options to the "Show items from" dropdown on /find-items. Requires fetching campmate user IDs (users sharing a `user_camp_affiliations` camp with the viewer) and updating `filteredItems` logic. Current options (Everyone / People I Follow / People Who Follow Me / Both) were built for Session 6; campmates options were missed in the visibility tiers step.
-- [ ] **Notification bell: link to item pages** — Clicking a notification in the bell dropdown should navigate to the relevant item page. Defer full messaging system until lending flow warrants it.
 - [ ] **Signup page required fields** — Add Preferred Name, Username, and Full Name fields to the signup form so new users aren't created with NULL required fields. Redirect to /settings is the fallback but capturing at signup is cleaner.
 
 ---
@@ -109,3 +106,6 @@ _(nothing queued)_
 - [x] Feature: Playa story field on profile — `playa_story text` column, textarea in edit mode, displayed in view mode below bio section
 - [x] Design: Profile page layout restructure — Row 1: avatar+name/location/social links; Row 2: bio | wishlist; Row 3: story + playa history stacked
 - [x] Feature: Camps layer Phase 1 — `camps` + `user_camp_affiliations` tables with RLS; multi-entry camp affiliation editor on profile (year dropdown, camp autocomplete with freeform stub creation, Open Camping option); profile view mode reads affiliations first with legacy burning_man_years/burning_man_camp fallback; /camps/[slug] page with unclaimed banner + member list + claimed layout
+- [x] Feature: Find-items campmates filter — "My Campmates" multi-select chip on /find-items; campmate IDs fetched from user_camp_affiliations; filter chips for Everyone / People I Follow / People Who Follow Me / My Campmates (multi-select, independent toggles)
+- [x] Feature: Notification bell full wiring — type-based text + href switch for new_item, new_follower, transfer_accepted/declined, loan_accepted/declined, item_request, camp_join; camp_id column added to notifications; 5 new DB triggers (new_follower, transfer_accepted/declined, loan_accepted/declined, camp_join)
+- [x] Feature: Camp page claim flow — inline form replaces mailto link; `camp_claim_requests` table with RLS + approval/denial triggers; `send-camp-claim-notification` edge function emails support; bell cases for camp_claim_approved/denied; approval auto-sets is_claimed + page_owner_id and denies other pending requests
