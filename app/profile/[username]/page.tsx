@@ -600,12 +600,19 @@ export default function PublicProfilePage() {
             ) : (
               <h1 style={{ fontSize: '2.2rem', margin: 0, color: '#2D241E' }}>{profile.preferred_name || username}</h1>
             )}
-            <p style={{ color: '#888', margin: '4px 0 0' }}>@{username}{profile.pronouns ? <span style={{ marginLeft: '8px' }}>{profile.pronouns}</span> : null}</p>
-            {locationStr && (
-              <p style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#999', fontSize: '0.85rem', margin: '4px 0 0' }}>
-                <MapPin size={13} />{locationStr}
-              </p>
-            )}
+            {/* Row 2: @username + pronouns + location — flex, items shown based on what's available */}
+            {(() => {
+              const items: React.ReactNode[] = [
+                <span key="username" style={{ color: '#888', fontSize: '0.9rem' }}>@{username}</span>,
+                ...(profile.pronouns ? [<span key="pronouns" style={{ color: '#888', fontSize: '0.9rem' }}>{profile.pronouns}</span>] : []),
+                ...(locationStr ? [<span key="location" style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#999', fontSize: '0.85rem' }}><MapPin size={13} />{locationStr}</span>] : []),
+              ];
+              return (
+                <div style={{ display: 'flex', justifyContent: items.length > 1 ? 'space-between' as const : 'flex-start' as const, alignItems: 'center', marginTop: '4px', gap: '8px' }}>
+                  {items}
+                </div>
+              );
+            })()}
 
             {/* Social links — view mode inline, edit form below */}
             {isEditing ? (
