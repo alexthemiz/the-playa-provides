@@ -196,63 +196,53 @@ export default function FindItemsPage() {
     <div style={containerStyle}>
       <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 20px 0' }}>The Playa Provides<span style={{ textDecoration: 'underline' }}> Items to Borrow or Keep{'\u00a0'}</span></h1>
 
-      {/* ROW 1: Search + Zip + Availability chips + Toggle */}
+      {/* ROW 1: Search + Zip + Toggle */}
       <div style={topBarStyle}>
-        <div style={searchWrapperStyle}>
-          <Search size={18} style={searchIconStyle} />
-          <input
-            type="text"
-            placeholder="Search items..."
-            style={searchInputStyle}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        <div>
+          <span style={filterLabelStyle}>Search by keyword</span>
+          <div style={{ ...searchWrapperStyle, marginTop: '4px' }}>
+            <Search size={18} style={searchIconStyle} />
+            <input
+              type="text"
+              placeholder="Item name or type..."
+              style={searchInputStyle}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
         </div>
 
-        <div style={{ ...searchWrapperStyle, flex: '0 0 80px', minWidth: '80px' }}>
-          <MapPin size={18} style={searchIconStyle} />
-          <input
-            type="text"
-            placeholder="Zip"
-            style={searchInputStyle}
-            value={zipQuery}
-            onChange={(e) => setZipQuery(e.target.value)}
-          />
+        <div>
+          <span style={filterLabelStyle}>Search by location</span>
+          <div style={{ ...searchWrapperStyle, flex: '0 0 80px', minWidth: '80px', marginTop: '4px' }}>
+            <MapPin size={18} style={searchIconStyle} />
+            <input
+              type="text"
+              placeholder="Zip"
+              style={searchInputStyle}
+              value={zipQuery}
+              onChange={(e) => setZipQuery(e.target.value)}
+            />
+          </div>
         </div>
 
-        {[{ value: 'Keep', label: 'To Keep' }, { value: 'Borrow', label: 'To Borrow' }].map(({ value, label }) => {
-          const isActive = availabilityFilters.includes(value);
-          return (
-            <button
-              key={value}
-              onClick={() => toggleAvailability(value)}
-              style={{
-                ...chipStyle,
-                backgroundColor: isActive ? '#00ccff' : '#fff',
-                color: isActive ? '#000' : '#555',
-                borderColor: isActive ? '#00ccff' : '#ccc',
-              }}
-            >
-              {label}
+        <div style={{ marginLeft: 'auto' }}>
+          <span style={filterLabelStyle}>&nbsp;</span>
+          <div style={{ ...toggleGroupStyle, minWidth: '108px', marginTop: '4px' }}>
+            <button onClick={() => setViewMode('grid')} style={{...toggleButtonStyle, backgroundColor: viewMode === 'grid' ? '#eee' : 'transparent'}}>
+              <LayoutGrid size={20} color={viewMode === 'grid' ? '#000' : '#666'} />
             </button>
-          );
-        })}
-
-        <div style={{ ...toggleGroupStyle, marginLeft: 'auto', minWidth: '108px' }}>
-          <button onClick={() => setViewMode('grid')} style={{...toggleButtonStyle, backgroundColor: viewMode === 'grid' ? '#eee' : 'transparent'}}>
-            <LayoutGrid size={20} color={viewMode === 'grid' ? '#000' : '#666'} />
-          </button>
-          <button onClick={() => setViewMode('list')} style={{...toggleButtonStyle, backgroundColor: viewMode === 'list' ? '#eee' : 'transparent'}}>
-            <List size={20} color={viewMode === 'list' ? '#000' : '#666'} />
-          </button>
-          <button onClick={() => setViewMode('map')} style={{...toggleButtonStyle, backgroundColor: viewMode === 'map' ? '#eee' : 'transparent'}}>
-            <MapIcon size={20} color={viewMode === 'map' ? '#000' : '#666'} />
-          </button>
+            <button onClick={() => setViewMode('list')} style={{...toggleButtonStyle, backgroundColor: viewMode === 'list' ? '#eee' : 'transparent'}}>
+              <List size={20} color={viewMode === 'list' ? '#000' : '#666'} />
+            </button>
+            <button onClick={() => setViewMode('map')} style={{...toggleButtonStyle, backgroundColor: viewMode === 'map' ? '#eee' : 'transparent'}}>
+              <MapIcon size={20} color={viewMode === 'map' ? '#000' : '#666'} />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* CATEGORY FILTERS */}
-      {/* ROW 2: Relationship filter chips */}
+      {/* ROW 2: Relationship chips + Availability chips */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' as const, marginBottom: '12px' }}>
         <span style={filterLabelStyle}>Show items from:</span>
         {['Everyone', 'People I Follow', 'People Who Follow Me', 'My Campmates'].map((option) => {
@@ -269,6 +259,24 @@ export default function FindItemsPage() {
               }}
             >
               {option}
+            </button>
+          );
+        })}
+        <span style={{ ...filterLabelStyle, marginLeft: '12px' }}>Available to:</span>
+        {[{ value: 'Keep', label: 'Keep' }, { value: 'Borrow', label: 'Borrow' }].map(({ value, label }) => {
+          const isActive = availabilityFilters.includes(value);
+          return (
+            <button
+              key={value}
+              onClick={() => toggleAvailability(value)}
+              style={{
+                ...chipStyle,
+                backgroundColor: isActive ? '#00ccff' : '#fff',
+                color: isActive ? '#000' : '#555',
+                borderColor: isActive ? '#00ccff' : '#ccc',
+              }}
+            >
+              {label}
             </button>
           );
         })}
