@@ -389,7 +389,9 @@ export default function SettingsPage() {
               {/* Delete Account */}
               <div>
                 <h4 style={subHeaderStyle}>Delete Account</h4>
-                <button onClick={() => setShowDeleteModal(true)} style={deleteButtonStyle}>Delete My Account</button>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <button onClick={() => setShowDeleteModal(true)} style={deleteButtonStyle}>Delete My Account</button>
+                </div>
               </div>
             </section>
           )}
@@ -417,9 +419,9 @@ export default function SettingsPage() {
                   </button>
                   <button
                     onClick={handleDeleteAccount}
-                    style={{ flex: 1, padding: '10px', backgroundColor: '#dc2626', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}
+                    style={{ flex: 1, padding: '10px', backgroundColor: '#fff0f0', color: '#cc0000', border: '1px solid #ffaaaa', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}
                   >
-                    Yes, Delete My Account
+                    Delete Account
                   </button>
                 </div>
               </>
@@ -462,4 +464,4 @@ const inputStyle = { width: '100%', padding: '8px 10px', backgroundColor: '#fff'
 const buttonStyle = { padding: '14px', backgroundColor: '#00ccff', color: 'black', fontWeight: 'bold' as const, border: 'none', borderRadius: '8px', cursor: 'pointer', width: '100%' };
 const smallButtonStyle = { width: '100%', padding: '10px', backgroundColor: '#eee', color: '#333', border: '1px solid #ccc', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem' };
 const addressCardStyle = { backgroundColor: '#f8f8f8', border: '1px solid #e0e0e0', borderRadius: '10px', padding: '12px', marginBottom: '10px' };
-const deleteButtonStyle = { padding: '10px 16px', backgroundColor: '#fff', color: '#dc2626', border: '1px solid #dc2626', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' as const, fontSize: '0.9rem' };
+const deleteButtonStyle = { padding: '10px 24px', backgroundColor: '#fff0f0', color: '#cc0000', border: '1px solid #ffaaaa', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' as const, fontSize: '0.9rem' };
