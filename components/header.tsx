@@ -3,8 +3,8 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
-import { useRouter } from 'next/navigation'
-import { Bell } from 'lucide-react'
+
+import { Bell, Menu, X } from 'lucide-react'
 
 export default function Header() {
   const [user, setUser] = useState<any>(null)
@@ -12,7 +12,8 @@ export default function Header() {
   const [unreadCount, setUnreadCount] = useState(0)
   const [notifications, setNotifications] = useState<any[]>([])
   const [bellOpen, setBellOpen] = useState(false)
-  const router = useRouter()
+  const [menuOpen, setMenuOpen] = useState(false)
+
 
   useEffect(() => {
     let pollInterval: ReturnType<typeof setInterval> | undefined
@@ -30,7 +31,6 @@ export default function Header() {
 
     const getUserData = async () => {
       try {
-        // getSession reads local cookie cache — no network call, won't hold lock
         const { data: { session } } = await supabase.auth.getSession()
         const user = session?.user ?? null
         setUser(user)
@@ -44,7 +44,6 @@ export default function Header() {
 
           if (profile) setUsername(profile.username)
 
-          // Start polling only for logged-in users
           fetchUnread()
           if (!pollInterval) {
             pollInterval = setInterval(fetchUnread, 30000)
@@ -64,10 +63,6 @@ export default function Header() {
       if (!currentUser) {
         setUsername(null)
       } else if (event !== 'INITIAL_SESSION') {
-        // Defer profile fetch until AFTER the onAuthStateChange lock releases.
-        // Calling supabase inside an async onAuthStateChange callback queues all
-        // subsequent Supabase calls behind it in pendingInLock, blocking every
-        // data fetch on the page until the profile query completes.
         setTimeout(getUserData, 0)
       }
     })
@@ -132,49 +127,73 @@ export default function Header() {
     setBellOpen(false)
   }
 
-  // Visual Theme - Dusty Sienna Daylight
   const headerBg = { backgroundColor: '#C08261' }
   const mainTextColor = 'text-[#2D241E]'
-  const hoverEffect = 'hover:text-[#00ccff]' // Updated to match your accent color preference
+  const hoverEffect = 'hover:text-[#00ccff]'
+
+  const navLinks = user ? (
+    <>
+      <Link href="/resources" onClick={() => setMenuOpen(false)} className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>On-Playa Resources</Link>
+      <Link href="/find-items" onClick={() => setMenuOpen(false)} className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>Find Items</Link>
+      <Link href="/list-item" onClick={() => setMenuOpen(false)} className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition whitespace-nowrap`}>Offer an Item</Link>
+      <Link href="/inventory" onClick={() => setMenuOpen(false)} className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>My Inventory</Link>
+      {username && (
+        <Link href={`/profile/${username}`} onClick={() => setMenuOpen(false)} className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>My Profile</Link>
+      )}
+      <Link href="/settings" onClick={() => setMenuOpen(false)} className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>Settings</Link>
+      <button
+        onClick={() => { setMenuOpen(false); handleSignOut() }}
+        className="text-sm font-bold text-red-800 hover:text-red-600 transition cursor-pointer text-left"
+      >
+        Logout
+      </button>
+    </>
+  ) : (
+    <>
+      <Link href="/resources" onClick={() => setMenuOpen(false)} className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>On-Playa Resources</Link>
+      <Link href="/find-items" onClick={() => setMenuOpen(false)} className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>Find Items</Link>
+      <Link href="/list-item" onClick={() => setMenuOpen(false)} className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition whitespace-nowrap`}>Offer an Item</Link>
+      <Link
+        href="/login"
+        onClick={() => setMenuOpen(false)}
+        className="bg-[#2D241E] text-[#C08261] px-4 py-2 rounded-lg text-sm font-bold hover:bg-black transition"
+      >
+        Login
+      </Link>
+    </>
+  )
 
   return (
     <header className="w-full border-b border-[#A66D51] sticky top-0 z-50 shadow-sm" style={headerBg}>
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-      <Link href="/" className="hover:opacity-80 transition flex flex-col leading-tight">
-        <span className={`font-black text-xl uppercase tracking-tighter ${mainTextColor}`}>The Playa Provides</span>
-        {user && (
-          <span className={`hidden lg:block text-[13px] font-medium ${mainTextColor} opacity-60 normal-case tracking-normal`}>Why let your stuff collect dust in storage when it could be earning dust on playa?</span>
-        )}
-      </Link>
 
-        <nav className="flex gap-6 items-center">
-          <Link href="/resources" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>
-            On-Playa Resources
-          </Link>
-          <Link href="/find-items" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>
-            Find Items
-          </Link>
-          <Link href="/list-item" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition whitespace-nowrap`}>
-            Offer an Item
-          </Link>
+        {/* Logo */}
+        <Link href="/" className="hover:opacity-80 transition flex flex-col leading-tight">
+          <span className={`font-black text-xl uppercase tracking-tighter ${mainTextColor}`}>
+            The Playa Provides<span className="text-[#2D241E]">_</span>
+          </span>
+          {user && (
+            <span className={`hidden lg:block text-[13px] font-medium ${mainTextColor} opacity-60 normal-case tracking-normal`}>
+              Why let your stuff collect dust in storage when it could be earning dust on playa?
+            </span>
+          )}
+        </Link>
+
+        {/* Desktop nav */}
+        <nav className="hidden lg:flex gap-6 items-center">
+          <Link href="/resources" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>On-Playa Resources</Link>
+          <Link href="/find-items" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>Find Items</Link>
+          <Link href="/list-item" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition whitespace-nowrap`}>Offer an Item</Link>
 
           {user ? (
             <>
-              <Link href="/inventory" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>
-                My Inventory
-              </Link>
-
+              <Link href="/inventory" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>My Inventory</Link>
               {username && (
-                <Link href={`/profile/${username}`} className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>
-                  My Profile
-                </Link>
+                <Link href={`/profile/${username}`} className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>My Profile</Link>
               )}
+              <Link href="/settings" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>Settings</Link>
 
-              <Link href="/settings" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>
-                Settings
-              </Link>
-
-              {/* BELL */}
+              {/* Bell */}
               <div style={{ position: 'relative' as const }}>
                 <button
                   onClick={() => {
@@ -199,11 +218,7 @@ export default function Header() {
 
                 {bellOpen && (
                   <>
-                    {/* Backdrop to close on outside click */}
-                    <div
-                      onClick={() => setBellOpen(false)}
-                      style={{ position: 'fixed' as const, inset: 0, zIndex: 49 }}
-                    />
+                    <div onClick={() => setBellOpen(false)} style={{ position: 'fixed' as const, inset: 0, zIndex: 49 }} />
                     <div style={{
                       position: 'absolute' as const, right: 0, top: '36px',
                       backgroundColor: '#fff', border: '1px solid #eee', borderRadius: '12px',
@@ -219,9 +234,7 @@ export default function Header() {
                         )}
                       </div>
                       {notifications.length === 0 ? (
-                        <div style={{ padding: '24px 16px', color: '#aaa', fontSize: '0.85rem', textAlign: 'center' as const }}>
-                          No notifications yet
-                        </div>
+                        <div style={{ padding: '24px 16px', color: '#aaa', fontSize: '0.85rem', textAlign: 'center' as const }}>No notifications yet</div>
                       ) : (
                         notifications.map(n => {
                           const actorName = (n.actor as any)?.preferred_name || (n.actor as any)?.username || 'Someone'
@@ -259,15 +272,111 @@ export default function Header() {
               </button>
             </>
           ) : (
-            <Link
-              href="/login"
-              className="bg-[#2D241E] text-[#C08261] px-4 py-2 rounded-lg text-sm font-bold hover:bg-black transition"
-            >
+            <Link href="/login" className="bg-[#2D241E] text-[#C08261] px-4 py-2 rounded-lg text-sm font-bold hover:bg-black transition">
               Login
             </Link>
           )}
         </nav>
+
+        {/* Mobile: bell (if logged in) + hamburger */}
+        <div className="flex lg:hidden items-center gap-3">
+          {user && (
+            <div style={{ position: 'relative' as const }}>
+              <button
+                onClick={() => {
+                  const willOpen = !bellOpen
+                  setBellOpen(willOpen)
+                  if (willOpen) fetchNotifications()
+                }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative' as const, padding: '4px', display: 'flex', alignItems: 'center' }}
+              >
+                <Bell size={20} color="#2D241E" />
+                {unreadCount > 0 && (
+                  <span style={{
+                    position: 'absolute' as const, top: '-4px', right: '-4px',
+                    backgroundColor: '#dc2626', color: '#fff', borderRadius: '50%',
+                    width: '16px', height: '16px', fontSize: '10px', fontWeight: 'bold',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {bellOpen && (
+                <>
+                  <div onClick={() => setBellOpen(false)} style={{ position: 'fixed' as const, inset: 0, zIndex: 49 }} />
+                  <div style={{
+                    position: 'absolute' as const, right: 0, top: '36px',
+                    backgroundColor: '#fff', border: '1px solid #eee', borderRadius: '12px',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.12)', width: '290px', zIndex: 50,
+                    maxHeight: '400px', overflowY: 'auto' as const,
+                  }}>
+                    <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontWeight: 700, color: '#2D241E', fontSize: '0.9rem' }}>Notifications</span>
+                      {unreadCount > 0 && (
+                        <button onClick={handleMarkAllRead} style={{ background: 'none', border: 'none', color: '#00aacc', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}>
+                          Mark all read
+                        </button>
+                      )}
+                    </div>
+                    {notifications.length === 0 ? (
+                      <div style={{ padding: '24px 16px', color: '#aaa', fontSize: '0.85rem', textAlign: 'center' as const }}>No notifications yet</div>
+                    ) : (
+                      notifications.map(n => {
+                        const actorName = (n.actor as any)?.preferred_name || (n.actor as any)?.username || 'Someone'
+                        const itemName = (n.item as any)?.item_name || 'an item'
+                        const timeAgo = formatTimeAgo(n.created_at)
+                        return (
+                          <a
+                            key={n.id}
+                            href="/find-items"
+                            onClick={() => handleNotificationClick(n.id)}
+                            style={{
+                              display: 'block', padding: '12px 16px', borderBottom: '1px solid #f5f5f5',
+                              backgroundColor: n.read ? '#fff' : '#f0fdf4',
+                              textDecoration: 'none', color: '#2D241E',
+                            }}
+                          >
+                            <div style={{ fontSize: '0.85rem', lineHeight: 1.4 }}>
+                              <strong>{actorName}</strong> posted: {itemName}
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: '#aaa', marginTop: '3px' }}>{timeAgo}</div>
+                          </a>
+                        )
+                      })
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }}
+          >
+            {menuOpen ? <X size={24} color="#2D241E" /> : <Menu size={24} color="#2D241E" />}
+          </button>
+        </div>
       </div>
+
+      {/* Mobile dropdown menu */}
+      {menuOpen && (
+        <>
+          <div
+            onClick={() => setMenuOpen(false)}
+            style={{ position: 'fixed' as const, inset: 0, zIndex: 49 }}
+            className="lg:hidden"
+          />
+          <div
+            className="lg:hidden flex flex-col gap-4 px-6 py-5 border-t border-[#A66D51]"
+            style={{ backgroundColor: '#C08261', position: 'relative' as const, zIndex: 50 }}
+          >
+            {navLinks}
+          </div>
+        </>
+      )}
     </header>
   )
 }
