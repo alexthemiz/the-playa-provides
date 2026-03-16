@@ -150,13 +150,15 @@ export default function SettingsPage() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No active session');
-      const { error } = await supabase.functions.invoke('delete-account', {
+      const { data, error } = await supabase.functions.invoke('delete-account', {
         body: { user_id: session.user.id },
       });
+      console.log('Delete response data:', data, 'error:', error);
       if (error) {
         let msg = error.message;
         try {
           const body = await (error as any).context?.json();
+          console.log('Delete error body:', body);
           if (body?.error) msg = body.error;
         } catch (_) {}
         throw new Error(msg);
