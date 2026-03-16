@@ -74,7 +74,7 @@ serve(async (req: Request) => {
         city: null,
         state: null,
         zip_code: null,
-        social_links: null,
+        social_links: {},
         pronouns: null,
         playa_story: null,
         wish_list: null,
