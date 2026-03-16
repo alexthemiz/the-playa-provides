@@ -150,18 +150,24 @@ export default function SettingsPage() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No active session');
-      const { data, error } = await supabase.functions.invoke('delete-account', {
-        body: { user_id: session.user.id },
-      });
-      console.log('Delete response data:', data, 'error:', error);
-      if (error) {
-        let msg = error.message;
-        try {
-          const body = await (error as any).context?.json();
-          console.log('Delete error body:', body);
-          if (body?.error) msg = body.error;
-        } catch (_) {}
-        throw new Error(msg);
+      let invokeData: any = null;
+      let invokeError: any = null;
+      try {
+        const result = await supabase.functions.invoke('delete-account', {
+          body: { user_id: session.user.id },
+        });
+        invokeData = result.data;
+        invokeError = result.error;
+        console.log('invoke resolved — data:', invokeData, 'error:', invokeError);
+        if (invokeError) {
+          let body: any = null;
+          try { body = await (invokeError as any).context?.json(); } catch (_) {}
+          console.log('invoke error body:', body);
+          throw new Error(body?.error || invokeError.message);
+        }
+      } catch (invokeEx: any) {
+        console.log('invoke threw:', invokeEx);
+        throw invokeEx;
       }
       await supabase.auth.signOut();
       window.location.href = '/?deleted=true';
