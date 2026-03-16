@@ -253,6 +253,8 @@ export default function Header() {
                               case 'loan_declined': return { text: `declined your borrow request for ${itemName}`, href: '/inventory' }
                               case 'item_request': return { text: `requested your ${itemName}`, href: '/inventory' }
                               case 'camp_join': return { text: `joined ${campName}`, href: `/camps/${campSlug}` }
+                              case 'camp_claim_approved': return { text: `Your claim for ${campName} was approved!`, href: `/camps/${campSlug}` }
+                              case 'camp_claim_denied': return { text: `Your claim for ${campName} was not approved`, href: `/camps/${campSlug}` }
                               default: return { text: 'sent you a notification', href: '/inventory' }
                             }
                           })()
