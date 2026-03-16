@@ -30,6 +30,7 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
           .single();
 
         if (gearError) throw gearError;
+        if (gear.owner_deleted) { setLoading(false); return; }
 
         // 2. Fetch Owner and Location in parallel (The "Manual Join")
         const [profileRes, locationRes] = await Promise.all([

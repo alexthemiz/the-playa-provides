@@ -8,6 +8,17 @@ import PolaroidPhoto from '@/components/PolaroidPhoto';
 export default function HomePage() {
   const [marqueeItems, setMarqueeItems] = useState<any[]>([]);
   const [marqueeHovered, setMarqueeHovered] = useState(false);
+  const [showDeletedBanner, setShowDeletedBanner] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('deleted') === 'true') {
+      setShowDeletedBanner(true);
+      const url = new URL(window.location.href);
+      url.searchParams.delete('deleted');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, []);
 
   useEffect(() => {
     async function fetchMarqueeItems() {
@@ -28,6 +39,14 @@ export default function HomePage() {
 
   return (
     <div style={{ backgroundColor: '#ffffff', minHeight: '100vh', color: '#2D241E', fontFamily: 'sans-serif' }}>
+
+      {showDeletedBanner && (
+        <div style={{ backgroundColor: '#dcfce7', borderBottom: '1px solid #86efac', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ color: '#166534', fontSize: '0.9rem', fontWeight: 600 }}>Your account has been successfully deleted.</span>
+          <button onClick={() => setShowDeletedBanner(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#166534', fontSize: '1.1rem', lineHeight: 1 }}>×</button>
+        </div>
+      )}
+
       <style>{`
         @keyframes marquee {
           from { transform: translateX(0); }

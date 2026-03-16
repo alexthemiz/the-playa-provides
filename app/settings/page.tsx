@@ -37,6 +37,8 @@ export default function SettingsPage() {
   const [passwordMsg, setPasswordMsg] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteStep, setDeleteStep] = useState<'confirm1' | 'deleting' | 'error'>('confirm1');
+  const [deleteError, setDeleteError] = useState('');
 
   useEffect(() => {
     async function loadAllData() {
@@ -140,6 +142,23 @@ export default function SettingsPage() {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
+    }
+  }
+
+  async function handleDeleteAccount() {
+    setDeleteStep('deleting');
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No active session');
+      const { error } = await supabase.functions.invoke('delete-account', {
+        body: { user_id: session.user.id },
+      });
+      if (error) throw new Error(error.message);
+      await supabase.auth.signOut();
+      window.location.href = '/?deleted=true';
+    } catch (err: any) {
+      setDeleteError(err.message || 'Something went wrong.');
+      setDeleteStep('error');
     }
   }
 
@@ -374,9 +393,49 @@ export default function SettingsPage() {
       {/* Delete account modal */}
       {showDeleteModal && (
         <div style={{ position: 'fixed' as const, inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ backgroundColor: '#fff', padding: '28px 24px', borderRadius: '12px', maxWidth: '340px', width: '90%', textAlign: 'center' as const }}>
-            <p style={{ marginBottom: '20px', fontSize: '1rem', color: '#111' }}>Account deletion is coming soon.</p>
-            <button onClick={() => setShowDeleteModal(false)} style={{ padding: '10px 28px', backgroundColor: '#eee', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}>Close</button>
+          <div style={{ backgroundColor: '#fff', padding: '28px 24px', borderRadius: '12px', maxWidth: '360px', width: '90%' }}>
+
+            {deleteStep === 'confirm1' && (
+              <>
+                <h3 style={{ margin: '0 0 12px', fontSize: '1.1rem', color: '#111' }}>Delete Your Account</h3>
+                <p style={{ margin: '0 0 20px', fontSize: '0.9rem', color: '#555', lineHeight: 1.5 }}>
+                  Are you sure you want to delete your account? This cannot be undone. All your personal information will be permanently removed.
+                </p>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    onClick={() => { setShowDeleteModal(false); setDeleteStep('confirm1'); }}
+                    style={{ flex: 1, padding: '10px', backgroundColor: '#eee', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDeleteAccount}
+                    style={{ flex: 1, padding: '10px', backgroundColor: '#dc2626', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}
+                  >
+                    Yes, Delete My Account
+                  </button>
+                </div>
+              </>
+            )}
+
+            {deleteStep === 'deleting' && (
+              <div style={{ textAlign: 'center' as const, padding: '12px 0' }}>
+                <p style={{ margin: '0', fontSize: '0.95rem', color: '#555' }}>Deleting your account...</p>
+              </div>
+            )}
+
+            {deleteStep === 'error' && (
+              <>
+                <p style={{ margin: '0 0 16px', fontSize: '0.9rem', color: '#dc2626' }}>{deleteError}</p>
+                <button
+                  onClick={() => { setShowDeleteModal(false); setDeleteStep('confirm1'); setDeleteError(''); }}
+                  style={{ width: '100%', padding: '10px', backgroundColor: '#eee', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}
+                >
+                  Close
+                </button>
+              </>
+            )}
+
           </div>
         </div>
       )}

@@ -28,6 +28,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
           .single();
 
         if (gearError) throw gearError;
+        if (gear.owner_deleted) { setLoading(false); return; }
 
         const [profileRes, locationRes] = await Promise.all([
           supabase.from('profiles').select('preferred_name').eq('id', gear.user_id).single(),

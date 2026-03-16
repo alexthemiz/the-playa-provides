@@ -82,7 +82,7 @@ export default function FindItemsPage() {
   async function fetchItems() {
     setLoading(true);
     try {
-      const { data: gear, error: gearError } = await supabase.from('gear_items').select('*');
+      const { data: gear, error: gearError } = await supabase.from('gear_items').select('*').eq('owner_deleted', false);
       if (gearError) throw gearError;
 
       const userIds = [...new Set(gear.map(i => i.user_id))];
