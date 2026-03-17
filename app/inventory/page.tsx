@@ -33,6 +33,10 @@ export default function InventoryPage() {
   const [inboundLoans, setInboundLoans] = useState<any[]>([]);
   const [transferItem, setTransferItem] = useState<any>(null);
   const [lendItem, setLendItem] = useState<any>(null);
+  const [disputeLoan, setDisputeLoan] = useState<any>(null);
+  const [disputeMessage, setDisputeMessage] = useState('');
+  const [disputeSubmitting, setDisputeSubmitting] = useState(false);
+  const [disputeSuccess, setDisputeSuccess] = useState(false);
   const [userLocations, setUserLocations] = useState<{ id: string; label: string }[]>([]);
   const [borrowerLocationIds, setBorrowerLocationIds] = useState<Record<string, string>>({});
   const [newLoanLocData, setNewLoanLocData] = useState<{ loanId: string | null; label: string; address_line_1: string; city: string; state: string; zip_code: string }>({ loanId: null, label: '', address_line_1: '', city: '', state: '', zip_code: '' });
@@ -83,7 +87,7 @@ export default function InventoryPage() {
         // Fetch active loans (owner side)
         const { data: loanData } = await supabase
           .from('item_loans')
-          .select('id, item_id, status, owner_confirmed_pickup, borrower_confirmed_pickup, return_by, picked_up_at, borrower:profiles!item_loans_borrower_id_fkey(preferred_name, username), gear_items(item_name)')
+          .select('id, item_id, borrower_id, status, owner_confirmed_pickup, borrower_confirmed_pickup, return_by, picked_up_at, borrower:profiles!item_loans_borrower_id_fkey(preferred_name, username), gear_items(item_name)')
           .eq('owner_id', user.id)
           .in('status', ['pending_handover', 'active', 'return_pending']);
         setActiveLoans(loanData || []);
@@ -240,12 +244,44 @@ export default function InventoryPage() {
     fetchMyInventory();
   }
 
+  async function handleSubmitDispute() {
+    if (!disputeLoan || !disputeMessage.trim()) return;
+    setDisputeSubmitting(true);
+    await supabase.functions.invoke('send-dispute-notification', {
+      body: { loan_id: disputeLoan.id, dispute_message: disputeMessage.trim() },
+    });
+    setDisputeSubmitting(false);
+    setDisputeSuccess(true);
+  }
+
   async function handleOwnerConfirmReturn(loan: any) {
+    // 1. Complete the loan
     await supabase
       .from('item_loans')
       .update({ owner_confirmed_return: true, status: 'complete' })
       .eq('id', loan.id);
-    fetchMyInventory();
+
+    // 2. Mark item unavailable and private
+    await supabase
+      .from('gear_items')
+      .update({ availability_status: 'Not Available', visibility: 'private' })
+      .eq('id', loan.item_id);
+
+    // 3. Notify borrower
+    await supabase.from('notifications').insert({
+      type: 'loan_return_confirmed',
+      recipient_id: loan.borrower_id,
+      actor_id: userId,
+      item_id: loan.item_id,
+    });
+
+    // 4. Optimistic local updates — no full refetch
+    setActiveLoans(prev => prev.filter(l => l.id !== loan.id));
+    setItems(prev => prev.map(i =>
+      i.id === loan.item_id
+        ? { ...i, availability_status: 'Not Available', visibility: 'private' }
+        : i
+    ));
   }
 
   async function handleRecipientConfirmTransfer(transfer: any) {
@@ -308,10 +344,10 @@ export default function InventoryPage() {
       .update({ borrower_confirmed_return: true, status: 'return_pending' })
       .eq('id', loan.id);
     if (!error) {
+      setInboundLoans(prev => prev.map(l => l.id === loan.id ? { ...l, status: 'return_pending', borrower_confirmed_return: true } : l));
       await supabase.functions.invoke('send-loan-notification', {
         body: { type: 'borrower_confirmed_return', loan_id: loan.id },
       });
-      fetchMyInventory();
     }
   }
 
@@ -616,6 +652,7 @@ export default function InventoryPage() {
                   <th style={thStyle}>Picked Up On</th>
                   <th style={thStyle}>Return By</th>
                   <th style={thStyle}>Status</th>
+                  <th style={thStyle}>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -644,6 +681,14 @@ export default function InventoryPage() {
                           <span style={{ fontSize: '0.8rem', color: loan.status === 'return_pending' ? '#92400e' : '#555' }}>
                             {loan.status === 'return_pending' ? 'Return Pending' : 'Out on Loan'}
                           </span>
+                        </td>
+                        <td style={tdStyle}>
+                          {loan.status === 'return_pending' && (
+                            <div style={{ display: 'flex', gap: '6px' }}>
+                              <button onClick={() => handleOwnerConfirmReturn(loan)} style={handsOverButtonStyle}>Confirm Return</button>
+                              <button onClick={() => setDisputeLoan(loan)} style={cancelActionButtonStyle}>Dispute</button>
+                            </div>
+                          )}
                         </td>
                       </tr>
                     );
@@ -786,6 +831,9 @@ export default function InventoryPage() {
                         {loan.status === 'active' && (
                           <button onClick={() => handleBorrowerConfirmReturn(loan)} style={cancelActionButtonStyle}>Return Item</button>
                         )}
+                        {loan.status === 'return_pending' && (
+                          <span style={{ fontSize: '0.75rem', color: '#aaa', fontStyle: 'italic' as const }}>Return Pending</span>
+                        )}
                       </td>
                     </tr>
                   );
@@ -845,6 +893,58 @@ export default function InventoryPage() {
           onClose={() => setLendItem(null)}
           onSuccess={() => { setLendItem(null); fetchMyInventory(); }}
         />
+      )}
+
+      {disputeLoan && (
+        <div style={{ position: 'fixed' as const, inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100, padding: '20px' }}>
+          <div style={{ backgroundColor: '#fff', padding: '28px 24px', borderRadius: '16px', maxWidth: '420px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
+            {disputeSuccess ? (
+              <>
+                <p style={{ margin: '0 0 20px', fontSize: '0.95rem', color: '#16a34a', lineHeight: 1.5 }}>
+                  Your dispute has been submitted. We'll be in touch soon.
+                </p>
+                <button
+                  onClick={() => { setDisputeLoan(null); setDisputeMessage(''); setDisputeSuccess(false); }}
+                  style={{ width: '100%', padding: '10px', backgroundColor: '#f5f5f5', color: '#333', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600 }}
+                >
+                  Close
+                </button>
+              </>
+            ) : (
+              <>
+                <h3 style={{ margin: '0 0 6px', fontSize: '1rem', color: '#2D241E' }}>Dispute Return</h3>
+                <p style={{ margin: '0 0 16px', fontSize: '0.85rem', color: '#888', lineHeight: 1.4 }}>
+                  Describe the issue with <strong style={{ color: '#2D241E' }}>{disputeLoan.gear_items?.item_name || 'this item'}</strong>. Our team will follow up.
+                </p>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#555', marginBottom: '6px', textTransform: 'uppercase' as const, letterSpacing: '0.05em' }}>
+                  Describe the issue
+                </label>
+                <textarea
+                  value={disputeMessage}
+                  onChange={e => setDisputeMessage(e.target.value)}
+                  rows={5}
+                  placeholder="e.g. The item was returned damaged..."
+                  style={{ width: '100%', padding: '10px', fontSize: '0.9rem', border: '1px solid #ddd', borderRadius: '8px', resize: 'vertical' as const, boxSizing: 'border-box' as const, color: '#2D241E', fontFamily: 'inherit' }}
+                />
+                <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
+                  <button
+                    onClick={() => { setDisputeLoan(null); setDisputeMessage(''); }}
+                    style={{ flex: 1, padding: '10px', backgroundColor: '#f5f5f5', color: '#333', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600 }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSubmitDispute}
+                    disabled={disputeSubmitting || !disputeMessage.trim()}
+                    style={{ flex: 1, padding: '10px', backgroundColor: '#dc2626', color: '#fff', border: 'none', borderRadius: '8px', cursor: disputeSubmitting || !disputeMessage.trim() ? 'not-allowed' : 'pointer', fontSize: '0.9rem', fontWeight: 600, opacity: disputeSubmitting || !disputeMessage.trim() ? 0.6 : 1 }}
+                  >
+                    {disputeSubmitting ? 'Submitting...' : 'Submit'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );
