@@ -231,7 +231,13 @@ export default function InventoryPage() {
       .from('item_transfers')
       .update({ recipient_confirmed: true, status: 'complete' })
       .eq('id', transfer.id);
-    if (!error) fetchMyInventory();
+    if (!error) {
+      await supabase
+        .from('gear_items')
+        .update({ user_id: userId })
+        .eq('id', transfer.item_id);
+      fetchMyInventory();
+    }
   }
 
   async function handleBorrowerConfirmPickup(loan: any) {
