@@ -335,7 +335,7 @@ export default function InventoryPage() {
 
     if (status === 'Available to Borrow') return <button onClick={() => setLendItem(item)} style={lendButtonStyle}>Lend To</button>;
     if (status === 'Available to Keep') return <button onClick={() => setTransferItem(item)} style={transferButtonStyle}>Transfer To</button>;
-    return <button style={makeAvailableButtonStyle}>Make Available</button>;
+    return <span style={{ color: '#bbb', fontSize: '0.8rem' }}>N/A</span>;
   }
 
   const locationButtonLabel = selectedLocations.length === 0
@@ -445,10 +445,10 @@ export default function InventoryPage() {
             <thead>
               <tr style={headerRowStyle}>
                 <th style={thStyle}>Item Name</th>
-                <th style={thStyle}>Status</th>
                 <th style={thStyle}>Category</th>
                 <th style={thStyle}>Location</th>
                 <th style={thStyle}>Description</th>
+                <th style={{ ...thStyle, width: '160px' }}>Status</th>
                 <th style={thStyle}>Action</th>
               </tr>
             </thead>
@@ -490,8 +490,19 @@ export default function InventoryPage() {
                       </div>
                     </td>
 
+                    {/* CATEGORY */}
+                    <td style={tdStyle}>{item.category}</td>
+
+                    {/* LOCATION */}
+                    <td style={tdStyle}>{item.locations?.label || item.location_type || 'Unset'}</td>
+
+                    {/* DESCRIPTION */}
+                    <td style={{ ...tdStyle, maxWidth: '280px', fontSize: '0.8rem' }}>
+                      {item.description || '—'}
+                    </td>
+
                     {/* STATUS TOGGLE */}
-                    <td style={tdStyle}>
+                    <td style={{ ...tdStyle, width: '160px' }}>
                       <div style={{ display: 'flex', gap: '4px' }}>
                         {[
                           { value: 'Available to Borrow', label: 'Borrow' },
@@ -519,17 +530,6 @@ export default function InventoryPage() {
                           <option value="followers_and_campmates">Followers &amp; campmates</option>
                         </select>
                       )}
-                    </td>
-
-                    {/* CATEGORY */}
-                    <td style={tdStyle}>{item.category}</td>
-
-                    {/* LOCATION */}
-                    <td style={tdStyle}>{item.locations?.label || item.location_type || 'Unset'}</td>
-
-                    {/* DESCRIPTION */}
-                    <td style={{ ...tdStyle, maxWidth: '280px', fontSize: '0.8rem' }}>
-                      {item.description || '—'}
                     </td>
 
                     {/* ACTION BUTTON */}
