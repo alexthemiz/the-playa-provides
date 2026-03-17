@@ -83,7 +83,7 @@ export default function InventoryPage() {
         // Fetch active loans (owner side)
         const { data: loanData } = await supabase
           .from('item_loans')
-          .select('id, item_id, status, owner_confirmed_pickup, borrower_confirmed_pickup, return_by, borrower:profiles!item_loans_borrower_id_fkey(preferred_name, username)')
+          .select('id, item_id, status, owner_confirmed_pickup, borrower_confirmed_pickup, return_by, picked_up_at, borrower:profiles!item_loans_borrower_id_fkey(preferred_name, username), gear_items(item_name)')
           .eq('owner_id', user.id)
           .in('status', ['pending_handover', 'active', 'return_pending']);
         setActiveLoans(loanData || []);
@@ -613,9 +613,9 @@ export default function InventoryPage() {
                 <tr style={headerRowStyle}>
                   <th style={thStyle}>Item</th>
                   <th style={thStyle}>Borrower</th>
+                  <th style={thStyle}>Picked Up On</th>
                   <th style={thStyle}>Return By</th>
                   <th style={thStyle}>Status</th>
-                  <th style={thStyle}>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -623,25 +623,27 @@ export default function InventoryPage() {
                   .filter(l => ['active', 'return_pending'].includes(l.status))
                   .map(loan => {
                     const borrowerName = loan.borrower?.preferred_name || loan.borrower?.username || '—';
+                    const borrowerUsername = loan.borrower?.username;
                     const returnBy = loan.return_by ? new Date(loan.return_by).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
-                    const itemName = items.find(i => i.id === loan.item_id)?.item_name || '—';
+                    const pickedUpOn = loan.picked_up_at ? new Date(loan.picked_up_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+                    const itemName = loan.gear_items?.item_name || items.find(i => i.id === loan.item_id)?.item_name || '—';
                     return (
                       <tr key={loan.id} style={rowStyle}>
-                        <td style={{ ...tdStyle, fontWeight: 600, color: '#2D241E' }}>{itemName}</td>
-                        <td style={tdStyle}>{borrowerName}</td>
+                        <td style={{ ...tdStyle, fontWeight: 600, color: '#2D241E' }}>
+                          {itemName}
+                          <a href={`/find-items/${loan.item_id}`} style={editLinkStyle}>View Item Details</a>
+                        </td>
+                        <td style={tdStyle}>
+                          {borrowerUsername
+                            ? <a href={`/profile/${borrowerUsername}`} style={{ color: '#00aacc', textDecoration: 'none', fontWeight: 500 }}>{borrowerName}</a>
+                            : borrowerName}
+                        </td>
+                        <td style={tdStyle}>{pickedUpOn}</td>
                         <td style={tdStyle}>{returnBy}</td>
                         <td style={tdStyle}>
                           <span style={{ fontSize: '0.8rem', color: loan.status === 'return_pending' ? '#92400e' : '#555' }}>
                             {loan.status === 'return_pending' ? 'Return Pending' : 'Out on Loan'}
                           </span>
-                        </td>
-                        <td style={tdStyle}>
-                          {loan.status === 'return_pending' && (
-                            <div style={{ display: 'flex', gap: '6px' }}>
-                              <button onClick={() => handleOwnerConfirmReturn(loan)} style={handsOverButtonStyle}>Got It Back</button>
-                              <button onClick={() => handleDisputeReturn(loan)} style={cancelActionButtonStyle}>Dispute</button>
-                            </div>
-                          )}
                         </td>
                       </tr>
                     );
