@@ -227,34 +227,21 @@ export default function InventoryPage() {
   }
 
   async function handleRecipientConfirmTransfer(transfer: any) {
-    // Read session directly rather than relying on userId state closure
-    const { data: { session } } = await supabase.auth.getSession();
-    const currentUserId = session?.user?.id ?? null;
-    console.log('[transfer] Got It clicked — userId state:', userId, '| session userId:', currentUserId, '| transfer.item_id:', transfer.item_id);
-
-    const { error } = await supabase
-      .from('item_transfers')
-      .update({ recipient_confirmed: true, status: 'complete' })
-      .eq('id', transfer.id);
-    console.log('[transfer] item_transfers update result — error:', error);
-
+    // Use a SECURITY DEFINER RPC to atomically transfer ownership + mark complete.
+    // Direct client-side UPDATE on gear_items is blocked by RLS (recipient doesn't
+    // own the row yet), so we delegate to a DB function that runs with elevated privileges
+    // after verifying the caller is the actual recipient.
+    const { error } = await supabase.rpc('confirm_transfer_receipt', { p_transfer_id: transfer.id });
     if (!error) {
-      const { data: updateData, error: updateError } = await supabase
-        .from('gear_items')
-        .update({ user_id: currentUserId })
-        .eq('id', transfer.item_id)
-        .select();
-      console.log('[transfer] gear_items update result — data:', updateData, '| error:', updateError);
-
-      const { data: newItem, error: selectError } = await supabase
+      const { data: newItem } = await supabase
         .from('gear_items')
         .select('*, locations(label)')
         .eq('id', transfer.item_id)
         .single();
-      console.log('[transfer] gear_items post-update select — user_id:', newItem?.user_id, '| error:', selectError);
-
       if (newItem) setItems(prev => [newItem, ...prev]);
       setInboundTransfers(prev => prev.filter(t => t.id !== transfer.id));
+    } else {
+      console.error('confirm_transfer_receipt error:', error.message);
     }
   }
 
