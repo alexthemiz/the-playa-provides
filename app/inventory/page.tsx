@@ -445,12 +445,12 @@ export default function InventoryPage() {
         <div style={tableContainerStyle}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const, tableLayout: 'fixed' as const }}>
             <colgroup>
-              <col style={{ width: '220px' }} />
+              <col style={{ width: '200px' }} />
               <col style={{ width: '110px' }} />
               <col style={{ width: '110px' }} />
-              <col style={{ width: '260px' }} />
+              <col style={{ width: '290px' }} />
               <col style={{ width: '170px' }} />
-              <col style={{ width: '150px' }} />
+              <col style={{ width: '140px' }} />
             </colgroup>
             <thead>
               <tr style={headerRowStyle}>
