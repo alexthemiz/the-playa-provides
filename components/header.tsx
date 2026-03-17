@@ -173,11 +173,6 @@ export default function Header() {
           <span className={`font-black text-xl uppercase tracking-tighter ${mainTextColor}`}>
             The Playa Provides<span>______</span>
           </span>
-          {user && (
-            <span className={`hidden lg:block text-[13px] font-medium ${mainTextColor} opacity-60 normal-case tracking-normal`}>
-              Why let your stuff collect dust in storage when it could be earning dust on playa?
-            </span>
-          )}
         </Link>
 
         {/* Desktop nav */}
