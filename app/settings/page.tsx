@@ -7,6 +7,7 @@ import Link from 'next/link';
 const US_STATES = ["", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"];
 
 export default function SettingsPage() {
+  const [showSetupBanner, setShowSetupBanner] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -39,6 +40,13 @@ export default function SettingsPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteStep, setDeleteStep] = useState<'confirm1' | 'deleting' | 'error'>('confirm1');
   const [deleteError, setDeleteError] = useState('');
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('setup') === 'true') {
+      setShowSetupBanner(true);
+      window.history.replaceState(null, '', '/settings');
+    }
+  }, []);
 
   useEffect(() => {
     async function loadAllData() {
@@ -179,6 +187,15 @@ export default function SettingsPage() {
 
         <Link href="/inventory" style={{ color: '#00ccff', textDecoration: 'none', fontWeight: 'bold' }}>← Back to Inventory</Link>
         <h1 style={{ margin: '12px 0 16px', fontSize: '24px' }}>The Playa Provides<span style={{ textDecoration: 'underline' }}> Account Settings{'\u00a0'}</span></h1>
+
+        {showSetupBanner && (
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', backgroundColor: '#fffbeb', border: '1px solid #fcd34d', borderRadius: '10px', padding: '14px 16px', marginBottom: '8px' }}>
+            <p style={{ margin: 0, fontSize: '0.875rem', color: '#92400e', lineHeight: 1.5 }}>
+              <strong>Welcome!</strong> Please complete your profile to get started.
+            </p>
+            <button onClick={() => setShowSetupBanner(false)} style={{ background: 'none', border: 'none', color: '#92400e', cursor: 'pointer', fontSize: '1rem', lineHeight: 1, flexShrink: 0, padding: 0 }}>✕</button>
+          </div>
+        )}
 
         <div style={{ display: 'grid', gap: '14px' }}>
 
