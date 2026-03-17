@@ -34,6 +34,8 @@ export default function AddItemModal({
   const [selectedLocationId, setSelectedLocationId] = useState('');
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [returnTerms, setReturnTerms] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     async function fetchLocations() {
@@ -82,6 +84,27 @@ export default function AddItemModal({
       e.target.value = "";
     }
   };
+
+  async function handleDeleteItem() {
+    if (!itemToEdit) return;
+    setDeleting(true);
+    try {
+      if (itemToEdit.image_urls?.length) {
+        const paths = itemToEdit.image_urls.map((url: string) => {
+          const parts = url.split('/gear-photos/');
+          return parts.length > 1 ? parts[1] : null;
+        }).filter(Boolean);
+        if (paths.length) await supabase.storage.from('gear-photos').remove(paths);
+      }
+      const { error } = await supabase.from('gear_items').delete().eq('id', itemToEdit.id);
+      if (error) throw error;
+      onSuccess();
+    } catch (err: any) {
+      console.error('Delete error:', err.message);
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -275,8 +298,32 @@ export default function AddItemModal({
           <button type="submit" disabled={loading || uploading} style={submitBtnStyle}>
             {uploading ? 'Uploading...' : loading ? 'Saving...' : itemToEdit ? 'Save Changes' : 'List Your Item'}
           </button>
+
+          {itemToEdit && (
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
+              <button type="button" onClick={() => setConfirmDelete(true)} style={deleteItemBtnStyle}>
+                Delete this item
+              </button>
+            </div>
+          )}
         </form>
       </div>
+
+      {confirmDelete && (
+        <div style={deleteOverlayStyle}>
+          <div style={deleteModalStyle}>
+            <p style={{ margin: '0 0 20px 0', fontSize: '15px', color: '#2D241E', lineHeight: 1.5 }}>
+              Are you sure you want to delete this item? This cannot be undone.
+            </p>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button onClick={() => setConfirmDelete(false)} style={cancelBtnStyle}>Cancel</button>
+              <button onClick={handleDeleteItem} disabled={deleting} style={confirmDeleteBtnStyle}>
+                {deleting ? 'Deleting...' : 'Delete Item'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -297,3 +344,8 @@ const photoPlaceholderStyle: React.CSSProperties = { width: '80px', height: '80p
 const photoPreviewStyle: React.CSSProperties = { width: '80px', height: '80px', objectFit: 'cover' as const, borderRadius: '10px', border: '1px solid #eee' };
 const removePhotoBtnStyle: React.CSSProperties = { position: 'absolute' as const, top: '-5px', right: '-5px', backgroundColor: '#ff4444', color: 'white', border: 'none', borderRadius: '50%', width: '20px', height: '20px', fontSize: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' };
 const submitBtnStyle: React.CSSProperties = { padding: '13px', backgroundColor: '#00ccff', color: 'black', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', fontSize: '15px', boxShadow: '0 4px 12px rgba(0,204,255,0.3)', marginTop: '4px' };
+const deleteItemBtnStyle: React.CSSProperties = { padding: '8px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '1px solid #ffaaaa', borderRadius: '8px', fontSize: '13px', cursor: 'pointer', fontWeight: '600' };
+const deleteOverlayStyle: React.CSSProperties = { position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100, padding: '20px' };
+const deleteModalStyle: React.CSSProperties = { backgroundColor: '#fff', padding: '24px', borderRadius: '16px', maxWidth: '400px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' };
+const cancelBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#f5f5f5', color: '#333', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600' };
+const confirmDeleteBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '1px solid #ffaaaa', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600' };
