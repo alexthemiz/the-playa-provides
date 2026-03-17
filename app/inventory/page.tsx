@@ -443,15 +443,15 @@ export default function InventoryPage() {
         <p style={{ color: '#888', textAlign: 'center', padding: '40px' }}>Loading your gear...</p>
       ) : (
         <div style={tableContainerStyle}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const, tableLayout: 'fixed' as const }}>
             <thead>
               <tr style={headerRowStyle}>
-                <th style={thStyle}>Item Name</th>
-                <th style={thStyle}>Category</th>
-                <th style={thStyle}>Location</th>
+                <th style={{ ...thStyle, width: '200px' }}>Item Name</th>
+                <th style={{ ...thStyle, width: '120px' }}>Category</th>
+                <th style={{ ...thStyle, width: '120px' }}>Location</th>
                 <th style={thStyle}>Description</th>
-                <th style={{ ...thStyle, width: '160px', minWidth: '160px', maxWidth: '160px' }}>Status</th>
-                <th style={thStyle}>Action</th>
+                <th style={{ ...thStyle, width: '160px' }}>Status</th>
+                <th style={{ ...thStyle, width: '130px' }}>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -504,7 +504,7 @@ export default function InventoryPage() {
                     </td>
 
                     {/* STATUS TOGGLE */}
-                    <td style={{ ...tdStyle, width: '160px', minWidth: '160px', maxWidth: '160px' }}>
+                    <td style={tdStyle}>
                       <div style={{ display: 'flex', gap: '4px' }}>
                         {[
                           { value: 'Available to Borrow', label: 'Borrow' },
