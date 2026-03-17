@@ -538,8 +538,8 @@ function CampCardView({ item }: { item: any }) {
   const hasTerms = item.return_by || item.return_terms;
   return (
     <div style={{ backgroundColor: '#fff', border: '1px solid #eee', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
-      <div style={{ position: 'relative' as const, backgroundColor: 'transparent', padding: '12px 12px 0 12px' }}>
-        <PolaroidPhoto src={item.image_urls?.[0]} alt={item.item_name} itemId={item.id} imageSize={300} noRotate />
+      <div style={{ position: 'relative' as const, backgroundColor: 'transparent', padding: '12px 12px 0 12px', width: '100%', overflow: 'hidden', boxSizing: 'border-box' as const }}>
+        <PolaroidPhoto src={item.image_urls?.[0]} alt={item.item_name} itemId={item.id} noRotate />
         <div style={{ position: 'absolute', top: '10px', left: '10px', backgroundColor: '#00ccff', color: '#000', padding: '3px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', zIndex: 5 }}>
           {item.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}
         </div>
