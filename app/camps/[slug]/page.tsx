@@ -349,6 +349,54 @@ export default function CampPage() {
         </div>
       )}
 
+      {/* Member list */}
+      <div style={{ marginTop: '36px' }}>
+        <h2 style={sectionHeadStyle}>Members ({members.length})</h2>
+        {members.length === 0 ? (
+          <p style={{ color: '#aaa', fontSize: '0.9rem', fontStyle: 'italic' as const }}>No members listed yet.</p>
+        ) : (
+          <>
+          <div style={{ display: 'flex', justifyContent: 'flex-end' as const, paddingRight: '12px', marginBottom: '4px' }}>
+            <span style={{ fontSize: '11px', fontWeight: 700, color: '#bbb', textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>Years Attended</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '2px' }}>
+            {members.map(member => (
+              <Link
+                key={member.id}
+                href={`/profile/${member.username}`}
+                style={memberRowStyle}
+              >
+                <div style={{
+                  width: '38px', height: '38px', borderRadius: '50%', flexShrink: 0,
+                  backgroundColor: '#f0f0f0', border: '2px solid #e5e5e5',
+                  backgroundImage: member.avatar_url ? `url(${member.avatar_url})` : 'none',
+                  backgroundSize: 'cover' as const, backgroundPosition: 'center' as const,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '1rem', color: '#C08261', fontWeight: 'bold' as const,
+                }}>
+                  {!member.avatar_url && (member.preferred_name?.charAt(0) || member.username?.charAt(0) || '?')}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 600, fontSize: '14px', color: '#2D241E', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    {member.preferred_name || member.username}
+                    {camp.is_claimed && camp.page_owner_id === member.id && (
+                      <span style={{ fontSize: '11px', color: '#bbb', fontWeight: 400 }}>(page owner)</span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#aaa' }}>@{member.username}</div>
+                </div>
+                <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' as const, justifyContent: 'flex-end' as const }}>
+                  {[...member.years].sort((a: number, b: number) => b - a).map((year: number) => (
+                    <span key={year} style={yearPillStyle}>{year}</span>
+                  ))}
+                </div>
+              </Link>
+            ))}
+          </div>
+          </>
+        )}
+      </div>
+
       {/* Camp items section */}
       <div style={{ marginTop: '48px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
@@ -459,54 +507,6 @@ export default function CampPage() {
       {showCampRequestForm && selectedCampItem && (
         <RequestModal item={selectedCampItem} onClose={() => setShowCampRequestForm(false)} />
       )}
-
-      {/* Member list */}
-      <div style={{ marginTop: '36px' }}>
-        <h2 style={sectionHeadStyle}>Members ({members.length})</h2>
-        {members.length === 0 ? (
-          <p style={{ color: '#aaa', fontSize: '0.9rem', fontStyle: 'italic' as const }}>No members listed yet.</p>
-        ) : (
-          <>
-          <div style={{ display: 'flex', justifyContent: 'flex-end' as const, paddingRight: '12px', marginBottom: '4px' }}>
-            <span style={{ fontSize: '11px', fontWeight: 700, color: '#bbb', textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>Years Attended</span>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '2px' }}>
-            {members.map(member => (
-              <Link
-                key={member.id}
-                href={`/profile/${member.username}`}
-                style={memberRowStyle}
-              >
-                <div style={{
-                  width: '38px', height: '38px', borderRadius: '50%', flexShrink: 0,
-                  backgroundColor: '#f0f0f0', border: '2px solid #e5e5e5',
-                  backgroundImage: member.avatar_url ? `url(${member.avatar_url})` : 'none',
-                  backgroundSize: 'cover' as const, backgroundPosition: 'center' as const,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '1rem', color: '#C08261', fontWeight: 'bold' as const,
-                }}>
-                  {!member.avatar_url && (member.preferred_name?.charAt(0) || member.username?.charAt(0) || '?')}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, fontSize: '14px', color: '#2D241E', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    {member.preferred_name || member.username}
-                    {camp.is_claimed && camp.page_owner_id === member.id && (
-                      <span style={{ fontSize: '11px', color: '#bbb', fontWeight: 400 }}>(page owner)</span>
-                    )}
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#aaa' }}>@{member.username}</div>
-                </div>
-                <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' as const, justifyContent: 'flex-end' as const }}>
-                  {[...member.years].sort((a: number, b: number) => b - a).map((year: number) => (
-                    <span key={year} style={yearPillStyle}>{year}</span>
-                  ))}
-                </div>
-              </Link>
-            ))}
-          </div>
-          </>
-        )}
-      </div>
     </div>
   );
 }
