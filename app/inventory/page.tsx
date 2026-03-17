@@ -3,6 +3,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
+
+const US_STATES = ["", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"];
 import AddItemModal from '@/components/AddItemModal';
 import WelcomeModal from '@/components/WelcomeModal';
 import ImportSpreadsheetModal from '@/components/ImportSpreadsheetModal';
@@ -31,7 +33,9 @@ export default function InventoryPage() {
   const [inboundLoans, setInboundLoans] = useState<any[]>([]);
   const [transferItem, setTransferItem] = useState<any>(null);
   const [lendItem, setLendItem] = useState<any>(null);
-  const [borrowerLocations, setBorrowerLocations] = useState<Record<string, string>>({});
+  const [userLocations, setUserLocations] = useState<{ id: string; label: string }[]>([]);
+  const [borrowerLocationIds, setBorrowerLocationIds] = useState<Record<string, string>>({});
+  const [newLoanLocData, setNewLoanLocData] = useState<{ loanId: string | null; label: string; address_line_1: string; city: string; state: string; zip_code: string }>({ loanId: null, label: '', address_line_1: '', city: '', state: '', zip_code: '' });
 
   useEffect(() => {
     fetchMyInventory();
@@ -95,10 +99,24 @@ export default function InventoryPage() {
         // Inbound loans (borrower side)
         const { data: inboundLoanData } = await supabase
           .from('item_loans')
-          .select('id, item_id, status, owner_confirmed_pickup, borrower_confirmed_pickup, borrower_confirmed_return, return_by, picked_up_at, borrower_location, owner:profiles!item_loans_owner_id_fkey(preferred_name, username), gear_items(item_name, category, description)')
+          .select('id, item_id, status, owner_confirmed_pickup, borrower_confirmed_pickup, borrower_confirmed_return, return_by, picked_up_at, borrower_location_id, owner:profiles!item_loans_owner_id_fkey(preferred_name, username), gear_items(item_name, category)')
           .eq('borrower_id', user.id)
           .in('status', ['pending_handover', 'active']);
         setInboundLoans(inboundLoanData || []);
+
+        // User's saved locations (for borrower location dropdown)
+        const { data: locData } = await supabase
+          .from('locations')
+          .select('id, label')
+          .eq('user_id', user.id);
+        setUserLocations(locData || []);
+
+        // Initialise borrowerLocationIds from fetched loan data
+        const initialLoanLocs: Record<string, string> = {};
+        (inboundLoanData || []).forEach((l: any) => {
+          if (l.borrower_location_id) initialLoanLocs[l.id] = l.borrower_location_id;
+        });
+        setBorrowerLocationIds(initialLoanLocs);
       }
     } catch (err) {
       console.error('fetchMyInventory error:', err);
@@ -257,11 +275,31 @@ export default function InventoryPage() {
     if (!error) fetchMyInventory();
   }
 
-  async function saveBorrowerLocation(loanId: string, value: string) {
-    await supabase
-      .from('item_loans')
-      .update({ borrower_location: value || null })
-      .eq('id', loanId);
+  async function handleLoanLocationChange(loanId: string, locationId: string) {
+    setBorrowerLocationIds(prev => ({ ...prev, [loanId]: locationId }));
+    if (locationId === '__new__') {
+      setNewLoanLocData({ loanId, label: '', address_line_1: '', city: '', state: '', zip_code: '' });
+    } else {
+      await supabase.from('item_loans').update({ borrower_location_id: locationId || null }).eq('id', loanId);
+    }
+  }
+
+  async function handleSaveNewLoanLocation() {
+    if (!newLoanLocData.loanId || !newLoanLocData.label) return;
+    const { data: { session } } = await supabase.auth.getSession();
+    const uid = session?.user?.id;
+    if (!uid) return;
+    const { data: newLoc, error } = await supabase
+      .from('locations')
+      .insert({ label: newLoanLocData.label, address_line_1: newLoanLocData.address_line_1, city: newLoanLocData.city, state: newLoanLocData.state, zip_code: newLoanLocData.zip_code, user_id: uid })
+      .select('id')
+      .single();
+    if (newLoc && !error) {
+      setUserLocations(prev => [...prev, { id: newLoc.id, label: newLoanLocData.label }]);
+      setBorrowerLocationIds(prev => ({ ...prev, [newLoanLocData.loanId!]: newLoc.id }));
+      await supabase.from('item_loans').update({ borrower_location_id: newLoc.id }).eq('id', newLoanLocData.loanId!);
+      setNewLoanLocData({ loanId: null, label: '', address_line_1: '', city: '', state: '', zip_code: '' });
+    }
   }
 
   async function handleBorrowerConfirmReturn(loan: any) {
@@ -672,7 +710,6 @@ export default function InventoryPage() {
                   <th style={thStyle}>Item</th>
                   <th style={thStyle}>From</th>
                   <th style={thStyle}>Category</th>
-                  <th style={thStyle}>Description</th>
                   <th style={thStyle}>Picked Up On</th>
                   <th style={thStyle}>Return By</th>
                   <th style={thStyle}>My Location</th>
@@ -686,31 +723,52 @@ export default function InventoryPage() {
                   const ownerUsername = loan.owner?.username;
                   const itemName = loan.gear_items?.item_name || '—';
                   const category = loan.gear_items?.category || '—';
-                  const description = loan.gear_items?.description || '—';
                   const pickedUpOn = loan.picked_up_at ? new Date(loan.picked_up_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
                   const returnBy = loan.return_by ? new Date(loan.return_by).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
-                  const locationValue = borrowerLocations[loan.id] ?? loan.borrower_location ?? '';
+                  const selectedLocId = borrowerLocationIds[loan.id] ?? '';
+                  const isAddingNew = newLoanLocData.loanId === loan.id;
                   return (
                     <tr key={loan.id} style={rowStyle}>
-                      <td style={{ ...tdStyle, fontWeight: 600, color: '#2D241E' }}>{itemName}</td>
+                      <td style={{ ...tdStyle, fontWeight: 600, color: '#2D241E' }}>
+                        {itemName}
+                        <Link href={`/find-items/${loan.item_id}`} style={editLinkStyle}>View Item Details</Link>
+                      </td>
                       <td style={tdStyle}>
                         {ownerUsername
                           ? <Link href={`/profile/${ownerUsername}`} style={{ color: '#00aacc', textDecoration: 'none', fontWeight: 500 }}>{ownerName}</Link>
                           : ownerName}
                       </td>
                       <td style={tdStyle}>{category}</td>
-                      <td style={{ ...tdStyle, fontSize: '0.8rem', overflow: 'hidden', display: '-webkit-box' as const, WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{description}</td>
                       <td style={tdStyle}>{pickedUpOn}</td>
                       <td style={tdStyle}>{returnBy}</td>
                       <td style={tdStyle}>
-                        <input
-                          type="text"
-                          value={locationValue}
-                          placeholder="Where is it?"
-                          onChange={e => setBorrowerLocations(prev => ({ ...prev, [loan.id]: e.target.value }))}
-                          onBlur={e => saveBorrowerLocation(loan.id, e.target.value)}
-                          style={borrowerLocationInputStyle}
-                        />
+                        <select
+                          value={selectedLocId || ''}
+                          onChange={e => handleLoanLocationChange(loan.id, e.target.value)}
+                          style={loanLocationSelectStyle}
+                        >
+                          <option value="" disabled>— Location —</option>
+                          {userLocations.map(loc => (
+                            <option key={loc.id} value={loc.id}>{loc.label}</option>
+                          ))}
+                          <option value="__new__">+ Add new location</option>
+                        </select>
+                        {isAddingNew && (
+                          <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column' as const, gap: '6px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                              <input style={loanLocInputStyle} placeholder="Label (e.g. Home)" value={newLoanLocData.label} onChange={e => setNewLoanLocData(d => ({ ...d, label: e.target.value }))} />
+                              <input style={loanLocInputStyle} placeholder="Street Address" value={newLoanLocData.address_line_1} onChange={e => setNewLoanLocData(d => ({ ...d, address_line_1: e.target.value }))} />
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '6px' }}>
+                              <input style={loanLocInputStyle} placeholder="City" value={newLoanLocData.city} onChange={e => setNewLoanLocData(d => ({ ...d, city: e.target.value }))} />
+                              <select style={loanLocInputStyle} value={newLoanLocData.state} onChange={e => setNewLoanLocData(d => ({ ...d, state: e.target.value }))}>
+                                {US_STATES.map(s => <option key={s} value={s}>{s || 'State'}</option>)}
+                              </select>
+                              <input style={loanLocInputStyle} placeholder="Zip" value={newLoanLocData.zip_code} onChange={e => setNewLoanLocData(d => ({ ...d, zip_code: e.target.value }))} />
+                            </div>
+                            <button onClick={handleSaveNewLoanLocation} style={saveLocButtonStyle}>Save Location</button>
+                          </div>
+                        )}
                       </td>
                       <td style={tdStyle}>
                         <span style={{ fontSize: '0.8rem', color: '#555' }}>
@@ -828,4 +886,6 @@ const handsOverButtonStyle: React.CSSProperties = { height: '28px', padding: '0 
 const reminderButtonStyle: React.CSSProperties = { height: '24px', padding: '0 8px', fontSize: '0.7rem', backgroundColor: '#f0f0f0', color: '#666', border: '1px solid #ddd', borderRadius: '4px', cursor: 'pointer', whiteSpace: 'nowrap' as const };
 const cancelActionButtonStyle: React.CSSProperties = { height: '24px', padding: '0 8px', fontSize: '0.7rem', backgroundColor: '#fff', color: '#dc2626', border: '1px solid #fca5a5', borderRadius: '4px', cursor: 'pointer', whiteSpace: 'nowrap' as const };
 const visibilitySelectStyle: React.CSSProperties = { marginTop: '6px', width: '100%', padding: '3px 6px', fontSize: '0.7rem', border: '1px solid #ddd', borderRadius: '4px', backgroundColor: '#fff', color: '#555', cursor: 'pointer' };
-const borrowerLocationInputStyle: React.CSSProperties = { width: '100%', padding: '5px 8px', fontSize: '0.8rem', border: '1px solid #ddd', borderRadius: '6px', color: '#2D241E', backgroundColor: '#fff', boxSizing: 'border-box' as const };
+const loanLocationSelectStyle: React.CSSProperties = { width: '100%', padding: '5px 8px', fontSize: '0.8rem', border: '1px solid #ddd', borderRadius: '6px', color: '#2D241E', backgroundColor: '#fff', cursor: 'pointer' };
+const loanLocInputStyle: React.CSSProperties = { width: '100%', padding: '5px 8px', fontSize: '0.75rem', border: '1px solid #ddd', borderRadius: '5px', color: '#2D241E', backgroundColor: '#fff', boxSizing: 'border-box' as const };
+const saveLocButtonStyle: React.CSSProperties = { padding: '5px 12px', fontSize: '0.75rem', backgroundColor: '#00ccff', color: '#000', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 600 };
