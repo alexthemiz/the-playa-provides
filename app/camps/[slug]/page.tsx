@@ -31,7 +31,7 @@ export default function CampPage() {
   // Camp items state
   const [campItems, setCampItems] = useState<any[]>([]);
   const [campItemsLoading, setCampItemsLoading] = useState(false);
-  const [campViewMode, setCampViewMode] = useState<'grid' | 'list'>('grid');
+  const [campViewMode, setCampViewMode] = useState<'grid' | 'list'>('list');
   const [selectedCampItem, setSelectedCampItem] = useState<any>(null);
   const [showCampRequestForm, setShowCampRequestForm] = useState(false);
 
