@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import Link from 'next/link';
 import AddItemModal from '@/components/AddItemModal';
 import WelcomeModal from '@/components/WelcomeModal';
 import ImportSpreadsheetModal from '@/components/ImportSpreadsheetModal';
@@ -30,6 +31,7 @@ export default function InventoryPage() {
   const [inboundLoans, setInboundLoans] = useState<any[]>([]);
   const [transferItem, setTransferItem] = useState<any>(null);
   const [lendItem, setLendItem] = useState<any>(null);
+  const [borrowerLocations, setBorrowerLocations] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetchMyInventory();
@@ -93,7 +95,7 @@ export default function InventoryPage() {
         // Inbound loans (borrower side)
         const { data: inboundLoanData } = await supabase
           .from('item_loans')
-          .select('id, item_id, status, owner_confirmed_pickup, borrower_confirmed_pickup, borrower_confirmed_return, return_by, owner:profiles!item_loans_owner_id_fkey(preferred_name, username), gear_items(item_name)')
+          .select('id, item_id, status, owner_confirmed_pickup, borrower_confirmed_pickup, borrower_confirmed_return, return_by, picked_up_at, borrower_location, owner:profiles!item_loans_owner_id_fkey(preferred_name, username), gear_items(item_name, category, description)')
           .eq('borrower_id', user.id)
           .in('status', ['pending_handover', 'active']);
         setInboundLoans(inboundLoanData || []);
@@ -250,9 +252,16 @@ export default function InventoryPage() {
   async function handleBorrowerConfirmPickup(loan: any) {
     const { error } = await supabase
       .from('item_loans')
-      .update({ borrower_confirmed_pickup: true, status: 'active' })
+      .update({ borrower_confirmed_pickup: true, status: 'active', picked_up_at: new Date().toISOString() })
       .eq('id', loan.id);
     if (!error) fetchMyInventory();
+  }
+
+  async function saveBorrowerLocation(loanId: string, value: string) {
+    await supabase
+      .from('item_loans')
+      .update({ borrower_location: value || null })
+      .eq('id', loanId);
   }
 
   async function handleBorrowerConfirmReturn(loan: any) {
@@ -662,7 +671,11 @@ export default function InventoryPage() {
                 <tr style={headerRowStyle}>
                   <th style={thStyle}>Item</th>
                   <th style={thStyle}>From</th>
+                  <th style={thStyle}>Category</th>
+                  <th style={thStyle}>Description</th>
+                  <th style={thStyle}>Picked Up On</th>
                   <th style={thStyle}>Return By</th>
+                  <th style={thStyle}>My Location</th>
                   <th style={thStyle}>Status</th>
                   <th style={thStyle}>Action</th>
                 </tr>
@@ -670,13 +683,35 @@ export default function InventoryPage() {
               <tbody>
                 {inboundLoans.map(loan => {
                   const ownerName = loan.owner?.preferred_name || loan.owner?.username || '—';
+                  const ownerUsername = loan.owner?.username;
                   const itemName = loan.gear_items?.item_name || '—';
+                  const category = loan.gear_items?.category || '—';
+                  const description = loan.gear_items?.description || '—';
+                  const pickedUpOn = loan.picked_up_at ? new Date(loan.picked_up_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
                   const returnBy = loan.return_by ? new Date(loan.return_by).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+                  const locationValue = borrowerLocations[loan.id] ?? loan.borrower_location ?? '';
                   return (
                     <tr key={loan.id} style={rowStyle}>
                       <td style={{ ...tdStyle, fontWeight: 600, color: '#2D241E' }}>{itemName}</td>
-                      <td style={tdStyle}>{ownerName}</td>
+                      <td style={tdStyle}>
+                        {ownerUsername
+                          ? <Link href={`/profile/${ownerUsername}`} style={{ color: '#00aacc', textDecoration: 'none', fontWeight: 500 }}>{ownerName}</Link>
+                          : ownerName}
+                      </td>
+                      <td style={tdStyle}>{category}</td>
+                      <td style={{ ...tdStyle, fontSize: '0.8rem', overflow: 'hidden', display: '-webkit-box' as const, WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{description}</td>
+                      <td style={tdStyle}>{pickedUpOn}</td>
                       <td style={tdStyle}>{returnBy}</td>
+                      <td style={tdStyle}>
+                        <input
+                          type="text"
+                          value={locationValue}
+                          placeholder="Where is it?"
+                          onChange={e => setBorrowerLocations(prev => ({ ...prev, [loan.id]: e.target.value }))}
+                          onBlur={e => saveBorrowerLocation(loan.id, e.target.value)}
+                          style={borrowerLocationInputStyle}
+                        />
+                      </td>
                       <td style={tdStyle}>
                         <span style={{ fontSize: '0.8rem', color: '#555' }}>
                           {loan.status === 'pending_handover'
@@ -689,7 +724,7 @@ export default function InventoryPage() {
                           <button onClick={() => handleBorrowerConfirmPickup(loan)} style={handsOverButtonStyle}>Got It</button>
                         )}
                         {loan.status === 'active' && (
-                          <button onClick={() => handleBorrowerConfirmReturn(loan)} style={cancelActionButtonStyle}>I've Returned It</button>
+                          <button onClick={() => handleBorrowerConfirmReturn(loan)} style={cancelActionButtonStyle}>Return Item</button>
                         )}
                       </td>
                     </tr>
@@ -793,3 +828,4 @@ const handsOverButtonStyle: React.CSSProperties = { height: '28px', padding: '0 
 const reminderButtonStyle: React.CSSProperties = { height: '24px', padding: '0 8px', fontSize: '0.7rem', backgroundColor: '#f0f0f0', color: '#666', border: '1px solid #ddd', borderRadius: '4px', cursor: 'pointer', whiteSpace: 'nowrap' as const };
 const cancelActionButtonStyle: React.CSSProperties = { height: '24px', padding: '0 8px', fontSize: '0.7rem', backgroundColor: '#fff', color: '#dc2626', border: '1px solid #fca5a5', borderRadius: '4px', cursor: 'pointer', whiteSpace: 'nowrap' as const };
 const visibilitySelectStyle: React.CSSProperties = { marginTop: '6px', width: '100%', padding: '3px 6px', fontSize: '0.7rem', border: '1px solid #ddd', borderRadius: '4px', backgroundColor: '#fff', color: '#555', cursor: 'pointer' };
+const borrowerLocationInputStyle: React.CSSProperties = { width: '100%', padding: '5px 8px', fontSize: '0.8rem', border: '1px solid #ddd', borderRadius: '6px', color: '#2D241E', backgroundColor: '#fff', boxSizing: 'border-box' as const };
