@@ -14,6 +14,7 @@ export default function SignUpPage() {
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [usernameError, setUsernameError] = useState('');
   // New state for the waiver
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
@@ -38,8 +39,22 @@ export default function SignUpPage() {
 
     setLoading(true);
     setMessage('');
+    setUsernameError('');
 
-    const { data, error } = await supabase.auth.signUp({
+    // Check username availability
+    const { data: existing } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('username', username.toLowerCase().trim())
+      .maybeSingle();
+
+    if (existing) {
+      setUsernameError('This username is already taken.');
+      setLoading(false);
+      return;
+    }
+
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -170,12 +185,15 @@ export default function SignUpPage() {
             <label style={labelStyle}>Username</label>
             <input
               type="text"
-              style={inputStyle}
+              style={{ ...inputStyle, borderColor: usernameError ? '#ef4444' : '#ddd' }}
               value={username}
-              onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s/g, ''))}
+              onChange={(e) => { setUsername(e.target.value.toLowerCase().replace(/\s/g, '')); setUsernameError(''); }}
               required
               placeholder="unique_handle"
             />
+            {usernameError && (
+              <p style={{ margin: '5px 0 0', fontSize: '0.75rem', color: '#ef4444' }}>{usernameError}</p>
+            )}
           </div>
 
           {/* Mandatory Waiver Box */}
