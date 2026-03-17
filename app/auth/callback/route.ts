@@ -30,6 +30,19 @@ export async function GET(request: Request) {
     )
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
+      // For OAuth users (e.g. Google), check if profile is complete.
+      // Email/password users always have preferred_name + username from signup.
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('preferred_name, username')
+          .eq('id', user.id)
+          .maybeSingle()
+        if (!profile?.preferred_name || !profile?.username) {
+          return NextResponse.redirect(`${origin}/settings?setup=true`)
+        }
+      }
       return NextResponse.redirect(`${origin}${next}`)
     }
   }
