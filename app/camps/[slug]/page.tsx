@@ -466,6 +466,7 @@ export default function CampPage() {
         {members.length === 0 ? (
           <p style={{ color: '#aaa', fontSize: '0.9rem', fontStyle: 'italic' as const }}>No members listed yet.</p>
         ) : (
+          <>
           <div style={{ display: 'flex', justifyContent: 'flex-end' as const, paddingRight: '12px', marginBottom: '4px' }}>
             <span style={{ fontSize: '11px', fontWeight: 700, color: '#bbb', textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>Years Attended</span>
           </div>
@@ -503,6 +504,7 @@ export default function CampPage() {
               </Link>
             ))}
           </div>
+          </>
         )}
       </div>
     </div>
