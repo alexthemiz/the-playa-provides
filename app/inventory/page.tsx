@@ -443,14 +443,22 @@ export default function InventoryPage() {
         <p style={{ color: '#888', textAlign: 'center', padding: '40px' }}>Loading your gear...</p>
       ) : (
         <div style={tableContainerStyle}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const, tableLayout: 'fixed' as const }}>
+            <colgroup>
+              <col style={{ width: '220px' }} />
+              <col style={{ width: '110px' }} />
+              <col style={{ width: '110px' }} />
+              <col style={{ width: '260px' }} />
+              <col style={{ width: '170px' }} />
+              <col style={{ width: '150px' }} />
+            </colgroup>
             <thead>
               <tr style={headerRowStyle}>
                 <th style={thStyle}>Item Name</th>
                 <th style={thStyle}>Category</th>
                 <th style={thStyle}>Location</th>
                 <th style={thStyle}>Description</th>
-                <th style={{ ...thStyle, paddingRight: '40px' }}>Status</th>
+                <th style={thStyle}>Status</th>
                 <th style={thStyle}>Action</th>
               </tr>
             </thead>
@@ -504,7 +512,7 @@ export default function InventoryPage() {
                     </td>
 
                     {/* STATUS TOGGLE */}
-                    <td style={{ ...tdStyle, paddingRight: '40px' }}>
+                    <td style={tdStyle}>
                       <div style={{ display: 'flex', gap: '4px' }}>
                         {[
                           { value: 'Available to Borrow', label: 'Borrow' },
