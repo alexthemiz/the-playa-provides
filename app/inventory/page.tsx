@@ -123,13 +123,15 @@ export default function InventoryPage() {
   }
 
   async function updateVisibility(itemId: number, newVisibility: string) {
+    // Optimistic update first so the controlled <select> reflects the change immediately.
+    // Without this, the async DB call causes React to re-render with the old value
+    // and the browser resets the dropdown before the await resolves.
+    setItems(prev => prev.map(i => i.id === itemId ? { ...i, visibility: newVisibility } : i));
     const { error } = await supabase
       .from('gear_items')
       .update({ visibility: newVisibility })
       .eq('id', itemId);
-    if (!error) {
-      setItems(prev => prev.map(i => i.id === itemId ? { ...i, visibility: newVisibility } : i));
-    }
+    if (error) console.error('updateVisibility error:', error);
   }
 
   const downloadCSV = () => {
@@ -448,7 +450,7 @@ export default function InventoryPage() {
                 <th style={thStyle}>Category</th>
                 <th style={thStyle}>Location</th>
                 <th style={thStyle}>Description</th>
-                <th style={{ ...thStyle, width: '160px' }}>Status</th>
+                <th style={{ ...thStyle, width: '160px', minWidth: '160px', maxWidth: '160px' }}>Status</th>
                 <th style={thStyle}>Action</th>
               </tr>
             </thead>
@@ -502,7 +504,7 @@ export default function InventoryPage() {
                     </td>
 
                     {/* STATUS TOGGLE */}
-                    <td style={{ ...tdStyle, width: '160px' }}>
+                    <td style={{ ...tdStyle, width: '160px', minWidth: '160px', maxWidth: '160px' }}>
                       <div style={{ display: 'flex', gap: '4px' }}>
                         {[
                           { value: 'Available to Borrow', label: 'Borrow' },
