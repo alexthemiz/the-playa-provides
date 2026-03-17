@@ -11,6 +11,7 @@ export default function SignUpPage() {
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [preferredName, setPreferredName] = useState('');
+  const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   // New state for the waiver
@@ -45,6 +46,7 @@ export default function SignUpPage() {
         data: {
           username: username.toLowerCase().trim(),
           preferred_name: preferredName,
+          full_name: fullName.trim(),
           email: email,
         },
       },
@@ -132,6 +134,21 @@ export default function SignUpPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="••••••••"
+            />
+          </div>
+
+          <div>
+            <label style={labelStyle}>
+              Full Name
+              <span style={{ fontWeight: 'normal', textTransform: 'none' as const, letterSpacing: 0, color: '#bbb', marginLeft: '6px', fontSize: '0.7rem' }}>Kept private and never displayed publicly.</span>
+            </label>
+            <input
+              type="text"
+              style={inputStyle}
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              required
+              placeholder="e.g. Jane Smith"
             />
           </div>
 
