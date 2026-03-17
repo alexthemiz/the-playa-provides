@@ -70,20 +70,19 @@ return (
       
       {/* Header Section */}
       <div className="flex flex-col mb-16">
-        <h1 className="text-5xl font-bold text-[#2D241E] mb-4">The Playa Provides<span style={{ textDecoration: 'underline' }}> Resources{'\u00a0'}</span></h1>
-
-        <p className="text-stone-600 max-w-4xl text-lg leading-relaxed mb-8">
-          A directory of camps that offer community services at the Burn, from compost collecting to bike repair.
-        </p>
-
-        <div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <h1 className="text-5xl font-bold text-[#2D241E]">The Playa Provides<span style={{ textDecoration: 'underline' }}> Resources{'\u00a0'}</span></h1>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="bg-[#C08261] text-white px-10 py-4 rounded-2xl font-bold hover:bg-[#A66D51] transition-all shadow-lg shadow-stone-200 active:scale-95"
+            style={{ backgroundColor: '#00ccff', color: '#000', padding: '10px 20px', borderRadius: '6px', border: 'none', fontWeight: 'bold', cursor: 'pointer', whiteSpace: 'nowrap' as const, fontSize: '0.9rem' }}
           >
             Submit Your Camp
           </button>
         </div>
+
+        <p className="text-stone-600 max-w-4xl text-lg leading-relaxed mb-8">
+          A directory of camps that offer community services at the Burn, from compost collecting to bike repair.
+        </p>
       </div>
 
       {loading ? (
