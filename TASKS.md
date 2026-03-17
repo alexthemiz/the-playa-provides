@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-03-17 (session 15)_
+_Last updated: 2026-03-17 (session 16)_
 
 ---
 
@@ -13,6 +13,7 @@ _Last updated: 2026-03-17 (session 15)_
 ## 🔧 Bugs & Fixes
 - [ ] **Visibility constraint error — user-friendly copy** — When a user selects "People I Follow" or "Campmates" visibility but has no followers or camp affiliations, the site shows a raw database constraint error. Replace with friendly copy explaining why the option isn't available.
 - [ ] **Item request notifications not wired to bell** — Requests currently only trigger an email via the `send-request-email` edge function; no row is inserted into the `notifications` table. Add a notification insert to the request flow (edge function or client-side after send) so the bell picks it up.
+- [ ] **Notification bell not wired to transfer acceptance** — When a transfer is accepted or declined by the recipient, no bell notification fires for the initiating party. The `notifications` table has `transfer_accepted` and `transfer_declined` types and the header switch handles them, but the insert is missing from the transfer confirmation flow.
 
 
 
@@ -36,7 +37,6 @@ _(nothing queued yet)_
 ## 💡 Ideas & Long Term
 - [ ] **Custom Supabase Auth domain** — Upgrade to Supabase Pro, set `auth.theplayaprovides.com` as custom auth domain + DNS config. Fixes Google OAuth consent screen showing `bklycpitofjrjhizttny.supabase.co` instead of the app domain.
 - [ ] **Dispute arbitration UI** — Loans with `status = disputed` have no admin UI yet; flagged for future resolution flow.
-- [ ] **Notifications for loan/transfer events** — Bell + email only covers new item listings in v1. Future: wire transfer/loan confirmations into the `notifications` table too.
 - [ ] **Loan renewal / extension** — Extend return_by date without completing and re-creating the loan.
 - [ ] **Camp page editing** — Claimed pages need a UI to edit description, founded year, avatar, banner.
 - [ ] **Camp-scoped gear sharing** — Share items with your camp only using `visibility` column + camp membership check.
@@ -44,6 +44,8 @@ _(nothing queued yet)_
 - [ ] **Camps Phase 2** — Needs further scoping. Includes: campmates filter on find-items, self-serve camp page claiming UI, BM API integration for official camp autocomplete, camp gear inventory, playa_resources linking to camp pages.
 - [ ] **SEO / noindex for restricted items** — Public items indexable by search engines; campmates-only and followers-only items should have noindex meta tag.
 - [ ] **Incomplete profile nudge** — Some users have NULL full_name (and potentially other required fields) from before required field validation was added. Options: (A) Soft banner at top of /settings page if required fields are missing — non-blocking, just a nudge; (B) One-time modal after login prompting user to complete their profile, dismissible and non-blocking; (C) Validate only on save — no proactive warning, error only appears when user next visits /settings and tries to save. Option B is most user-friendly at scale.
+- [ ] **Borrowed item detail page** — When an item is currently out on loan, determine what shows on the unique item page for: (1) the borrower, (2) the owner, (3) anyone else. Should "Request this item" be hidden? Should there be a loan status indicator?
+- [ ] **Return flow limbo/reminder** — If owner never confirms return after borrower clicks "Return Item", send daily bell notification to owner. Add option for borrower to ping owner with a reminder button.
 ---
 
 ## 🧠 Brainstorming
@@ -53,6 +55,7 @@ _(nothing queued)_
 
 ## 🚀 Features (Designed, Ready to Build)
 - [ ] **Signup page required fields** — Add Preferred Name, Username, and Full Name fields to the signup form so new users aren't created with NULL required fields. Redirect to /settings is the fallback but capturing at signup is cleaner.
+- [ ] **Notification types Phase 2** — Wire remaining transfer/loan/return events into the `notifications` table and bell. Most types are now in the schema and header switch; gaps: transfer acceptance bell insert, item request bell insert, loan return confirmation (done), any remaining edge cases.
 
 ---
 
