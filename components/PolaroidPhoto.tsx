@@ -5,10 +5,11 @@ interface PolaroidPhotoProps {
   alt: string;
   itemId: number;
   imageSize?: number; // if set, renders a fixed square with objectFit:contain
+  noRotate?: boolean;
 }
 
-export default function PolaroidPhoto({ src, alt, itemId, imageSize }: PolaroidPhotoProps) {
-  const rotation = ((itemId % 7) - 3) * 0.7;
+export default function PolaroidPhoto({ src, alt, itemId, imageSize, noRotate }: PolaroidPhotoProps) {
+  const rotation = noRotate ? 0 : ((itemId % 7) - 3) * 0.7;
 
   const imageContent = src ? (
     imageSize ? (

@@ -445,7 +445,7 @@ export default function CampPage() {
             <button onClick={handleCloseCampModal} style={campCloseButtonStyle}><X size={24} /></button>
 
             <div style={{ marginBottom: '20px' }}>
-              <PolaroidPhoto src={selectedCampItem.image_urls?.[0]} alt={selectedCampItem.item_name} itemId={selectedCampItem.id} />
+              <PolaroidPhoto src={selectedCampItem.image_urls?.[0]} alt={selectedCampItem.item_name} itemId={selectedCampItem.id} noRotate />
             </div>
 
             <h2 style={{ margin: '0 0 5px 0', color: '#111', fontSize: '24px' }}>{selectedCampItem.item_name}</h2>
@@ -539,7 +539,7 @@ function CampCardView({ item }: { item: any }) {
   return (
     <div style={{ backgroundColor: '#fff', border: '1px solid #eee', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
       <div style={{ position: 'relative' as const, backgroundColor: 'transparent', padding: '12px 12px 0 12px' }}>
-        <PolaroidPhoto src={item.image_urls?.[0]} alt={item.item_name} itemId={item.id} imageSize={300} />
+        <PolaroidPhoto src={item.image_urls?.[0]} alt={item.item_name} itemId={item.id} imageSize={300} noRotate />
         <div style={{ position: 'absolute', top: '10px', left: '10px', backgroundColor: '#00ccff', color: '#000', padding: '3px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', zIndex: 5 }}>
           {item.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}
         </div>
