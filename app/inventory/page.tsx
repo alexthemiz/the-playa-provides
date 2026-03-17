@@ -236,7 +236,15 @@ export default function InventoryPage() {
         .from('gear_items')
         .update({ user_id: userId })
         .eq('id', transfer.item_id);
-      fetchMyInventory();
+      // Fetch the specific item by ID (not by user_id) to avoid read-after-write
+      // race conditions from a full fetchMyInventory refetch
+      const { data: newItem } = await supabase
+        .from('gear_items')
+        .select('*, locations(label)')
+        .eq('id', transfer.item_id)
+        .single();
+      if (newItem) setItems(prev => [newItem, ...prev]);
+      setInboundTransfers(prev => prev.filter(t => t.id !== transfer.id));
     }
   }
 
