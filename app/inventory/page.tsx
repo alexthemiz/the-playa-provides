@@ -227,22 +227,32 @@ export default function InventoryPage() {
   }
 
   async function handleRecipientConfirmTransfer(transfer: any) {
+    // Read session directly rather than relying on userId state closure
+    const { data: { session } } = await supabase.auth.getSession();
+    const currentUserId = session?.user?.id ?? null;
+    console.log('[transfer] Got It clicked — userId state:', userId, '| session userId:', currentUserId, '| transfer.item_id:', transfer.item_id);
+
     const { error } = await supabase
       .from('item_transfers')
       .update({ recipient_confirmed: true, status: 'complete' })
       .eq('id', transfer.id);
+    console.log('[transfer] item_transfers update result — error:', error);
+
     if (!error) {
-      await supabase
+      const { data: updateData, error: updateError } = await supabase
         .from('gear_items')
-        .update({ user_id: userId })
-        .eq('id', transfer.item_id);
-      // Fetch the specific item by ID (not by user_id) to avoid read-after-write
-      // race conditions from a full fetchMyInventory refetch
-      const { data: newItem } = await supabase
+        .update({ user_id: currentUserId })
+        .eq('id', transfer.item_id)
+        .select();
+      console.log('[transfer] gear_items update result — data:', updateData, '| error:', updateError);
+
+      const { data: newItem, error: selectError } = await supabase
         .from('gear_items')
         .select('*, locations(label)')
         .eq('id', transfer.item_id)
         .single();
+      console.log('[transfer] gear_items post-update select — user_id:', newItem?.user_id, '| error:', selectError);
+
       if (newItem) setItems(prev => [newItem, ...prev]);
       setInboundTransfers(prev => prev.filter(t => t.id !== transfer.id));
     }
