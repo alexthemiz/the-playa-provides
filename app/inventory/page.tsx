@@ -446,7 +446,7 @@ export default function InventoryPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const, tableLayout: 'fixed' as const }}>
             <thead>
               <tr style={headerRowStyle}>
-                <th style={{ ...thStyle, width: '200px' }}>Item Name</th>
+                <th style={{ ...thStyle, width: '240px' }}>Item Name</th>
                 <th style={{ ...thStyle, width: '120px' }}>Category</th>
                 <th style={{ ...thStyle, width: '120px' }}>Location</th>
                 <th style={thStyle}>Description</th>
@@ -499,7 +499,7 @@ export default function InventoryPage() {
                     <td style={tdStyle}>{item.locations?.label || item.location_type || 'Unset'}</td>
 
                     {/* DESCRIPTION */}
-                    <td style={{ ...tdStyle, maxWidth: '280px', fontSize: '0.8rem' }}>
+                    <td style={{ ...tdStyle, fontSize: '0.8rem', paddingRight: '32px' }}>
                       {item.description || '—'}
                     </td>
 
