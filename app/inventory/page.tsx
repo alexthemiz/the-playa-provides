@@ -731,7 +731,7 @@ export default function InventoryPage() {
                     <tr key={loan.id} style={rowStyle}>
                       <td style={{ ...tdStyle, fontWeight: 600, color: '#2D241E' }}>
                         {itemName}
-                        <Link href={`/find-items/${loan.item_id}`} style={editLinkStyle}>View Item Details</Link>
+                        <a href={`/find-items/${loan.item_id}`} style={editLinkStyle}>View Item Details</a>
                       </td>
                       <td style={tdStyle}>
                         {ownerUsername
