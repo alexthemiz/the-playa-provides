@@ -611,7 +611,7 @@ function CampListView({ item }: { item: any }) {
 // Camp items styles
 const campToggleGroupStyle: React.CSSProperties = { display: 'flex', backgroundColor: '#f5f5f5', borderRadius: '8px', padding: '4px', border: '1px solid #eee' };
 const campToggleButtonStyle: React.CSSProperties = { border: 'none', padding: '6px 10px', borderRadius: '6px', cursor: 'pointer' };
-const campGridStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px', width: '100%' };
+const campGridStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' };
 const campListContainerStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column' as const };
 const campListHeaderStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: CAMP_LIST_COLS, gap: '10px', padding: '8px 12px', fontSize: '10px', fontWeight: 700, color: '#aaa', textTransform: 'uppercase' as const, letterSpacing: '0.06em', borderBottom: '2px solid #eee' };
 const campSkeletonStyle: React.CSSProperties = { height: '280px', backgroundColor: '#f5f5f5', borderRadius: '12px' };
