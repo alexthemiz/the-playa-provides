@@ -443,22 +443,14 @@ export default function InventoryPage() {
         <p style={{ color: '#888', textAlign: 'center', padding: '40px' }}>Loading your gear...</p>
       ) : (
         <div style={tableContainerStyle}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const, tableLayout: 'fixed' as const }}>
-            <colgroup>
-              <col style={{ width: '240px' }} />
-              <col style={{ width: '120px' }} />
-              <col style={{ width: '120px' }} />
-              <col />
-              <col style={{ width: '160px' }} />
-              <col style={{ width: '130px' }} />
-            </colgroup>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const }}>
             <thead>
               <tr style={headerRowStyle}>
                 <th style={thStyle}>Item Name</th>
                 <th style={thStyle}>Category</th>
                 <th style={thStyle}>Location</th>
                 <th style={thStyle}>Description</th>
-                <th style={{ ...thStyle, paddingLeft: '28px' }}>Status</th>
+                <th style={{ ...thStyle, paddingRight: '40px' }}>Status</th>
                 <th style={thStyle}>Action</th>
               </tr>
             </thead>
@@ -507,12 +499,12 @@ export default function InventoryPage() {
                     <td style={tdStyle}>{item.locations?.label || item.location_type || 'Unset'}</td>
 
                     {/* DESCRIPTION */}
-                    <td style={{ ...tdStyle, fontSize: '0.8rem', paddingRight: '32px' }}>
+                    <td style={{ ...tdStyle, fontSize: '0.8rem' }}>
                       {item.description || '—'}
                     </td>
 
                     {/* STATUS TOGGLE */}
-                    <td style={{ ...tdStyle, paddingLeft: '28px' }}>
+                    <td style={{ ...tdStyle, paddingRight: '40px' }}>
                       <div style={{ display: 'flex', gap: '4px' }}>
                         {[
                           { value: 'Available to Borrow', label: 'Borrow' },
