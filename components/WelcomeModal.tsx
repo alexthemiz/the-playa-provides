@@ -1,6 +1,8 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabaseClient';
 
 interface WelcomeModalProps {
   userId: string;
@@ -9,6 +11,12 @@ interface WelcomeModalProps {
 
 export default function WelcomeModal({ userId, onClose }: WelcomeModalProps) {
   const router = useRouter();
+  const [username, setUsername] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.from('profiles').select('username').eq('id', userId).maybeSingle()
+      .then(({ data }) => { if (data?.username) setUsername(data.username); });
+  }, [userId]);
 
   const dismiss = () => {
     localStorage.setItem(`tpp_welcomed_${userId}`, 'true');
@@ -61,6 +69,11 @@ export default function WelcomeModal({ userId, onClose }: WelcomeModalProps) {
           <button onClick={() => goTo('/find-items')} style={secondaryBtnStyle}>
             Browse Items
           </button>
+          {username && (
+            <button onClick={() => goTo(`/profile/${username}`)} style={secondaryBtnStyle}>
+              My Profile
+            </button>
+          )}
           <button onClick={() => goTo('/list-item')} style={primaryBtnStyle}>
             List My First Item →
           </button>
