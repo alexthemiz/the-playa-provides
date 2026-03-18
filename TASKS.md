@@ -1,12 +1,14 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-03-17 (session 16)_
+_Last updated: 2026-03-18 (session 17)_
 
 ---
 
-## 🏗️ In Progress
+## 🏗️ In Progress / Needs Testing
 - [ ] **Test spreadsheet import end-to-end in browser** — CSV upload, Excel upload, duplicate detection, error cases
 - [ ] **End-to-end test: Following & Notifications** — Follow a user, list a new item as them, verify bell badge + dropdown appears; test mark-as-read and mark-all-read; verify email opt-in; verify /find-items relationship filter
+- [ ] **End-to-end test: Return flow** — Borrower clicks Return Item → owner sees Confirm Return → owner confirms → item goes back to Not Available
+- [ ] **Deploy `send-dispute-notification` edge function** — paste `supabase/functions/send-dispute-notification/index.ts` into Supabase Dashboard, toggle Verify JWT off
 
 ---
 
@@ -38,7 +40,6 @@ _(nothing queued yet)_
 - [ ] **Custom Supabase Auth domain** — Upgrade to Supabase Pro, set `auth.theplayaprovides.com` as custom auth domain + DNS config. Fixes Google OAuth consent screen showing `bklycpitofjrjhizttny.supabase.co` instead of the app domain.
 - [ ] **Dispute arbitration UI** — Loans with `status = disputed` have no admin UI yet; flagged for future resolution flow.
 - [ ] **Loan renewal / extension** — Extend return_by date without completing and re-creating the loan.
-- [ ] **Camp page editing** — Claimed pages need a UI to edit description, founded year, avatar, banner.
 - [ ] **Camp-scoped gear sharing** — Share items with your camp only using `visibility` column + camp membership check.
 - [ ] **Inventory-first reframe** — Shift site messaging to lead with gear organization as primary value prop; lending as optional bonus. Affects homepage copy, onboarding flow, and item-add form.
 - [ ] **Camps Phase 2** — Needs further scoping. Includes: campmates filter on find-items, self-serve camp page claiming UI, BM API integration for official camp autocomplete, camp gear inventory, playa_resources linking to camp pages.
@@ -114,3 +115,5 @@ _(nothing queued)_
 - [x] Feature: Camp page claim flow — inline form replaces mailto link; `camp_claim_requests` table with RLS + approval/denial triggers; `send-camp-claim-notification` edge function emails support; bell cases for camp_claim_approved/denied; approval auto-sets is_claimed + page_owner_id and denies other pending requests
 - [x] Fix: Camp claim triggers — `user_id` → `recipient_id` in notifications INSERT; added CHECK constraint on `camp_claim_requests.status` ('pending'|'approved'|'denied'); expanded `notifications_type_check` constraint to cover all 10 notification types
 - [x] Feature: Camp page updates — (page owner) label inline in members list; "Years Attended" column header; "Items from Camp Members" section with grid/list toggle, member item fetch (available + public/campmates visibility), quick-view modal with URL sync (/camps/[slug]/[id]), Request Item button; members list appears first, items section second; items default to list view; PolaroidPhoto `noRotate` prop added to prevent card overflow
+- [x] Feature: Camp page editing + member management — edit mode panel (display name, description, founded year, homebase, social links, banner upload); member grid with Wish List / Years Attended / Returning in 2026? / Actions columns; admin can set roles, transfer ownership, remove members; non-member items gate; camp_member_removed bell notification
+- [x] Feature: Camp page + profile 2026 returning status — DB: `returning_status` on `user_camp_affiliations`, `returning_2026` on `camps`; profile edit: Returning in 2026 field (Yes/Maybe/No chips + camp autocomplete), year cap at 2025, playa_story moved below history; camp members: per-member returning badge scoped to this camp; camp social links: edit trimmed to Facebook/Instagram/Website; camp layout: homebase plain text, conditional playa address display, "Returning in 2026?" select in edit form
