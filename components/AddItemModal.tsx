@@ -36,6 +36,10 @@ export default function AddItemModal({
   const [returnTerms, setReturnTerms] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [followingIds, setFollowingIds] = useState<string[]>([]);
+  const [campMateIds, setCampMateIds] = useState<string[]>([]);
+  const [userUsername, setUserUsername] = useState('');
+  const [visibilityError, setVisibilityError] = useState<{ message: string; showFindItems: boolean } | null>(null);
 
   useEffect(() => {
     async function fetchLocations() {
@@ -48,6 +52,18 @@ export default function AddItemModal({
             const defaultLoc = data.find((l: any) => l.is_default);
             if (defaultLoc) setSelectedLocationId(defaultLoc.id);
           }
+        }
+        const [profRes, followingRes, campRes] = await Promise.all([
+          supabase.from('profiles').select('username').eq('id', user.id).maybeSingle(),
+          supabase.from('user_follows').select('following_id').eq('follower_id', user.id),
+          supabase.from('user_camp_affiliations').select('camp_id').eq('user_id', user.id),
+        ]);
+        if (profRes.data?.username) setUserUsername(profRes.data.username);
+        setFollowingIds((followingRes.data || []).map((r: any) => r.following_id));
+        const myCampIds = (campRes.data || []).map((r: any) => r.camp_id);
+        if (myCampIds.length > 0) {
+          const { data: campMembers } = await supabase.from('user_camp_affiliations').select('user_id').in('camp_id', myCampIds).neq('user_id', user.id);
+          setCampMateIds([...new Set((campMembers || []).map((r: any) => r.user_id))]);
         }
       }
     }
@@ -104,6 +120,23 @@ export default function AddItemModal({
     } finally {
       setDeleting(false);
     }
+  }
+
+  function handleVisibilityChange(newVal: string) {
+    if (newVal === 'followers' && followingIds.length === 0) {
+      setVisibilityError({ message: "You're not following anyone yet. Follow other users first to use this option.", showFindItems: true });
+      return;
+    }
+    if (newVal === 'campmates' && campMateIds.length === 0) {
+      setVisibilityError({ message: "You haven't joined a camp yet. Add a camp to your profile first to use this option.", showFindItems: false });
+      return;
+    }
+    if (newVal === 'followers_and_campmates' && followingIds.length === 0 && campMateIds.length === 0) {
+      setVisibilityError({ message: "You're not following anyone or have Campmates yet. Follow other users or add a camp to your profile to use this option.", showFindItems: true });
+      return;
+    }
+    setVisibilityError(null);
+    setVisibility(newVal);
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -226,14 +259,24 @@ export default function AddItemModal({
               <label style={labelStyle}>Who Can See This?</label>
               <select
                 value={visibility}
-                onChange={e => setVisibility(e.target.value)}
+                onChange={e => handleVisibilityChange(e.target.value)}
                 style={inputStyle}
               >
                 <option value="public">Everyone</option>
                 <option value="followers">People you follow</option>
                 <option value="campmates">Campmates only</option>
-                <option value="followers_and_campmates">Followers &amp; campmates</option>
+                <option value="followers_and_campmates">Followers &amp; Campmates</option>
               </select>
+              {visibilityError && (
+                <div style={{ marginTop: '8px', padding: '10px 12px', backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px' }}>
+                  <p style={{ margin: '0 0 8px', fontSize: '0.83rem', color: '#78350f', lineHeight: 1.4 }}>{visibilityError.message}</p>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' as const }}>
+                    <a href={`/profile/${userUsername}`} style={visErrBtnStyle}>My Profile</a>
+                    {visibilityError.showFindItems && <a href="/find-items" style={visErrBtnStyle}>Find Items</a>}
+                    <button type="button" onClick={() => setVisibilityError(null)} style={{ ...visErrBtnStyle, borderColor: '#ddd', color: '#666' }}>Cancel</button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -349,3 +392,4 @@ const deleteOverlayStyle: React.CSSProperties = { position: 'fixed', inset: 0, b
 const deleteModalStyle: React.CSSProperties = { backgroundColor: '#fff', padding: '24px', borderRadius: '16px', maxWidth: '400px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' };
 const cancelBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#f5f5f5', color: '#333', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600' };
 const confirmDeleteBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '1px solid #ffaaaa', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600' };
+const visErrBtnStyle: React.CSSProperties = { padding: '4px 10px', backgroundColor: '#fff', border: '1px solid #d97706', borderRadius: '6px', color: '#b45309', fontSize: '0.8rem', fontWeight: 600 as const, textDecoration: 'none', display: 'inline-block', cursor: 'pointer' };

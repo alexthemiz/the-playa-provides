@@ -37,6 +37,10 @@ export default function InventoryPage() {
   const [disputeMessage, setDisputeMessage] = useState('');
   const [disputeSubmitting, setDisputeSubmitting] = useState(false);
   const [disputeSuccess, setDisputeSuccess] = useState(false);
+  const [followingIds, setFollowingIds] = useState<string[]>([]);
+  const [campMateIds, setCampMateIds] = useState<string[]>([]);
+  const [userUsername, setUserUsername] = useState('');
+  const [visibilityError, setVisibilityError] = useState<{ itemId: number; message: string; showFindItems: boolean } | null>(null);
   const [userLocations, setUserLocations] = useState<{ id: string; label: string }[]>([]);
   const [borrowerLocationIds, setBorrowerLocationIds] = useState<Record<string, string>>({});
   const [newLoanLocData, setNewLoanLocData] = useState<{ loanId: string | null; label: string; address_line_1: string; city: string; state: string; zip_code: string }>({ loanId: null, label: '', address_line_1: '', city: '', state: '', zip_code: '' });
@@ -62,8 +66,22 @@ export default function InventoryPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserId(user.id);
-        const { data: profileData } = await supabase.from('profiles').select('preferred_name').eq('id', user.id).maybeSingle();
+        const { data: profileData } = await supabase.from('profiles').select('preferred_name, username').eq('id', user.id).maybeSingle();
         if (profileData?.preferred_name) setDisplayName(profileData.preferred_name);
+        if (profileData?.username) setUserUsername(profileData.username);
+
+        const [followingRes, campRes] = await Promise.all([
+          supabase.from('user_follows').select('following_id').eq('follower_id', user.id),
+          supabase.from('user_camp_affiliations').select('camp_id').eq('user_id', user.id),
+        ]);
+        setFollowingIds((followingRes.data || []).map((r: any) => r.following_id));
+        const myCampIds = (campRes.data || []).map((r: any) => r.camp_id);
+        if (myCampIds.length > 0) {
+          const { data: campMembers } = await supabase.from('user_camp_affiliations').select('user_id').in('camp_id', myCampIds).neq('user_id', user.id);
+          setCampMateIds([...new Set((campMembers || []).map((r: any) => r.user_id))]);
+        } else {
+          setCampMateIds([]);
+        }
 
         const welcomeKey = `tpp_welcomed_${user.id}`;
         if (!localStorage.getItem(welcomeKey)) setShowWelcome(true);
@@ -95,7 +113,7 @@ export default function InventoryPage() {
         // Inbound transfers (recipient side)
         const { data: inboundTransferData } = await supabase
           .from('item_transfers')
-          .select('id, item_id, status, owner_confirmed, recipient_confirmed, owner:profiles!item_transfers_owner_id_fkey(preferred_name, username), gear_items(item_name)')
+          .select('id, item_id, status, owner_id, owner_confirmed, recipient_confirmed, owner:profiles!item_transfers_owner_id_fkey(preferred_name, username), gear_items(item_name)')
           .eq('recipient_id', user.id)
           .in('status', ['pending_handover']);
         setInboundTransfers(inboundTransferData || []);
@@ -298,6 +316,12 @@ export default function InventoryPage() {
         .single();
       if (newItem) setItems(prev => [newItem, ...prev]);
       setInboundTransfers(prev => prev.filter(t => t.id !== transfer.id));
+      supabase.from('notifications').insert({
+        type: 'transfer_accepted',
+        recipient_id: transfer.owner_id,
+        actor_id: userId,
+        item_id: transfer.item_id,
+      });
     } else {
       console.error('confirm_transfer_receipt error:', error.message);
     }
@@ -349,6 +373,39 @@ export default function InventoryPage() {
         body: { type: 'borrower_confirmed_return', loan_id: loan.id },
       });
     }
+  }
+
+  async function handleRecipientDeclineTransfer(transfer: any) {
+    const { error } = await supabase
+      .from('item_transfers')
+      .update({ status: 'cancelled' })
+      .eq('id', transfer.id);
+    if (!error) {
+      supabase.from('notifications').insert({
+        type: 'transfer_declined',
+        recipient_id: transfer.owner_id,
+        actor_id: userId,
+        item_id: transfer.item_id,
+      });
+      setInboundTransfers(prev => prev.filter(t => t.id !== transfer.id));
+    }
+  }
+
+  function handleVisibilityChange(itemId: number, newVal: string) {
+    if (newVal === 'followers' && followingIds.length === 0) {
+      setVisibilityError({ itemId, message: "You're not following anyone yet. Follow other users first to use this option.", showFindItems: true });
+      return;
+    }
+    if (newVal === 'campmates' && campMateIds.length === 0) {
+      setVisibilityError({ itemId, message: "You haven't joined a camp yet. Add a camp to your profile first to use this option.", showFindItems: false });
+      return;
+    }
+    if (newVal === 'followers_and_campmates' && followingIds.length === 0 && campMateIds.length === 0) {
+      setVisibilityError({ itemId, message: "You're not following anyone or have Campmates yet. Follow other users or add a camp to your profile to use this option.", showFindItems: true });
+      return;
+    }
+    setVisibilityError(null);
+    updateVisibility(itemId, newVal);
   }
 
   // --- Filters ---
@@ -612,16 +669,28 @@ export default function InventoryPage() {
                         ))}
                       </div>
                       {item.availability_status !== 'Not Available' && (
-                        <select
-                          value={item.visibility || 'public'}
-                          onChange={e => updateVisibility(item.id, e.target.value)}
-                          style={visibilitySelectStyle}
-                        >
-                          <option value="public">Everyone</option>
-                          <option value="followers">People you follow</option>
-                          <option value="campmates">Campmates only</option>
-                          <option value="followers_and_campmates">Followers &amp; campmates</option>
-                        </select>
+                        <>
+                          <select
+                            value={item.visibility || 'public'}
+                            onChange={e => handleVisibilityChange(item.id, e.target.value)}
+                            style={visibilitySelectStyle}
+                          >
+                            <option value="public">Everyone</option>
+                            <option value="followers">People you follow</option>
+                            <option value="campmates">Campmates only</option>
+                            <option value="followers_and_campmates">Followers &amp; Campmates</option>
+                          </select>
+                          {visibilityError != null && visibilityError.itemId === item.id && (
+                            <div style={visibilityErrorBoxStyle}>
+                              <p style={{ margin: '0 0 6px', fontSize: '0.75rem', color: '#78350f', lineHeight: 1.4 }}>{visibilityError.message}</p>
+                              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' as const }}>
+                                <a href={`/profile/${userUsername}`} style={visErrBtnStyle}>My Profile</a>
+                                {visibilityError.showFindItems && <a href="/find-items" style={visErrBtnStyle}>Find Items</a>}
+                                <button onClick={() => setVisibilityError(null)} style={{ ...visErrBtnStyle, borderColor: '#ddd', color: '#666' }}>Cancel</button>
+                              </div>
+                            </div>
+                          )}
+                        </>
                       )}
                     </td>
 
@@ -729,11 +798,16 @@ export default function InventoryPage() {
                         </span>
                       </td>
                       <td style={tdStyle}>
-                        {transfer.owner_confirmed && (
-                          <button onClick={() => handleRecipientConfirmTransfer(transfer)} style={handsOverButtonStyle}>
-                            Got It
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          {transfer.owner_confirmed && (
+                            <button onClick={() => handleRecipientConfirmTransfer(transfer)} style={handsOverButtonStyle}>
+                              Got It
+                            </button>
+                          )}
+                          <button onClick={() => handleRecipientDeclineTransfer(transfer)} style={cancelActionButtonStyle}>
+                            Decline
                           </button>
-                        )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -991,3 +1065,5 @@ const visibilitySelectStyle: React.CSSProperties = { marginTop: '6px', width: '1
 const loanLocationSelectStyle: React.CSSProperties = { width: '100%', padding: '5px 8px', fontSize: '0.8rem', border: '1px solid #ddd', borderRadius: '6px', color: '#2D241E', backgroundColor: '#fff', cursor: 'pointer' };
 const loanLocInputStyle: React.CSSProperties = { width: '100%', padding: '5px 8px', fontSize: '0.75rem', border: '1px solid #ddd', borderRadius: '5px', color: '#2D241E', backgroundColor: '#fff', boxSizing: 'border-box' as const };
 const saveLocButtonStyle: React.CSSProperties = { padding: '5px 12px', fontSize: '0.75rem', backgroundColor: '#00ccff', color: '#000', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 600 };
+const visibilityErrorBoxStyle: React.CSSProperties = { marginTop: '6px', padding: '8px 10px', backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px' };
+const visErrBtnStyle: React.CSSProperties = { padding: '3px 8px', backgroundColor: '#fff', border: '1px solid #d97706', borderRadius: '5px', color: '#b45309', fontSize: '0.7rem', fontWeight: 600 as const, textDecoration: 'none', display: 'inline-block', cursor: 'pointer' };

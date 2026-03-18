@@ -28,12 +28,14 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
   const [sendError, setSendError] = useState('');
   const [requesterName, setRequesterName] = useState('');
   const [requesterEmail, setRequesterEmail] = useState('');
+  const [requesterId, setRequesterId] = useState('');
 
   useEffect(() => {
     async function getRequesterInfo() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       setRequesterEmail(user.email || '');
+      setRequesterId(user.id);
       const { data: profile } = await supabase
         .from('profiles')
         .select('preferred_name, contact_email')
@@ -68,6 +70,15 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
 
       if (error) throw error;
       setSent(true);
+      // Fire-and-forget: bell notification for item owner
+      if (requesterId) {
+        supabase.from('notifications').insert({
+          type: 'item_request',
+          recipient_id: item.user_id,
+          actor_id: requesterId,
+          item_id: item.id,
+        });
+      }
       setTimeout(() => onClose(), 2000);
     } catch (err) {
       console.error('Error:', err);
