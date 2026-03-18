@@ -251,6 +251,7 @@ export default function Header() {
                               case 'camp_claim_approved': return { text: `Your claim for ${campName} was approved!`, href: `/camps/${campSlug}` }
                               case 'camp_claim_denied': return { text: `Your claim for ${campName} was not approved`, href: `/camps/${campSlug}` }
                               case 'loan_return_confirmed': return { text: `confirmed return of ${itemName}`, href: '/inventory' }
+                              case 'camp_member_removed': return { text: `You have been removed from ${campName}`, href: '/' }
                               default: return { text: 'sent you a notification', href: '/inventory' }
                             }
                           })()
@@ -356,6 +357,7 @@ export default function Header() {
                             case 'camp_claim_approved': return { text: `Your claim for ${campName} was approved!`, href: `/camps/${campSlug}` }
                             case 'camp_claim_denied': return { text: `Your claim for ${campName} was not approved`, href: `/camps/${campSlug}` }
                             case 'loan_return_confirmed': return { text: `confirmed return of ${itemName}`, href: '/inventory' }
+                            case 'camp_member_removed': return { text: `You have been removed from ${campName}`, href: '/' }
                             default: return { text: 'sent you a notification', href: '/inventory' }
                           }
                         })()
