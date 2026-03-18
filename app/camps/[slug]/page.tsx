@@ -38,6 +38,7 @@ export default function CampPage() {
   const [editFoundedYear, setEditFoundedYear] = useState('');
   const [editHomebase, setEditHomebase] = useState('');
   const [editSocialLinks, setEditSocialLinks] = useState<Record<string, string>>({});
+  const [editReturning2026, setEditReturning2026] = useState<boolean | null>(null);
   const [editSaving, setEditSaving] = useState(false);
   const [editError, setEditError] = useState('');
   const [bannerUploading, setBannerUploading] = useState(false);
@@ -52,6 +53,8 @@ export default function CampPage() {
 
   // Member management
   const [memberActionError, setMemberActionError] = useState('');
+  // userId → 'yes'|'maybe'|'no'|'other' (different camp / open camping) | undefined (no 2026 row)
+  const [returning2026Map, setReturning2026Map] = useState<Record<string, string>>({});
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -128,6 +131,27 @@ export default function CampPage() {
         const memberList = Array.from(memberMap.values())
           .sort((a, b) => Math.max(...b.years) - Math.max(...a.years));
         setMembers(memberList);
+
+        // Fetch each member's 2026 returning status for this specific camp
+        if (memberList.length > 0) {
+          const memberIds = memberList.map((m: any) => m.id);
+          const { data: ret2026 } = await supabase
+            .from('user_camp_affiliations')
+            .select('user_id, returning_status, camp_id, is_open_camping')
+            .in('user_id', memberIds)
+            .eq('year', 2026);
+          const rmap: Record<string, string> = {};
+          for (const row of ret2026 || []) {
+            if (row.camp_id === campData.id) {
+              // Affiliation is for THIS camp — use returning_status directly
+              rmap[row.user_id] = row.returning_status || 'none';
+            } else if (!rmap[row.user_id]) {
+              // Has a 2026 row but for a different camp / open camping → show ✗
+              rmap[row.user_id] = 'other';
+            }
+          }
+          setReturning2026Map(rmap);
+        }
       } catch (err) {
         console.error('fetchCamp error:', err);
       } finally {
@@ -250,6 +274,7 @@ export default function CampPage() {
     setEditFoundedYear(camp.founded_year ? String(camp.founded_year) : '');
     setEditHomebase(camp.homebase || '');
     setEditSocialLinks(camp.social_links || {});
+    setEditReturning2026(camp.returning_2026 ?? null);
     setEditError('');
     setEditMode(true);
   };
@@ -290,6 +315,7 @@ export default function CampPage() {
         description: editDescription.trim() || null,
         founded_year: editFoundedYear ? parseInt(editFoundedYear, 10) : null,
         homebase: editHomebase.trim() || null,
+        returning_2026: editReturning2026,
         social_links: editSocialLinks,
         updated_at: new Date().toISOString(),
       };
@@ -376,15 +402,17 @@ export default function CampPage() {
     setMembers(prev => prev.filter(m => m.id !== member.id));
   };
 
-  // Social link platform config
+  // Social link platform config — edit mode shows only these three
   const socialPlatforms = [
-    { key: 'facebook', label: 'Facebook' },
+    { key: 'facebook',  label: 'Facebook' },
     { key: 'instagram', label: 'Instagram' },
-    { key: 'bluesky', label: 'Bluesky' },
-    { key: 'linkedin', label: 'LinkedIn' },
-    { key: 'eplaya', label: 'ePlaya' },
-    { key: 'website', label: 'Personal Website' },
+    { key: 'website',   label: 'Camp Website' },
   ];
+  // Label map used for view-mode pills (covers legacy keys too)
+  const socialLabelMap: Record<string, string> = {
+    facebook: 'Facebook', instagram: 'Instagram', website: 'Camp Website',
+    bluesky: 'Bluesky', linkedin: 'LinkedIn', eplaya: 'ePlaya',
+  };
 
   return (
     <div style={{ padding: '40px 20px', maxWidth: '900px', margin: '0 auto', color: '#2D241E' }}>
@@ -489,21 +517,29 @@ export default function CampPage() {
               )}
               {camp.homebase && (
                 <p style={{ fontSize: '0.85rem', color: '#999', margin: '0 0 6px' }}>
-                  <MapPin size={13} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
-                  {camp.homebase}
+                  Homebase: {camp.homebase}
                 </p>
               )}
-              <p style={{ fontSize: '0.85rem', color: '#aaa', margin: '0 0 10px' }}>
-                Playa Location: <strong>{camp.playa_location || 'To Be Announced'}</strong>
-              </p>
-              {/* Social links pills */}
+              {camp.returning_2026 === true && (
+                <p style={{ fontSize: '0.85rem', color: '#aaa', margin: '0 0 10px' }}>
+                  2026 Playa Address: <strong>{camp.playa_location || 'To Be Announced'}</strong>
+                </p>
+              )}
+              {camp.returning_2026 === false && (
+                <p style={{ fontSize: '0.85rem', color: '#aaa', margin: '0 0 10px' }}>
+                  2026 Playa Address: <strong>Not Returning in 2026</strong>
+                </p>
+              )}
+              {/* Social links pills — show any key that has a URL (including legacy) */}
               {camp.social_links && Object.keys(camp.social_links).some(k => camp.social_links[k]) && (
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' as const, marginTop: '8px' }}>
-                  {socialPlatforms.filter(p => camp.social_links[p.key]).map(p => (
-                    <a key={p.key} href={camp.social_links[p.key]} target="_blank" rel="noopener noreferrer" style={socialPillStyle}>
-                      {p.label}
-                    </a>
-                  ))}
+                  {Object.entries(camp.social_links as Record<string, string>)
+                    .filter(([, url]) => !!url)
+                    .map(([key, url]) => (
+                      <a key={key} href={url} target="_blank" rel="noopener noreferrer" style={socialPillStyle}>
+                        {socialLabelMap[key] || key}
+                      </a>
+                    ))}
                 </div>
               )}
             </div>
@@ -548,6 +584,31 @@ export default function CampPage() {
             <input type="text" value={editHomebase} onChange={e => setEditHomebase(e.target.value)} placeholder="e.g. New York, NY / San Francisco, CA" style={editInputStyle} />
           </div>
 
+          <div style={{ marginBottom: '14px' }}>
+            <label style={editLabelStyle}>Returning in 2026?</label>
+            <select
+              value={editReturning2026 === null ? '' : String(editReturning2026)}
+              onChange={e => {
+                const v = e.target.value;
+                setEditReturning2026(v === '' ? null : v === 'true');
+              }}
+              style={{ ...editInputStyle, marginBottom: 0 }}
+            >
+              <option value="">Not set</option>
+              <option value="true">Yes, returning in 2026</option>
+              <option value="false">No, not returning in 2026</option>
+            </select>
+          </div>
+
+          {editReturning2026 === true && (
+            <div style={{ marginBottom: '14px' }}>
+              <label style={editLabelStyle}>2026 Playa Address</label>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: '#999', fontStyle: 'italic' as const }}>
+                {camp.playa_location || 'To be announced — populated by Burning Man API'}
+              </p>
+            </div>
+          )}
+
           {/* Social links */}
           <div style={{ marginBottom: '14px' }}>
             <label style={editLabelStyle}>Social Links</label>
@@ -587,84 +648,95 @@ export default function CampPage() {
         {members.length === 0 ? (
           <p style={{ color: '#aaa', fontSize: '0.9rem', fontStyle: 'italic' as const }}>No members listed yet.</p>
         ) : (
-          <>
-            <div style={{ display: 'flex', justifyContent: 'flex-end' as const, paddingRight: '12px', marginBottom: '4px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: '#bbb', textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>Years Attended</span>
+          <div style={{ overflowX: 'auto' as const }}>
+            {/* Header row */}
+            <div style={{ ...memberGridStyle(editMode), padding: '6px 12px', fontSize: '10px', fontWeight: 700, color: '#bbb', textTransform: 'uppercase' as const, letterSpacing: '0.06em', borderBottom: '2px solid #eee', marginBottom: '2px' }}>
+              <div>Name</div>
+              <div>Wish List</div>
+              <div>Years Attended</div>
+              <div style={{ textAlign: 'center' as const }}>Returning in 2026?</div>
+              {editMode && <div>Actions</div>}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '2px' }}>
-              {members.map(member => {
-                const isOwner = camp.page_owner_id === member.id;
-                const isCurrentUser = member.id === currentUserId;
-                const wishList: string[] = Array.isArray(member.wish_list) ? member.wish_list : [];
 
-                return (
-                  <div key={member.id} style={{ ...memberRowStyle, flexDirection: 'column' as const, gap: '8px', alignItems: 'stretch' }}>
-                    {/* Top row: avatar, name, years, management controls */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <Link href={`/profile/${member.username}`} style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, textDecoration: 'none' }}>
-                        <div style={{
-                          width: '38px', height: '38px', borderRadius: '50%', flexShrink: 0,
-                          backgroundColor: '#f0f0f0', border: '2px solid #e5e5e5',
-                          backgroundImage: member.avatar_url ? `url(${member.avatar_url})` : 'none',
-                          backgroundSize: 'cover' as const, backgroundPosition: 'center' as const,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: '1rem', color: '#C08261', fontWeight: 'bold' as const,
-                        }}>
-                          {!member.avatar_url && (member.preferred_name?.charAt(0) || member.username?.charAt(0) || '?')}
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: 600, fontSize: '14px', color: '#2D241E', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            {member.preferred_name || member.username}
-                            {isOwner && <span style={{ fontSize: '11px', color: '#bbb', fontWeight: 400 }}>(page owner)</span>}
-                            {!isOwner && member.role === 'admin' && <span style={{ fontSize: '11px', color: '#C08261', fontWeight: 600 }}>Admin</span>}
-                          </div>
-                          <div style={{ fontSize: '12px', color: '#aaa' }}>@{member.username}</div>
-                        </div>
-                      </Link>
-                      {/* Years */}
-                      <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' as const, justifyContent: 'flex-end' as const }}>
-                        {[...member.years].sort((a: number, b: number) => b - a).map((year: number) => (
-                          <span key={year} style={yearPillStyle}>{year}</span>
-                        ))}
+            {members.map(member => {
+              const isOwner = camp.page_owner_id === member.id;
+              const isCurrentUser = member.id === currentUserId;
+              const wishList: string[] = Array.isArray(member.wish_list) ? member.wish_list : [];
+              const ret2026 = returning2026Map[member.id]; // 'yes'|'maybe'|'no'|'other'|undefined
+
+              // Returning box config
+              const retCfg: Record<string, { symbol: string; bg: string; color: string; border: string }> = {
+                yes:   { symbol: '✓', bg: '#dcfce7', color: '#16a34a', border: '#86efac' },
+                maybe: { symbol: '?', bg: '#fef9c3', color: '#92400e', border: '#fde68a' },
+                no:    { symbol: '✗', bg: '#fee2e2', color: '#dc2626', border: '#fca5a5' },
+                other: { symbol: '✗', bg: '#fee2e2', color: '#dc2626', border: '#fca5a5' },
+              };
+              const rc = ret2026 ? retCfg[ret2026] : null;
+
+              return (
+                <div key={member.id} style={{ ...memberGridStyle(editMode), padding: '10px 12px', backgroundColor: '#fff', border: '1px solid #f0f0f0', borderRadius: '8px', marginBottom: '2px', alignItems: 'center' }}>
+
+                  {/* Name column */}
+                  <Link href={`/profile/${member.username}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', minWidth: 0 }}>
+                    <div style={{ width: '36px', height: '36px', borderRadius: '50%', flexShrink: 0, backgroundColor: '#f0f0f0', border: '2px solid #e5e5e5', backgroundImage: member.avatar_url ? `url(${member.avatar_url})` : 'none', backgroundSize: 'cover' as const, backgroundPosition: 'center' as const, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem', color: '#C08261', fontWeight: 'bold' as const }}>
+                      {!member.avatar_url && (member.preferred_name?.charAt(0) || member.username?.charAt(0) || '?')}
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, fontSize: '13px', color: '#2D241E', display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' as const }}>
+                        {member.preferred_name || member.username}
+                        {isOwner && <span style={{ fontSize: '10px', color: '#bbb', fontWeight: 400 }}>(owner)</span>}
+                        {!isOwner && member.role === 'admin' && <span style={{ fontSize: '10px', color: '#C08261', fontWeight: 600 }}>Admin</span>}
                       </div>
-                      {/* Management controls — never show next to self */}
-                      {!isCurrentUser && (
-                        <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-                          {isPageOwner && !isOwner && (
-                            <>
-                              {member.role === 'member' && (
-                                <button onClick={() => handleSetRole(member, 'admin')} style={mgmtBtnStyle}>Make Admin</button>
-                              )}
-                              {member.role === 'admin' && (
-                                <button onClick={() => handleSetRole(member, 'member')} style={mgmtBtnStyle}>Remove Admin</button>
-                              )}
-                              <button onClick={() => handleMakeOwner(member)} style={mgmtBtnStyle}>Make Owner</button>
-                              <button onClick={() => handleRemoveMember(member)} style={{ ...mgmtBtnStyle, color: '#cc0000', borderColor: '#fca5a5' }}>Remove</button>
-                            </>
+                      <div style={{ fontSize: '11px', color: '#aaa' }}>@{member.username}</div>
+                    </div>
+                  </Link>
+
+                  {/* Wish List column */}
+                  <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '4px', alignItems: 'center' }}>
+                    {wishList.length > 0
+                      ? wishList.map(tag => <span key={tag} style={wishTagStyle}>{tag}</span>)
+                      : <span style={{ fontSize: '12px', color: '#ccc' }}>—</span>
+                    }
+                  </div>
+
+                  {/* Years Attended column */}
+                  <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' as const }}>
+                    {[...member.years].sort((a: number, b: number) => b - a).map((year: number) => (
+                      <span key={year} style={yearPillStyle}>{year}</span>
+                    ))}
+                  </div>
+
+                  {/* Returning in 2026? column */}
+                  <div style={{ display: 'flex', justifyContent: 'center' as const }}>
+                    <div style={{ width: '26px', height: '26px', borderRadius: '5px', border: `1px solid ${rc ? rc.border : '#e5e5e5'}`, backgroundColor: rc ? rc.bg : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 700, color: rc ? rc.color : 'transparent' }}>
+                      {rc?.symbol || ''}
+                    </div>
+                  </div>
+
+                  {/* Actions column — only in edit mode, never for self */}
+                  {editMode && (
+                    <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' as const }}>
+                      {!isCurrentUser && isPageOwner && !isOwner && (
+                        <>
+                          {member.role === 'member' && (
+                            <button onClick={() => handleSetRole(member, 'admin')} style={mgmtBtnStyle}>Make Admin</button>
                           )}
-                          {/* Admins can remove members (not other admins, not owner) */}
-                          {!isPageOwner && myRole === 'admin' && !isOwner && member.role === 'member' && (
-                            <button onClick={() => handleRemoveMember(member)} style={{ ...mgmtBtnStyle, color: '#cc0000', borderColor: '#fca5a5' }}>Remove</button>
+                          {member.role === 'admin' && (
+                            <button onClick={() => handleSetRole(member, 'member')} style={mgmtBtnStyle}>Remove Admin</button>
                           )}
-                        </div>
+                          <button onClick={() => handleMakeOwner(member)} style={mgmtBtnStyle}>Make Owner</button>
+                          <button onClick={() => handleRemoveMember(member)} style={{ ...mgmtBtnStyle, color: '#cc0000', borderColor: '#fca5a5' }}>Remove</button>
+                        </>
+                      )}
+                      {!isCurrentUser && !isPageOwner && myRole === 'admin' && !isOwner && member.role === 'member' && (
+                        <button onClick={() => handleRemoveMember(member)} style={{ ...mgmtBtnStyle, color: '#cc0000', borderColor: '#fca5a5' }}>Remove</button>
                       )}
                     </div>
-                    {/* Wishlist row */}
-                    {wishList.length > 0 && (
-                      <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' as const, paddingLeft: '50px' }}>
-                        {wishList.map(tag => (
-                          <span key={tag} style={wishTagStyle}>{tag}</span>
-                        ))}
-                      </div>
-                    )}
-                    {wishList.length === 0 && isMember && (
-                      <div style={{ paddingLeft: '50px', fontSize: '12px', color: '#ccc' }}>—</div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
 
@@ -796,12 +868,17 @@ const sectionHeadStyle: React.CSSProperties = {
   textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px',
 };
 
-const memberRowStyle: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: '12px',
-  padding: '10px 12px', borderRadius: '8px',
-  textDecoration: 'none', backgroundColor: '#fff',
-  border: '1px solid #f0f0f0',
-};
+// Returns a grid template for the members table; edit mode adds an Actions column
+function memberGridStyle(editMode: boolean): React.CSSProperties {
+  return {
+    display: 'grid',
+    gridTemplateColumns: editMode
+      ? 'minmax(180px, 2fr) minmax(100px, 2fr) auto 120px auto'
+      : 'minmax(180px, 2fr) minmax(100px, 2fr) auto 120px',
+    gap: '10px',
+    alignItems: 'center',
+  };
+}
 
 const yearPillStyle: React.CSSProperties = {
   backgroundColor: '#fdf3ec', padding: '2px 8px', borderRadius: '20px',
