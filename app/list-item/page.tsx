@@ -34,17 +34,14 @@ export default function ListItemPage() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [followingIds, setFollowingIds] = useState<string[]>([]);
   const [campMateIds, setCampMateIds] = useState<string[]>([]);
-  const [userUsername, setUserUsername] = useState('');
-  const [visibilityError, setVisibilityError] = useState<{ message: string; showFindItems: boolean } | null>(null);
 
   useEffect(() => {
     async function fetchLocations() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          const { data: profileData } = await supabase.from('profiles').select('preferred_name, username').eq('id', user.id).maybeSingle();
+          const { data: profileData } = await supabase.from('profiles').select('preferred_name').eq('id', user.id).maybeSingle();
           if (profileData?.preferred_name) setDisplayName(profileData.preferred_name);
-          if (profileData?.username) setUserUsername(profileData.username);
 
           const [followingRes, campRes] = await Promise.all([
             supabase.from('user_follows').select('following_id').eq('follower_id', user.id),
@@ -104,23 +101,6 @@ export default function ListItemPage() {
       setUploading(false);
     }
   };
-
-  function handleVisibilityChange(newVal: string) {
-    if (newVal === 'followers' && followingIds.length === 0) {
-      setVisibilityError({ message: "You're not following anyone yet. Follow other users first to use this option.", showFindItems: true });
-      return;
-    }
-    if (newVal === 'campmates' && campMateIds.length === 0) {
-      setVisibilityError({ message: "You haven't joined a camp yet. Add a camp to your profile first to use this option.", showFindItems: false });
-      return;
-    }
-    if (newVal === 'followers_and_campmates' && followingIds.length === 0 && campMateIds.length === 0) {
-      setVisibilityError({ message: "You're not following anyone or have Campmates yet. Follow other users or add a camp to your profile to use this option.", showFindItems: true });
-      return;
-    }
-    setVisibilityError(null);
-    setVisibility(newVal);
-  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -288,24 +268,29 @@ export default function ListItemPage() {
               <label style={labelStyle}>Who Can See This?</label>
               <select
                 value={visibility}
-                onChange={e => handleVisibilityChange(e.target.value)}
+                onChange={e => setVisibility(e.target.value)}
                 style={inputStyle}
               >
                 <option value="public">Everyone</option>
-                <option value="followers">People you follow</option>
-                <option value="campmates">Campmates only</option>
-                <option value="followers_and_campmates">Followers &amp; Campmates</option>
+                <option
+                  value="followers"
+                  disabled={followingIds.length === 0}
+                  style={{ color: followingIds.length === 0 ? '#bbb' : 'inherit' }}
+                  title={followingIds.length === 0 ? 'Follow users to unlock this' : undefined}
+                >People you follow</option>
+                <option
+                  value="campmates"
+                  disabled={campMateIds.length === 0}
+                  style={{ color: campMateIds.length === 0 ? '#bbb' : 'inherit' }}
+                  title={campMateIds.length === 0 ? 'Add a camp to your profile to unlock this' : undefined}
+                >Campmates only</option>
+                <option
+                  value="followers_and_campmates"
+                  disabled={followingIds.length === 0 && campMateIds.length === 0}
+                  style={{ color: followingIds.length === 0 && campMateIds.length === 0 ? '#bbb' : 'inherit' }}
+                  title={followingIds.length === 0 && campMateIds.length === 0 ? 'Follow users or join a camp to unlock this' : undefined}
+                >Followers &amp; Campmates</option>
               </select>
-              {visibilityError && (
-                <div style={{ marginTop: '8px', padding: '10px 12px', backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px' }}>
-                  <p style={{ margin: '0 0 8px', fontSize: '0.83rem', color: '#78350f', lineHeight: 1.4 }}>{visibilityError.message}</p>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' as const }}>
-                    <a href={`/profile/${userUsername}`} style={visErrBtnStyle}>My Profile</a>
-                    {visibilityError.showFindItems && <a href="/find-items" style={visErrBtnStyle}>Find Items</a>}
-                    <button type="button" onClick={() => setVisibilityError(null)} style={{ ...visErrBtnStyle, borderColor: '#ddd', color: '#666' }}>Cancel</button>
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
@@ -414,4 +399,3 @@ const modalContentStyle: React.CSSProperties = { backgroundColor: '#fff', paddin
 const checkCircleStyle: React.CSSProperties = { width: '70px', height: '70px', backgroundColor: '#f0fdf4', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto' };
 const primaryActionBtn: React.CSSProperties = { padding: '13px', backgroundColor: '#00ccff', color: 'black', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', width: '100%' };
 const secondaryActionBtn: React.CSSProperties = { padding: '13px', backgroundColor: '#f5f5f5', color: '#666', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', width: '100%' };
-const visErrBtnStyle: React.CSSProperties = { padding: '4px 10px', backgroundColor: '#fff', border: '1px solid #d97706', borderRadius: '6px', color: '#b45309', fontSize: '0.8rem', fontWeight: 600 as const, textDecoration: 'none', display: 'inline-block', cursor: 'pointer' };
