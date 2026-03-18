@@ -256,10 +256,10 @@ export default function AddItemModal({
                 >Campmates only</option>
                 <option
                   value="followers_and_campmates"
-                  disabled={followingIds.length === 0 && campMateIds.length === 0}
-                  style={{ color: followingIds.length === 0 && campMateIds.length === 0 ? '#bbb' : 'inherit' }}
-                  title={followingIds.length === 0 && campMateIds.length === 0 ? 'Follow users or join a camp to unlock this' : undefined}
-                >Followers &amp; Campmates</option>
+                  disabled={followingIds.length === 0 || campMateIds.length === 0}
+                  style={{ color: followingIds.length === 0 || campMateIds.length === 0 ? '#bbb' : 'inherit' }}
+                  title={followingIds.length === 0 || campMateIds.length === 0 ? 'Follow users or join a camp to unlock this' : undefined}
+                >Following &amp; Campmates</option>
               </select>
             </div>
           )}

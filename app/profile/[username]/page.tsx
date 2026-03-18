@@ -897,7 +897,7 @@ export default function PublicProfilePage() {
                         {{
                           followers: 'Followers',
                           campmates: 'Campmates',
-                          followers_and_campmates: 'Followers + Campmates',
+                          followers_and_campmates: 'Following + Campmates',
                         }[item.visibility as string] ?? item.visibility}
                       </div>
                     )}
