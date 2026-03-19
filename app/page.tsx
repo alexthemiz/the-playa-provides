@@ -83,7 +83,7 @@ export default function HomePage() {
       <section style={{
         padding: '80px 20px 40px',
         textAlign: 'center',
-        background: 'radial-gradient(circle at center, #FAF9F6 0%, #ffffff 100%)',
+        background: '#ffffff',
       }}>
         <h1 style={{ fontSize: '4rem', marginBottom: '20px', fontWeight: '900', letterSpacing: '-2px', color: '#2D241E' }}>
           The Playa Provides
@@ -108,7 +108,7 @@ export default function HomePage() {
       </section>
 
       {/* Numbered list */}
-      <div style={{ maxWidth: '600px', margin: '60px auto 0', padding: '0 20px', display: 'flex', flexDirection: 'column' as const, gap: '28px' }}>
+      <div style={{ maxWidth: '860px', margin: '60px auto 0', padding: '0 20px 80px', display: 'flex', flexDirection: 'column' as const, gap: '28px' }}>
         {[
           { n: '1', title: 'Easily keep track of what you own', sub: 'Your inventory stays private until you decide what to share, when, and with whom.' },
           { n: '2', title: 'Lend or give away what you\'re not using', sub: 'Make it easier and cheaper for your fellow burners to get to BRC.' },
@@ -126,7 +126,7 @@ export default function HomePage() {
 
       {/* Polaroid Marquee */}
       {marqueeItems.length > 0 && (
-        <div style={{ overflow: 'hidden' as const, width: '100%', padding: '60px 0 40px', backgroundColor: '#FAF9F6' }}>
+        <div style={{ overflow: 'hidden' as const, width: '100%', padding: '60px 0 40px', backgroundColor: '#ffffff' }}>
           <div
             onMouseEnter={() => setMarqueeHovered(true)}
             onMouseLeave={() => setMarqueeHovered(false)}
@@ -160,7 +160,7 @@ export default function HomePage() {
       {/* Wishlist Ticker */}
       {wishlistTags.length > 0 && (
         <div style={{ padding: '40px 0 20px', backgroundColor: '#fff' }}>
-          <p style={{ textAlign: 'center' as const, fontSize: '1rem', color: '#666', marginBottom: '16px', padding: '0 20px' }}>
+          <p style={{ textAlign: 'center' as const, fontSize: '1.2rem', fontWeight: 700, color: '#2D241E', marginBottom: '16px', padding: '0 20px' }}>
             Burners are looking for these items. Can you help them out?
           </p>
           <div style={{ overflow: 'hidden' as const, width: '100%' }}>
@@ -222,7 +222,6 @@ const primaryBtn = {
   textDecoration: 'none',
   fontWeight: 'bold',
   fontSize: '1.05rem',
-  boxShadow: '0 4px 12px rgba(0, 204, 255, 0.25)'
 };
 
 const secondaryBtn = {
@@ -233,17 +232,16 @@ const secondaryBtn = {
   textDecoration: 'none',
   fontWeight: 'bold',
   fontSize: '1.05rem',
-  boxShadow: '0 4px 12px rgba(192, 130, 97, 0.25)'
 };
 
 const resourceBtn = {
-  padding: '12px 28px',
+  padding: '16px 36px',
   backgroundColor: '#F5E6D3',
   color: '#634832',
   borderRadius: '12px',
   textDecoration: 'none',
   fontWeight: 'bold',
-  fontSize: '0.95rem',
+  fontSize: '1rem',
   display: 'inline-block',
   border: '1px solid #E6D2B5'
 };
