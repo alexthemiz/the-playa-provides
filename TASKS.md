@@ -8,8 +8,6 @@ _Last updated: 2026-03-19 (session 19)_
 - [ ] **Test spreadsheet import end-to-end in browser** — CSV upload, Excel upload, duplicate detection, error cases
 - [ ] **End-to-end test: Following & Notifications** — Follow a user, list a new item as them, verify bell badge + dropdown appears; test mark-as-read and mark-all-read; verify email opt-in; verify /find-items relationship filter
 - [ ] **End-to-end test: Return flow** — Borrower clicks Return Item → owner sees Confirm Return → owner confirms → item goes back to Not Available
-- [ ] **Deploy `send-dispute-notification` edge function** — paste `supabase/functions/send-dispute-notification/index.ts` into Supabase Dashboard, toggle Verify JWT off
-- [ ] **Deploy `send-wish-list-match-email` edge function** — paste `supabase/functions/send-wish-list-match-email/index.ts` into Supabase Dashboard, toggle Verify JWT off
 
 ---
 
@@ -128,3 +126,5 @@ _(nothing queued)_
 - [x] Design: Homepage overhaul — triptych removed; numbered list (1/2/3) added; wishlist ticker added; polaroid marquee label added; hero copy tightened; layout, spacing, and background cleaned up to consistent white
 - [x] Design: Profile page — Playa History and Playa Story moved to two-column side-by-side layout
 - [x] Feature: "I have one of these" wish list match — `WishListMatchModal` (tag checkboxes + inventory toggles + note field + success state); DB migrations (`wish_list_match` type + `meta jsonb` on notifications); `send-wish-list-match-email` edge function (Resend, links to sender profile); bell notification wiring in header (both desktop + mobile)
+- [x] Deploy: `send-dispute-notification` edge function — deployed via Supabase Dashboard, Verify JWT off
+- [x] Deploy: `send-wish-list-match-email` edge function — deployed via Supabase Dashboard, Verify JWT off
