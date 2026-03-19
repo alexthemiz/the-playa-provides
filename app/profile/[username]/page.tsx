@@ -684,8 +684,11 @@ export default function PublicProfilePage() {
           </div>
         </div>
 
-        {/* PLAYA HISTORY — moved above Playa Story */}
-        <div style={{ marginTop: '25px' }}>
+        {/* PLAYA HISTORY + PLAYA STORY — two-column grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', marginTop: '25px' }}>
+
+        {/* PLAYA HISTORY */}
+        <div>
           <h4 style={subheadStyle}>Playa History</h4>
           {isEditing ? (
             <div>
@@ -840,8 +843,8 @@ export default function PublicProfilePage() {
           )}
         </div>
 
-        {/* PLAYA STORY — moved below Playa History */}
-        <div style={{ marginTop: '20px' }}>
+        {/* PLAYA STORY */}
+        <div>
           <h4 style={subheadStyle}>Got a good &quot;playa provides&quot; story?</h4>
           {isEditing ? (
             <textarea style={editTextareaStyle} value={profile.playa_story || ''} onChange={e => setProfile({ ...profile, playa_story: e.target.value })} placeholder="Share a time the playa provided..." />
@@ -851,6 +854,8 @@ export default function PublicProfilePage() {
             </p>
           )}
         </div>
+
+        </div>{/* end two-column grid */}
 
       </header>
 
