@@ -9,6 +9,8 @@ export default function HomePage() {
   const [marqueeItems, setMarqueeItems] = useState<any[]>([]);
   const [marqueeHovered, setMarqueeHovered] = useState(false);
   const [showDeletedBanner, setShowDeletedBanner] = useState(false);
+  const [wishlistTags, setWishlistTags] = useState<{ tag: string; username: string }[]>([]);
+  const [wishlistHovered, setWishlistHovered] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -28,13 +30,32 @@ export default function HomePage() {
         .in('availability_status', ['Available to Borrow', 'Available to Keep'])
         .limit(20);
 
-      // Only show items that have at least one image
       const withImages = (data || []).filter(
         (item: any) => Array.isArray(item.image_urls) && item.image_urls.length > 0
       );
       setMarqueeItems(withImages);
     }
     fetchMarqueeItems();
+  }, []);
+
+  useEffect(() => {
+    async function fetchWishlists() {
+      const { data } = await supabase
+        .from('profiles')
+        .select('username, wish_list')
+        .not('wish_list', 'is', null);
+
+      const tags: { tag: string; username: string }[] = [];
+      for (const row of data || []) {
+        if (!row.username) continue;
+        const list = Array.isArray(row.wish_list) ? row.wish_list : [];
+        for (const tag of list) {
+          if (tag) tags.push({ tag, username: row.username });
+        }
+      }
+      setWishlistTags(tags);
+    }
+    fetchWishlists();
   }, []);
 
   return (
@@ -52,6 +73,10 @@ export default function HomePage() {
           from { transform: translateX(0); }
           to   { transform: translateX(-50%); }
         }
+        @keyframes wishlistTicker {
+          from { transform: translateX(0); }
+          to   { transform: translateX(-50%); }
+        }
       `}</style>
 
       {/* Hero Section */}
@@ -65,15 +90,14 @@ export default function HomePage() {
         </h1>
 
         <p style={{
-          maxWidth: '850px',
-          margin: '0 auto',
-          fontSize: '1.3rem',
-          lineHeight: '1.5',
-          color: '#C08261',
-          fontWeight: '500',
-          marginBottom: '32px'
+          maxWidth: '750px',
+          margin: '0 auto 32px',
+          fontSize: '1.6rem',
+          lineHeight: '1.4',
+          color: '#2D241E',
+          fontWeight: '700',
         }}>
-          Why let your stuff collect dust in storage when it could be collecting dust on playa? Gift or lend your items, save your fellow burners money, and take the circular economy for a spin.
+          Why let your stuff collect dust in storage when it could be collecting dust on playa?
         </p>
 
         {/* Main Borrow/Lend Actions */}
@@ -83,9 +107,26 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Numbered list */}
+      <div style={{ maxWidth: '600px', margin: '60px auto 0', padding: '0 20px', display: 'flex', flexDirection: 'column' as const, gap: '28px' }}>
+        {[
+          { n: '1', title: 'Easily keep track of what you own', sub: 'Your inventory stays private until you decide what to share, when, and with whom.' },
+          { n: '2', title: 'Lend or give away what you\'re not using', sub: 'Make it easier and cheaper for your fellow burners to get to BRC.' },
+          { n: '3', title: 'Borrow what you need', sub: 'Skip the Amazon order. Someone in the community probably has it already.' },
+        ].map(({ n, title, sub }) => (
+          <div key={n} style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+            <span style={{ fontSize: '2.4rem', fontWeight: '900', color: '#00ccff', lineHeight: 1, flexShrink: 0, width: '40px', textAlign: 'center' as const }}>{n}</span>
+            <div>
+              <p style={{ margin: '0 0 4px', fontSize: '1.05rem', fontWeight: '700', color: '#2D241E' }}>{title}</p>
+              <p style={{ margin: 0, fontSize: '0.95rem', color: '#777', lineHeight: '1.5' }}>{sub}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* Polaroid Marquee */}
       {marqueeItems.length > 0 && (
-        <div style={{ overflow: 'hidden' as const, width: '100%', padding: '40px 0', backgroundColor: '#FAF9F6' }}>
+        <div style={{ overflow: 'hidden' as const, width: '100%', padding: '60px 0 40px', backgroundColor: '#FAF9F6' }}>
           <div
             onMouseEnter={() => setMarqueeHovered(true)}
             onMouseLeave={() => setMarqueeHovered(false)}
@@ -116,43 +157,54 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* The Core Pillars */}
-      <section style={{
-        padding: '40px 20px 80px',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-        gap: '24px',
-        maxWidth: '1100px',
-        margin: '0 auto'
-      }}>
-        <div style={cardStyle}>
-          <div style={iconStyle}>🎁</div>
-          <h3 style={{ fontSize: '1.4rem', marginBottom: '8px', color: '#2D241E' }}>Practice Radical Interdependence</h3>
-          <p style={{ color: '#666', fontSize: '0.95rem', lineHeight: '1.5' }}>
-            Getting to the playa is expensive enough. Help a fellow burner cut costs by lending or passing on gear you're not using.
+      {/* Wishlist Ticker */}
+      {wishlistTags.length > 0 && (
+        <div style={{ padding: '40px 0 20px', backgroundColor: '#fff' }}>
+          <p style={{ textAlign: 'center' as const, fontSize: '1rem', color: '#666', marginBottom: '16px', padding: '0 20px' }}>
+            Burners are looking for these items. Can you help them out?
           </p>
+          <div style={{ overflow: 'hidden' as const, width: '100%' }}>
+            <div
+              onMouseEnter={() => setWishlistHovered(true)}
+              onMouseLeave={() => setWishlistHovered(false)}
+              style={{
+                display: 'flex',
+                gap: '12px',
+                width: 'max-content',
+                animation: 'wishlistTicker 50s linear infinite',
+                animationPlayState: wishlistHovered ? 'paused' : 'running',
+                paddingLeft: '20px',
+                alignItems: 'center',
+              }}
+            >
+              {[...wishlistTags, ...wishlistTags].map(({ tag, username }, i) => (
+                <a
+                  key={i}
+                  href={`/profile/${username}`}
+                  style={{
+                    flexShrink: 0,
+                    padding: '5px 14px',
+                    borderRadius: '20px',
+                    border: '1px solid #00ccff',
+                    backgroundColor: '#f0fcff',
+                    color: '#007a99',
+                    fontSize: '0.85rem',
+                    fontWeight: 500,
+                    textDecoration: 'none',
+                    whiteSpace: 'nowrap' as const,
+                  }}
+                >
+                  {tag}
+                </a>
+              ))}
+            </div>
+          </div>
         </div>
-
-        <div style={cardStyle}>
-          <div style={iconStyle}>📋</div>
-          <h3 style={{ fontSize: '1.4rem', marginBottom: '8px', color: '#2D241E' }}>Track Your Inventory</h3>
-          <p style={{ color: '#666', fontSize: '0.95rem', lineHeight: '1.5' }}>
-            Your list stays private until you choose what you're open to sharing, when, and how.
-          </p>
-        </div>
-
-        <div style={cardStyle}>
-          <div style={iconStyle}>♻️</div>
-          <h3 style={{ fontSize: '1.4rem', marginBottom: '8px', color: '#2D241E' }}>Cut Down on Purchasing New Things</h3>
-          <p style={{ color: '#666', fontSize: '0.95rem', lineHeight: '1.5' }}>
-            The world has enough stuff already. Let yours go to the playa this year even if you can't.
-          </p>
-        </div>
-      </section>
+      )}
 
       {/* On-Playa Resources */}
-      <div style={{ textAlign: 'center' as const, padding: '20px 20px 60px' }}>
-        <p style={{ fontSize: '1rem', color: '#666', marginBottom: '16px' }}>
+      <div style={{ textAlign: 'center' as const, padding: '40px 20px 60px' }}>
+        <p style={{ fontSize: '1.2rem', color: '#666', marginBottom: '16px', fontWeight: 700 }}>
           Find the camps providing services that make Burning Man more sustainable
         </p>
         <Link href="/resources" style={resourceBtn}>On-Playa Resources</Link>
@@ -194,17 +246,4 @@ const resourceBtn = {
   fontSize: '0.95rem',
   display: 'inline-block',
   border: '1px solid #E6D2B5'
-};
-
-const cardStyle = {
-  padding: '32px 24px',
-  backgroundColor: '#FAF9F6',
-  borderRadius: '24px',
-  border: '1px solid #f0eee9',
-  textAlign: 'center' as 'center'
-};
-
-const iconStyle = {
-  fontSize: '2.2rem',
-  marginBottom: '12px'
 };
