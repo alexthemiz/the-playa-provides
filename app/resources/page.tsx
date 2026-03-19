@@ -81,7 +81,7 @@ return (
         </div>
 
         <p className="text-stone-600 max-w-4xl text-lg leading-relaxed mb-8">
-          A directory of camps that offer community services at the Burn, from compost collecting to bike repair.
+          A directory of camps offering sustainability and community services at the 2026 Burn, from composting and can crushing to bike repair and donation accepting.
         </p>
       </div>
 
