@@ -258,7 +258,6 @@ export default function PublicProfilePage() {
     const { error } = await supabase.from('profiles').update({
       bio: profile.bio,
       preferred_name: profile.preferred_name,
-      burning_man_years: profile.burning_man_years,
       avatar_url: profile.avatar_url,
       social_links: profile.social_links || {},
       playa_story: profile.playa_story || null,
@@ -402,14 +401,6 @@ export default function PublicProfilePage() {
     } else {
       setDraft2026(prev => ({ ...prev, searchResults: [], showDropdown: false }));
     }
-  };
-
-  const toggleYear = (year: string) => {
-    const years = profile.burning_man_years || [];
-    const newYears = years.includes(year)
-      ? years.filter((y: string) => y !== year)
-      : [...years, year];
-    setProfile({ ...profile, burning_man_years: newYears });
   };
 
   if (loading) return <div style={{ color: '#2D241E', padding: '40px' }}>Loading...</div>;
@@ -817,18 +808,6 @@ export default function PublicProfilePage() {
                 + Add year
               </button>
 
-              {/* Legacy year checkboxes */}
-              <div style={{ marginTop: '16px' }}>
-                <p style={{ fontSize: '0.7rem', color: '#ccc', margin: '0 0 6px', textTransform: 'uppercase' as const, letterSpacing: '0.05em' }}>Years attended (legacy)</p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: '5px', maxHeight: '120px', overflowY: 'auto' as const, border: '1px solid #e5e5e5', padding: '10px', borderRadius: '6px' }}>
-                  {YEAR_OPTIONS.map(year => (
-                    <label key={year} style={{ fontSize: '0.75rem', color: '#2D241E', cursor: 'pointer' }}>
-                      <input type="checkbox" checked={profile.burning_man_years?.includes(year)} onChange={() => toggleYear(year)} style={{ marginRight: '4px' }} />
-                      {year}
-                    </label>
-                  ))}
-                </div>
-              </div>
             </div>
           ) : affiliations.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '6px' }}>
@@ -854,19 +833,7 @@ export default function PublicProfilePage() {
             </div>
           ) : (
             <>
-              {(profile.burning_man_years || []).length > 0 ? (
-                <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '8px' }}>
-                  {(profile.burning_man_years || []).map((year: string) => (
-                    <span key={year} style={{ backgroundColor: '#fdf3ec', padding: '5px 12px', borderRadius: '20px', color: '#C08261', border: '1px solid #f0d8c8', fontSize: '0.85rem', fontWeight: 'bold' }}>{year}</span>
-                  ))}
-                </div>
-              ) : null}
-              {profile.burning_man_camp ? (
-                <p style={{ fontSize: '0.875rem', color: '#555', margin: (profile.burning_man_years || []).length > 0 ? '8px 0 0' : '0' }}>
-                  {profile.burning_man_camp}
-                </p>
-              ) : null}
-              {!(profile.burning_man_years || []).length && !profile.burning_man_camp && (
+              {affiliations.length === 0 && !draft2026.status && (
                 <span style={{ color: '#aaa', fontStyle: 'italic' as const, fontSize: '0.9rem' }}>No years listed yet.</span>
               )}
             </>

@@ -20,8 +20,6 @@ export default function SettingsPage() {
     pronouns: '',
     contact_email: '',
     bio: '',
-    burning_man_years: [],
-    burning_man_camp: '',
     city: '',
     state: '',
     zip_code: '',
