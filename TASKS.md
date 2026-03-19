@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-03-18 (session 17)_
+_Last updated: 2026-03-19 (session 18)_
 
 ---
 
@@ -13,16 +13,12 @@ _Last updated: 2026-03-18 (session 17)_
 ---
 
 ## 🔧 Bugs & Fixes
-- [ ] **Visibility constraint error — user-friendly copy** — When a user selects "People I Follow" or "Campmates" visibility but has no followers or camp affiliations, the site shows a raw database constraint error. Replace with friendly copy explaining why the option isn't available.
-- [ ] **Item request notifications not wired to bell** — Requests currently only trigger an email via the `send-request-email` edge function; no row is inserted into the `notifications` table. Add a notification insert to the request flow (edge function or client-side after send) so the bell picks it up.
-- [ ] **Notification bell not wired to transfer acceptance** — When a transfer is accepted or declined by the recipient, no bell notification fires for the initiating party. The `notifications` table has `transfer_accepted` and `transfer_declined` types and the header switch handles them, but the insert is missing from the transfer confirmation flow.
-
-
+_(nothing queued)_
 
 ---
 
 ## ⚡ Quick Wins
-- [ ] **Resources page: move "Submit Your Camp" button** — move to top right corner, style to match the "Add New Item" button on /inventory or "Edit Profile" button on /profile/[username]
+_(nothing queued)_
 
 ---
 
@@ -47,6 +43,8 @@ _(nothing queued yet)_
 - [ ] **Incomplete profile nudge** — Some users have NULL full_name (and potentially other required fields) from before required field validation was added. Options: (A) Soft banner at top of /settings page if required fields are missing — non-blocking, just a nudge; (B) One-time modal after login prompting user to complete their profile, dismissible and non-blocking; (C) Validate only on save — no proactive warning, error only appears when user next visits /settings and tries to save. Option B is most user-friendly at scale.
 - [ ] **Borrowed item detail page** — When an item is currently out on loan, determine what shows on the unique item page for: (1) the borrower, (2) the owner, (3) anyone else. Should "Request this item" be hidden? Should there be a loan status indicator?
 - [ ] **Return flow limbo/reminder** — If owner never confirms return after borrower clicks "Return Item", send daily bell notification to owner. Add option for borrower to ping owner with a reminder button.
+- [ ] **Camp member year/attendance breakdown** — Ability to filter or view all campers attending in a specific year, or see who's attending the current year across all camps.
+
 ---
 
 ## 🧠 Brainstorming
@@ -55,7 +53,6 @@ _(nothing queued)_
 ---
 
 ## 🚀 Features (Designed, Ready to Build)
-- [ ] **Signup page required fields** — Add Preferred Name, Username, and Full Name fields to the signup form so new users aren't created with NULL required fields. Redirect to /settings is the fallback but capturing at signup is cleaner.
 - [ ] **Notification types Phase 2** — Wire remaining transfer/loan/return events into the `notifications` table and bell. Most types are now in the schema and header switch; gaps: transfer acceptance bell insert, item request bell insert, loan return confirmation (done), any remaining edge cases.
 
 ---
@@ -66,6 +63,7 @@ _(nothing queued)_
 - [x] Fix: Delete account FK chain — resolved series of blocking constraints: `item_loans/item_transfers` NO ACTION on profiles.id → CASCADE; `gear_items.location_id` NO ACTION → SET NULL; `social_links` NOT NULL conflict → set to `{}`; `gear_items.user_id` NOT NULL conflict with SET NULL FK rule → dropped NOT NULL
 - [x] Design: Header hamburger menu backdrop div, logo `______` underscore span in header + footer
 - [x] Feature: Item visibility tiers — `visibility` column on `gear_items` with RLS enforcing public/followers/campmates/private; visibility selector on list-item form, edit modal, and inventory inline toggle; availability↔visibility coupling ('Not Available' → 'private'); owner visibility badge on profile page; "Log In to Request" gate on detail page, parallel modal, and find-items quick-view modal
+- [x] Fix: Visibility constraint error — grayed-out disabled options in visibility dropdown with tooltips explaining why options aren't available (no followers / no camp affiliations)
 - [x] Fix: Regular-mode loading hangs (GoTrue lock contention) — header was calling getUser() which held the lock during a network request; switched to getSession() (local cache, ~1ms). Added lockAcquireTimeout: 5000 to fail faster. Added try/catch/finally to resources page so setLoading(false) always fires.
 - [x] Fix: Email sender switched to hello@theplayaprovides.com via Resend SMTP (Supabase dashboard config)
 - [x] Fix: Profile pages stuck on "Loading..." — root cause: getUser() makes a network call that can hang on expired/refreshing tokens; swapped to getSession() (reads local cache, no network call) for the owner-check
@@ -106,14 +104,18 @@ _(nothing queued)_
 - [x] Design: Mobile header — tagline hidden below lg breakpoint (1024px), `w-full` on header fixes background not reaching screen edges, `whitespace-nowrap` on "Offer an Item" link
 - [x] Design: /about page — accordion layout (5→3 sections), 4 census charts at 50% width centered, census link, merged Support/Help/Contact into one section
 - [x] Design: /resources page — replaced list table with responsive card grid (auto-fill, 260px min)
+- [x] Design: Resources page "Submit Your Camp" button moved to top right, styled to match site conventions
 - [x] Feature: Social links on profile — `social_links jsonb` column on profiles, 6-field edit form inline in profile header, pill buttons in view mode (Lucide icons for FB/IG/LI/Globe; text for Bluesky/ePlaya)
 - [x] Feature: Playa story field on profile — `playa_story text` column, textarea in edit mode, displayed in view mode below bio section
 - [x] Design: Profile page layout restructure — Row 1: avatar+name/location/social links; Row 2: bio | wishlist; Row 3: story + playa history stacked
 - [x] Feature: Camps layer Phase 1 — `camps` + `user_camp_affiliations` tables with RLS; multi-entry camp affiliation editor on profile (year dropdown, camp autocomplete with freeform stub creation, Open Camping option); profile view mode reads affiliations first with legacy burning_man_years/burning_man_camp fallback; /camps/[slug] page with unclaimed banner + member list + claimed layout
 - [x] Feature: Find-items campmates filter — "My Campmates" multi-select chip on /find-items; campmate IDs fetched from user_camp_affiliations; filter chips for Everyone / People I Follow / People Who Follow Me / My Campmates (multi-select, independent toggles)
 - [x] Feature: Notification bell full wiring — type-based text + href switch for new_item, new_follower, transfer_accepted/declined, loan_accepted/declined, item_request, camp_join; camp_id column added to notifications; 5 new DB triggers (new_follower, transfer_accepted/declined, loan_accepted/declined, camp_join)
+- [x] Fix: Item request notifications wired to bell — notification row inserted into `notifications` table after request email sent, so bell picks it up
+- [x] Fix: Transfer accepted/declined notifications wired to bell — notification insert added on recipient's accept/decline action so initiating party sees bell update
 - [x] Feature: Camp page claim flow — inline form replaces mailto link; `camp_claim_requests` table with RLS + approval/denial triggers; `send-camp-claim-notification` edge function emails support; bell cases for camp_claim_approved/denied; approval auto-sets is_claimed + page_owner_id and denies other pending requests
 - [x] Fix: Camp claim triggers — `user_id` → `recipient_id` in notifications INSERT; added CHECK constraint on `camp_claim_requests.status` ('pending'|'approved'|'denied'); expanded `notifications_type_check` constraint to cover all 10 notification types
 - [x] Feature: Camp page updates — (page owner) label inline in members list; "Years Attended" column header; "Items from Camp Members" section with grid/list toggle, member item fetch (available + public/campmates visibility), quick-view modal with URL sync (/camps/[slug]/[id]), Request Item button; members list appears first, items section second; items default to list view; PolaroidPhoto `noRotate` prop added to prevent card overflow
 - [x] Feature: Camp page editing + member management — edit mode panel (display name, description, founded year, homebase, social links, banner upload); member grid with Wish List / Years Attended / Returning in 2026? / Actions columns; admin can set roles, transfer ownership, remove members; non-member items gate; camp_member_removed bell notification
 - [x] Feature: Camp page + profile 2026 returning status — DB: `returning_status` on `user_camp_affiliations`, `returning_2026` on `camps`; profile edit: Returning in 2026 field (Yes/Maybe/No chips + camp autocomplete), year cap at 2025, playa_story moved below history; camp members: per-member returning badge scoped to this camp; camp social links: edit trimmed to Facebook/Instagram/Website; camp layout: homebase plain text, conditional playa address display, "Returning in 2026?" select in edit form
+- [x] Feature: Signup page required fields — Preferred Name, Username, and Full Name fields added to signup form; username uniqueness check before submit; Google OAuth incomplete profile redirects to /settings?setup=true with amber setup banner
