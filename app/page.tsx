@@ -81,7 +81,7 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section style={{
-        padding: '80px 20px 40px',
+        padding: '80px 20px 20px',
         textAlign: 'center',
         background: '#ffffff',
       }}>
@@ -108,7 +108,7 @@ export default function HomePage() {
       </section>
 
       {/* Numbered list */}
-      <div style={{ maxWidth: '860px', margin: '60px auto 0', padding: '0 20px 80px', display: 'flex', flexDirection: 'column' as const, gap: '28px' }}>
+      <div style={{ maxWidth: '860px', margin: '0 auto', padding: '40px 20px 40px', display: 'flex', flexDirection: 'column' as const, gap: '28px' }}>
         {[
           { n: '1', title: 'Easily keep track of what you own', sub: 'Your inventory stays private until you decide what to share, when, and with whom.' },
           { n: '2', title: 'Lend or give away what you\'re not using', sub: 'Make it easier and cheaper for your fellow burners to get to BRC.' },
@@ -126,7 +126,11 @@ export default function HomePage() {
 
       {/* Polaroid Marquee */}
       {marqueeItems.length > 0 && (
-        <div style={{ overflow: 'hidden' as const, width: '100%', padding: '60px 0 40px', backgroundColor: '#ffffff' }}>
+        <div style={{ width: '100%', backgroundColor: '#ffffff' }}>
+          <p style={{ textAlign: 'center' as const, fontSize: '1.2rem', fontWeight: 700, color: '#2D241E', marginBottom: '16px', padding: '0 20px' }}>
+            Missing supplies for the burn? See what users have made available.
+          </p>
+        <div style={{ overflow: 'hidden' as const, width: '100%', padding: '0 0 40px' }}>
           <div
             onMouseEnter={() => setMarqueeHovered(true)}
             onMouseLeave={() => setMarqueeHovered(false)}
@@ -155,6 +159,7 @@ export default function HomePage() {
             ))}
           </div>
         </div>
+        </div>
       )}
 
       {/* Wishlist Ticker */}
@@ -163,7 +168,7 @@ export default function HomePage() {
           <p style={{ textAlign: 'center' as const, fontSize: '1.2rem', fontWeight: 700, color: '#2D241E', marginBottom: '16px', padding: '0 20px' }}>
             Burners are looking for these items. Can you help them out?
           </p>
-          <div style={{ overflow: 'hidden' as const, width: '100%' }}>
+          <div style={{ overflow: 'hidden' as const, width: '100%', paddingTop: '8px', paddingBottom: '12px' }}>
             <div
               onMouseEnter={() => setWishlistHovered(true)}
               onMouseLeave={() => setWishlistHovered(false)}
