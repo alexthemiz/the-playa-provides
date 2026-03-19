@@ -88,7 +88,7 @@ export default function Header() {
     const { data } = await supabase
       .from('notifications')
       .select(`
-        id, type, read, created_at, item_id, camp_id,
+        id, type, read, created_at, item_id, camp_id, meta,
         actor:profiles!notifications_actor_id_fkey(username, preferred_name),
         item:gear_items!notifications_item_id_fkey(item_name),
         camp:camps!notifications_camp_id_fkey(display_name, slug)
@@ -252,6 +252,7 @@ export default function Header() {
                               case 'camp_claim_denied': return { text: `Your claim for ${campName} was not approved`, href: `/camps/${campSlug}` }
                               case 'loan_return_confirmed': return { text: `confirmed return of ${itemName}`, href: '/inventory' }
                               case 'camp_member_removed': return { text: `You have been removed from ${campName}`, href: '/' }
+                              case 'wish_list_match': { const items = (n.meta as any)?.items; return { text: `says they have: ${Array.isArray(items) ? items.join(', ') : 'something on your wish list'}`, href: `/profile/${(n.actor as any)?.username}` } }
                               default: return { text: 'sent you a notification', href: '/inventory' }
                             }
                           })()

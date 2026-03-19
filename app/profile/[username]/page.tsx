@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 import AvatarUpload from '@/components/AvatarUpload';
+import WishListMatchModal from '@/components/WishListMatchModal';
 import { MapPin, Package, Globe, Linkedin, Instagram, Facebook } from 'lucide-react';
 
 export default function PublicProfilePage() {
@@ -31,6 +32,7 @@ export default function PublicProfilePage() {
   const [tagSaving, setTagSaving] = useState(false);
   const [affiliations, setAffiliations] = useState<any[]>([]);
   const [draftAffiliations, setDraftAffiliations] = useState<any[]>([]);
+  const [showWishMatchModal, setShowWishMatchModal] = useState(false);
 
   // 2026 returning status — managed separately from regular year drafts
   const [draft2026, setDraft2026] = useState<{
@@ -681,6 +683,17 @@ export default function PublicProfilePage() {
                 <button onClick={addTag} disabled={tagSaving} style={{ backgroundColor: '#00ccff', color: '#000', border: 'none', borderRadius: '6px', padding: '6px 14px', fontWeight: 600, fontSize: '13px', cursor: tagSaving ? 'default' as const : 'pointer' as const, opacity: tagSaving ? 0.5 : 1 }}>Add</button>
               </div>
             )}
+            {!isOwner && currentUserId && wishTags.length > 0 && (
+              <div style={{ marginTop: '14px' }}>
+                <p style={{ margin: '0 0 6px', fontSize: '0.78rem', color: '#aaa' }}>Got something they're looking for?</p>
+                <button
+                  onClick={() => setShowWishMatchModal(true)}
+                  style={{ padding: '7px 14px', backgroundColor: '#f5f5f5', color: '#2D241E', border: '1px solid #ddd', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  I have one of these
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -924,6 +937,15 @@ export default function PublicProfilePage() {
           </div>
         )}
       </section>
+
+      {showWishMatchModal && profile && currentUserId && (
+        <WishListMatchModal
+          profile={profile}
+          wishTags={wishTags}
+          currentUserId={currentUserId}
+          onClose={() => setShowWishMatchModal(false)}
+        />
+      )}
     </div>
   );
 }
