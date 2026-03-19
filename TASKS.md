@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-03-19 (session 18)_
+_Last updated: 2026-03-19 (session 19)_
 
 ---
 
@@ -9,6 +9,7 @@ _Last updated: 2026-03-19 (session 18)_
 - [ ] **End-to-end test: Following & Notifications** — Follow a user, list a new item as them, verify bell badge + dropdown appears; test mark-as-read and mark-all-read; verify email opt-in; verify /find-items relationship filter
 - [ ] **End-to-end test: Return flow** — Borrower clicks Return Item → owner sees Confirm Return → owner confirms → item goes back to Not Available
 - [ ] **Deploy `send-dispute-notification` edge function** — paste `supabase/functions/send-dispute-notification/index.ts` into Supabase Dashboard, toggle Verify JWT off
+- [ ] **Deploy `send-wish-list-match-email` edge function** — paste `supabase/functions/send-wish-list-match-email/index.ts` into Supabase Dashboard, toggle Verify JWT off
 
 ---
 
@@ -44,6 +45,10 @@ _(nothing queued yet)_
 - [ ] **Borrowed item detail page** — When an item is currently out on loan, determine what shows on the unique item page for: (1) the borrower, (2) the owner, (3) anyone else. Should "Request this item" be hidden? Should there be a loan status indicator?
 - [ ] **Return flow limbo/reminder** — If owner never confirms return after borrower clicks "Return Item", send daily bell notification to owner. Add option for borrower to ping owner with a reminder button.
 - [ ] **Camp member year/attendance breakdown** — Ability to filter or view all campers attending in a specific year, or see who's attending the current year across all camps.
+- [ ] **Wish list ticker optimization** — Homepage currently fetches all profiles' wish_list arrays and flattens in the browser. At scale, replace with a dedicated `wish_list_items` table (one row per tag per user) to enable pagination, location filtering, and efficient querying.
+- [ ] **Wish list search page** — Reverse find-items page: search all wish list items, filter by location, see who near you needs what.
+- [ ] **In-app messaging** — Replace wish list match email/notification flow with a proper message thread when messaging is built.
+- [ ] **Sitewide font overhaul** — Current fonts are functional but generic. Design pass needed across all pages.
 
 ---
 
@@ -54,6 +59,7 @@ _(nothing queued)_
 
 ## 🚀 Features (Designed, Ready to Build)
 - [ ] **Notification types Phase 2** — Wire remaining transfer/loan/return events into the `notifications` table and bell. Most types are now in the schema and header switch; gaps: transfer acceptance bell insert, item request bell insert, loan return confirmation (done), any remaining edge cases.
+- [ ] **Wish list match — logged-out state** — Currently the "I have one of these" button only shows to logged-in users. Consider showing a prompt to logged-out visitors to sign in to send a match.
 
 ---
 
@@ -61,7 +67,7 @@ _(nothing queued)_
 - [x] Feature: Settings page overhaul — Identity & Contact rename/reorder, pronouns field (DB migration), required asterisks, address card layout with "Set as default" checkbox, default location pre-select on /list-item and AddItemModal, Account & Security section (Change Email, Change Password with OAuth detection, Delete Account modal), zip_code field added
 - [x] Feature: Delete Account — two-step confirmation modal in settings, `delete-account` edge function (scrubs profile PII, marks gear owner_deleted+private, unlinks camps, deletes follows/notifications/affiliations/loans/transfers, then calls auth.admin.deleteUser), homepage `?deleted=true` banner, owner_deleted guard on item detail + parallel modal + find-items query
 - [x] Fix: Delete account FK chain — resolved series of blocking constraints: `item_loans/item_transfers` NO ACTION on profiles.id → CASCADE; `gear_items.location_id` NO ACTION → SET NULL; `social_links` NOT NULL conflict → set to `{}`; `gear_items.user_id` NOT NULL conflict with SET NULL FK rule → dropped NOT NULL
-- [x] Design: Header hamburger menu backdrop div, logo `______` underscore span in header + footer
+- [x] Design: Header hamburger menu (mobile) and logo "The Playa Provides______" updated in header and footer
 - [x] Feature: Item visibility tiers — `visibility` column on `gear_items` with RLS enforcing public/followers/campmates/private; visibility selector on list-item form, edit modal, and inventory inline toggle; availability↔visibility coupling ('Not Available' → 'private'); owner visibility badge on profile page; "Log In to Request" gate on detail page, parallel modal, and find-items quick-view modal
 - [x] Fix: Visibility constraint error — grayed-out disabled options in visibility dropdown with tooltips explaining why options aren't available (no followers / no camp affiliations)
 - [x] Fix: Regular-mode loading hangs (GoTrue lock contention) — header was calling getUser() which held the lock during a network request; switched to getSession() (local cache, ~1ms). Added lockAcquireTimeout: 5000 to fail faster. Added try/catch/finally to resources page so setLoading(false) always fires.
@@ -119,3 +125,6 @@ _(nothing queued)_
 - [x] Feature: Camp page editing + member management — edit mode panel (display name, description, founded year, homebase, social links, banner upload); member grid with Wish List / Years Attended / Returning in 2026? / Actions columns; admin can set roles, transfer ownership, remove members; non-member items gate; camp_member_removed bell notification
 - [x] Feature: Camp page + profile 2026 returning status — DB: `returning_status` on `user_camp_affiliations`, `returning_2026` on `camps`; profile edit: Returning in 2026 field (Yes/Maybe/No chips + camp autocomplete), year cap at 2025, playa_story moved below history; camp members: per-member returning badge scoped to this camp; camp social links: edit trimmed to Facebook/Instagram/Website; camp layout: homebase plain text, conditional playa address display, "Returning in 2026?" select in edit form
 - [x] Feature: Signup page required fields — Preferred Name, Username, and Full Name fields added to signup form; username uniqueness check before submit; Google OAuth incomplete profile redirects to /settings?setup=true with amber setup banner
+- [x] Design: Homepage overhaul — triptych removed; numbered list (1/2/3) added; wishlist ticker added; polaroid marquee label added; hero copy tightened; layout, spacing, and background cleaned up to consistent white
+- [x] Design: Profile page — Playa History and Playa Story moved to two-column side-by-side layout
+- [x] Feature: "I have one of these" wish list match — `WishListMatchModal` (tag checkboxes + inventory toggles + note field + success state); DB migrations (`wish_list_match` type + `meta jsonb` on notifications); `send-wish-list-match-email` edge function (Resend, links to sender profile); bell notification wiring in header (both desktop + mobile)
