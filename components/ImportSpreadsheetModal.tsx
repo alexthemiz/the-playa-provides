@@ -125,8 +125,16 @@ export default function ImportSpreadsheetModal({
     setImporting(true);
     setImportError('');
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user?.id) {
+        setImportError('You must be logged in to import items.');
+        setImporting(false);
+        return;
+      }
+      const userId = session.user.id;
+
       const insertData = rowsToImport.map(row => {
-        const record: Record<string, string> = { availability_status: 'Not Available' };
+        const record: Record<string, string> = { availability_status: 'Not Available', user_id: userId };
         Object.entries(columnMap).forEach(([col, field]) => {
           if (field === 'skip') return;
           const idx = headers.indexOf(col);
