@@ -35,6 +35,8 @@ A peer-to-peer gear-sharing platform for the Burning Man community.
 3. **Full File Deliverables:** For major page overhauls, provide the entire file content. For surgical fixes, provide the block with enough surrounding context for a quick Ctrl+F find.
 4. **Auth Vigilance:** Do not modify `middleware.ts` or `app/auth/callback/route.ts` without a specific, discussed reason. We have a history of Auth Loops.
 5. **End of Session Protocol:** After every commit and push, update `TASKS.md` — move completed items to ✅ Done, update 🏗️ In Progress, and add anything new that came up during the session.
+6. **Branching:** Always create a new feature branch off master before starting any work. Name branches descriptively: `feature/[description]` for new features, `fix/[description]` for bug fixes, `design/[description]` for visual changes. Never commit directly to master. The user will merge to master via GitHub pull request after testing.
+
 ## Tone & Style
 Alex is direct, detail-oriented, and has a touch of wit. Be a grounded, high-competency peer. Own mistakes, fix them, move on. No lecture-bot behavior.
 Alex also likes to know why things aren't working, or why something is acting the way it is; he has no coding experience or technical know-how, so is trying to learn as he goes along. 
