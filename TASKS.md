@@ -1,28 +1,38 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-03-19 (session 19)_
+_Last updated: 2026-03-20 (session 20)_
+
+---
+
+## ✅ Session Start Checklist
+1. Read **In Progress** and **Bugs** sections — what's actually unfinished?
+2. Pick **one primary goal** for this session
+3. If something comes up mid-session, ask: is this blocking my goal or a tangent? If tangent, log it and move on.
+4. **End of session:** update TASKS.md before closing out
 
 ---
 
 ## 🏗️ In Progress / Needs Testing
-- [ ] **Test spreadsheet import end-to-end in browser** — CSV upload, Excel upload, duplicate detection, error cases
-- [ ] **End-to-end test: Following & Notifications** — Follow a user, list a new item as them, verify bell badge + dropdown appears; test mark-as-read and mark-all-read; verify email opt-in; verify /find-items relationship filter
-- [ ] **End-to-end test: Return flow** — Borrower clicks Return Item → owner sees Confirm Return → owner confirms → item goes back to Not Available
+- [ ] **Test spreadsheet import end-to-end in browser** — CSV upload, Excel upload, duplicate detection, error cases. ⚠️ Merge `fix/spreadsheet-import-user-id` first.
+- [ ] **End-to-end test: Following & Notifications** — Follow a user, list a new item as them, verify bell badge + dropdown appears; test mark-as-read and mark-all-read; verify email opt-in; verify /find-items relationship filter. _(Fully implemented in code — this is a testing task only, not a build task.)_
+- [ ] **End-to-end test: Return flow** — Borrower clicks Return Item → owner sees Confirm Return → owner confirms → item goes back to Not Available. _(Fully implemented in code — this is a testing task only, not a build task.)_
 
 ---
 
 ## 🔧 Bugs & Fixes
-_(nothing queued)_
+- [ ] **Merge `fix/spreadsheet-import-user-id`** — Fix is committed and pushed. Adds `user_id` to each imported row and aborts with an error if no session. Merge via GitHub PR before end-to-end testing.
+- [ ] **Resources submission form — contact email required** — Make contact email a required field. Add website or social handle as a recommended (not required) field to aid verification.
 
 ---
 
 ## ⚡ Quick Wins
-_(nothing queued)_
+- [ ] **Delete orphaned `/app/profile/page.tsx`** — Old "My Gear Manager" page, never linked to, uses outdated patterns (hardcoded dark theme, `burner_user_name` localStorage, stale column names). Safe to delete.
+- [ ] **Investigate `/app/auth/page.tsx`** — May be an unlinked leftover. Check if anything routes to it before deleting.
 
 ---
 
 ## 🚀 Features
-_(nothing queued yet)_
+- [ ] **Resources directory submission from camp edit panel** — Visible only to logged-in camp page owners. Pre-fills camp name and pulls contact email from page owner's profile. Submits for backend approval same as the public form. Framed as a benefit of claiming your camp page, not a requirement.
 
 ---
 
@@ -47,6 +57,18 @@ _(nothing queued yet)_
 - [ ] **Wish list search page** — Reverse find-items page: search all wish list items, filter by location, see who near you needs what.
 - [ ] **In-app messaging** — Replace wish list match email/notification flow with a proper message thread when messaging is built.
 - [ ] **Sitewide font overhaul** — Current fonts are functional but generic. Design pass needed across all pages.
+- [ ] **Credibility layer** — TBD; some way to signal trustworthiness of lenders/borrowers.
+- [ ] **Gamification / incentivization** — Badges, leaderboards, real-world prizes, playa party invitations.
+- [ ] **Tailwind deviation** — Several components (`header.tsx`, `footer.tsx`, `RequestModal.tsx`, `resources/page.tsx`, `layout.tsx`, `terms/page.tsx`, `SubmitCampModal.tsx`, `ImageSlider.tsx`) use Tailwind utility classes in JSX despite CLAUDE.md convention. Not broken but inconsistent. Options: (A) update CLAUDE.md to officially allow Tailwind in JSX, or (B) do a cleanup pass to convert to inline styles. Decide before the codebase grows further.
+
+---
+
+## 🧹 Maintenance & Housekeeping
+- [x] **Branching strategy** — DONE: CC now branches by default per CLAUDE.md
+- [x] **Vercel preview deployments** — DONE: confirmed working
+- [x] **Test accounts** — DONE: @abm and @smoreslab
+- [ ] **Workflow tools audit** — Screenshot/Loom/CC tips, GitHub PR flow
+- [ ] **End-to-end tests** — Return flow and following/notifications still untested
 
 ---
 
