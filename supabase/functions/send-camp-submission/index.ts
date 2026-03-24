@@ -24,7 +24,7 @@ serve(async (req: Request) => {
       body: JSON.stringify({
         from: 'The Playa Provides <hello@theplayaprovides.com>',
         to: ['contact@theplayaprovides.com'],
-        reply_to: formData.contact_email,
+        replyTo: formData.contact_email,
         subject: `New Camp Submission: ${formData.camp_name}`,
         html: `
           <div style="font-family: sans-serif; color: #333; max-width: 600px;">
@@ -59,7 +59,7 @@ serve(async (req: Request) => {
               </tr>
               <tr>
                 <td style="padding: 10px; font-weight: bold;">Instagram</td>
-                <td style="padding: 10px;">${formData.instagram || '—'}</td>
+                <td style="padding: 10px;">${formData.instagram ? `<a href="https://instagram.com/${formData.instagram}">@${formData.instagram}</a>` : '—'}</td>
               </tr>
               <tr style="background: #f9f9f9;">
                 <td style="padding: 10px; font-weight: bold;">Public Email</td>

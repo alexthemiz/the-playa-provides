@@ -86,15 +86,17 @@ export default function SubmitCampModal({ onClose }: SubmitCampModalProps) {
                 <input required className="w-full border-2 border-stone-200 rounded-xl p-2 text-black focus:border-[#C08261] outline-none" value={formData.camp_name} onChange={(e) => setFormData({...formData, camp_name: e.target.value})} placeholder="e.g. Camp Dust-Off" />
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-[#2D241E] mb-1 ml-1 uppercase tracking-tight">Submitter's Name *</label>
-                <input required className="w-full border-2 border-stone-200 rounded-xl p-2 text-black focus:border-[#C08261] outline-none" value={formData.submitter_name} onChange={(e) => setFormData({...formData, submitter_name: e.target.value})} placeholder="Your name" />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-[#2D241E] mb-1 ml-1 uppercase tracking-tight">Submitter's Name *</label>
+                  <input required className="w-full border-2 border-stone-200 rounded-xl p-2 text-black focus:border-[#C08261] outline-none" value={formData.submitter_name} onChange={(e) => setFormData({...formData, submitter_name: e.target.value})} placeholder="Your name" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[#2D241E] mb-1 ml-1 uppercase tracking-tight">Submitter's Email *</label>
+                  <input required type="email" className="w-full border-2 border-stone-200 rounded-xl p-2 text-black focus:border-[#C08261] outline-none" value={formData.contact_email} onChange={(e) => setFormData({...formData, contact_email: e.target.value})} placeholder="you@email.com" />
+                </div>
               </div>
-
-              <div>
-                <label className="block text-xs font-bold text-[#2D241E] mb-1 ml-1 uppercase tracking-tight">Submitter's Email (private, not displayed publicly) *</label>
-                <input required type="email" className="w-full border-2 border-stone-200 rounded-xl p-2 text-black focus:border-[#C08261] outline-none" value={formData.contact_email} onChange={(e) => setFormData({...formData, contact_email: e.target.value})} placeholder="you@email.com" />
-              </div>
+              <p className="text-xs text-stone-400 -mt-2 ml-1">Not displayed publicly — used for verification only.</p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
@@ -139,29 +141,31 @@ export default function SubmitCampModal({ onClose }: SubmitCampModalProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
                     <label className="block text-xs font-bold text-[#2D241E] mb-1 ml-1 uppercase tracking-tight">Website</label>
-                    <input type="url" className="w-full border-2 border-stone-200 rounded-lg p-1.5 text-black focus:border-[#C08261] outline-none text-sm" value={formData.website} onChange={(e) => setFormData({...formData, website: e.target.value})} placeholder="https://..." />
+                    <input type="text" className="w-full border-2 border-stone-200 rounded-lg p-1.5 text-black focus:border-[#C08261] outline-none text-sm" value={formData.website} onChange={(e) => setFormData({...formData, website: e.target.value})} placeholder="yourcampwebsite.com" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-[#2D241E] mb-1 ml-1 uppercase tracking-tight">Instagram</label>
-                    <input type="url" className="w-full border-2 border-stone-200 rounded-lg p-1.5 text-black focus:border-[#C08261] outline-none text-sm" value={formData.instagram} onChange={(e) => setFormData({...formData, instagram: e.target.value})} placeholder="https://instagram.com/yourcamphandle" />
+                    <div className="flex items-center border-2 border-stone-200 rounded-lg focus-within:border-[#C08261]">
+                      <span className="pl-2 pr-1 text-stone-400 text-sm font-bold select-none">@</span>
+                      <input type="text" className="flex-1 p-1.5 text-black outline-none text-sm bg-transparent" value={formData.instagram} onChange={(e) => setFormData({...formData, instagram: e.target.value.replace(/^@/, '')})} placeholder="yourcamphandle" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 items-end">
+                  <div>
+                    <label className="block text-xs font-bold text-[#2D241E] mb-1 ml-1 uppercase tracking-tight">Contact Email (Visible)</label>
+                    <input type="email" className="w-full border-2 border-stone-200 rounded-lg p-1.5 text-black focus:border-[#C08261] outline-none text-sm" value={formData.public_email} onChange={(e) => setFormData({...formData, public_email: e.target.value})} placeholder="hello@camp.com" />
+                  </div>
+                  <div className="flex items-center gap-2 pb-2">
+                    <input type="checkbox" id="new_campers" checked={formData.accepting_campers} onChange={(e) => setFormData({...formData, accepting_campers: e.target.checked})} className="w-3.5 h-3.5 accent-[#C08261]" />
+                    <label htmlFor="new_campers" className="text-[11px] font-bold text-[#2D241E] uppercase">Accepting new campers?</label>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#2D241E] mb-1 ml-1 uppercase tracking-tight">Public Email</label>
-                  <input type="email" className="w-full border-2 border-stone-200 rounded-lg p-1.5 text-black focus:border-[#C08261] outline-none text-sm" value={formData.public_email} onChange={(e) => setFormData({...formData, public_email: e.target.value})} placeholder="hello@camp.com" />
-                </div>
-
-                <div className="space-y-2">
-                  <div>
-                    <label className="block text-xs font-bold text-[#2D241E] mb-1 ml-1 uppercase tracking-tight">About the Camp</label>
-                    <textarea className="w-full border-2 border-stone-200 rounded-lg p-1.5 h-16 text-black focus:border-[#C08261] outline-none resize-none text-sm" value={formData.about_camp} onChange={(e) => setFormData({...formData, about_camp: e.target.value})} placeholder="Brief history or camp mission..." />
-                  </div>
-
-                  <div className="flex items-center gap-2 pb-1">
-                    <input type="checkbox" id="new_campers" checked={formData.accepting_campers} onChange={(e) => setFormData({...formData, accepting_campers: e.target.checked})} className="w-3.5 h-3.5 accent-[#C08261]" />
-                    <label htmlFor="new_campers" className="text-[11px] font-bold text-[#2D241E] uppercase">Accepting new campers?</label>
-                  </div>
+                  <label className="block text-xs font-bold text-[#2D241E] mb-1 ml-1 uppercase tracking-tight">About the Camp</label>
+                  <textarea className="w-full border-2 border-stone-200 rounded-lg p-1.5 h-16 text-black focus:border-[#C08261] outline-none resize-none text-sm" value={formData.about_camp} onChange={(e) => setFormData({...formData, about_camp: e.target.value})} placeholder="Brief history or camp mission..." />
                 </div>
               </div>
 
