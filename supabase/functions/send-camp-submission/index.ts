@@ -24,11 +24,17 @@ serve(async (req: Request) => {
       body: JSON.stringify({
         from: 'The Playa Provides <hello@theplayaprovides.com>',
         to: ['contact@theplayaprovides.com'],
+        reply_to: formData.contact_email,
         subject: `New Camp Submission: ${formData.camp_name}`,
         html: `
           <div style="font-family: sans-serif; color: #333; max-width: 600px;">
             <h1 style="color: #C08261;">New Camp Submission</h1>
             <p>A new camp has been submitted for review on The Playa Provides.</p>
+
+            <div style="background: #fdf3ec; border: 1px solid #f0d8c8; border-radius: 8px; padding: 14px 16px; margin-bottom: 16px;">
+              <p style="margin: 0 0 4px;"><strong>Submitted by:</strong> ${formData.submitter_name}</p>
+              <p style="margin: 0;"><strong>Contact email:</strong> <a href="mailto:${formData.contact_email}">${formData.contact_email}</a> <span style="color:#999; font-size:0.85em;">(reply to this email to reach them directly)</span></p>
+            </div>
 
             <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
               <tr style="background: #f9f9f9;">
@@ -52,14 +58,18 @@ serve(async (req: Request) => {
                 <td style="padding: 10px;">${formData.website || '—'}</td>
               </tr>
               <tr>
-                <td style="padding: 10px; font-weight: bold;">Contact Email</td>
-                <td style="padding: 10px;">${formData.public_email || '—'}</td>
+                <td style="padding: 10px; font-weight: bold;">Instagram</td>
+                <td style="padding: 10px;">${formData.instagram || '—'}</td>
               </tr>
               <tr style="background: #f9f9f9;">
+                <td style="padding: 10px; font-weight: bold;">Public Email</td>
+                <td style="padding: 10px;">${formData.public_email || '—'}</td>
+              </tr>
+              <tr>
                 <td style="padding: 10px; font-weight: bold;">About the Camp</td>
                 <td style="padding: 10px;">${formData.about_camp || '—'}</td>
               </tr>
-              <tr>
+              <tr style="background: #f9f9f9;">
                 <td style="padding: 10px; font-weight: bold;">Accepting Campers?</td>
                 <td style="padding: 10px;">${formData.accepting_campers ? 'Yes' : 'No'}</td>
               </tr>
