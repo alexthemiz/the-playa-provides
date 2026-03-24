@@ -24,8 +24,8 @@ serve(async (req: Request) => {
       body: JSON.stringify({
         from: 'The Playa Provides <hello@theplayaprovides.com>',
         to: ['contact@theplayaprovides.com'],
-        replyTo: formData.contact_email,
-        subject: `New Camp Submission: ${formData.camp_name}`,
+        reply_to: [formData.contact_email],
+        subject: `New Camp Submission: ${formData.camp_name} — reply to ${formData.contact_email}`,
         html: `
           <div style="font-family: sans-serif; color: #333; max-width: 600px;">
             <h1 style="color: #C08261;">New Camp Submission</h1>
