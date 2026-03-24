@@ -125,8 +125,16 @@ export default function ImportSpreadsheetModal({
     setImporting(true);
     setImportError('');
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user?.id) {
+        setImportError('You must be logged in to import items.');
+        setImporting(false);
+        return;
+      }
+      const userId = session.user.id;
+
       const insertData = rowsToImport.map(row => {
-        const record: Record<string, string> = { availability_status: 'Not Available' };
+        const record: Record<string, string> = { availability_status: 'Not Available', user_id: userId };
         Object.entries(columnMap).forEach(([col, field]) => {
           if (field === 'skip') return;
           const idx = headers.indexOf(col);
@@ -166,7 +174,7 @@ export default function ImportSpreadsheetModal({
               <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: '#aaa' }}>
                 {step === 'upload' && 'Accepts .csv, .xlsx, or .xls'}
                 {step === 'map' && 'Tell us which column is which — we\'ve made our best guess'}
-                {step === 'review' && `${rowsToImport.length} item${rowsToImport.length !== 1 ? 's' : ''} will be added as Not Available`}
+                {step === 'review' && `${rowsToImport.length} item${rowsToImport.length !== 1 ? 's' : ''} will be added to your private inventory, where you can make them available for others to borrow or keep.`}
               </p>
             </div>
             <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#aaa', padding: '4px', lineHeight: 1 }}>
@@ -216,33 +224,57 @@ export default function ImportSpreadsheetModal({
                 <span style={colHeadStyle}>Your column</span>
                 <span style={colHeadStyle}>Maps to</span>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '8px', marginBottom: '24px' }}>
-                {headers.map(col => {
-                  const sampleVal = rows[0]?.[headers.indexOf(col)] || '';
-                  return (
-                    <div key={col} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', alignItems: 'center' }}>
-                      <div style={{ padding: '10px 12px', backgroundColor: '#f7f7f7', borderRadius: '8px', border: '1px solid #eee', minWidth: 0 }}>
-                        <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#2D241E', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{col}</div>
-                        {sampleVal && (
-                          <div style={{ fontSize: '0.72rem', color: '#aaa', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>
-                            e.g. {sampleVal}
+              <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '8px', marginBottom: '12px' }}>
+                {(() => {
+                  const fieldUsageCount = Object.values(columnMap).reduce((acc, field) => {
+                    if (field !== 'skip') acc[field] = (acc[field] || 0) + 1;
+                    return acc;
+                  }, {} as Record<string, number>);
+                  return headers.map(col => {
+                    const usedByOthers = new Set(
+                      Object.entries(columnMap)
+                        .filter(([c, f]) => c !== col && f !== 'skip')
+                        .map(([, f]) => f)
+                    );
+                    const isDupe = columnMap[col] !== 'skip' && (fieldUsageCount[columnMap[col]] || 0) > 1;
+                    const sampleVal = rows[0]?.[headers.indexOf(col)] || '';
+                    return (
+                      <div key={col}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', alignItems: 'center' }}>
+                          <div style={{ padding: '10px 12px', backgroundColor: '#f7f7f7', borderRadius: '8px', border: '1px solid #eee', minWidth: 0 }}>
+                            <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#2D241E', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>{col}</div>
+                            {sampleVal && (
+                              <div style={{ fontSize: '0.72rem', color: '#aaa', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>
+                                e.g. {sampleVal}
+                              </div>
+                            )}
                           </div>
+                          <select
+                            value={columnMap[col] || 'skip'}
+                            onChange={(e) => setColumnMap(prev => ({ ...prev, [col]: e.target.value }))}
+                            style={{ padding: '10px 12px', border: `1px solid ${isDupe ? '#fca5a5' : '#ddd'}`, borderRadius: '8px', fontSize: '0.85rem', color: '#2D241E', backgroundColor: '#fff', width: '100%' }}
+                          >
+                            <option value="skip">— Skip this column —</option>
+                            {GEAR_FIELDS.map(f => (
+                              <option key={f.value} value={f.value} disabled={usedByOthers.has(f.value)}>
+                                {f.label}{usedByOthers.has(f.value) ? ' (already mapped)' : ''}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        {isDupe && (
+                          <p style={{ fontSize: '0.72rem', color: '#ef4444', margin: '3px 0 0 4px' }}>
+                            Each field can only be mapped once — the first one listed will be used.
+                          </p>
                         )}
                       </div>
-                      <select
-                        value={columnMap[col] || 'skip'}
-                        onChange={(e) => setColumnMap(prev => ({ ...prev, [col]: e.target.value }))}
-                        style={{ padding: '10px 12px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '0.85rem', color: '#2D241E', backgroundColor: '#fff', width: '100%' }}
-                      >
-                        <option value="skip">— Skip this column —</option>
-                        {GEAR_FIELDS.map(f => (
-                          <option key={f.value} value={f.value}>{f.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                  );
-                })}
+                    );
+                  });
+                })()}
               </div>
+              <p style={{ fontSize: '0.78rem', color: '#aaa', margin: '0 0 20px 2px' }}>
+                Extra columns not listed here will be skipped. Location and availability status will need to be set manually after import.
+              </p>
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button onClick={() => setStep('upload')} style={secondaryBtnStyle}>← Back</button>
                 <button
@@ -317,6 +349,8 @@ export default function ImportSpreadsheetModal({
                   </tbody>
                 </table>
               </div>
+
+              <p style={{ fontSize: '0.78rem', color: '#aaa', margin: '-12px 0 16px 2px' }}>Unmapped columns will be skipped.</p>
 
               {importError && (
                 <p style={{ color: '#ef4444', fontSize: '0.85rem', marginBottom: '12px', textAlign: 'center' as const }}>{importError}</p>
