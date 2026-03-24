@@ -65,24 +65,28 @@ export default function ResourcesPage() {
 
 return (
   /* Wrap in a full-width white div to hide the black background on the sides */
-  <div className="w-full bg-white min-h-screen"> 
-    <div className="max-w-6xl mx-auto px-4 py-16">
-      
+  <div style={{ width: '100%', backgroundColor: '#fff', minHeight: '100vh' }}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+
       {/* Header Section */}
-      <div className="flex flex-col mb-16">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-          <h1 className="text-5xl font-bold text-[#2D241E]">The Playa Provides<span style={{ textDecoration: 'underline' }}> Resources{'\u00a0'}</span></h1>
+      <div style={{ marginBottom: '40px' }}>
+        <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 20px 0' }}>The Playa Provides<span style={{ textDecoration: 'underline' }}> Resources{'\u00a0'}</span></h1>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '24px' }}>
+          <div>
+            <p style={{ color: '#555', fontSize: '15px', lineHeight: '1.6', margin: '0 0 8px 0' }}>
+              A directory of camps offering sustainability and community services at the 2026 Burn, from composting and can crushing to bike repair and mental health support. We&apos;ll update with BRC addresses when they become available.
+            </p>
+            <p style={{ color: '#555', fontSize: '15px', lineHeight: '1.6', margin: 0 }}>
+              Part of a camp that should be listed here? Click the button! No site registration necessary to submit or to view the page.
+            </p>
+          </div>
           <button
             onClick={() => setIsModalOpen(true)}
-            style={{ backgroundColor: '#00ccff', color: '#000', padding: '10px 20px', borderRadius: '6px', border: 'none', fontWeight: 'bold', cursor: 'pointer', whiteSpace: 'nowrap' as const, fontSize: '0.9rem' }}
+            style={{ backgroundColor: '#00ccff', color: '#000', padding: '10px 20px', borderRadius: '6px', border: 'none', fontWeight: 'bold', cursor: 'pointer', whiteSpace: 'nowrap' as const, fontSize: '0.9rem', flexShrink: 0 }}
           >
             Submit Your Camp
           </button>
         </div>
-
-        <p className="text-stone-600 max-w-4xl text-lg leading-relaxed mb-8">
-          A directory of camps offering sustainability and community services at the 2026 Burn, from composting and can crushing to bike repair and donation accepting.
-        </p>
       </div>
 
       {loading ? (

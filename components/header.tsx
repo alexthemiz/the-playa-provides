@@ -171,13 +171,14 @@ export default function Header() {
         {/* Logo */}
         <Link href="/" className="hover:opacity-80 transition flex flex-col leading-tight">
           <span className={`font-black text-xl uppercase tracking-tighter ${mainTextColor}`}>
-            The Playa Provides<span>______</span>
+            The Playa Provides<span style={{ textDecoration: 'underline' }}>{'\u00a0\u00a0'}</span>
           </span>
         </Link>
 
         {/* Desktop nav */}
         <nav className="hidden lg:flex gap-6 items-center">
           <Link href="/resources" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>On-Playa Resources</Link>
+          <span style={{ color: '#2D241E', opacity: 0.35, fontSize: '14px', userSelect: 'none' as const }}>|</span>
           <Link href="/find-items" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>Find Items</Link>
           <Link href="/list-item" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition whitespace-nowrap`}>Offer an Item</Link>
 

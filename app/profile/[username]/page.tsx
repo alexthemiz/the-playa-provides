@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
-import Link from 'next/link';
 import AvatarUpload from '@/components/AvatarUpload';
 import WishListMatchModal from '@/components/WishListMatchModal';
 import { MapPin, Package, Globe, Linkedin, Instagram, Facebook } from 'lucide-react';
@@ -429,143 +428,12 @@ export default function PublicProfilePage() {
   return (
     <div style={{ padding: '40px 20px', maxWidth: '960px', margin: '0 auto', color: '#2D241E' }}>
 
-      {/* NAV ROW + error */}
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Link href="/find-items" style={{ color: '#888', textDecoration: 'none' }}>← Find Items</Link>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            {isOwner ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
-                <button
-                  onClick={() => {
-                    const next = openList === 'followers' ? null : 'followers' as const;
-                    setOpenList(next);
-                    if (next === 'followers') fetchList('followers');
-                  }}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: openList === 'followers' ? '#00aacc' : '#888', fontWeight: openList === 'followers' ? 600 : 400, fontSize: '0.85rem' }}
-                >
-                  {followerCount} {followerCount === 1 ? 'follower' : 'followers'}
-                </button>
-                <span style={{ color: '#ccc' }}>·</span>
-                <button
-                  onClick={() => {
-                    const next = openList === 'following' ? null : 'following' as const;
-                    setOpenList(next);
-                    if (next === 'following') fetchList('following');
-                  }}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: openList === 'following' ? '#00aacc' : '#888', fontWeight: openList === 'following' ? 600 : 400, fontSize: '0.85rem' }}
-                >
-                  {followingCount} following
-                </button>
-              </div>
-            ) : (
-              followerCount > 0 && (
-                <span style={{ fontSize: '0.85rem', color: '#888' }}>
-                  {followerCount} {followerCount === 1 ? 'follower' : 'followers'}
-                </span>
-              )
-            )}
-            {isOwner ? (
-              <button
-                onClick={() => {
-                  if (isEditing) {
-                    handleSave();
-                  } else {
-                    const aff2026 = affiliations.find(a => a.year === 2026);
-                    setDraft2026({
-                      status: aff2026?.returning_status ?? null,
-                      campInput: (aff2026?.camps as any)?.display_name || '',
-                      campId: aff2026?.camp_id || null,
-                      isOpenCamping: aff2026?.is_open_camping || false,
-                      searchResults: [],
-                      showDropdown: false,
-                    });
-                    setDraftAffiliations(
-                      affiliations
-                        .filter(a => a.year !== 2026)
-                        .map(a => ({
-                          tempId: a.id,
-                          year: a.year,
-                          is_open_camping: a.is_open_camping,
-                          campInput: (a.camps as any)?.display_name || '',
-                          campId: a.camp_id || null,
-                          searchResults: [],
-                          showDropdown: false,
-                        }))
-                    );
-                    setIsEditing(true);
-                  }
-                }}
-                style={{ padding: '8px 20px', backgroundColor: isEditing ? '#4CAF50' : '#00ccff', color: isEditing ? '#fff' : '#000', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
-              >
-                {isEditing ? 'Save Profile' : 'Edit Profile'}
-              </button>
-            ) : currentUserId ? (
-              <button
-                onClick={handleFollowToggle}
-                disabled={followLoading}
-                style={{ padding: '8px 20px', backgroundColor: isFollowing ? '#f0f0f0' : '#00ccff', color: isFollowing ? '#666' : '#000', border: isFollowing ? '1px solid #ddd' : 'none', borderRadius: '6px', cursor: followLoading ? 'default' : 'pointer', fontWeight: 'bold', opacity: followLoading ? 0.6 : 1 }}
-              >
-                {followLoading ? '...' : isFollowing ? 'Following' : 'Follow'}
-              </button>
-            ) : null}
-          </div>
-        </div>
-        {followError && (
-          <p style={{ fontSize: '0.8rem', color: '#dc2626', margin: '6px 0 0', textAlign: 'right' as const }}>{followError}</p>
-        )}
-      </div>
-
-      {/* FOLLOWERS / FOLLOWING EXPANDABLE LIST */}
-      {isOwner && openList && (
-        <div style={{ marginTop: '12px', border: '1px solid #e5e5e5', borderRadius: '10px', overflow: 'hidden' as const }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '40px minmax(100px, 200px) 110px 90px 80px', gap: '12px', alignItems: 'center', padding: '8px 16px', fontSize: '10px', fontWeight: 700, color: '#aaa', textTransform: 'uppercase' as const, letterSpacing: '0.06em', borderBottom: '1px solid #f0f0f0' }}>
-            <div />
-            <div>{openList === 'followers' ? 'Follower' : 'Following'}</div>
-            <div />
-            <div>
-              <div style={{ fontSize: '8px', fontWeight: 400, color: '#bbb', textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: '2px' }}>Items Available</div>
-              To Borrow
-            </div>
-            <div>To Keep</div>
-          </div>
-
-          {listLoading ? (
-            <div style={{ padding: '20px 16px', color: '#aaa', fontSize: '0.875rem' }}>Loading...</div>
-          ) : (openList === 'followers' ? followersList : followingList).length === 0 ? (
-            <div style={{ padding: '20px 16px', color: '#aaa', fontSize: '0.875rem', fontStyle: 'italic' as const }}>
-              {openList === 'followers' ? 'No followers yet.' : 'Not following anyone yet.'}
-            </div>
-          ) : (
-            (openList === 'followers' ? followersList : followingList).map((entry) => (
-              <div key={entry.id} style={{ display: 'grid', gridTemplateColumns: '40px minmax(100px, 200px) 110px 90px 80px', gap: '12px', alignItems: 'center', padding: '10px 16px', borderBottom: '1px solid #f9f9f9' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#f0f0f0', backgroundImage: entry.avatar_url ? `url(${entry.avatar_url})` : 'none' as const, backgroundSize: 'cover' as const, backgroundPosition: 'center' as const, border: '2px solid #e5e5e5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', color: '#C08261', fontWeight: 'bold' as const, flexShrink: 0 }}>
-                  {!entry.avatar_url && (entry.preferred_name?.charAt(0) || entry.username?.charAt(0) || '?')}
-                </div>
-                <a href={`/profile/${entry.username}`} style={{ textDecoration: 'none' as const, color: 'inherit' as const }}>
-                  <div style={{ fontWeight: 600, fontSize: '14px', color: '#2D241E' }}>{entry.preferred_name || entry.username}</div>
-                  <div style={{ fontSize: '12px', color: '#aaa' }}>@{entry.username}</div>
-                </a>
-                <button
-                  onClick={() => handleListFollowToggle(entry.id, openList!)}
-                  style={{ padding: '5px 14px', backgroundColor: entry.isFollowing ? '#f0f0f0' : '#00ccff', color: entry.isFollowing ? '#666' : '#000', border: entry.isFollowing ? '1px solid #ddd' : 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}
-                >
-                  {entry.isFollowing ? 'Following' : 'Follow'}
-                </button>
-                <div style={{ fontSize: '13px', color: '#444', textAlign: 'center' as const }}>{entry.borrowCount}</div>
-                <div style={{ fontSize: '13px', color: '#444', textAlign: 'center' as const }}>{entry.keepCount}</div>
-              </div>
-            ))
-          )}
-        </div>
-      )}
-
-      <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '24px 0 0 0' }}>The Playa Provides<span style={{ textDecoration: 'underline' }}> a Profile{'\u00a0'}</span></h1>
+      <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 20px 0' }}>The Playa Provides<span style={{ textDecoration: 'underline' }}>{isOwner ? ' Your Profile' : ' A Profile'}{'\u00a0'}</span></h1>
 
       {/* PROFILE HEADER */}
-      <header style={{ marginTop: '30px', borderBottom: '1px solid #e5e5e5', paddingBottom: '30px' }}>
+      <header style={{ borderBottom: '1px solid #e5e5e5', paddingBottom: '30px' }}>
 
-        {/* ROW 1: Avatar + Name / @username / Location / Social Links */}
+        {/* ROW 1: Avatar + Name / @username / Location / Social Links + Followers/Edit (right) */}
         <div style={{ display: 'flex', gap: '25px', alignItems: 'flex-start' }}>
           {isEditing ? (
             <AvatarUpload url={profile.avatar_url} onUpload={(url) => setProfile({ ...profile, avatar_url: url })} />
@@ -647,7 +515,133 @@ export default function PublicProfilePage() {
               );
             })()}
           </div>
+
+          {/* Right: Followers/Following + Edit/Follow button */}
+          <div style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'flex-end', gap: '10px', flexShrink: 0 }}>
+            {isOwner ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
+                <button
+                  onClick={() => {
+                    const next = openList === 'followers' ? null : 'followers' as const;
+                    setOpenList(next);
+                    if (next === 'followers') fetchList('followers');
+                  }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: openList === 'followers' ? '#00aacc' : '#888', fontWeight: openList === 'followers' ? 600 : 400, fontSize: '0.85rem' }}
+                >
+                  {followerCount} {followerCount === 1 ? 'follower' : 'followers'}
+                </button>
+                <span style={{ color: '#ccc' }}>·</span>
+                <button
+                  onClick={() => {
+                    const next = openList === 'following' ? null : 'following' as const;
+                    setOpenList(next);
+                    if (next === 'following') fetchList('following');
+                  }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: openList === 'following' ? '#00aacc' : '#888', fontWeight: openList === 'following' ? 600 : 400, fontSize: '0.85rem' }}
+                >
+                  {followingCount} following
+                </button>
+              </div>
+            ) : (
+              followerCount > 0 && (
+                <span style={{ fontSize: '0.85rem', color: '#888' }}>
+                  {followerCount} {followerCount === 1 ? 'follower' : 'followers'}
+                </span>
+              )
+            )}
+            {isOwner ? (
+              <button
+                onClick={() => {
+                  if (isEditing) {
+                    handleSave();
+                  } else {
+                    const aff2026 = affiliations.find(a => a.year === 2026);
+                    setDraft2026({
+                      status: aff2026?.returning_status ?? null,
+                      campInput: (aff2026?.camps as any)?.display_name || '',
+                      campId: aff2026?.camp_id || null,
+                      isOpenCamping: aff2026?.is_open_camping || false,
+                      searchResults: [],
+                      showDropdown: false,
+                    });
+                    setDraftAffiliations(
+                      affiliations
+                        .filter(a => a.year !== 2026)
+                        .map(a => ({
+                          tempId: a.id,
+                          year: a.year,
+                          is_open_camping: a.is_open_camping,
+                          campInput: (a.camps as any)?.display_name || '',
+                          campId: a.camp_id || null,
+                          searchResults: [],
+                          showDropdown: false,
+                        }))
+                    );
+                    setIsEditing(true);
+                  }
+                }}
+                style={{ padding: '8px 20px', backgroundColor: isEditing ? '#4CAF50' : '#00ccff', color: isEditing ? '#fff' : '#000', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
+              >
+                {isEditing ? 'Save Profile' : 'Edit Profile'}
+              </button>
+            ) : currentUserId ? (
+              <button
+                onClick={handleFollowToggle}
+                disabled={followLoading}
+                style={{ padding: '8px 20px', backgroundColor: isFollowing ? '#f0f0f0' : '#00ccff', color: isFollowing ? '#666' : '#000', border: isFollowing ? '1px solid #ddd' : 'none', borderRadius: '6px', cursor: followLoading ? 'default' : 'pointer', fontWeight: 'bold', opacity: followLoading ? 0.6 : 1 }}
+              >
+                {followLoading ? '...' : isFollowing ? 'Following' : 'Follow'}
+              </button>
+            ) : null}
+            {followError && (
+              <p style={{ fontSize: '0.8rem', color: '#dc2626', margin: 0 }}>{followError}</p>
+            )}
+          </div>
         </div>
+
+        {/* FOLLOWERS / FOLLOWING EXPANDABLE LIST */}
+        {isOwner && openList && (
+          <div style={{ marginTop: '12px', border: '1px solid #e5e5e5', borderRadius: '10px', overflow: 'hidden' as const }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '40px minmax(100px, 200px) 110px 90px 80px', gap: '12px', alignItems: 'center', padding: '8px 16px', fontSize: '10px', fontWeight: 700, color: '#aaa', textTransform: 'uppercase' as const, letterSpacing: '0.06em', borderBottom: '1px solid #f0f0f0' }}>
+              <div />
+              <div>{openList === 'followers' ? 'Follower' : 'Following'}</div>
+              <div />
+              <div>
+                <div style={{ fontSize: '8px', fontWeight: 400, color: '#bbb', textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: '2px' }}>Items Available</div>
+                To Borrow
+              </div>
+              <div>To Keep</div>
+            </div>
+
+            {listLoading ? (
+              <div style={{ padding: '20px 16px', color: '#aaa', fontSize: '0.875rem' }}>Loading...</div>
+            ) : (openList === 'followers' ? followersList : followingList).length === 0 ? (
+              <div style={{ padding: '20px 16px', color: '#aaa', fontSize: '0.875rem', fontStyle: 'italic' as const }}>
+                {openList === 'followers' ? 'No followers yet.' : 'Not following anyone yet.'}
+              </div>
+            ) : (
+              (openList === 'followers' ? followersList : followingList).map((entry) => (
+                <div key={entry.id} style={{ display: 'grid', gridTemplateColumns: '40px minmax(100px, 200px) 110px 90px 80px', gap: '12px', alignItems: 'center', padding: '10px 16px', borderBottom: '1px solid #f9f9f9' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#f0f0f0', backgroundImage: entry.avatar_url ? `url(${entry.avatar_url})` : 'none' as const, backgroundSize: 'cover' as const, backgroundPosition: 'center' as const, border: '2px solid #e5e5e5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', color: '#C08261', fontWeight: 'bold' as const, flexShrink: 0 }}>
+                    {!entry.avatar_url && (entry.preferred_name?.charAt(0) || entry.username?.charAt(0) || '?')}
+                  </div>
+                  <a href={`/profile/${entry.username}`} style={{ textDecoration: 'none' as const, color: 'inherit' as const }}>
+                    <div style={{ fontWeight: 600, fontSize: '14px', color: '#2D241E' }}>{entry.preferred_name || entry.username}</div>
+                    <div style={{ fontSize: '12px', color: '#aaa' }}>@{entry.username}</div>
+                  </a>
+                  <button
+                    onClick={() => handleListFollowToggle(entry.id, openList!)}
+                    style={{ padding: '5px 14px', backgroundColor: entry.isFollowing ? '#f0f0f0' : '#00ccff', color: entry.isFollowing ? '#666' : '#000', border: entry.isFollowing ? '1px solid #ddd' : 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}
+                  >
+                    {entry.isFollowing ? 'Following' : 'Follow'}
+                  </button>
+                  <div style={{ fontSize: '13px', color: '#444', textAlign: 'center' as const }}>{entry.borrowCount}</div>
+                  <div style={{ fontSize: '13px', color: '#444', textAlign: 'center' as const }}>{entry.keepCount}</div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
 
         {/* ROW 2: Bio | Wish List */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginTop: '25px' }}>

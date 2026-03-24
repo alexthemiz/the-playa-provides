@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Camera, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Camera, CheckCircle2 } from 'lucide-react';
 
 const US_STATES = ["", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"];
 
@@ -159,13 +158,9 @@ export default function ListItemPage() {
   return (
     <div style={pageWrapperStyle}>
       <div style={containerStyle}>
-        <Link href="/inventory" style={backLinkStyle}>
-          <ArrowLeft size={16} /> Back to Inventory Hub
-        </Link>
-
-        <div style={{ marginTop: '16px', marginBottom: '4px' }}>
-          <h1 style={{ fontSize: '24px', color: '#111', margin: '0 0 4px 0' }}>{displayName ? `${displayName} Provides: the Below Item` : 'Provide: the Below Item'}</h1>
-          <p style={{ color: '#666', fontSize: '14px', margin: 0 }}>Add something to the community pool or your private inventory.</p>
+        <div style={{ marginBottom: '16px' }}>
+          <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 20px 0' }}>The Playa Provides<span style={{ textDecoration: 'underline' }}> This Item{'\u00a0'}</span></h1>
+          <p style={{ color: '#666', fontSize: '14px', margin: 0, lineHeight: '1.5' }}>Add an item to your inventory, then make it available to the public, your campmates, or people you follow—or keep it private until you decide to share, and you set the terms.</p>
         </div>
 
         <form onSubmit={handleSubmit} style={formStyle}>
@@ -226,7 +221,7 @@ export default function ListItemPage() {
           {/* DESCRIPTION */}
           <div style={sectionStyle}>
             <label style={labelStyle}>Description</label>
-            <p style={hintStyle}>Share details and specs, existing damage, and any other useful information about the item.</p>
+            <p style={hintStyle}>Share details and specs, existing damage, and any other useful information.</p>
             <textarea name="description" placeholder="Describe your item" style={{ ...inputStyle, minHeight: '80px' }} />
           </div>
 
@@ -235,9 +230,9 @@ export default function ListItemPage() {
             <label style={labelStyle}>Availability</label>
             <div style={radioGroupStyle}>
               {[
-                { id: 'Available to Borrow', label: 'Offer to Borrow', sub: 'Must be returned.' },
-                { id: 'Available to Keep',   label: 'Offer to Keep',   sub: 'Permanent gift.' },
-                { id: 'Not Available',       label: 'Keep Private',    sub: 'Just add to my inventory' },
+                { id: 'Available to Borrow', label: 'Lend It',        sub: 'Set your terms below' },
+                { id: 'Available to Keep',   label: 'Gift It',         sub: 'Give the item away' },
+                { id: 'Not Available',       label: 'Keep it Private', sub: 'Add to your inventory' },
               ].map(status => (
                 <label key={status.id} style={{
                   ...radioLabelStyle,
@@ -252,14 +247,6 @@ export default function ListItemPage() {
                 </label>
               ))}
             </div>
-
-            {/* Pick up by — only for Keep */}
-            {availability === 'Available to Keep' && (
-              <div style={{ ...detailsBoxStyle, marginTop: '10px' }}>
-                <label style={labelStyle}>Pick up by</label>
-                <input type="date" name="pickup_by" style={{ ...inputStyle, marginTop: '5px' }} />
-              </div>
-            )}
           </div>
 
           {/* VISIBILITY — only shown when item is available */}
@@ -294,11 +281,19 @@ export default function ListItemPage() {
             </div>
           )}
 
+          {/* PICK UP BY — only for Gift It, shown after visibility */}
+          {availability === 'Available to Keep' && (
+            <div style={sectionStyle}>
+              <label style={labelStyle}>Pick up by</label>
+              <input type="date" name="pickup_by" style={inputStyle} />
+            </div>
+          )}
+
           {/* TERMS FOR BORROW */}
           {availability === 'Available to Borrow' && (
             <div style={sectionStyle}>
               <label style={labelStyle}>Terms for Borrowing</label>
-              <p style={{ ...hintStyle, fontStyle: 'italic' }}>The more you agree on now, the less chance of a headache later.</p>
+              <p style={{ ...hintStyle, fontStyle: 'italic' }}>Be specific and clear now and avoid potential headaches later.</p>
               <div style={detailsBoxStyle}>
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <div style={{ flex: 1 }}>
@@ -312,14 +307,20 @@ export default function ListItemPage() {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px' }}>
                   <div>
-                    <label style={labelStyle}>Damage Agreement ($)</label>
+                    <label style={labelStyle}>Damage Agreement</label>
                     <p style={{ ...hintStyle, fontStyle: 'italic', margin: '2px 0 5px' }}>If returned damaged, you agree to pay:</p>
-                    <input type="number" name="damage_price" placeholder="0" style={inputStyle} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '14px', color: '#555', fontWeight: 600 }}>$</span>
+                      <input type="number" name="damage_price" placeholder="0" style={{ ...inputStyle, flex: 1 }} />
+                    </div>
                   </div>
                   <div>
-                    <label style={labelStyle}>Loss Agreement ($)</label>
+                    <label style={labelStyle}>Loss Agreement</label>
                     <p style={{ ...hintStyle, fontStyle: 'italic', margin: '2px 0 5px' }}>If not returned, you agree to pay:</p>
-                    <input type="number" name="loss_price" placeholder="0" style={inputStyle} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '14px', color: '#555', fontWeight: 600 }}>$</span>
+                      <input type="number" name="loss_price" placeholder="0" style={{ ...inputStyle, flex: 1 }} />
+                    </div>
                   </div>
                 </div>
                 <div style={{ marginTop: '10px' }}>
@@ -380,7 +381,6 @@ export default function ListItemPage() {
 // --- STYLES ---
 const pageWrapperStyle: React.CSSProperties = { backgroundColor: '#fff', minHeight: '100vh', width: '100%' };
 const containerStyle: React.CSSProperties = { padding: '20px 20px 60px', maxWidth: '520px', margin: '0 auto' };
-const backLinkStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '6px', color: '#00ccff', textDecoration: 'none', fontWeight: 'bold', fontSize: '13px' };
 const formStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column' as const, gap: '14px', marginTop: '16px' };
 const sectionStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column' as const, gap: '5px' };
 const labelStyle: React.CSSProperties = { fontSize: '12px', color: '#555', fontWeight: '600', textTransform: 'uppercase' as const, letterSpacing: '0.04em' };
