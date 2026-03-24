@@ -157,11 +157,11 @@ export default function ListItemPage() {
 
   return (
     <div style={pageWrapperStyle}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px 20px 0 20px' }}>
+        <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 8px 0' }}>The Playa Provides<span style={{ textDecoration: 'underline' }}> This Item{'\u00a0'}</span></h1>
+        <p style={{ color: '#666', fontSize: '14px', margin: 0, lineHeight: '1.5' }}>Add an item to your inventory, then make it available to the public, your campmates, or people you follow—or keep it private until you decide to share, and you set the terms.</p>
+      </div>
       <div style={containerStyle}>
-        <div style={{ marginBottom: '16px' }}>
-          <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 20px 0' }}>The Playa Provides<span style={{ textDecoration: 'underline' }}> This Item{'\u00a0'}</span></h1>
-          <p style={{ color: '#666', fontSize: '14px', margin: 0, lineHeight: '1.5' }}>Add an item to your inventory, then make it available to the public, your campmates, or people you follow—or keep it private until you decide to share, and you set the terms.</p>
-        </div>
 
         <form onSubmit={handleSubmit} style={formStyle}>
 

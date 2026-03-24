@@ -180,9 +180,10 @@ export default function SettingsPage() {
 
   return (
     <div style={{ backgroundColor: 'white', minHeight: '100vh', width: '100%', color: '#111' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px 20px 0 20px', fontFamily: 'sans-serif' }}>
+        <h1 style={{ margin: '0', fontSize: '28px', fontWeight: 'bold', color: '#2D241E' }}>The Playa Provides<span style={{ textDecoration: 'underline' }}> Account Settings{'\u00a0'}</span></h1>
+      </div>
       <div style={{ padding: '20px', maxWidth: '520px', margin: '0 auto', fontFamily: 'sans-serif' }}>
-
-        <h1 style={{ margin: '0 0 20px', fontSize: '28px', fontWeight: 'bold', color: '#2D241E' }}>The Playa Provides<span style={{ textDecoration: 'underline' }}> Account Settings{'\u00a0'}</span></h1>
 
         {showSetupBanner && (
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', backgroundColor: '#fffbeb', border: '1px solid #fcd34d', borderRadius: '10px', padding: '14px 16px', marginBottom: '8px' }}>

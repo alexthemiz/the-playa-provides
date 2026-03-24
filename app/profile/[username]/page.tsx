@@ -426,7 +426,7 @@ export default function PublicProfilePage() {
   };
 
   return (
-    <div style={{ padding: '40px 20px', maxWidth: '960px', margin: '0 auto', color: '#2D241E' }}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px', color: '#2D241E' }}>
 
       <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 20px 0' }}>The Playa Provides<span style={{ textDecoration: 'underline' }}>{isOwner ? ' Your Profile' : ' A Profile'}{'\u00a0'}</span></h1>
 
