@@ -140,7 +140,7 @@ return (
                   {res.website && (
                     <div style={metaRowStyle}>
                       <span style={metaLabelStyle}>Web</span>
-                      <a href={/^https?:\/\//i.test(res.website) ? res.website : `https://${res.website}`} target="_blank" rel="noreferrer" style={{ fontSize: '12px', color: '#00aacc', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>
+                      <a href={`https://${res.website.replace(/^https?:\/\//i, '')}`} target="_blank" rel="noreferrer" style={{ fontSize: '12px', color: '#00aacc', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>
                         {res.website.replace(/^https?:\/\//, '')}
                       </a>
                     </div>

@@ -141,7 +141,10 @@ export default function SubmitCampModal({ onClose }: SubmitCampModalProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
                     <label className="block text-xs font-bold text-[#2D241E] mb-1 ml-1 uppercase tracking-tight">Website</label>
-                    <input type="text" className="w-full border-2 border-stone-200 rounded-lg p-1.5 text-black focus:border-[#C08261] outline-none text-sm" value={formData.website} onChange={(e) => setFormData({...formData, website: e.target.value})} placeholder="yourcampwebsite.com" />
+                    <div className="flex items-center border-2 border-stone-200 rounded-lg focus-within:border-[#C08261]">
+                      <span className="pl-2 pr-1 text-stone-400 text-sm select-none">https://</span>
+                      <input type="text" className="flex-1 p-1.5 text-black outline-none text-sm bg-transparent" value={formData.website} onChange={(e) => setFormData({...formData, website: e.target.value.replace(/^https?:\/\//, '')})} placeholder="yourcampwebsite.com" />
+                    </div>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-[#2D241E] mb-1 ml-1 uppercase tracking-tight">Instagram</label>
