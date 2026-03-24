@@ -467,15 +467,13 @@ export default function InventoryPage() {
     : `${selectedLocations.length} Locations`;
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto', backgroundColor: '#fff', fontFamily: 'sans-serif' }}>
+    <div style={{ backgroundColor: '#fff', fontFamily: 'sans-serif' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px 20px 0 20px' }}>
+        <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 8px 0' }}>The Playa Provides<span style={{ textDecoration: 'underline' }}> Your Inventory{'\u00a0'}</span></h1>
+        <p style={{ color: '#666', fontSize: '14px', margin: '0 0 20px 0', lineHeight: '1.5' }}>Add or edit items, change their availability settings, track whom you&apos;ve lent what items to, and transfer ownership of items given away. Have your items listed on a spreadsheet? Click the Import Inventory button to add them all at once.</p>
 
-      {/* HEADER */}
-      <div style={{ marginBottom: '16px' }}>
-        <h1 style={{ margin: 0, color: '#2D241E', fontWeight: 'bold' }}>{displayName ? `${displayName} Could Provide: these Items` : 'My Inventory'}</h1>
-      </div>
-
-      {/* FILTERS + ADD BUTTON */}
-      <div style={filterBarStyle}>
+        {/* FILTERS + ADD BUTTON */}
+        <div style={filterBarStyle}>
         {/* Search */}
         <div style={{ flex: 3 }}>
           <label style={labelStyle}>Search Your List</label>
@@ -556,7 +554,9 @@ export default function InventoryPage() {
             + Add New Item
           </button>
         </div>
+        </div>
       </div>
+    <div style={{ padding: '0 20px 20px', maxWidth: '1400px', margin: '0 auto' }}>
 
       {/* TABLE */}
       {loading ? (
@@ -1003,6 +1003,7 @@ export default function InventoryPage() {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }

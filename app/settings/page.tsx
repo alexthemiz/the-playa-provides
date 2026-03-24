@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import Link from 'next/link';
 
 const US_STATES = ["", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"];
 
@@ -181,10 +180,10 @@ export default function SettingsPage() {
 
   return (
     <div style={{ backgroundColor: 'white', minHeight: '100vh', width: '100%', color: '#111' }}>
-      <div style={{ padding: '20px', maxWidth: '480px', margin: '0 auto', fontFamily: 'sans-serif' }}>
-
-        <Link href="/inventory" style={{ color: '#00ccff', textDecoration: 'none', fontWeight: 'bold' }}>← Back to Inventory</Link>
-        <h1 style={{ margin: '12px 0 16px', fontSize: '24px' }}>The Playa Provides<span style={{ textDecoration: 'underline' }}> Account Settings{'\u00a0'}</span></h1>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px 20px 0 20px', fontFamily: 'sans-serif' }}>
+        <h1 style={{ margin: '0', fontSize: '28px', fontWeight: 'bold', color: '#2D241E' }}>The Playa Provides<span style={{ textDecoration: 'underline' }}> Account Settings{'\u00a0'}</span></h1>
+      </div>
+      <div style={{ padding: '20px', maxWidth: '520px', margin: '0 auto', fontFamily: 'sans-serif' }}>
 
         {showSetupBanner && (
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', backgroundColor: '#fffbeb', border: '1px solid #fcd34d', borderRadius: '10px', padding: '14px 16px', marginBottom: '8px' }}>
@@ -350,7 +349,7 @@ export default function SettingsPage() {
           </section>
 
           <button onClick={handleSave} disabled={saving} style={{ ...buttonStyle, marginBottom: '40px' }}>
-            {saving ? 'Saving...' : 'Save All Changes'}
+            {saving ? 'Saving...' : 'Save Changes'}
           </button>
 
           {/* ACCOUNT & SECURITY */}
