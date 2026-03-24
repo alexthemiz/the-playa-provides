@@ -199,7 +199,7 @@ export default function FindItemsPage() {
       {/* ROW 1: Search + Zip + Toggle */}
       <div style={topBarStyle}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={filterLabelStyle}>Search by keyword</span>
+          <span style={filterLabelStyle}>Search by keyword:</span>
           <div style={searchWrapperStyle}>
             <Search size={18} style={searchIconStyle} />
             <input
@@ -213,8 +213,8 @@ export default function FindItemsPage() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={filterLabelStyle}>Search by location</span>
-          <div style={{ ...searchWrapperStyle, flex: '0 0 80px', minWidth: '80px' }}>
+          <span style={filterLabelStyle}>Search by location:</span>
+          <div style={{ ...searchWrapperStyle, flex: '0 0 120px', minWidth: '120px' }}>
             <MapPin size={18} style={searchIconStyle} />
             <input
               type="text"
@@ -262,7 +262,7 @@ export default function FindItemsPage() {
           );
         })}
         <span style={{ ...filterLabelStyle, marginLeft: 'auto' }}>Available to:</span>
-        {[{ value: 'Keep', label: 'Keep' }, { value: 'Borrow', label: 'Borrow' }].map(({ value, label }) => {
+        {[{ value: 'Borrow', label: 'Borrow' }, { value: 'Keep', label: 'Keep' }].map(({ value, label }) => {
           const isActive = availabilityFilters.includes(value);
           return (
             <button
