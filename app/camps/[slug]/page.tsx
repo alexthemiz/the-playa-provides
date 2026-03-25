@@ -398,6 +398,12 @@ export default function CampPage() {
 
       {/* Unclaimed banner */}
       {!camp.is_claimed && (
+        <>
+        {camp.banner_url && (
+          <div style={{ marginTop: '24px' }}>
+            <img src={camp.banner_url} alt="" style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover' as const, borderRadius: '10px' }} />
+          </div>
+        )}
         <div style={{
           backgroundColor: '#fdf3ec', border: '1px solid #f0d8c8', borderRadius: '10px',
           padding: '16px 20px', marginTop: '24px',
@@ -461,6 +467,7 @@ export default function CampPage() {
             </div>
           )}
         </div>
+        </>
       )}
 
       {/* Claimed: view mode */}
@@ -512,7 +519,7 @@ export default function CampPage() {
             {/* Banner image */}
             {camp.banner_url && (
               <div style={{ flex: 1 }}>
-                <img src={camp.banner_url} alt="" style={{ width: '100%', height: '200px', objectFit: 'cover' as const, borderRadius: '10px' }} />
+                <img src={camp.banner_url} alt="" style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover' as const, borderRadius: '10px' }} />
               </div>
             )}
           </div>
