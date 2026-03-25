@@ -262,7 +262,7 @@ export default function CampPage() {
         .upload(path, file, { upsert: true });
       if (upErr) throw upErr;
       const { data: urlData } = supabase.storage.from('camp-banners').getPublicUrl(path);
-      const bannerUrl = urlData.publicUrl;
+      const bannerUrl = `${urlData.publicUrl}?t=${Date.now()}`;
       await supabase.from('camps').update({ banner_url: bannerUrl }).eq('id', camp.id);
       setCamp((prev: any) => ({ ...prev, banner_url: bannerUrl }));
     } catch (err: any) {
