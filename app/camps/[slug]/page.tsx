@@ -415,11 +415,10 @@ export default function CampPage() {
   };
 
   return (
-    <div style={{ padding: '40px 20px', maxWidth: '900px', margin: '0 auto', color: '#2D241E' }}>
-      <Link href="/find-items" style={{ color: '#888', textDecoration: 'none', fontSize: '0.9rem' }}>← Find Items</Link>
+    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto', color: '#2D241E' }}>
 
       {/* Title row with edit button */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '24px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: 0 }}>
           The Playa Provides<span style={{ textDecoration: 'underline' }}> {camp.display_name}{'\u00a0'}</span>
         </h1>
@@ -653,8 +652,8 @@ export default function CampPage() {
             <div style={{ ...memberGridStyle(editMode), padding: '6px 12px', fontSize: '10px', fontWeight: 700, color: '#bbb', textTransform: 'uppercase' as const, letterSpacing: '0.06em', borderBottom: '2px solid #eee', marginBottom: '2px' }}>
               <div>Name</div>
               <div>Wish List</div>
-              <div>Years Attended</div>
-              <div style={{ textAlign: 'center' as const }}>Returning in 2026?</div>
+              <div>Camp Years</div>
+              <div style={{ textAlign: 'center' as const }}>2026 Camp</div>
               {editMode && <div>Actions</div>}
             </div>
 
@@ -771,12 +770,11 @@ export default function CampPage() {
               <div style={campListHeaderStyle}>
                 <div style={{ width: '50px' }} />
                 <div>Item</div>
-                <div>Description</div>
+                <div>Owner</div>
                 <div>Category</div>
                 <div>Location</div>
-                <div>Owner</div>
+                <div>Description</div>
                 <div>Terms</div>
-                <div />
               </div>
             )}
             {campItems.map(item => (
@@ -873,8 +871,8 @@ function memberGridStyle(editMode: boolean): React.CSSProperties {
   return {
     display: 'grid',
     gridTemplateColumns: editMode
-      ? 'minmax(180px, 2fr) minmax(100px, 2fr) auto 120px auto'
-      : 'minmax(180px, 2fr) minmax(100px, 2fr) auto 120px',
+      ? 'minmax(140px, 1.5fr) minmax(80px, 2.5fr) auto 50px auto'
+      : 'minmax(140px, 1.5fr) minmax(80px, 2.5fr) auto 50px',
     gap: '10px',
     alignItems: 'center',
   };
@@ -994,7 +992,7 @@ function CampCardView({ item }: { item: any }) {
   );
 }
 
-const CAMP_LIST_COLS = '50px 160px 1fr 140px 120px 110px 1fr 70px';
+const CAMP_LIST_COLS = '50px 160px 90px 100px 110px 1.5fr 1fr';
 
 function CampListView({ item }: { item: any }) {
   const ownerName = item.profiles?.preferred_name || 'Member';
@@ -1020,16 +1018,15 @@ function CampListView({ item }: { item: any }) {
           {item.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}
         </div>
       </div>
-      <div style={{ fontSize: '12px', color: '#666', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{item.description || '—'}</div>
-      <div style={{ fontSize: '12px', color: '#666', overflow: 'hidden', whiteSpace: 'nowrap' as const }}>{item.category}</div>
-      <div style={{ fontSize: '12px', color: '#666', display: 'flex', alignItems: 'center', overflow: 'hidden', whiteSpace: 'nowrap' as const }}><MapPin size={11} style={{ marginRight: '3px', flexShrink: 0 }} />{locationDisplay}</div>
       <div style={{ fontSize: '12px', color: '#666', overflow: 'hidden', whiteSpace: 'nowrap' as const }}>
         {item.profiles?.username ? (
           <Link href={`/profile/${item.profiles.username}`} onClick={e => e.stopPropagation()} style={{ color: '#00aacc', textDecoration: 'none' }}>{ownerName}</Link>
         ) : ownerName}
       </div>
+      <div style={{ fontSize: '12px', color: '#666', overflow: 'hidden', whiteSpace: 'nowrap' as const }}>{item.category}</div>
+      <div style={{ fontSize: '12px', color: '#666', display: 'flex', alignItems: 'center', overflow: 'hidden', whiteSpace: 'nowrap' as const }}><MapPin size={11} style={{ marginRight: '3px', flexShrink: 0 }} />{locationDisplay}</div>
+      <div style={{ fontSize: '12px', color: '#666', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{item.description || '—'}</div>
       <div style={{ fontSize: '11px', color: '#888', overflow: 'hidden', whiteSpace: 'nowrap' as const }}>{termsSummary || '—'}</div>
-      <div style={{ color: '#00ccff', fontWeight: 'bold', fontSize: '12px', flexShrink: 0 }}>View →</div>
     </div>
   );
 }
