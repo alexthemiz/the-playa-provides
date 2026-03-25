@@ -92,13 +92,6 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
           <div style={{ borderRadius: '16px', overflow: 'hidden', width: '100%', aspectRatio: '1 / 1' }}>
             <ImageSlider images={item.image_urls} />
           </div>
-          {session?.user?.id === item.user_id && (
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
-              <button onClick={() => setConfirmDelete(true)} style={deleteItemBtnStyle}>
-                Delete this item
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Right column: details */}
@@ -182,9 +175,14 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
             </div>
           )}
 
-          {/* Request button — centered, below lending terms */}
-          <div style={{ display: 'flex', justifyContent: 'center' as const, marginTop: '8px' }}>
-            {session ? (
+          {/* Button row — centered, below text column */}
+          <div style={{ display: 'flex', justifyContent: 'center' as const, gap: '10px', marginTop: '8px' }}>
+            {session?.user?.id === item.user_id ? (
+              <>
+                <a href={`/list-item?edit=${item.id}`} style={ownerBtnStyle}>Edit Listing</a>
+                <button onClick={() => setConfirmDelete(true)} style={ownerBtnStyle}>Delete This Item</button>
+              </>
+            ) : session ? (
               <button style={borrowButtonStyle} onClick={() => setIsModalOpen(true)}>
                 {requestLabel}
               </button>
@@ -250,8 +248,9 @@ const priceTag: React.CSSProperties = { display: 'flex', alignItems: 'center', g
 const returnTermsBox: React.CSSProperties = { padding: '10px 12px', backgroundColor: '#efefef', borderRadius: '8px', border: '1px solid #ddd' };
 const conditionLabelStyle: React.CSSProperties = { margin: '0 0 4px 0', fontSize: '10px', color: '#888', textTransform: 'uppercase' as const, fontWeight: 'bold', letterSpacing: '0.06em' };
 
-// Request button
+// Request / owner buttons
 const borrowButtonStyle: React.CSSProperties = { padding: '12px 24px', borderRadius: '10px', border: 'none', backgroundColor: '#00ccff', color: '#000', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer' };
+const ownerBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', textDecoration: 'none' };
 
 const deleteItemBtnStyle: React.CSSProperties = { padding: '8px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '1px solid #ffaaaa', borderRadius: '8px', fontSize: '13px', cursor: 'pointer', fontWeight: '600' };
 const deleteOverlayStyle: React.CSSProperties = { position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100, padding: '20px' };
