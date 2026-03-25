@@ -19,7 +19,7 @@ export default function WelcomeModal({ userId, onClose }: WelcomeModalProps) {
   }, [userId]);
 
   const dismiss = () => {
-    localStorage.setItem(`tpp_welcomed_${userId}`, 'true');
+    supabase.from('profiles').update({ has_seen_welcome: true }).eq('id', userId).then(() => {});
     onClose();
   };
 
