@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Camera, CheckCircle2 } from 'lucide-react';
 
 const US_STATES = ["", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"];
@@ -18,8 +18,13 @@ const CATEGORIES = [
   "Miscellaneous"
 ];
 
+const CONDITIONS = ["New / Like New", "Good", "Well-Used", "Rough but Works", "Fixer-Upper"];
+
 export default function ListItemPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editId = searchParams.get('edit');
+
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [displayName, setDisplayName] = useState<string | null>(null);
@@ -33,6 +38,16 @@ export default function ListItemPage() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [followingIds, setFollowingIds] = useState<string[]>([]);
   const [campMateIds, setCampMateIds] = useState<string[]>([]);
+
+  // Controlled text-field state (replaces uncontrolled name= inputs)
+  const [itemName, setItemName] = useState('');
+  const [category, setCategory] = useState(CATEGORIES[0]);
+  const [condition, setCondition] = useState(CONDITIONS[0]);
+  const [description, setDescription] = useState('');
+  const [pickupBy, setPickupBy] = useState('');
+  const [returnBy, setReturnBy] = useState('');
+  const [damagePrice, setDamagePrice] = useState('');
+  const [lossPrice, setLossPrice] = useState('');
 
   useEffect(() => {
     async function fetchLocations() {
@@ -64,13 +79,40 @@ export default function ListItemPage() {
               if (defaultLoc) setSelectedLocationId(defaultLoc.id);
             }
           }
+
+          // Edit mode: fetch existing item and pre-populate all fields
+          if (editId) {
+            const { data: existingItem, error: itemErr } = await supabase
+              .from('gear_items')
+              .select('*')
+              .eq('id', editId)
+              .single();
+            if (itemErr || !existingItem) {
+              console.error('Edit fetch error:', itemErr?.message);
+            } else {
+              setAvailability(existingItem.availability_status || 'Available to Borrow');
+              setVisibility(existingItem.visibility || 'public');
+              setSelectedLocationId(existingItem.location_id || '');
+              setImageUrls(existingItem.image_urls || []);
+              setReturnTerms(existingItem.return_terms || '');
+              setItemName(existingItem.item_name || '');
+              setCategory(existingItem.category || CATEGORIES[0]);
+              setCondition(existingItem.condition || CONDITIONS[0]);
+              setDescription(existingItem.description || '');
+              // Dates come back as ISO strings — strip to YYYY-MM-DD for <input type="date">
+              setPickupBy(existingItem.pickup_by ? existingItem.pickup_by.split('T')[0] : '');
+              setReturnBy(existingItem.return_by ? existingItem.return_by.split('T')[0] : '');
+              setDamagePrice(existingItem.damage_price != null ? String(existingItem.damage_price) : '');
+              setLossPrice(existingItem.loss_price != null ? String(existingItem.loss_price) : '');
+            }
+          }
         }
       } catch (err) {
         console.error('fetchLocations exception:', err);
       }
     }
     fetchLocations();
-  }, []);
+  }, [editId]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -105,7 +147,6 @@ export default function ListItemPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const formData = new FormData(e.currentTarget);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { alert("You must be logged in!"); return; }
 
@@ -123,29 +164,46 @@ export default function ListItemPage() {
         setLocations(prev => [...prev, { id: newLoc.id, label: newLocData.label }]);
       }
 
-      const { data: newItem, error } = await supabase.from('gear_items').insert([{
-        user_id: user.id,
-        item_name: formData.get('item_name'),
-        category: formData.get('category'),
-        condition: formData.get('condition'),
+      const itemPayload = {
+        item_name: itemName,
+        category,
+        condition,
         location_id: resolvedLocationId,
         availability_status: availability,
         visibility: availability === 'Not Available' ? 'private' : visibility,
-        description: formData.get('description'),
-        pickup_by: formData.get('pickup_by') || null,
-        return_by: formData.get('return_by') || null,
-        damage_price: formData.get('damage_price') ? parseInt(formData.get('damage_price') as string, 10) : null,
-        loss_price: formData.get('loss_price') ? parseInt(formData.get('loss_price') as string, 10) : null,
+        description,
+        pickup_by: pickupBy || null,
+        return_by: returnBy || null,
+        damage_price: damagePrice ? parseInt(damagePrice, 10) : null,
+        loss_price: lossPrice ? parseInt(lossPrice, 10) : null,
         image_urls: imageUrls,
-        return_terms: formData.get('return_terms'),
-      }]).select('id').single();
+        return_terms: returnTerms,
+      };
 
-      if (error || !newItem) { alert(`Error: ${error?.message ?? 'Item was not saved. Please try again.'}`); } else {
-        // Fire-and-forget: notify followers who have email opt-in
-        supabase.functions.invoke('send-follow-notification', {
-          body: { item_id: newItem.id, poster_id: user.id },
-        });
-        setShowSuccessModal(true);
+      if (editId) {
+        // Edit mode: update existing record
+        const { error } = await supabase.from('gear_items').update(itemPayload).eq('id', editId);
+        if (error) {
+          alert(`Error: ${error.message}`);
+        } else {
+          setShowSuccessModal(true);
+        }
+      } else {
+        // Create mode: insert new record + notify followers
+        const { data: newItem, error } = await supabase.from('gear_items').insert([{
+          user_id: user.id,
+          ...itemPayload,
+        }]).select('id').single();
+
+        if (error || !newItem) {
+          alert(`Error: ${error?.message ?? 'Item was not saved. Please try again.'}`);
+        } else {
+          // Fire-and-forget: notify followers who have email opt-in
+          supabase.functions.invoke('send-follow-notification', {
+            body: { item_id: newItem.id, poster_id: user.id },
+          });
+          setShowSuccessModal(true);
+        }
       }
     } catch (err) {
       console.error('handleSubmit exception:', err);
@@ -168,21 +226,27 @@ export default function ListItemPage() {
           {/* ITEM NAME */}
           <div style={sectionStyle}>
             <label style={labelStyle}>Item Name</label>
-            <input name="item_name" required placeholder="e.g. Coleman 2-Burner Stove" style={inputStyle} />
+            <input
+              required
+              placeholder="e.g. Coleman 2-Burner Stove"
+              style={inputStyle}
+              value={itemName}
+              onChange={e => setItemName(e.target.value)}
+            />
           </div>
 
           {/* CATEGORY + CONDITION + STORED AT — one row */}
           <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr 2fr', gap: '10px' }}>
             <div style={sectionStyle}>
               <label style={labelStyle}>Category</label>
-              <select name="category" style={inputStyle}>
+              <select style={inputStyle} value={category} onChange={e => setCategory(e.target.value)}>
                 {CATEGORIES.map(cat => <option key={cat}>{cat}</option>)}
               </select>
             </div>
             <div style={sectionStyle}>
               <label style={labelStyle}>Condition</label>
-              <select name="condition" style={inputStyle}>
-                {["New / Like New", "Good", "Well-Used", "Rough but Works", "Fixer-Upper"].map(c => <option key={c}>{c}</option>)}
+              <select style={inputStyle} value={condition} onChange={e => setCondition(e.target.value)}>
+                {CONDITIONS.map(c => <option key={c}>{c}</option>)}
               </select>
             </div>
             <div style={sectionStyle}>
@@ -222,7 +286,12 @@ export default function ListItemPage() {
           <div style={sectionStyle}>
             <label style={labelStyle}>Description</label>
             <p style={hintStyle}>Share details and specs, existing damage, and any other useful information.</p>
-            <textarea name="description" placeholder="Describe your item" style={{ ...inputStyle, minHeight: '80px' }} />
+            <textarea
+              placeholder="Describe your item"
+              style={{ ...inputStyle, minHeight: '80px' }}
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+            />
           </div>
 
           {/* AVAILABILITY */}
@@ -285,7 +354,12 @@ export default function ListItemPage() {
           {availability === 'Available to Keep' && (
             <div style={sectionStyle}>
               <label style={labelStyle}>Pick up by</label>
-              <input type="date" name="pickup_by" style={inputStyle} />
+              <input
+                type="date"
+                style={inputStyle}
+                value={pickupBy}
+                onChange={e => setPickupBy(e.target.value)}
+              />
             </div>
           )}
 
@@ -298,11 +372,21 @@ export default function ListItemPage() {
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <div style={{ flex: 1 }}>
                     <label style={labelStyle}>Pick up by</label>
-                    <input type="date" name="pickup_by" style={{ ...inputStyle, marginTop: '5px' }} />
+                    <input
+                      type="date"
+                      style={{ ...inputStyle, marginTop: '5px' }}
+                      value={pickupBy}
+                      onChange={e => setPickupBy(e.target.value)}
+                    />
                   </div>
                   <div style={{ flex: 1 }}>
                     <label style={labelStyle}>Return by</label>
-                    <input type="date" name="return_by" style={{ ...inputStyle, marginTop: '5px' }} />
+                    <input
+                      type="date"
+                      style={{ ...inputStyle, marginTop: '5px' }}
+                      value={returnBy}
+                      onChange={e => setReturnBy(e.target.value)}
+                    />
                   </div>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px' }}>
@@ -311,7 +395,13 @@ export default function ListItemPage() {
                     <p style={{ ...hintStyle, fontStyle: 'italic', margin: '2px 0 5px' }}>If returned damaged, you agree to pay:</p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span style={{ fontSize: '14px', color: '#555', fontWeight: 600 }}>$</span>
-                      <input type="number" name="damage_price" placeholder="0" style={{ ...inputStyle, flex: 1 }} />
+                      <input
+                        type="number"
+                        placeholder="0"
+                        style={{ ...inputStyle, flex: 1 }}
+                        value={damagePrice}
+                        onChange={e => setDamagePrice(e.target.value)}
+                      />
                     </div>
                   </div>
                   <div>
@@ -319,14 +409,19 @@ export default function ListItemPage() {
                     <p style={{ ...hintStyle, fontStyle: 'italic', margin: '2px 0 5px' }}>If not returned, you agree to pay:</p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span style={{ fontSize: '14px', color: '#555', fontWeight: 600 }}>$</span>
-                      <input type="number" name="loss_price" placeholder="0" style={{ ...inputStyle, flex: 1 }} />
+                      <input
+                        type="number"
+                        placeholder="0"
+                        style={{ ...inputStyle, flex: 1 }}
+                        value={lossPrice}
+                        onChange={e => setLossPrice(e.target.value)}
+                      />
                     </div>
                   </div>
                 </div>
                 <div style={{ marginTop: '10px' }}>
                   <label style={labelStyle}>Specify Your Terms</label>
                   <textarea
-                    name="return_terms"
                     placeholder="e.g. Please clean before returning, no modifications, return by the date agreed."
                     style={{ ...inputStyle, minHeight: '80px', marginTop: '5px' }}
                     value={returnTerms}
@@ -356,7 +451,7 @@ export default function ListItemPage() {
           </div>
 
           <button type="submit" disabled={loading || uploading} style={submitButtonStyle}>
-            {loading ? 'Processing...' : 'List Your Item'}
+            {loading ? 'Processing...' : editId ? 'Save Changes' : 'List Your Item'}
           </button>
         </form>
 
@@ -364,10 +459,22 @@ export default function ListItemPage() {
           <div style={modalOverlayStyle}>
             <div style={modalContentStyle}>
               <div style={checkCircleStyle}><CheckCircle2 size={40} color="#22c55e" /></div>
-              <h2 style={{ fontSize: '24px', color: '#111', margin: '0 0 8px 0' }}>Item Listed!</h2>
-              <p style={{ color: '#666', marginBottom: '24px' }}>Gear is now in the system.</p>
+              <h2 style={{ fontSize: '24px', color: '#111', margin: '0 0 8px 0' }}>
+                {editId ? 'Item Updated!' : 'Item Listed!'}
+              </h2>
+              <p style={{ color: '#666', marginBottom: '24px' }}>
+                {editId ? 'Your changes have been saved.' : 'Gear is now in the system.'}
+              </p>
               <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '12px' }}>
-                <button onClick={() => window.location.reload()} style={primaryActionBtn}>Add Another Item</button>
+                {editId ? (
+                  <button onClick={() => router.push(`/find-items/${editId}`)} style={primaryActionBtn}>
+                    Back to Item
+                  </button>
+                ) : (
+                  <button onClick={() => window.location.reload()} style={primaryActionBtn}>
+                    Add Another Item
+                  </button>
+                )}
                 <button onClick={() => router.push('/inventory')} style={secondaryActionBtn}>Go to Inventory</button>
               </div>
             </div>

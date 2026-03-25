@@ -258,10 +258,10 @@ export default function CampPage() {
       const ext = file.name.split('.').pop();
       const path = `${camp.id}/banner.${ext}`;
       const { error: upErr } = await supabase.storage
-        .from('camp-photos')
+        .from('camp-banners')
         .upload(path, file, { upsert: true });
       if (upErr) throw upErr;
-      const { data: urlData } = supabase.storage.from('camp-photos').getPublicUrl(path);
+      const { data: urlData } = supabase.storage.from('camp-banners').getPublicUrl(path);
       const bannerUrl = urlData.publicUrl;
       await supabase.from('camps').update({ banner_url: bannerUrl }).eq('id', camp.id);
       setCamp((prev: any) => ({ ...prev, banner_url: bannerUrl }));
