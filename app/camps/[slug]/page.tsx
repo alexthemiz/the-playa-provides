@@ -466,36 +466,36 @@ export default function CampPage() {
       {/* Claimed: view mode */}
       {camp.is_claimed && !editMode && (
         <div style={{ marginTop: '24px' }}>
-          {camp.banner_url && (
-            <img src={camp.banner_url} alt="" style={{ width: '100%', height: '200px', objectFit: 'cover' as const, borderRadius: '10px', marginBottom: '20px' }} />
-          )}
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-            {camp.avatar_url && (
-              <img src={camp.avatar_url} alt="" style={{ width: '72px', height: '72px', borderRadius: '50%', border: '3px solid #C08261', flexShrink: 0, objectFit: 'cover' as const }} />
-            )}
-            <div style={{ flex: 1 }}>
-              {camp.description && (
-                <p style={{ fontSize: '1rem', color: '#444', margin: '0 0 8px', lineHeight: 1.6 }}>{camp.description}</p>
-              )}
+          <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
+            {/* Meta info column */}
+            <div style={{ minWidth: '160px', flexShrink: 0 }}>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', marginBottom: '12px' }}>
+                {camp.avatar_url && (
+                  <img src={camp.avatar_url} alt="" style={{ width: '56px', height: '56px', borderRadius: '50%', border: '3px solid #C08261', flexShrink: 0, objectFit: 'cover' as const }} />
+                )}
+                <div>
+                  {camp.description && (
+                    <p style={{ fontSize: '1rem', color: '#444', margin: '0 0 8px', lineHeight: 1.6 }}>{camp.description}</p>
+                  )}
+                </div>
+              </div>
               {camp.founded_year && (
                 <p style={{ fontSize: '0.85rem', color: '#999', margin: '0 0 6px' }}>Est. {camp.founded_year}</p>
               )}
               {camp.homebase && (
-                <p style={{ fontSize: '0.85rem', color: '#999', margin: '0 0 6px' }}>
-                  Homebase: {camp.homebase}
-                </p>
+                <p style={{ fontSize: '0.85rem', color: '#999', margin: '0 0 6px' }}>Homebase: {camp.homebase}</p>
               )}
               {camp.returning_2026 === true && (
-                <p style={{ fontSize: '0.85rem', color: '#aaa', margin: '0 0 10px' }}>
-                  2026 Playa Address: <strong>{camp.playa_location || 'To Be Announced'}</strong>
+                <p style={{ fontSize: '0.85rem', color: '#aaa', margin: '0 0 10px', lineHeight: 1.5 }}>
+                  2026 Playa Address:<br /><strong>{camp.playa_location || 'To Be Announced'}</strong>
                 </p>
               )}
               {camp.returning_2026 === false && (
-                <p style={{ fontSize: '0.85rem', color: '#aaa', margin: '0 0 10px' }}>
-                  2026 Playa Address: <strong>Not Returning in 2026</strong>
+                <p style={{ fontSize: '0.85rem', color: '#aaa', margin: '0 0 10px', lineHeight: 1.5 }}>
+                  2026 Playa Address:<br /><strong>Not Returning</strong>
                 </p>
               )}
-              {/* Social links pills — show any key that has a URL (including legacy) */}
+              {/* Social links pills */}
               {camp.social_links && Object.keys(camp.social_links).some(k => camp.social_links[k]) && (
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' as const, marginTop: '8px' }}>
                   {Object.entries(camp.social_links as Record<string, string>)
@@ -508,6 +508,13 @@ export default function CampPage() {
                 </div>
               )}
             </div>
+
+            {/* Banner image */}
+            {camp.banner_url && (
+              <div style={{ flex: 1 }}>
+                <img src={camp.banner_url} alt="" style={{ width: '100%', height: '200px', objectFit: 'cover' as const, borderRadius: '10px' }} />
+              </div>
+            )}
           </div>
         </div>
       )}
