@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { MapPin, User, ChevronLeft, Shield, AlertTriangle, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import RequestModal from '@/components/RequestModal'; // Assuming this is your path
-import PolaroidPhoto from '@/components/PolaroidPhoto';
+import ImageSlider from '@/components/ImageSlider';
 
 export default function ItemDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -87,7 +87,9 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
       <div style={contentGrid}>
         {/* Left column: photo + button */}
         <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '12px' }}>
-          <PolaroidPhoto src={item.image_urls?.[0]} alt={item.item_name} itemId={item.id} />
+          <div style={{ borderRadius: '16px', overflow: 'hidden', width: '100%', aspectRatio: '1 / 1' }}>
+            <ImageSlider images={item.image_urls} />
+          </div>
           {session ? (
             <button style={borrowButtonStyle} onClick={() => setIsModalOpen(true)}>
               Request Item
