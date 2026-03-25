@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Camera, CheckCircle2 } from 'lucide-react';
@@ -20,7 +20,7 @@ const CATEGORIES = [
 
 const CONDITIONS = ["New / Like New", "Good", "Well-Used", "Rough but Works", "Fixer-Upper"];
 
-export default function ListItemPage() {
+function ListItemPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams.get('edit');
@@ -482,6 +482,14 @@ export default function ListItemPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function ListItemPage() {
+  return (
+    <Suspense fallback={null}>
+      <ListItemPageInner />
+    </Suspense>
   );
 }
 
