@@ -64,7 +64,7 @@ export default function InventoryPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserId(user.id);
-        const { data: profileData } = await supabase.from('profiles').select('preferred_name').eq('id', user.id).maybeSingle();
+        const { data: profileData } = await supabase.from('profiles').select('preferred_name, has_seen_welcome').eq('id', user.id).maybeSingle();
         if (profileData?.preferred_name) setDisplayName(profileData.preferred_name);
 
         const [followingRes, campRes] = await Promise.all([
@@ -80,8 +80,7 @@ export default function InventoryPage() {
           setCampMateIds([]);
         }
 
-        const welcomeKey = `tpp_welcomed_${user.id}`;
-        if (!localStorage.getItem(welcomeKey)) setShowWelcome(true);
+        if (!profileData?.has_seen_welcome) setShowWelcome(true);
 
         const { data, error } = await supabase
           .from('gear_items')

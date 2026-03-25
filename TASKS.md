@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-03-20 (session 20)_
+_Last updated: 2026-03-24 (session 22)_
 
 ---
 
@@ -12,16 +12,22 @@ _Last updated: 2026-03-20 (session 20)_
 
 ---
 
+## 🎯 Next Session Priority
+- [ ] **Update homepage copy** — Add a 4th point to the numbered list. Content TBD.
+- [ ] **Fix OG image crop** — Resize to 1200×630px with padding/background in Canva, re-upload, re-push.
+
+---
+
 ## 🏗️ In Progress / Needs Testing
-- [ ] **Test spreadsheet import end-to-end in browser** — CSV upload, Excel upload, duplicate detection, error cases. ⚠️ Merge `fix/spreadsheet-import-user-id` first.
+- [ ] **Test spreadsheet import end-to-end in browser** — CSV upload, Excel upload, duplicate detection, error cases. (`fix/spreadsheet-import-user-id` merged — ready to test.)
 - [ ] **End-to-end test: Following & Notifications** — Follow a user, list a new item as them, verify bell badge + dropdown appears; test mark-as-read and mark-all-read; verify email opt-in; verify /find-items relationship filter. _(Fully implemented in code — this is a testing task only, not a build task.)_
 - [ ] **End-to-end test: Return flow** — Borrower clicks Return Item → owner sees Confirm Return → owner confirms → item goes back to Not Available. _(Fully implemented in code — this is a testing task only, not a build task.)_
 
 ---
 
 ## 🔧 Bugs & Fixes
-- [ ] **Merge `fix/spreadsheet-import-user-id`** — Fix is committed and pushed. Adds `user_id` to each imported row and aborts with an error if no session. Merge via GitHub PR before end-to-end testing.
-- [ ] **Resources submission form — contact email required** — Make contact email a required field. Add website or social handle as a recommended (not required) field to aid verification.
+- [ ] **Welcome modal fires on every login** — Should only show once per account (first login only). Investigate current trigger mechanism and fix so repeat logins don't show the modal.
+- [ ] **OG preview image gets cropped when sharing links** — Current image is not 1200×630px. Resize with padding/background in Canva, re-upload to repo, re-push.
 
 ---
 
@@ -80,6 +86,8 @@ _(nothing queued)_
 ## 🚀 Features (Designed, Ready to Build)
 - [ ] **Notification types Phase 2** — Wire remaining transfer/loan/return events into the `notifications` table and bell. Most types are now in the schema and header switch; gaps: transfer acceptance bell insert, item request bell insert, loan return confirmation (done), any remaining edge cases.
 - [ ] **Wish list match — logged-out state** — Currently the "I have one of these" button only shows to logged-in users. Consider showing a prompt to logged-out visitors to sign in to send a match.
+- [ ] **New user guidance flow** — Tooltips or highlight circles around key features; step-by-step walkthrough page by page. Triggered on first login, after the welcome modal. Scope TBD.
+- [ ] **FAQ page** — TBD whether it replaces /about or sits alongside it. Content TBD. Should cover: how borrowing/lending works, what happens if something is damaged, how camps work, how visibility settings work, how to get listed on the resources directory.
 
 ---
 
@@ -150,3 +158,8 @@ _(nothing queued)_
 - [x] Feature: "I have one of these" wish list match — `WishListMatchModal` (tag checkboxes + inventory toggles + note field + success state); DB migrations (`wish_list_match` type + `meta jsonb` on notifications); `send-wish-list-match-email` edge function (Resend, links to sender profile); bell notification wiring in header (both desktop + mobile)
 - [x] Deploy: `send-dispute-notification` edge function — deployed via Supabase Dashboard, Verify JWT off
 - [x] Deploy: `send-wish-list-match-email` edge function — deployed via Supabase Dashboard, Verify JWT off
+- [x] Design: UX clarity pass — title style (28px bold #2D241E + underlined descriptor + NBSP), subhead copy, and `maxWidth: 1200px` left-edge alignment updated across /resources, /list-item, /inventory, /profile, /settings, /camps/[slug]; header pipe separator added between nav links; logo underline updated in header and footer; resources page layout restructured (button moved to subhead row)
+- [x] Design: Camp page cleanup — removed ← Find Items back link, widened container to 1200px, members table column headers renamed (Camp Years → Years Attended, 2026 Camp → Returning in 2026?), items table reordered and View → column removed
+- [x] Fix: Resources submission form — contact email and submitter name now required fields; Instagram field added; category list updated; reply-to header fixed on `send-request-email` edge function
+- [x] Fix: Spreadsheet import user_id bug — `user_id` now added to each imported row; import aborts with error if no active session
+- [x] Design: Favicon and OG preview image added — `app/favicon.png` added; OG image configured in `layout.tsx`
