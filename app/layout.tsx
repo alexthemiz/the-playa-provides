@@ -6,6 +6,12 @@ import Script from 'next/script'
 export const metadata = {
   title: 'The Playa Provides',
   description: 'A circular economy for the dust.',
+  icons: {
+    icon: '/TPP_logo1.png',
+  },
+  openGraph: {
+    images: ['/TPP_logo1.png'],
+  },
 }
 
 export default function RootLayout({
