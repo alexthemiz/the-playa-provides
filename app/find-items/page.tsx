@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import PolaroidPhoto from '@/components/PolaroidPhoto';
+import ImageSlider from '@/components/ImageSlider';
 import { Search, LayoutGrid, List, MapPin, User, Package, Map as MapIcon, X } from 'lucide-react';
 import Link from 'next/link';
 import RequestModal from '@/components/RequestModal';
@@ -341,8 +341,8 @@ export default function FindItemsPage() {
           <div style={modalContentStyle} onClick={e => e.stopPropagation()}>
             <button onClick={handleCloseModal} style={closeButtonStyle}><X size={24} /></button>
             
-            <div style={{ marginBottom: '20px' }}>
-              <PolaroidPhoto src={selectedItem.image_urls?.[0]} alt={selectedItem.item_name} itemId={selectedItem.id} />
+            <div style={{ marginBottom: '20px', borderRadius: '12px', overflow: 'hidden', width: '100%', aspectRatio: '1 / 1' }}>
+              <ImageSlider images={selectedItem.image_urls} />
             </div>
 
             <h2 style={{ margin: '0 0 5px 0', color: '#111', fontSize: '24px' }}>{selectedItem.item_name}</h2>
@@ -424,7 +424,9 @@ function CardView({ item }: { item: any }) {
   return (
     <div style={cardStyle}>
       <div style={imageWrapperStyle}>
-        <PolaroidPhoto src={item.image_urls?.[0]} alt={item.item_name} itemId={item.id} imageSize={300} />
+        <div style={{ borderRadius: '8px', overflow: 'hidden', width: '100%', aspectRatio: '1 / 1' }}>
+          <ImageSlider images={item.image_urls} />
+        </div>
         <div style={badgeStyle}>{item.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}</div>
       </div>
       <div style={cardContentStyle}>
@@ -508,7 +510,7 @@ const chipStyle: React.CSSProperties = { padding: '6px 14px', borderRadius: '20p
 const gridStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' };
 const listContainerStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: '2px' };
 const cardStyle: React.CSSProperties = { backgroundColor: '#fff', border: '1px solid #eee', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', overflow: 'hidden' };
-const imageWrapperStyle: React.CSSProperties = { position: 'relative' as const, backgroundColor: 'transparent', padding: '12px 12px 0 12px', width: '100%' };
+const imageWrapperStyle: React.CSSProperties = { position: 'relative' as const, width: '100%' };
 const badgeStyle: React.CSSProperties = { position: 'absolute', top: '10px', left: '10px', backgroundColor: '#00ccff', color: '#000', padding: '3px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', zIndex: 5 };
 const cardContentStyle: React.CSSProperties = { padding: '15px' };
 const itemTitleStyle: React.CSSProperties = { margin: 0, color: '#111', fontSize: '16px', fontWeight: '600' };
