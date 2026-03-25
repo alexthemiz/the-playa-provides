@@ -115,9 +115,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
             <span style={metaItem}>
               <User size={15} color="#00ccff" />
               {item.owner_username ? (
-                <Link href={`/profile/${item.owner_username}`} style={ownerLinkStyle}>
-                  {isGift ? 'Offered' : 'Owned'} by {item.owner_name}
-                </Link>
+                <span>{isGift ? 'Offered' : 'Owned'} by <Link href={`/profile/${item.owner_username}`} style={ownerLinkStyle}>{item.owner_name}</Link></span>
               ) : (
                 <span>{isGift ? 'Offered' : 'Owned'} by {item.owner_name}</span>
               )}
@@ -179,16 +177,13 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
 
               {/* Condition upon return */}
               {item.return_terms && (
-                <div style={returnTermsBox}>
-                  <p style={conditionLabelStyle}>CONDITION UPON RETURN</p>
-                  <p style={{ margin: 0, fontStyle: 'italic' as const, color: '#444' }}>"{item.return_terms}"</p>
-                </div>
+                <p style={{ margin: 0, fontSize: '13px', color: '#444' }}>{item.return_terms}</p>
               )}
             </div>
           )}
 
-          {/* Request button — right-aligned, below lending terms */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end' as const, marginTop: '8px' }}>
+          {/* Request button — centered, below lending terms */}
+          <div style={{ display: 'flex', justifyContent: 'center' as const, marginTop: '8px' }}>
             {session ? (
               <button style={borrowButtonStyle} onClick={() => setIsModalOpen(true)}>
                 {requestLabel}
@@ -250,7 +245,7 @@ const descText: React.CSSProperties = { lineHeight: '1.7', color: '#444', fontSi
 
 // Lending Terms box
 const termsSection: React.CSSProperties = { backgroundColor: '#f7f7f7', padding: '16px', borderRadius: '12px', border: '1px solid #e5e5e5' };
-const termsTitleStyle: React.CSSProperties = { color: '#333', fontSize: '15px', fontWeight: 800, margin: '0 0 12px 0' };
+const termsTitleStyle: React.CSSProperties = { color: '#555', fontSize: '11px', textTransform: 'uppercase' as const, marginBottom: '8px', marginTop: 0, letterSpacing: '1px', fontWeight: 800 };
 const priceTag: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#2D241E' };
 const returnTermsBox: React.CSSProperties = { padding: '10px 12px', backgroundColor: '#efefef', borderRadius: '8px', border: '1px solid #ddd' };
 const conditionLabelStyle: React.CSSProperties = { margin: '0 0 4px 0', fontSize: '10px', color: '#888', textTransform: 'uppercase' as const, fontWeight: 'bold', letterSpacing: '0.06em' };
