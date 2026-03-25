@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 import type React from 'react';
@@ -11,7 +11,6 @@ import { LayoutGrid, List, MapPin, User, Package, Pencil } from 'lucide-react';
 export default function CampPage() {
   const params = useParams();
   const slug = params.slug as string;
-  const router = useRouter();
 
   const [camp, setCamp] = useState<any>(null);
   const [pageOwner, setPageOwner] = useState<any>(null);
@@ -745,9 +744,9 @@ export default function CampPage() {
               </div>
             )}
             {campItems.map(item => (
-              <div key={item.id} onClick={() => router.push(`/find-items/${item.id}`)} style={{ cursor: 'pointer' }}>
+              <Link key={item.id} href={`/find-items/${item.id}`} style={{ textDecoration: 'none', display: 'block' }}>
                 {campViewMode === 'grid' ? <CampCardView item={item} /> : <CampListView item={item} />}
-              </div>
+              </Link>
             ))}
           </div>
         )}
