@@ -1,17 +1,17 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 import type React from 'react';
 import PolaroidPhoto from '@/components/PolaroidPhoto';
-import RequestModal from '@/components/RequestModal';
-import { LayoutGrid, List, MapPin, User, Package, X, Pencil } from 'lucide-react';
+import { LayoutGrid, List, MapPin, User, Package, Pencil } from 'lucide-react';
 
 export default function CampPage() {
   const params = useParams();
   const slug = params.slug as string;
+  const router = useRouter();
 
   const [camp, setCamp] = useState<any>(null);
   const [pageOwner, setPageOwner] = useState<any>(null);
@@ -48,8 +48,6 @@ export default function CampPage() {
   const [campItems, setCampItems] = useState<any[]>([]);
   const [campItemsLoading, setCampItemsLoading] = useState(false);
   const [campViewMode, setCampViewMode] = useState<'grid' | 'list'>('list');
-  const [selectedCampItem, setSelectedCampItem] = useState<any>(null);
-  const [showCampRequestForm, setShowCampRequestForm] = useState(false);
 
   // Member management
   const [memberActionError, setMemberActionError] = useState('');
@@ -201,25 +199,6 @@ export default function CampPage() {
     fetchCampItems();
   }, [members]);
 
-  // Sync quick-view modal with URL
-  useEffect(() => {
-    const syncCampModal = () => {
-      const parts = window.location.pathname.split('/');
-      const itemId = parts.length >= 4 ? parts[3] : null;
-      if (itemId && campItems.length > 0) {
-        const item = campItems.find((i: any) => String(i.id) === itemId);
-        if (item) setSelectedCampItem(item);
-      } else if (!itemId) {
-        setSelectedCampItem(null);
-        setShowCampRequestForm(false);
-      }
-    };
-    if (!campItemsLoading) {
-      syncCampModal();
-      window.addEventListener('popstate', syncCampModal);
-    }
-    return () => window.removeEventListener('popstate', syncCampModal);
-  }, [campItems, campItemsLoading]);
 
   if (loading) return <div style={{ color: '#2D241E', padding: '40px' }}>Loading...</div>;
   if (!camp) return <div style={{ color: '#2D241E', padding: '40px' }}>Camp not found.</div>;
@@ -229,18 +208,6 @@ export default function CampPage() {
   // Determine logged-in user's role in the camp
   const myMemberRow = members.find(m => m.id === currentUserId);
   const myRole = myMemberRow?.role ?? null; // 'admin' | 'member' | null
-
-  // ── Modal / quick-view handlers ──
-  const handleOpenCampItem = (item: any) => {
-    setSelectedCampItem(item);
-    window.history.pushState({ id: item.id }, '', `/camps/${slug}/${item.id}`);
-  };
-
-  const handleCloseCampModal = () => {
-    setSelectedCampItem(null);
-    setShowCampRequestForm(false);
-    window.history.pushState(null, '', `/camps/${slug}`);
-  };
 
   // ── Claim form handler ──
   const handleClaimSubmit = async (e: React.FormEvent) => {
@@ -778,7 +745,7 @@ export default function CampPage() {
               </div>
             )}
             {campItems.map(item => (
-              <div key={item.id} onClick={() => handleOpenCampItem(item)} style={{ cursor: 'pointer' }}>
+              <div key={item.id} onClick={() => router.push(`/find-items/${item.id}`)} style={{ cursor: 'pointer' }}>
                 {campViewMode === 'grid' ? <CampCardView item={item} /> : <CampListView item={item} />}
               </div>
             ))}
@@ -786,75 +753,6 @@ export default function CampPage() {
         )}
       </div>
 
-      {/* Camp item quick-view modal */}
-      {selectedCampItem && (
-        <div style={campModalOverlayStyle} onClick={handleCloseCampModal}>
-          <div style={campModalContentStyle} onClick={e => e.stopPropagation()}>
-            <button onClick={handleCloseCampModal} style={campCloseButtonStyle}><X size={24} /></button>
-
-            <div style={{ marginBottom: '20px' }}>
-              <PolaroidPhoto src={selectedCampItem.image_urls?.[0]} alt={selectedCampItem.item_name} itemId={selectedCampItem.id} noRotate />
-            </div>
-
-            <h2 style={{ margin: '0 0 5px 0', color: '#111', fontSize: '24px' }}>{selectedCampItem.item_name}</h2>
-            <p style={campCategoryLabelStyle}>{selectedCampItem.category} • {selectedCampItem.condition}</p>
-
-            <div style={{ margin: '20px 0', padding: '15px', backgroundColor: '#f9f9f9', borderRadius: '10px', fontSize: '15px', color: '#444', lineHeight: '1.6' }}>
-              {selectedCampItem.description || 'No description provided by the owner.'}
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', padding: '0 5px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#777', fontSize: '14px' }}>
-                <MapPin size={16} />
-                {[selectedCampItem.locations?.city, selectedCampItem.locations?.state].filter(Boolean).join(', ') || 'Location N/A'}
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#777', fontSize: '14px' }}>
-                <User size={16} />
-                {selectedCampItem.profiles?.username ? (
-                  <Link href={`/profile/${selectedCampItem.profiles.username}`} onClick={e => e.stopPropagation()} style={{ color: '#00aacc', textDecoration: 'none', fontWeight: '500' }}>
-                    {selectedCampItem.profiles?.preferred_name || 'Member'}
-                  </Link>
-                ) : (selectedCampItem.profiles?.preferred_name || 'Member')}
-              </div>
-            </div>
-
-            {(selectedCampItem.pickup_by || selectedCampItem.return_by || selectedCampItem.return_terms || selectedCampItem.damage_price || selectedCampItem.loss_price) && (
-              <div style={{ marginBottom: '20px', padding: '14px', backgroundColor: '#fdf3ec', borderRadius: '12px', fontSize: '13px', border: '1px solid #f0d8c8' }}>
-                <div style={{ fontWeight: 700, color: '#C08261', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase' as const, letterSpacing: '0.08em' }}>Borrowing Terms</div>
-                {(selectedCampItem.pickup_by || selectedCampItem.return_by) && (
-                  <div style={{ display: 'flex', gap: '20px', marginBottom: '6px', color: '#555' }}>
-                    {selectedCampItem.pickup_by && <span>Pick up by: <strong>{new Date(selectedCampItem.pickup_by).toLocaleDateString()}</strong></span>}
-                    {selectedCampItem.return_by && <span>Return by: <strong>{new Date(selectedCampItem.return_by).toLocaleDateString()}</strong></span>}
-                  </div>
-                )}
-                {(selectedCampItem.damage_price || selectedCampItem.loss_price) && (
-                  <div style={{ display: 'flex', gap: '20px', marginBottom: '6px', color: '#555' }}>
-                    {selectedCampItem.damage_price && <span>Damage agreement: <strong>${selectedCampItem.damage_price}</strong></span>}
-                    {selectedCampItem.loss_price && <span>Loss agreement: <strong>${selectedCampItem.loss_price}</strong></span>}
-                  </div>
-                )}
-                {selectedCampItem.return_terms && (
-                  <div style={{ color: '#666', fontStyle: 'italic' }}>"{selectedCampItem.return_terms}"</div>
-                )}
-              </div>
-            )}
-
-            {currentUserId ? (
-              <button onClick={() => setShowCampRequestForm(true)} style={campPrimaryButtonStyle}>
-                Request to {selectedCampItem.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}
-              </button>
-            ) : (
-              <a href="/login" style={{ ...campPrimaryButtonStyle, display: 'block', textAlign: 'center' as const, textDecoration: 'none' }}>
-                Log In to Request
-              </a>
-            )}
-          </div>
-        </div>
-      )}
-
-      {showCampRequestForm && selectedCampItem && (
-        <RequestModal item={selectedCampItem} onClose={() => setShowCampRequestForm(false)} />
-      )}
     </div>
   );
 }
