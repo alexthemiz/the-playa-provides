@@ -80,7 +80,7 @@ export default function FindItemsPage() {
         .from('user_camp_affiliations')
         .select('camp_id')
         .eq('user_id', session.user.id)
-      const myCampIds = (myAffiliations || []).map((r: any) => r.camp_id)
+      const myCampIds = (myAffiliations || []).map((r: any) => r.camp_id).filter(Boolean)
       if (myCampIds.length === 0) {
         setCampMateIds([])
       } else {

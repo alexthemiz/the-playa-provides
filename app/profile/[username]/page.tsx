@@ -457,18 +457,11 @@ export default function PublicProfilePage() {
             ) : (
               <h1 style={{ fontSize: '2.2rem', margin: 0, color: '#2D241E' }}>{profile.preferred_name || username}</h1>
             )}
-            {(() => {
-              const items: React.ReactNode[] = [
-                <span key="username" style={{ color: '#888', fontSize: '0.9rem' }}>@{username}</span>,
-                ...(profile.pronouns ? [<span key="pronouns" style={{ color: '#888', fontSize: '0.9rem' }}>{profile.pronouns}</span>] : []),
-                ...(locationStr ? [<span key="location" style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#999', fontSize: '0.85rem' }}><MapPin size={13} />{locationStr}</span>] : []),
-              ];
-              return (
-                <div style={{ display: 'flex', justifyContent: items.length > 1 ? 'space-between' as const : 'flex-start' as const, alignItems: 'center', marginTop: '4px', gap: '8px', maxWidth: 'calc(50% - 70px)' }}>
-                  {items}
-                </div>
-              );
-            })()}
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' as const, marginTop: '5px', fontSize: '0.9rem', color: '#888' }}>
+              <span>@{username}</span>
+              {profile.pronouns && <><span style={{ margin: '0 7px', color: '#ccc' }}>|</span><span>{profile.pronouns}</span></>}
+              {locationStr && <><span style={{ margin: '0 7px', color: '#ccc' }}>|</span><span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><MapPin size={13} />{locationStr}</span></>}
+            </div>
 
             {/* Social links */}
             {isEditing ? (
@@ -599,48 +592,73 @@ export default function PublicProfilePage() {
           </div>
         </div>
 
-        {/* FOLLOWERS / FOLLOWING EXPANDABLE LIST */}
+        {/* FOLLOWERS / FOLLOWING MODAL */}
         {isOwner && openList && (
-          <div style={{ marginTop: '12px', border: '1px solid #e5e5e5', borderRadius: '10px', overflow: 'hidden' as const }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '40px minmax(100px, 200px) 110px 90px 80px', gap: '12px', alignItems: 'center', padding: '8px 16px', fontSize: '10px', fontWeight: 700, color: '#aaa', textTransform: 'uppercase' as const, letterSpacing: '0.06em', borderBottom: '1px solid #f0f0f0' }}>
-              <div />
-              <div>{openList === 'followers' ? 'Follower' : 'Following'}</div>
-              <div />
-              <div>
-                <div style={{ fontSize: '8px', fontWeight: 400, color: '#bbb', textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: '2px' }}>Items Available</div>
-                To Borrow
+          <>
+            {/* Backdrop */}
+            <div
+              style={{ position: 'fixed', inset: 0, zIndex: 200 }}
+              onClick={() => setOpenList(null)}
+            />
+            {/* Modal */}
+            <div style={{ position: 'fixed', top: '140px', right: '24px', zIndex: 201, backgroundColor: '#fff', border: '1px solid #e5e5e5', borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,0.14)', minWidth: '460px', maxWidth: '560px', overflow: 'hidden' as const }}>
+              {/* Modal header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>
+                <span style={{ fontWeight: 700, fontSize: '14px', color: '#2D241E', textTransform: 'capitalize' as const }}>{openList}</span>
+                <button onClick={() => setOpenList(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: '18px', lineHeight: 1, padding: '2px 6px' }}>×</button>
               </div>
-              <div>To Keep</div>
-            </div>
 
-            {listLoading ? (
-              <div style={{ padding: '20px 16px', color: '#aaa', fontSize: '0.875rem' }}>Loading...</div>
-            ) : (openList === 'followers' ? followersList : followingList).length === 0 ? (
-              <div style={{ padding: '20px 16px', color: '#aaa', fontSize: '0.875rem', fontStyle: 'italic' as const }}>
-                {openList === 'followers' ? 'No followers yet.' : 'Not following anyone yet.'}
-              </div>
-            ) : (
-              (openList === 'followers' ? followersList : followingList).map((entry) => (
-                <div key={entry.id} style={{ display: 'grid', gridTemplateColumns: '40px minmax(100px, 200px) 110px 90px 80px', gap: '12px', alignItems: 'center', padding: '10px 16px', borderBottom: '1px solid #f9f9f9' }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#f0f0f0', backgroundImage: entry.avatar_url ? `url(${entry.avatar_url})` : 'none' as const, backgroundSize: 'cover' as const, backgroundPosition: 'center' as const, border: '2px solid #e5e5e5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', color: '#C08261', fontWeight: 'bold' as const, flexShrink: 0 }}>
-                    {!entry.avatar_url && (entry.preferred_name?.charAt(0) || entry.username?.charAt(0) || '?')}
+              {/* Column headers */}
+              <div style={{ padding: '6px 16px 0' }}>
+                {/* Super-label row */}
+                <div style={{ display: 'grid', gridTemplateColumns: '40px minmax(100px, 180px) 100px 85px 75px', gap: '12px', alignItems: 'end', paddingBottom: '2px' }}>
+                  <div /><div /><div />
+                  <div style={{ fontSize: '8px', fontWeight: 400, color: '#bbb', textTransform: 'uppercase' as const, letterSpacing: '0.06em', gridColumn: '4 / 6' }}>
+                    Items Available...
                   </div>
-                  <a href={`/profile/${entry.username}`} style={{ textDecoration: 'none' as const, color: 'inherit' as const }}>
-                    <div style={{ fontWeight: 600, fontSize: '14px', color: '#2D241E' }}>{entry.preferred_name || entry.username}</div>
-                    <div style={{ fontSize: '12px', color: '#aaa' }}>@{entry.username}</div>
-                  </a>
-                  <button
-                    onClick={() => handleListFollowToggle(entry.id, openList!)}
-                    style={{ padding: '5px 14px', backgroundColor: entry.isFollowing ? '#f0f0f0' : '#00ccff', color: entry.isFollowing ? '#666' : '#000', border: entry.isFollowing ? '1px solid #ddd' : 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}
-                  >
-                    {entry.isFollowing ? 'Following' : 'Follow'}
-                  </button>
-                  <div style={{ fontSize: '13px', color: '#444', textAlign: 'center' as const }}>{entry.borrowCount}</div>
-                  <div style={{ fontSize: '13px', color: '#444', textAlign: 'center' as const }}>{entry.keepCount}</div>
                 </div>
-              ))
-            )}
-          </div>
+                {/* Sub-label row */}
+                <div style={{ display: 'grid', gridTemplateColumns: '40px minmax(100px, 180px) 100px 85px 75px', gap: '12px', alignItems: 'center', paddingBottom: '6px', fontSize: '10px', fontWeight: 700, color: '#aaa', textTransform: 'uppercase' as const, letterSpacing: '0.06em', borderBottom: '1px solid #f0f0f0' }}>
+                  <div />
+                  <div>{openList === 'followers' ? 'Follower' : 'Following'}</div>
+                  <div />
+                  <div>To Borrow</div>
+                  <div>To Keep</div>
+                </div>
+              </div>
+
+              {/* Rows */}
+              <div style={{ maxHeight: '380px', overflowY: 'auto' as const }}>
+                {listLoading ? (
+                  <div style={{ padding: '20px 16px', color: '#aaa', fontSize: '0.875rem' }}>Loading...</div>
+                ) : (openList === 'followers' ? followersList : followingList).length === 0 ? (
+                  <div style={{ padding: '20px 16px', color: '#aaa', fontSize: '0.875rem', fontStyle: 'italic' as const }}>
+                    {openList === 'followers' ? 'No followers yet.' : 'Not following anyone yet.'}
+                  </div>
+                ) : (
+                  (openList === 'followers' ? followersList : followingList).map((entry) => (
+                    <div key={entry.id} style={{ display: 'grid', gridTemplateColumns: '40px minmax(100px, 180px) 100px 85px 75px', gap: '12px', alignItems: 'center', padding: '10px 16px', borderBottom: '1px solid #f9f9f9' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#f0f0f0', backgroundImage: entry.avatar_url ? `url(${entry.avatar_url})` : 'none' as const, backgroundSize: 'cover' as const, backgroundPosition: 'center' as const, border: '2px solid #e5e5e5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', color: '#C08261', fontWeight: 'bold' as const, flexShrink: 0 }}>
+                        {!entry.avatar_url && (entry.preferred_name?.charAt(0) || entry.username?.charAt(0) || '?')}
+                      </div>
+                      <a href={`/profile/${entry.username}`} style={{ textDecoration: 'none' as const, color: 'inherit' as const }}>
+                        <div style={{ fontWeight: 600, fontSize: '14px', color: '#2D241E' }}>{entry.preferred_name || entry.username}</div>
+                        <div style={{ fontSize: '12px', color: '#aaa' }}>@{entry.username}</div>
+                      </a>
+                      <button
+                        onClick={() => handleListFollowToggle(entry.id, openList!)}
+                        style={{ padding: '5px 14px', backgroundColor: entry.isFollowing ? '#f0f0f0' : '#00ccff', color: entry.isFollowing ? '#666' : '#000', border: entry.isFollowing ? '1px solid #ddd' : 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}
+                      >
+                        {entry.isFollowing ? 'Following' : 'Follow'}
+                      </button>
+                      <div style={{ fontSize: '13px', color: '#444', textAlign: 'center' as const }}>{entry.borrowCount}</div>
+                      <div style={{ fontSize: '13px', color: '#444', textAlign: 'center' as const }}>{entry.keepCount}</div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </>
         )}
 
         {/* ROW 2: Bio | Wish List */}
@@ -691,8 +709,8 @@ export default function PublicProfilePage() {
           </div>
         </div>
 
-        {/* PLAYA HISTORY + PLAYA STORY — two-column grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', marginTop: '25px' }}>
+        {/* PLAYA HISTORY */}
+        <div style={{ marginTop: '25px' }}>
 
         {/* PLAYA HISTORY */}
         <div>
@@ -820,21 +838,21 @@ export default function PublicProfilePage() {
 
             </div>
           ) : affiliations.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '6px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '8px' }}>
               {affiliations.map((aff: any) => {
                 const campName = (aff.camps as any)?.display_name ?? null;
                 const campSlug = (aff.camps as any)?.slug ?? null;
                 return (
-                  <div key={aff.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' as const }}>
-                    <span style={{ backgroundColor: '#fdf3ec', padding: '3px 10px', borderRadius: '20px', color: '#C08261', border: '1px solid #f0d8c8', fontSize: '0.85rem', fontWeight: 'bold', flexShrink: 0 }}>
+                  <div key={aff.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#fafafa', border: '1px solid #eee', borderRadius: '20px', padding: '3px 10px 3px 4px' }}>
+                    <span style={{ backgroundColor: '#fdf3ec', padding: '2px 8px', borderRadius: '20px', color: '#C08261', border: '1px solid #f0d8c8', fontSize: '0.8rem', fontWeight: 'bold', flexShrink: 0 }}>
                       {aff.year}
                     </span>
                     {aff.is_open_camping ? (
-                      <span style={{ fontSize: '0.875rem', color: '#aaa', fontStyle: 'italic' as const }}>Open Camping</span>
+                      <span style={{ fontSize: '0.82rem', color: '#aaa', fontStyle: 'italic' as const }}>Open Camping</span>
                     ) : campSlug ? (
-                      <a href={`/camps/${campSlug}`} style={{ fontSize: '0.875rem', color: '#00aacc', textDecoration: 'none', fontWeight: 500 }}>{campName}</a>
+                      <a href={`/camps/${campSlug}`} style={{ fontSize: '0.82rem', color: '#00aacc', textDecoration: 'none', fontWeight: 500 }}>{campName}</a>
                     ) : campName ? (
-                      <span style={{ fontSize: '0.875rem', color: '#555' }}>{campName}</span>
+                      <span style={{ fontSize: '0.82rem', color: '#555' }}>{campName}</span>
                     ) : null}
                     {aff.returning_status && returningBadge(aff.returning_status)}
                   </div>
@@ -848,10 +866,10 @@ export default function PublicProfilePage() {
               )}
             </>
           )}
-        </div>
+        </div>{/* end playa history */}
 
-        {/* PLAYA STORY */}
-        <div>
+        {/* PLAYA STORY — full width below playa history */}
+        <div style={{ marginTop: '20px' }}>
           <h4 style={subheadStyle}>Got a good &quot;playa provides&quot; story?</h4>
           {isEditing ? (
             <textarea style={editTextareaStyle} value={profile.playa_story || ''} onChange={e => setProfile({ ...profile, playa_story: e.target.value })} placeholder="Share a time the playa provided..." />
@@ -862,7 +880,7 @@ export default function PublicProfilePage() {
           )}
         </div>
 
-        </div>{/* end two-column grid */}
+        </div>{/* end playa history + story section */}
 
       </header>
 
@@ -947,7 +965,7 @@ export default function PublicProfilePage() {
 // --- STYLES ---
 const LIST_COLS = '50px 160px 1fr 140px 120px 1fr 60px';
 
-const subheadStyle: React.CSSProperties = { color: '#888', textTransform: 'uppercase', fontSize: '0.8rem', marginBottom: '8px', marginTop: 0 };
+const subheadStyle: React.CSSProperties = { color: '#555', textTransform: 'uppercase', fontSize: '0.88rem', fontWeight: 800, marginBottom: '10px', marginTop: 0, letterSpacing: '0.04em' };
 const editTextareaStyle: React.CSSProperties = { width: '100%', backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', padding: '10px', height: '80px', borderRadius: '6px', boxSizing: 'border-box', outline: 'none' };
 const listHeaderStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: LIST_COLS, gap: '10px', padding: '8px 12px', fontSize: '10px', fontWeight: '700', color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '2px solid #eee' };
 const listRowStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: LIST_COLS, gap: '10px', alignItems: 'center', padding: '10px 12px', backgroundColor: '#fff', borderBottom: '1px solid #f5f5f5' };
