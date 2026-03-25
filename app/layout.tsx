@@ -13,8 +13,10 @@ export const metadata = {
 
 export default function RootLayout({
   children,
+  modal,
 }: {
   children: React.ReactNode
+  modal?: React.ReactNode
 }) {
   return (
     <html lang="en">
@@ -35,11 +37,12 @@ export default function RootLayout({
         </Script>
 
         <Header />
-        
+
         <main className="min-h-screen w-full" style={{ backgroundColor: '#fff' }}>
           {children}
+          {modal}
         </main>
-        
+
         <Footer />
       </body>
     </html>
