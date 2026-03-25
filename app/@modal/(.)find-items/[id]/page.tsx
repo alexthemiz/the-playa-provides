@@ -85,7 +85,7 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
         <button onClick={close} style={closeButtonStyle}><X size={20} /></button>
         
         {loading ? (
-          <p style={{ color: '#fff', textAlign: 'center' }}>Loading gear details...</p>
+          <p style={{ color: '#333', textAlign: 'center' }}>Loading gear details...</p>
         ) : item ? (
           <div>
             {/* Image Preview */}
@@ -130,7 +130,7 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
             </div>
           </div>
         ) : (
-          <p style={{ color: '#fff' }}>This item isn't available, or you may need to log in to view it.</p>
+          <p style={{ color: '#333' }}>This item isn't available, or you may need to log in to view it.</p>
         )}
       </div>
       {isRequestOpen && item && (
@@ -159,30 +159,30 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
 // --- STYLES ---
 const overlayStyle: React.CSSProperties = {
   position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-  backgroundColor: 'rgba(0, 0, 0, 0.85)', display: 'flex',
-  alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(8px)'
+  backgroundColor: 'rgba(0, 0, 0, 0.4)', display: 'flex',
+  alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)'
 };
 
 const modalStyle: React.CSSProperties = {
-  backgroundColor: '#0a0a0a', padding: '30px', borderRadius: '24px',
-  width: '95%', maxWidth: '500px', position: 'relative', border: '1px solid #222',
+  backgroundColor: '#fff', padding: '30px', borderRadius: '24px',
+  width: '95%', maxWidth: '500px', position: 'relative',
   maxHeight: '90vh', overflowY: 'auto'
 };
 
 const closeButtonStyle: React.CSSProperties = {
-  position: 'absolute', top: '15px', right: '15px', background: '#222',
-  border: 'none', color: '#fff', width: '36px', height: '36px',
+  position: 'absolute', top: '15px', right: '15px', background: '#f5f5f5',
+  border: 'none', color: '#666', width: '36px', height: '36px',
   borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center',
   justifyContent: 'center', zIndex: 10
 };
 
-const titleStyle: React.CSSProperties = { color: '#fff', fontSize: '24px', margin: '0 0 5px 0' };
+const titleStyle: React.CSSProperties = { color: '#111', fontSize: '24px', margin: '0 0 5px 0' };
 const categoryStyle: React.CSSProperties = { color: '#00ccff', fontSize: '14px', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '20px' };
-const infoGridStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: '10px', color: '#fff', fontSize: '14px' };
-const infoItemStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '10px' };
-const dividerStyle: React.CSSProperties = { border: '0', borderTop: '1px solid #222', margin: '20px 0' };
-const sectionLabelStyle: React.CSSProperties = { color: '#666', fontSize: '12px', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '1px' };
-const descriptionStyle: React.CSSProperties = { color: '#ccc', lineHeight: '1.6', fontSize: '15px', marginBottom: '30px' };
+const infoGridStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: '10px', color: '#333', fontSize: '14px' };
+const infoItemStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '10px', color: '#333' };
+const dividerStyle: React.CSSProperties = { border: '0', borderTop: '1px solid #eee', margin: '20px 0' };
+const sectionLabelStyle: React.CSSProperties = { color: '#aaa', fontSize: '12px', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '1px' };
+const descriptionStyle: React.CSSProperties = { color: '#444', lineHeight: '1.6', fontSize: '15px', marginBottom: '30px' };
 const actionButtonStyle: React.CSSProperties = {
   width: '100%', padding: '15px', borderRadius: '12px', border: 'none',
   backgroundColor: '#00ccff', color: '#000', fontWeight: 'bold', cursor: 'pointer', fontSize: '16px'
