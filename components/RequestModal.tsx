@@ -90,7 +90,7 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" style={{ zIndex: 2000 }}>
-      <div className="bg-white rounded-2xl max-w-md w-full overflow-y-auto max-h-[90vh] shadow-2xl">
+      <div className="bg-white rounded-2xl max-w-md w-full overflow-y-auto max-h-[90vh]">
         <div className="p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold text-gray-900">Request {item.item_name}</h2>
