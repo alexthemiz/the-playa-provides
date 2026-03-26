@@ -548,7 +548,7 @@ const closeButtonStyle: React.CSSProperties = {
 };
 
 const primaryButtonStyle: React.CSSProperties = {
-  width: '100%', padding: '18px', backgroundColor: '#3ABFD4', color: '#000', 
+  width: '100%', padding: '18px', backgroundColor: '#5ECFDF', color: '#000', 
   border: 'none', borderRadius: '14px', fontWeight: 'bold', fontSize: '16px', 
-  cursor: 'pointer', boxShadow: '0 4px 14px rgba(0,204,255,0.4)'
+  cursor: 'pointer', boxShadow: 'none'
 };
