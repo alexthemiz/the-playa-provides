@@ -5,7 +5,7 @@ import { Instagram } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="border-t border-[#A66D51] py-5" style={{ backgroundColor: '#EA580C' }}>
+    <footer className="border-t border-[#A66D51] py-5" style={{ backgroundColor: '#D4621F' }}>
       <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
         
         {/* Left Side: Branding */}

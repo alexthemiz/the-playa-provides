@@ -128,7 +128,7 @@ export default function Header() {
     setBellOpen(false)
   }
 
-  const headerBg = { backgroundColor: '#EA580C' }
+  const headerBg = { backgroundColor: '#D4621F' }
   const mainTextColor = 'text-[#2D241E]'
   const hoverEffect = 'hover:text-[#00ccff]'
 
@@ -157,7 +157,7 @@ export default function Header() {
       <Link
         href="/login"
         onClick={() => setMenuOpen(false)}
-        className="bg-[#2D241E] text-[#EA580C] px-4 py-2 rounded-lg text-sm font-bold hover:bg-black transition"
+        className="bg-[#2D241E] text-[#D4621F] px-4 py-2 rounded-lg text-sm font-bold hover:bg-black transition"
       >
         Login
       </Link>
@@ -289,7 +289,7 @@ export default function Header() {
               </button>
             </>
           ) : (
-            <Link href="/login" className="bg-[#2D241E] text-[#EA580C] px-4 py-2 rounded-lg text-sm font-bold hover:bg-black transition">
+            <Link href="/login" className="bg-[#2D241E] text-[#D4621F] px-4 py-2 rounded-lg text-sm font-bold hover:bg-black transition">
               Login
             </Link>
           )}
@@ -407,7 +407,7 @@ export default function Header() {
           />
           <div
             className="lg:hidden flex flex-col gap-4 px-6 py-5 border-t border-[#A66D51]"
-            style={{ backgroundColor: '#EA580C', position: 'relative' as const, zIndex: 50 }}
+            style={{ backgroundColor: '#D4621F', position: 'relative' as const, zIndex: 50 }}
           >
             {navLinks}
           </div>

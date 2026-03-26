@@ -256,11 +256,16 @@ export default function PublicProfilePage() {
   };
 
   const handleSave = async () => {
+    const rawLinks = profile.social_links || {};
+    const normalizedLinks = { ...rawLinks };
+    if (normalizedLinks.website && !/^https?:\/\//i.test(normalizedLinks.website)) {
+      normalizedLinks.website = `https://${normalizedLinks.website}`;
+    }
     const { error } = await supabase.from('profiles').update({
       bio: profile.bio,
       preferred_name: profile.preferred_name,
       avatar_url: profile.avatar_url,
-      social_links: profile.social_links || {},
+      social_links: normalizedLinks,
       playa_story: profile.playa_story || null,
     }).eq('id', profile.id);
 
@@ -500,7 +505,7 @@ export default function PublicProfilePage() {
               return (
                 <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '6px', marginTop: '10px' }}>
                   {SOCIAL.map(s => (
-                    <a key={s.key} href={links[s.key]} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 11px', borderRadius: '99px', backgroundColor: '#f5f5f5', border: '1px solid #e5e5e5', textDecoration: 'none', fontSize: '12px', fontWeight: 600, color: s.color }}>
+                    <a key={s.key} href={/^https?:\/\//i.test(links[s.key]) ? links[s.key] : `https://${links[s.key]}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 11px', borderRadius: '99px', backgroundColor: '#f5f5f5', border: '1px solid #e5e5e5', textDecoration: 'none', fontSize: '12px', fontWeight: 600, color: s.color }}>
                       {s.icon}{s.label}
                     </a>
                   ))}

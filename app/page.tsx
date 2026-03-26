@@ -222,7 +222,7 @@ export default function HomePage() {
 const primaryBtn = {
   padding: '14px 32px',
   backgroundColor: '#00ccff',
-  color: 'white',
+  color: '#000',
   borderRadius: '12px',
   textDecoration: 'none',
   fontWeight: 'bold',
@@ -232,7 +232,7 @@ const primaryBtn = {
 const secondaryBtn = {
   padding: '14px 32px',
   backgroundColor: '#EA580C',
-  color: 'white',
+  color: '#000',
   borderRadius: '12px',
   textDecoration: 'none',
   fontWeight: 'bold',
