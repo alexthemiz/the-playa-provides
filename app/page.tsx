@@ -59,7 +59,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div style={{ backgroundColor: '#ffffff', minHeight: '100vh', color: '#2D241E', fontFamily: 'sans-serif' }}>
+    <div style={{ backgroundColor: '#ffffff', minHeight: '100vh', color: '#2D241E', fontFamily: 'Outfit, sans-serif' }}>
 
       {showDeletedBanner && (
         <div style={{ backgroundColor: '#dcfce7', borderBottom: '1px solid #86efac', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

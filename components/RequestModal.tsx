@@ -176,8 +176,7 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
               <button
                 onClick={handleSendRequest}
                 disabled={sending || !message.trim()}
-                className="w-full mt-4 bg-[#E8834A] text-black py-3 rounded-xl font-semibold hover:bg-[#D4621F] disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
-                style={{ boxShadow: 'none' }}
+                style={{ width: '100%', marginTop: '16px', backgroundColor: '#E8834A', color: '#000', padding: '12px', borderRadius: '12px', fontWeight: '600', fontSize: '15px', cursor: 'pointer', border: 'none', opacity: sending || !message.trim() ? 0.5 : 1 }}
               >
                 {sending ? 'Sending...' : 'Send Request'}
               </button>
