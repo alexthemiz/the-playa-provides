@@ -115,7 +115,7 @@ export default function HomePage() {
           { n: '3', title: 'Borrow what you need', sub: 'Skip the Amazon order. Someone in the community probably has it already.' },
         ].map(({ n, title, sub }) => (
           <div key={n} style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
-            <span style={{ fontSize: '2.4rem', fontWeight: '900', color: '#00ccff', lineHeight: 1, flexShrink: 0, width: '40px', textAlign: 'center' as const }}>{n}</span>
+            <span style={{ fontSize: '2.4rem', fontWeight: '900', color: '#3ABFD4', lineHeight: 1, flexShrink: 0, width: '40px', textAlign: 'center' as const }}>{n}</span>
             <div>
               <p style={{ margin: '0 0 4px', fontSize: '1.05rem', fontWeight: '700', color: '#2D241E' }}>{title}</p>
               <p style={{ margin: 0, fontSize: '0.95rem', color: '#777', lineHeight: '1.5' }}>{sub}</p>
@@ -190,7 +190,7 @@ export default function HomePage() {
                     flexShrink: 0,
                     padding: '5px 14px',
                     borderRadius: '20px',
-                    border: '1px solid #00ccff',
+                    border: '1px solid #3ABFD4',
                     backgroundColor: '#f0fcff',
                     color: '#007a99',
                     fontSize: '0.85rem',
@@ -221,12 +221,13 @@ export default function HomePage() {
 // Styling Constants
 const primaryBtn = {
   padding: '14px 32px',
-  backgroundColor: '#00ccff',
+  backgroundColor: '#3ABFD4',
   color: '#000',
   borderRadius: '12px',
   textDecoration: 'none',
   fontWeight: 'bold',
   fontSize: '1.05rem',
+  minWidth: '180px',
 };
 
 const secondaryBtn = {
@@ -237,6 +238,7 @@ const secondaryBtn = {
   textDecoration: 'none',
   fontWeight: 'bold',
   fontSize: '1.05rem',
+  minWidth: '180px',
 };
 
 const resourceBtn = {

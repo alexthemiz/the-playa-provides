@@ -686,7 +686,7 @@ export default function PublicProfilePage() {
                 <span style={{ color: '#aaa', fontStyle: 'italic' as const, fontSize: '0.9rem' }}>No wishlist yet.</span>
               )}
               {wishTags.map(tag => (
-                <span key={tag} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#00ccff', color: '#000', borderRadius: '20px', padding: '4px 12px', fontSize: '13px', fontWeight: 600 }}>
+                <span key={tag} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 14px', borderRadius: '20px', border: '1px solid #3ABFD4', backgroundColor: '#f0fcff', color: '#007a99', fontSize: '0.85rem', fontWeight: 500 }}>
                   {tag}
                   {isOwner && (
                     <button onClick={() => removeTag(tag)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '0', lineHeight: 1, color: '#005566', fontSize: '14px', fontWeight: 'bold' }} aria-label={`Remove ${tag}`}>×</button>

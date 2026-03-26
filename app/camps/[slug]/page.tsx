@@ -795,8 +795,8 @@ const yearPillStyle: React.CSSProperties = {
 };
 
 const wishTagStyle: React.CSSProperties = {
-  backgroundColor: '#e0faff', padding: '2px 8px', borderRadius: '20px',
-  color: '#007799', border: '1px solid #b0eaf8', fontSize: '11px', fontWeight: 600,
+  padding: '5px 14px', borderRadius: '20px', border: '1px solid #3ABFD4',
+  backgroundColor: '#f0fcff', color: '#007a99', fontSize: '0.85rem', fontWeight: 500,
 };
 
 const mgmtBtnStyle: React.CSSProperties = {

@@ -11,7 +11,7 @@ export default function Footer() {
         {/* Left Side: Branding */}
         <div className="flex flex-col items-center md:items-start flex-1">
           <h2 className="text-xl font-black text-[#2D241E] tracking-tighter uppercase leading-none">
-            THE PLAYA PROVIDES<span style={{ textDecoration: 'underline' }}>{'\u00a0\u00a0'}</span>
+            THE PLAYA PROVIDES<span style={{ textDecoration: 'underline' }}>{'\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0'}</span>
           </h2>
           <p className="text-[10px] text-[#2D241E] opacity-70 font-bold uppercase tracking-widest mt-1">
             © {new Date().getFullYear()} — All Rights Reserved

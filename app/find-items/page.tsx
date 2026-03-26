@@ -252,9 +252,9 @@ export default function FindItemsPage() {
               onClick={() => toggleRelationship(option)}
               style={{
                 ...chipStyle,
-                backgroundColor: isActive ? '#00ccff' : '#fff',
+                backgroundColor: isActive ? '#3ABFD4' : '#fff',
                 color: isActive ? '#000' : '#555',
-                borderColor: isActive ? '#00ccff' : '#ccc',
+                borderColor: isActive ? '#3ABFD4' : '#ccc',
               }}
             >
               {option}
@@ -270,9 +270,9 @@ export default function FindItemsPage() {
               onClick={() => toggleAvailability(value)}
               style={{
                 ...chipStyle,
-                backgroundColor: isActive ? '#00ccff' : '#fff',
+                backgroundColor: isActive ? '#3ABFD4' : '#fff',
                 color: isActive ? '#000' : '#555',
-                borderColor: isActive ? '#00ccff' : '#ccc',
+                borderColor: isActive ? '#3ABFD4' : '#ccc',
               }}
             >
               {label}
@@ -292,9 +292,9 @@ export default function FindItemsPage() {
                 onClick={() => toggleCategory(cat)}
                 style={{
                   ...chipStyle,
-                  backgroundColor: isActive ? '#00ccff' : '#f5f5f5',
+                  backgroundColor: isActive ? '#3ABFD4' : '#f5f5f5',
                   color: isActive ? '#000' : '#333',
-                  borderColor: isActive ? '#00ccff' : '#ddd',
+                  borderColor: isActive ? '#3ABFD4' : '#ddd',
                 }}
               >
                 {cat}
@@ -474,7 +474,7 @@ function ListView({ item }: { item: any }) {
       </div>
       <div style={listColName}>
         <div style={{ fontWeight: '600', color: '#111', fontSize: '14px' }}>{item.item_name}</div>
-        <div style={{ fontSize: '10px', color: '#00ccff', fontWeight: 'bold', textTransform: 'uppercase' as const, marginTop: '2px' }}>
+        <div style={{ fontSize: '10px', color: '#3ABFD4', fontWeight: 'bold', textTransform: 'uppercase' as const, marginTop: '2px' }}>
           {item.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}
         </div>
       </div>
@@ -489,7 +489,7 @@ function ListView({ item }: { item: any }) {
         ) : ownerName}
       </div>
       <div style={{ ...listColMeta, fontSize: '11px', color: '#888' }}>{termsSummary || '—'}</div>
-      <div style={{ color: '#00ccff', fontWeight: 'bold', fontSize: '12px', flexShrink: 0 }}>View →</div>
+      <div style={{ color: '#3ABFD4', fontWeight: 'bold', fontSize: '12px', flexShrink: 0 }}>View →</div>
     </div>
   );
 }
@@ -511,10 +511,10 @@ const gridStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: '
 const listContainerStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: '2px' };
 const cardStyle: React.CSSProperties = { backgroundColor: '#fff', border: '1px solid #eee', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', overflow: 'hidden' };
 const imageWrapperStyle: React.CSSProperties = { position: 'relative' as const, width: '100%' };
-const badgeStyle: React.CSSProperties = { position: 'absolute', top: '10px', left: '10px', backgroundColor: '#00ccff', color: '#000', padding: '3px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', zIndex: 5 };
+const badgeStyle: React.CSSProperties = { position: 'absolute', top: '10px', left: '10px', backgroundColor: '#3ABFD4', color: '#000', padding: '3px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', zIndex: 5 };
 const cardContentStyle: React.CSSProperties = { padding: '15px' };
 const itemTitleStyle: React.CSSProperties = { margin: 0, color: '#111', fontSize: '16px', fontWeight: '600' };
-const categoryLabelStyle: React.CSSProperties = { color: '#00ccff', fontSize: '11px', margin: '4px 0 12px 0', textTransform: 'uppercase', fontWeight: 'bold' };
+const categoryLabelStyle: React.CSSProperties = { color: '#3ABFD4', fontSize: '11px', margin: '4px 0 12px 0', textTransform: 'uppercase', fontWeight: 'bold' };
 const metaRowStyle: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', color: '#777', fontSize: '12px', borderTop: '1px solid #f5f5f5', paddingTop: '10px' };
 const metaItemStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '4px' };
 const LIST_COLS = '50px 160px 1fr 140px 120px 110px 1fr 70px';
@@ -548,7 +548,7 @@ const closeButtonStyle: React.CSSProperties = {
 };
 
 const primaryButtonStyle: React.CSSProperties = {
-  width: '100%', padding: '18px', backgroundColor: '#00ccff', color: '#000', 
+  width: '100%', padding: '18px', backgroundColor: '#3ABFD4', color: '#000', 
   border: 'none', borderRadius: '14px', fontWeight: 'bold', fontSize: '16px', 
   cursor: 'pointer', boxShadow: '0 4px 14px rgba(0,204,255,0.4)'
 };

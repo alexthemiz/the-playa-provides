@@ -130,7 +130,7 @@ export default function Header() {
 
   const headerBg = { backgroundColor: '#E8834A' }
   const mainTextColor = 'text-[#2D241E]'
-  const hoverEffect = 'hover:text-[#00ccff]'
+  const hoverEffect = 'hover:text-[#3ABFD4]'
 
   const navLinks = user ? (
     <>

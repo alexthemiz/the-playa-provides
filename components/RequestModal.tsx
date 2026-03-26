@@ -157,13 +157,13 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
                   type="date"
                   value={pickupDate}
                   onChange={(e) => setPickupDate(e.target.value)}
-                  className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-sm"
+                  className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-[#3ABFD4] focus:border-transparent outline-none text-sm"
                   style={{ color: '#111' }}
                 />
               </div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Message to owner</label>
               <textarea
-                className="w-full border rounded-xl p-3 h-32 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none text-sm"
+                className="w-full border rounded-xl p-3 h-32 focus:ring-2 focus:ring-[#3ABFD4] focus:border-transparent outline-none text-sm"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 style={{ color: '#111' }}
@@ -176,7 +176,8 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
               <button
                 onClick={handleSendRequest}
                 disabled={sending || !message.trim()}
-                className="w-full mt-4 bg-orange-600 text-white py-3 rounded-xl font-semibold hover:bg-orange-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+                className="w-full mt-4 bg-[#E8834A] text-black py-3 rounded-xl font-semibold hover:bg-[#D4621F] disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+                style={{ boxShadow: 'none' }}
               >
                 {sending ? 'Sending...' : 'Send Request'}
               </button>

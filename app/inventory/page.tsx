@@ -577,7 +577,7 @@ export default function InventoryPage() {
                 <th style={thStyle}>Category</th>
                 <th style={thStyle}>Location</th>
                 <th style={thStyle}>Description</th>
-                <th style={thStyle}>Status</th>
+                <th style={thStyle}>Availability</th>
                 <th style={thStyle}>Action</th>
               </tr>
             </thead>
@@ -634,8 +634,8 @@ export default function InventoryPage() {
                     <td style={tdStyle}>
                       <div style={{ display: 'flex', gap: '4px' }}>
                         {[
-                          { value: 'Available to Borrow', label: 'Borrow' },
-                          { value: 'Available to Keep', label: 'Keep' },
+                          { value: 'Available to Borrow', label: 'To Borrow' },
+                          { value: 'Available to Keep', label: 'To Keep' },
                           { value: 'Not Available', label: 'Private' },
                         ].map(opt => (
                           <button
@@ -1011,7 +1011,7 @@ export default function InventoryPage() {
 function getStatusToggleStyle(optionValue: string, currentStatus: string): React.CSSProperties {
   const isActive = optionValue === currentStatus;
   if (optionValue === 'Available to Borrow') {
-    return { padding: '3px 8px', fontSize: '0.7rem', borderRadius: '4px', cursor: 'pointer', fontWeight: isActive ? 'bold' : 'normal', border: '1px solid #00ccff', backgroundColor: isActive ? '#00ccff' : '#fff', color: isActive ? '#000' : '#00aacc', whiteSpace: 'nowrap' as const };
+    return { padding: '3px 8px', fontSize: '0.7rem', borderRadius: '4px', cursor: 'pointer', fontWeight: isActive ? 'bold' : 'normal', border: '1px solid #3ABFD4', backgroundColor: isActive ? '#3ABFD4' : '#fff', color: isActive ? '#000' : '#00aacc', whiteSpace: 'nowrap' as const };
   }
   if (optionValue === 'Available to Keep') {
     return { padding: '3px 8px', fontSize: '0.7rem', borderRadius: '4px', cursor: 'pointer', fontWeight: isActive ? 'bold' : 'normal', border: '1px solid #EA580C', backgroundColor: isActive ? '#EA580C' : '#fff', color: isActive ? '#fff' : '#a06040', whiteSpace: 'nowrap' as const };
@@ -1020,7 +1020,7 @@ function getStatusToggleStyle(optionValue: string, currentStatus: string): React
 }
 
 // --- STYLES ---
-const addButtonStyle: React.CSSProperties = { backgroundColor: '#00ccff', color: '#000', padding: '10px 20px', borderRadius: '6px', border: 'none', fontWeight: 'bold', cursor: 'pointer', whiteSpace: 'nowrap' as const, fontSize: '0.9rem' };
+const addButtonStyle: React.CSSProperties = { backgroundColor: '#3ABFD4', color: '#000', padding: '10px 20px', borderRadius: '6px', border: 'none', fontWeight: 'bold', cursor: 'pointer', whiteSpace: 'nowrap' as const, fontSize: '0.9rem' };
 const importButtonStyle: React.CSSProperties = { backgroundColor: '#fff', color: '#2D241E', padding: '10px 16px', borderRadius: '6px', border: '1px solid #ddd', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' as const, fontSize: '0.9rem' };
 const filterBarStyle: React.CSSProperties = { display: 'flex', gap: '12px', marginBottom: '24px', background: '#f7f7f7', padding: '16px', borderRadius: '12px', border: '1px solid #eee', alignItems: 'flex-end' };
 const labelStyle: React.CSSProperties = { display: 'block', fontSize: '0.75rem', color: '#888', marginBottom: '5px' };
@@ -1037,8 +1037,8 @@ const locationDropdownStyle: React.CSSProperties = { position: 'absolute' as con
 const locationOptionStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 4px', cursor: 'pointer', borderRadius: '4px' };
 
 // Action buttons
-const lendButtonStyle: React.CSSProperties = { height: '30px', padding: '0 14px', fontSize: '0.75rem', backgroundColor: '#00ccff', color: '#000', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' as const };
-const transferButtonStyle: React.CSSProperties = { height: '30px', padding: '0 14px', fontSize: '0.75rem', backgroundColor: '#EA580C', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' as const };
+const lendButtonStyle: React.CSSProperties = { height: '30px', padding: '0 14px', fontSize: '0.75rem', backgroundColor: '#3ABFD4', color: '#000', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' as const };
+const transferButtonStyle: React.CSSProperties = { height: '30px', padding: '0 14px', fontSize: '0.75rem', backgroundColor: '#EA580C', color: '#000', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' as const };
 const makeAvailableButtonStyle: React.CSSProperties = { height: '30px', padding: '0 14px', fontSize: '0.75rem', backgroundColor: '#f0f0f0', color: '#666', border: '1px solid #ddd', borderRadius: '5px', cursor: 'pointer', fontWeight: 'normal', whiteSpace: 'nowrap' as const };
 const pendingBadgeStyle: React.CSSProperties = { display: 'inline-block', padding: '2px 8px', backgroundColor: '#fef3c7', color: '#92400e', borderRadius: '10px', fontSize: '0.7rem', fontWeight: 700 };
 const handsOverButtonStyle: React.CSSProperties = { height: '28px', padding: '0 10px', fontSize: '0.7rem', backgroundColor: '#16a34a', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' as const };
@@ -1047,4 +1047,4 @@ const cancelActionButtonStyle: React.CSSProperties = { height: '24px', padding: 
 const visibilitySelectStyle: React.CSSProperties = { marginTop: '6px', width: '100%', padding: '3px 6px', fontSize: '0.7rem', border: '1px solid #ddd', borderRadius: '4px', backgroundColor: '#fff', color: '#555', cursor: 'pointer' };
 const loanLocationSelectStyle: React.CSSProperties = { width: '100%', padding: '5px 8px', fontSize: '0.8rem', border: '1px solid #ddd', borderRadius: '6px', color: '#2D241E', backgroundColor: '#fff', cursor: 'pointer' };
 const loanLocInputStyle: React.CSSProperties = { width: '100%', padding: '5px 8px', fontSize: '0.75rem', border: '1px solid #ddd', borderRadius: '5px', color: '#2D241E', backgroundColor: '#fff', boxSizing: 'border-box' as const };
-const saveLocButtonStyle: React.CSSProperties = { padding: '5px 12px', fontSize: '0.75rem', backgroundColor: '#00ccff', color: '#000', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 600 };
+const saveLocButtonStyle: React.CSSProperties = { padding: '5px 12px', fontSize: '0.75rem', backgroundColor: '#3ABFD4', color: '#000', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 600 };
