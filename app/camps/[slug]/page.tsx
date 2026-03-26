@@ -795,7 +795,7 @@ const yearPillStyle: React.CSSProperties = {
 };
 
 const wishTagStyle: React.CSSProperties = {
-  padding: '5px 14px', borderRadius: '20px', border: '1px solid #3ABFD4',
+  padding: '5px 14px', borderRadius: '20px', border: '1px solid #5ECFDF',
   backgroundColor: '#f0fcff', color: '#007a99', fontSize: '0.85rem', fontWeight: 500,
 };
 
@@ -875,13 +875,13 @@ function CampCardView({ item }: { item: any }) {
     <div style={{ backgroundColor: '#fff', border: '1px solid #eee', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
       <div style={{ position: 'relative' as const, backgroundColor: 'transparent', padding: '12px 12px 0 12px', width: '100%', overflow: 'hidden', boxSizing: 'border-box' as const }}>
         <PolaroidPhoto src={item.image_urls?.[0]} alt={item.item_name} itemId={item.id} noRotate />
-        <div style={{ position: 'absolute', top: '10px', left: '10px', backgroundColor: '#00ccff', color: '#000', padding: '3px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', zIndex: 5 }}>
+        <div style={{ position: 'absolute', top: '10px', left: '10px', backgroundColor: '#5ECFDF', color: '#000', padding: '3px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', zIndex: 5 }}>
           {item.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}
         </div>
       </div>
       <div style={{ padding: '15px' }}>
         <h3 style={{ margin: 0, color: '#111', fontSize: '16px', fontWeight: 600 }}>{item.item_name}</h3>
-        <p style={{ color: '#00ccff', fontSize: '11px', margin: '4px 0 12px', textTransform: 'uppercase' as const, fontWeight: 'bold' }}>{item.category} • {item.condition}</p>
+        <p style={{ color: '#5ECFDF', fontSize: '11px', margin: '4px 0 12px', textTransform: 'uppercase' as const, fontWeight: 'bold' }}>{item.category} • {item.condition}</p>
         <div style={{ display: 'flex', justifyContent: 'space-between', color: '#777', fontSize: '12px', borderTop: '1px solid #f5f5f5', paddingTop: '10px' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><MapPin size={12} />{locationDisplay}</span>
           {item.profiles?.username ? (
@@ -925,7 +925,7 @@ function CampListView({ item }: { item: any }) {
       </div>
       <div style={{ overflow: 'hidden' }}>
         <div style={{ fontWeight: 600, color: '#111', fontSize: '14px' }}>{item.item_name}</div>
-        <div style={{ fontSize: '10px', color: '#00ccff', fontWeight: 'bold', textTransform: 'uppercase' as const, marginTop: '2px' }}>
+        <div style={{ fontSize: '10px', color: '#5ECFDF', fontWeight: 'bold', textTransform: 'uppercase' as const, marginTop: '2px' }}>
           {item.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}
         </div>
       </div>
@@ -966,9 +966,9 @@ const campCloseButtonStyle: React.CSSProperties = {
   width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
   zIndex: 10,
 };
-const campCategoryLabelStyle: React.CSSProperties = { color: '#00ccff', fontSize: '11px', margin: '4px 0 12px', textTransform: 'uppercase', fontWeight: 'bold' };
+const campCategoryLabelStyle: React.CSSProperties = { color: '#5ECFDF', fontSize: '11px', margin: '4px 0 12px', textTransform: 'uppercase', fontWeight: 'bold' };
 const campPrimaryButtonStyle: React.CSSProperties = {
-  width: '100%', padding: '18px', backgroundColor: '#00ccff', color: '#000',
+  width: '100%', padding: '18px', backgroundColor: '#5ECFDF', color: '#000',
   border: 'none', borderRadius: '14px', fontWeight: 'bold', fontSize: '16px',
   cursor: 'pointer', boxShadow: '0 4px 14px rgba(0,204,255,0.4)',
 };

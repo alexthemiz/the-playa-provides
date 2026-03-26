@@ -71,7 +71,7 @@ serve(async (req: Request) => {
             </ul>
             ${noteHtml}
             <p>
-              <a href="https://theplayaprovides.com/profile/${senderUsername}" style="display: inline-block; padding: 12px 24px; background: #00ccff; color: #000; text-decoration: none; border-radius: 8px; font-weight: bold;">
+              <a href="https://theplayaprovides.com/profile/${senderUsername}" style="display: inline-block; padding: 12px 24px; background: #5ECFDF; color: #000; text-decoration: none; border-radius: 8px; font-weight: bold;">
                 View ${senderName}'s Profile
               </a>
             </p>

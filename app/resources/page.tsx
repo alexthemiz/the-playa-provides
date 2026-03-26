@@ -57,7 +57,7 @@ export default function ResourcesPage() {
       case 'Donations': return <Box className="text-amber-600 w-6 h-6" />;
       case 'Food/Drink': return <Beer className="text-orange-500 w-6 h-6" />;
       case 'Health/Wellness': return <Heart className="text-red-500 w-6 h-6" />;
-      case 'Water': return <Droplets className="text-[#00ccff] w-6 h-6" />;
+      case 'Water': return <Droplets className="text-[#5ECFDF] w-6 h-6" />;
       case 'Bike Repair': return <Wrench className="text-slate-500 w-6 h-6" />;
       default: return <Wrench className="text-[#C08261] w-6 h-6" />;
     }
@@ -84,7 +84,7 @@ return (
           </div>
           <button
             onClick={() => setIsModalOpen(true)}
-            style={{ backgroundColor: '#00ccff', color: '#000', padding: '10px 20px', borderRadius: '6px', border: 'none', fontWeight: 'bold', cursor: 'pointer', whiteSpace: 'nowrap' as const, fontSize: '0.9rem', flexShrink: 0 }}
+            style={{ backgroundColor: '#5ECFDF', color: '#000', padding: '10px 20px', borderRadius: '6px', border: 'none', fontWeight: 'bold', cursor: 'pointer', whiteSpace: 'nowrap' as const, fontSize: '0.9rem', flexShrink: 0 }}
           >
             Submit Your Camp
           </button>

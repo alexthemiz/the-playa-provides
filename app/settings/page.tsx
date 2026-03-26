@@ -304,7 +304,7 @@ export default function SettingsPage() {
                       type="checkbox"
                       checked={loc.is_default || false}
                       onChange={() => setDefaultLocation(index)}
-                      style={{ accentColor: '#00ccff', cursor: 'pointer' }}
+                      style={{ accentColor: '#5ECFDF', cursor: 'pointer' }}
                     />
                     Set as default
                   </label>
@@ -335,7 +335,7 @@ export default function SettingsPage() {
                 type="checkbox"
                 checked={profile.notify_new_items_email || false}
                 onChange={e => setProfile({ ...profile, notify_new_items_email: e.target.checked })}
-                style={{ marginTop: '2px', accentColor: '#00ccff', cursor: 'pointer', width: '16px', height: '16px' }}
+                style={{ marginTop: '2px', accentColor: '#5ECFDF', cursor: 'pointer', width: '16px', height: '16px' }}
               />
               <div>
                 <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#111' }}>
@@ -475,7 +475,7 @@ const errorStyle = { display: 'block', color: '#dc2626', fontSize: '11px', margi
 const oauthNoteStyle = { color: '#888', fontSize: '13px', margin: '0' };
 const successMsgStyle = { color: '#16a34a', fontSize: '12px', marginTop: '8px', marginBottom: '0' };
 const inputStyle = { width: '100%', padding: '8px 10px', backgroundColor: '#fff', border: '1px solid #ddd', borderRadius: '8px', color: '#111', outline: 'none', boxSizing: 'border-box' as const, fontSize: '0.9rem' };
-const buttonStyle = { padding: '14px', backgroundColor: '#00ccff', color: 'black', fontWeight: 'bold' as const, border: 'none', borderRadius: '8px', cursor: 'pointer', width: '100%' };
+const buttonStyle = { padding: '14px', backgroundColor: '#5ECFDF', color: 'black', fontWeight: 'bold' as const, border: 'none', borderRadius: '8px', cursor: 'pointer', width: '100%' };
 const smallButtonStyle = { width: '100%', padding: '10px', backgroundColor: '#eee', color: '#333', border: '1px solid #ccc', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem' };
 const addressCardStyle = { backgroundColor: '#f8f8f8', border: '1px solid #e0e0e0', borderRadius: '10px', padding: '12px', marginBottom: '10px' };
 const deleteButtonStyle = { padding: '10px 24px', backgroundColor: '#fff0f0', color: '#cc0000', border: '1px solid #ffaaaa', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' as const, fontSize: '0.9rem' };

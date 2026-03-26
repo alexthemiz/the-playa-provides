@@ -191,7 +191,7 @@ export default function ImportSpreadsheetModal({
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
                 style={{
-                  border: `2px dashed ${dragOver ? '#00ccff' : '#ddd'}`,
+                  border: `2px dashed ${dragOver ? '#5ECFDF' : '#ddd'}`,
                   borderRadius: '12px',
                   padding: '52px 24px',
                   textAlign: 'center' as const,
@@ -200,7 +200,7 @@ export default function ImportSpreadsheetModal({
                   transition: 'border-color 0.15s, background-color 0.15s',
                 }}
               >
-                <Upload size={32} color={dragOver ? '#00ccff' : '#ccc'} style={{ marginBottom: '12px', display: 'block', margin: '0 auto 12px' }} />
+                <Upload size={32} color={dragOver ? '#5ECFDF' : '#ccc'} style={{ marginBottom: '12px', display: 'block', margin: '0 auto 12px' }} />
                 <p style={{ margin: '0 0 4px', fontWeight: 600, color: '#2D241E', fontSize: '0.95rem' }}>Drop your file here</p>
                 <p style={{ margin: 0, fontSize: '0.8rem', color: '#aaa' }}>or click to browse — CSV, Excel, or Google Sheets export</p>
                 <input
@@ -387,5 +387,5 @@ const modalStyle: React.CSSProperties = {
 };
 const colHeadStyle: React.CSSProperties = { fontSize: '0.7rem', textTransform: 'uppercase' as const, color: '#aaa', fontWeight: 'bold', letterSpacing: '0.08em' };
 const thStyle: React.CSSProperties = { padding: '8px 12px', textAlign: 'left' as const, fontSize: '0.7rem', textTransform: 'uppercase' as const, color: '#aaa', fontWeight: 'bold', letterSpacing: '0.08em' };
-const primaryBtnStyle: React.CSSProperties = { flex: 2, padding: '12px', backgroundColor: '#00ccff', color: '#000', fontWeight: 600, border: 'none', borderRadius: '8px', fontSize: '0.9rem' };
+const primaryBtnStyle: React.CSSProperties = { flex: 2, padding: '12px', backgroundColor: '#5ECFDF', color: '#000', fontWeight: 600, border: 'none', borderRadius: '8px', fontSize: '0.9rem' };
 const secondaryBtnStyle: React.CSSProperties = { flex: 1, padding: '12px', backgroundColor: '#f5f5f5', color: '#444', border: '1px solid #ddd', borderRadius: '8px', fontSize: '0.9rem', cursor: 'pointer' };

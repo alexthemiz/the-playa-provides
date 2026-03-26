@@ -124,7 +124,7 @@ const inputStyle: React.CSSProperties = {
 };
 
 const submitButtonStyle: React.CSSProperties = {
-  width: '100%', backgroundColor: '#00ccff', color: '#000',
+  width: '100%', backgroundColor: '#5ECFDF', color: '#000',
   padding: '13px', borderRadius: '8px', fontWeight: 600,
   border: 'none', fontSize: '1rem',
 };

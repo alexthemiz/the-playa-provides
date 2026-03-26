@@ -305,7 +305,7 @@ function ListItemPageInner() {
               ].map(status => (
                 <label key={status.id} style={{
                   ...radioLabelStyle,
-                  border: availability === status.id ? '2px solid #00ccff' : '1px solid #eee',
+                  border: availability === status.id ? '2px solid #5ECFDF' : '1px solid #eee',
                   backgroundColor: availability === status.id ? '#f0fbff' : '#fff',
                 }}>
                   <input type="radio" value={status.id} checked={availability === status.id} onChange={e => setAvailability(e.target.value)} style={{ display: 'none' }} />
@@ -504,7 +504,7 @@ const inputStyle: React.CSSProperties = { padding: '9px 12px', borderRadius: '8p
 const radioGroupStyle: React.CSSProperties = { display: 'flex', flexDirection: 'row' as const, gap: '8px' };
 const radioLabelStyle: React.CSSProperties = { flex: 1, padding: '10px 12px', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' };
 const detailsBoxStyle: React.CSSProperties = { marginTop: '10px', padding: '14px', backgroundColor: '#f9f9f9', borderRadius: '10px', border: '1px solid #eee' };
-const submitButtonStyle: React.CSSProperties = { padding: '14px', backgroundColor: '#00ccff', color: 'black', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', fontSize: '15px', marginTop: '8px' };
+const submitButtonStyle: React.CSSProperties = { padding: '14px', backgroundColor: '#5ECFDF', color: 'black', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', fontSize: '15px', marginTop: '8px' };
 const photoUploadContainer: React.CSSProperties = { display: 'flex', gap: '10px', flexWrap: 'wrap' as const };
 const photoPlaceholder: React.CSSProperties = { width: '80px', height: '80px', borderRadius: '10px', border: '2px dashed #ddd', display: 'flex', flexDirection: 'column' as const, alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#aaa', fontSize: '10px', textAlign: 'center' as const, gap: '4px' };
 const photoPreviewImg: React.CSSProperties = { width: '80px', height: '80px', objectFit: 'cover' as const, borderRadius: '10px', border: '1px solid #eee' };
@@ -512,5 +512,5 @@ const removePhotoBtn: React.CSSProperties = { position: 'absolute' as const, top
 const modalOverlayStyle: React.CSSProperties = { position: 'fixed' as const, top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 };
 const modalContentStyle: React.CSSProperties = { backgroundColor: '#fff', padding: '40px', borderRadius: '24px', width: '90%', maxWidth: '400px', textAlign: 'center' as const, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' };
 const checkCircleStyle: React.CSSProperties = { width: '70px', height: '70px', backgroundColor: '#f0fdf4', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto' };
-const primaryActionBtn: React.CSSProperties = { padding: '13px', backgroundColor: '#00ccff', color: 'black', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', width: '100%' };
+const primaryActionBtn: React.CSSProperties = { padding: '13px', backgroundColor: '#5ECFDF', color: 'black', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', width: '100%' };
 const secondaryActionBtn: React.CSSProperties = { padding: '13px', backgroundColor: '#f5f5f5', color: '#666', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', width: '100%' };

@@ -46,7 +46,7 @@ const cardStyle: React.CSSProperties = {
 const buttonStyle: React.CSSProperties = {
   display: 'inline-block',
   padding: '12px 28px',
-  backgroundColor: '#00ccff',
+  backgroundColor: '#5ECFDF',
   color: '#000',
   fontWeight: 600,
   borderRadius: '8px',

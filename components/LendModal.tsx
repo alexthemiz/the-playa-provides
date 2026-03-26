@@ -169,6 +169,6 @@ const lookupButtonStyle: React.CSSProperties = { padding: '10px 16px', backgroun
 const matchedBoxStyle: React.CSSProperties = { backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '10px 14px', marginBottom: '4px' }
 const errorStyle: React.CSSProperties = { color: '#dc2626', fontSize: '0.85rem', margin: '4px 0' }
 const cancelButtonStyle: React.CSSProperties = { padding: '10px 18px', backgroundColor: '#f0f0f0', color: '#666', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }
-const confirmButtonStyle: React.CSSProperties = { padding: '10px 18px', backgroundColor: '#00ccff', color: '#000', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }
+const confirmButtonStyle: React.CSSProperties = { padding: '10px 18px', backgroundColor: '#5ECFDF', color: '#000', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }
 const termsGridStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }
 const labelStyle: React.CSSProperties = { display: 'block', fontSize: '0.75rem', color: '#888', marginBottom: '5px' }

@@ -578,7 +578,7 @@ export default function PublicProfilePage() {
                     setIsEditing(true);
                   }
                 }}
-                style={{ padding: '8px 20px', backgroundColor: isEditing ? '#4CAF50' : '#00ccff', color: isEditing ? '#fff' : '#000', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
+                style={{ padding: '8px 20px', backgroundColor: isEditing ? '#4CAF50' : '#5ECFDF', color: isEditing ? '#fff' : '#000', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
               >
                 {isEditing ? 'Save Profile' : 'Edit Profile'}
               </button>
@@ -586,7 +586,7 @@ export default function PublicProfilePage() {
               <button
                 onClick={handleFollowToggle}
                 disabled={followLoading}
-                style={{ padding: '8px 20px', backgroundColor: isFollowing ? '#f0f0f0' : '#00ccff', color: isFollowing ? '#666' : '#000', border: isFollowing ? '1px solid #ddd' : 'none', borderRadius: '6px', cursor: followLoading ? 'default' : 'pointer', fontWeight: 'bold', opacity: followLoading ? 0.6 : 1 }}
+                style={{ padding: '8px 20px', backgroundColor: isFollowing ? '#f0f0f0' : '#5ECFDF', color: isFollowing ? '#666' : '#000', border: isFollowing ? '1px solid #ddd' : 'none', borderRadius: '6px', cursor: followLoading ? 'default' : 'pointer', fontWeight: 'bold', opacity: followLoading ? 0.6 : 1 }}
               >
                 {followLoading ? '...' : isFollowing ? 'Following' : 'Follow'}
               </button>
@@ -652,7 +652,7 @@ export default function PublicProfilePage() {
                       </a>
                       <button
                         onClick={() => handleListFollowToggle(entry.id, openList!)}
-                        style={{ padding: '5px 14px', backgroundColor: entry.isFollowing ? '#f0f0f0' : '#00ccff', color: entry.isFollowing ? '#666' : '#000', border: entry.isFollowing ? '1px solid #ddd' : 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}
+                        style={{ padding: '5px 14px', backgroundColor: entry.isFollowing ? '#f0f0f0' : '#5ECFDF', color: entry.isFollowing ? '#666' : '#000', border: entry.isFollowing ? '1px solid #ddd' : 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}
                       >
                         {entry.isFollowing ? 'Following' : 'Follow'}
                       </button>
@@ -686,7 +686,7 @@ export default function PublicProfilePage() {
                 <span style={{ color: '#aaa', fontStyle: 'italic' as const, fontSize: '0.9rem' }}>No wishlist yet.</span>
               )}
               {wishTags.map(tag => (
-                <span key={tag} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 14px', borderRadius: '20px', border: '1px solid #3ABFD4', backgroundColor: '#f0fcff', color: '#007a99', fontSize: '0.85rem', fontWeight: 500 }}>
+                <span key={tag} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 14px', borderRadius: '20px', border: '1px solid #5ECFDF', backgroundColor: '#f0fcff', color: '#007a99', fontSize: '0.85rem', fontWeight: 500 }}>
                   {tag}
                   {isOwner && (
                     <button onClick={() => removeTag(tag)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '0', lineHeight: 1, color: '#005566', fontSize: '14px', fontWeight: 'bold' }} aria-label={`Remove ${tag}`}>×</button>
@@ -697,7 +697,7 @@ export default function PublicProfilePage() {
             {isOwner && (
               <div style={{ display: 'flex', gap: '8px' }}>
                 <input type="text" value={tagInput} placeholder="Add an item..." onChange={e => setTagInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }} disabled={tagSaving} style={{ flex: 1, backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', padding: '6px 10px', borderRadius: '6px', fontSize: '13px', outline: 'none', opacity: tagSaving ? 0.5 : 1 }} />
-                <button onClick={addTag} disabled={tagSaving} style={{ backgroundColor: '#00ccff', color: '#000', border: 'none', borderRadius: '6px', padding: '6px 14px', fontWeight: 600, fontSize: '13px', cursor: tagSaving ? 'default' as const : 'pointer' as const, opacity: tagSaving ? 0.5 : 1 }}>Add</button>
+                <button onClick={addTag} disabled={tagSaving} style={{ backgroundColor: '#5ECFDF', color: '#000', border: 'none', borderRadius: '6px', padding: '6px 14px', fontWeight: 600, fontSize: '13px', cursor: tagSaving ? 'default' as const : 'pointer' as const, opacity: tagSaving ? 0.5 : 1 }}>Add</button>
               </div>
             )}
             {!isOwner && currentUserId && wishTags.length > 0 && (
@@ -926,7 +926,7 @@ export default function PublicProfilePage() {
                   </div>
                   <div style={{ overflow: 'hidden' }}>
                     <div style={{ fontWeight: '600', color: '#111', fontSize: '14px' }}>{item.item_name}</div>
-                    <div style={{ fontSize: '10px', color: '#00ccff', fontWeight: 'bold', textTransform: 'uppercase' as const, marginTop: '2px' }}>
+                    <div style={{ fontSize: '10px', color: '#5ECFDF', fontWeight: 'bold', textTransform: 'uppercase' as const, marginTop: '2px' }}>
                       {item.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}
                     </div>
                     {isOwner && item.visibility && item.visibility !== 'public' && (
@@ -946,7 +946,7 @@ export default function PublicProfilePage() {
                   </div>
                   <div style={{ ...listColStyle, fontSize: '11px', color: '#888' }}>{termsSummary || '—'}</div>
                   <div style={{ flexShrink: 0 }}>
-                    <a href={`/find-items/${item.id}`} style={{ color: '#00ccff', textDecoration: 'none', fontWeight: 'bold', fontSize: '12px' }}>View →</a>
+                    <a href={`/find-items/${item.id}`} style={{ color: '#5ECFDF', textDecoration: 'none', fontWeight: 'bold', fontSize: '12px' }}>View →</a>
                   </div>
                 </div>
               );

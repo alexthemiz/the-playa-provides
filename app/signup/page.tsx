@@ -238,7 +238,7 @@ const containerStyle: React.CSSProperties = { display: 'flex', alignItems: 'cent
 const formStyle: React.CSSProperties = { backgroundColor: '#fff', padding: '28px', borderRadius: '14px', border: '1px solid #e5e5e5', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', width: '100%', maxWidth: '520px' };
 const labelStyle: React.CSSProperties = { display: 'block', color: '#888', fontSize: '0.75rem', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 'bold' };
 const inputStyle: React.CSSProperties = { width: '100%', padding: '12px', backgroundColor: '#fff', border: '1px solid #ddd', color: '#2D241E', borderRadius: '8px', outline: 'none', fontSize: '1rem', boxSizing: 'border-box' };
-const buttonStyle: React.CSSProperties = { width: '100%', padding: '13px', backgroundColor: '#00ccff', color: '#000', fontWeight: 600, border: 'none', borderRadius: '8px', fontSize: '1rem', marginTop: '10px' };
+const buttonStyle: React.CSSProperties = { width: '100%', padding: '13px', backgroundColor: '#5ECFDF', color: '#000', fontWeight: 600, border: 'none', borderRadius: '8px', fontSize: '1rem', marginTop: '10px' };
 
 const googleButtonStyle: React.CSSProperties = {
   width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',

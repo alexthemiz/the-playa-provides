@@ -133,7 +133,7 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, o
                     type="checkbox"
                     checked={selectedTags.has(tag)}
                     onChange={() => toggleTag(tag)}
-                    style={{ accentColor: '#00ccff', width: '15px', height: '15px', flexShrink: 0 }}
+                    style={{ accentColor: '#5ECFDF', width: '15px', height: '15px', flexShrink: 0 }}
                   />
                   <span style={{ fontSize: '0.95rem', color: '#2D241E' }}>{tag}</span>
                 </label>
@@ -164,7 +164,7 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, o
                       type="checkbox"
                       checked={selectedItemNames.has(item.item_name)}
                       onChange={() => toggleItem(item.item_name)}
-                      style={{ accentColor: '#00ccff', width: '15px', height: '15px', flexShrink: 0 }}
+                      style={{ accentColor: '#5ECFDF', width: '15px', height: '15px', flexShrink: 0 }}
                     />
                     <span style={{ fontSize: '0.95rem', color: '#2D241E' }}>{item.item_name}</span>
                   </label>
@@ -228,6 +228,6 @@ const cancelStyle: React.CSSProperties = {
   border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600,
 };
 const sendStyle: React.CSSProperties = {
-  padding: '10px 18px', backgroundColor: '#00ccff', color: '#000',
+  padding: '10px 18px', backgroundColor: '#5ECFDF', color: '#000',
   border: 'none', borderRadius: '6px', fontWeight: 600,
 };
