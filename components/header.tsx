@@ -171,7 +171,7 @@ export default function Header() {
         {/* Logo */}
         <Link href="/" className="hover:opacity-80 transition flex flex-col leading-tight">
           <span className={`font-black text-xl uppercase tracking-tighter ${mainTextColor}`}>
-            The Playa Provides<span style={{ textDecoration: 'underline' }}>{'\u00a0\u00a0'}</span>
+            The Playa Provides<span style={{ textDecoration: 'underline' }}>{'\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0'}</span>
           </span>
         </Link>
 

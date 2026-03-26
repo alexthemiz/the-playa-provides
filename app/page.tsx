@@ -86,7 +86,7 @@ export default function HomePage() {
         background: '#ffffff',
       }}>
         <h1 style={{ fontSize: '4rem', marginBottom: '20px', fontWeight: '900', letterSpacing: '-2px', color: '#2D241E' }}>
-          The Playa Provides
+          The Playa Provides<span className="blink-cursor">_</span>
         </h1>
 
         <p style={{
