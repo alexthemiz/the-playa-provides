@@ -1014,7 +1014,7 @@ function getStatusToggleStyle(optionValue: string, currentStatus: string): React
     return { padding: '3px 8px', fontSize: '0.7rem', borderRadius: '4px', cursor: 'pointer', fontWeight: isActive ? 'bold' : 'normal', border: '1px solid #3ABFD4', backgroundColor: isActive ? '#3ABFD4' : '#fff', color: isActive ? '#000' : '#00aacc', whiteSpace: 'nowrap' as const };
   }
   if (optionValue === 'Available to Keep') {
-    return { padding: '3px 8px', fontSize: '0.7rem', borderRadius: '4px', cursor: 'pointer', fontWeight: isActive ? 'bold' : 'normal', border: '1px solid #EA580C', backgroundColor: isActive ? '#EA580C' : '#fff', color: isActive ? '#fff' : '#a06040', whiteSpace: 'nowrap' as const };
+    return { padding: '3px 8px', fontSize: '0.7rem', borderRadius: '4px', cursor: 'pointer', fontWeight: isActive ? 'bold' : 'normal', border: '1px solid #EA580C', backgroundColor: isActive ? '#EA580C' : '#fff', color: isActive ? '#000' : '#a06040', whiteSpace: 'nowrap' as const };
   }
   return { padding: '3px 8px', fontSize: '0.7rem', borderRadius: '4px', cursor: 'pointer', fontWeight: isActive ? 'bold' : 'normal', border: '1px solid #ddd', backgroundColor: isActive ? '#e0e0e0' : '#fff', color: isActive ? '#444' : '#999', whiteSpace: 'nowrap' as const };
 }
