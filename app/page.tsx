@@ -231,7 +231,7 @@ const primaryBtn = {
 
 const secondaryBtn = {
   padding: '14px 32px',
-  backgroundColor: '#C08261',
+  backgroundColor: '#EA580C',
   color: 'white',
   borderRadius: '12px',
   textDecoration: 'none',

@@ -128,20 +128,20 @@ export default function Header() {
     setBellOpen(false)
   }
 
-  const headerBg = { backgroundColor: '#C08261' }
+  const headerBg = { backgroundColor: '#EA580C' }
   const mainTextColor = 'text-[#2D241E]'
   const hoverEffect = 'hover:text-[#00ccff]'
 
   const navLinks = user ? (
     <>
-      <Link href="/resources" onClick={() => setMenuOpen(false)} className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>On-Playa Resources</Link>
-      <Link href="/find-items" onClick={() => setMenuOpen(false)} className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>Find Items</Link>
-      <Link href="/list-item" onClick={() => setMenuOpen(false)} className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition whitespace-nowrap`}>Offer an Item</Link>
-      <Link href="/inventory" onClick={() => setMenuOpen(false)} className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>My Inventory</Link>
+      <Link href="/resources" onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>On-Playa Resources</Link>
+      <Link href="/find-items" onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>Find Items</Link>
+      <Link href="/list-item" onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition whitespace-nowrap`}>Offer an Item</Link>
+      <Link href="/inventory" onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>My Inventory</Link>
       {username && (
-        <Link href={`/profile/${username}`} onClick={() => setMenuOpen(false)} className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>My Profile</Link>
+        <Link href={`/profile/${username}`} onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>My Profile</Link>
       )}
-      <Link href="/settings" onClick={() => setMenuOpen(false)} className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>Settings</Link>
+      <Link href="/settings" onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>Settings</Link>
       <button
         onClick={() => { setMenuOpen(false); handleSignOut() }}
         className="text-sm font-bold text-red-800 hover:text-red-600 transition cursor-pointer text-left"
@@ -151,13 +151,13 @@ export default function Header() {
     </>
   ) : (
     <>
-      <Link href="/resources" onClick={() => setMenuOpen(false)} className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>On-Playa Resources</Link>
-      <Link href="/find-items" onClick={() => setMenuOpen(false)} className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>Find Items</Link>
-      <Link href="/list-item" onClick={() => setMenuOpen(false)} className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition whitespace-nowrap`}>Offer an Item</Link>
+      <Link href="/resources" onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>On-Playa Resources</Link>
+      <Link href="/find-items" onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>Find Items</Link>
+      <Link href="/list-item" onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition whitespace-nowrap`}>Offer an Item</Link>
       <Link
         href="/login"
         onClick={() => setMenuOpen(false)}
-        className="bg-[#2D241E] text-[#C08261] px-4 py-2 rounded-lg text-sm font-bold hover:bg-black transition"
+        className="bg-[#2D241E] text-[#EA580C] px-4 py-2 rounded-lg text-sm font-bold hover:bg-black transition"
       >
         Login
       </Link>
@@ -177,18 +177,18 @@ export default function Header() {
 
         {/* Desktop nav */}
         <nav className="hidden lg:flex gap-6 items-center">
-          <Link href="/resources" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>On-Playa Resources</Link>
+          <Link href="/resources" className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>On-Playa Resources</Link>
           <span style={{ color: '#2D241E', opacity: 0.35, fontSize: '14px', userSelect: 'none' as const }}>|</span>
-          <Link href="/find-items" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>Find Items</Link>
-          <Link href="/list-item" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition whitespace-nowrap`}>Offer an Item</Link>
+          <Link href="/find-items" className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>Find Items</Link>
+          <Link href="/list-item" className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition whitespace-nowrap`}>Offer an Item</Link>
 
           {user ? (
             <>
-              <Link href="/inventory" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>My Inventory</Link>
+              <Link href="/inventory" className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>My Inventory</Link>
               {username && (
-                <Link href={`/profile/${username}`} className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>My Profile</Link>
+                <Link href={`/profile/${username}`} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>My Profile</Link>
               )}
-              <Link href="/settings" className={`text-sm font-medium ${mainTextColor} ${hoverEffect} transition`}>Settings</Link>
+              <Link href="/settings" className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>Settings</Link>
 
               {/* Bell */}
               <div style={{ position: 'relative' as const }}>
@@ -289,7 +289,7 @@ export default function Header() {
               </button>
             </>
           ) : (
-            <Link href="/login" className="bg-[#2D241E] text-[#C08261] px-4 py-2 rounded-lg text-sm font-bold hover:bg-black transition">
+            <Link href="/login" className="bg-[#2D241E] text-[#EA580C] px-4 py-2 rounded-lg text-sm font-bold hover:bg-black transition">
               Login
             </Link>
           )}
@@ -407,7 +407,7 @@ export default function Header() {
           />
           <div
             className="lg:hidden flex flex-col gap-4 px-6 py-5 border-t border-[#A66D51]"
-            style={{ backgroundColor: '#C08261', position: 'relative' as const, zIndex: 50 }}
+            style={{ backgroundColor: '#EA580C', position: 'relative' as const, zIndex: 50 }}
           >
             {navLinks}
           </div>
