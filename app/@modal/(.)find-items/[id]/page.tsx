@@ -185,7 +185,8 @@ const sectionLabelStyle: React.CSSProperties = { color: '#aaa', fontSize: '12px'
 const descriptionStyle: React.CSSProperties = { color: '#444', lineHeight: '1.6', fontSize: '15px', marginBottom: '30px' };
 const actionButtonStyle: React.CSSProperties = {
   width: '100%', padding: '15px', borderRadius: '12px', border: 'none',
-  backgroundColor: '#00ccff', color: '#000', fontWeight: 'bold', cursor: 'pointer', fontSize: '16px'
+  backgroundColor: '#5ECFDF', color: '#000', fontWeight: 'bold', cursor: 'pointer', fontSize: '16px',
+  boxShadow: 'none'
 };
 const deleteItemBtnStyle: React.CSSProperties = { padding: '8px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '1px solid #ffaaaa', borderRadius: '8px', fontSize: '13px', cursor: 'pointer', fontWeight: '600' };
 const deleteOverlayStyle: React.CSSProperties = { position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100, padding: '20px' };
