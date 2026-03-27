@@ -432,6 +432,50 @@ export default function PublicProfilePage() {
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px', color: '#2D241E' }}>
+      <style>{`
+        @media (max-width: 640px) {
+          .profile-header-row {
+            flex-direction: column !important;
+            align-items: center !important;
+          }
+          .profile-info-col {
+            width: 100%;
+          }
+          .profile-info-col h1 {
+            text-align: center;
+          }
+          .profile-username-row {
+            justify-content: center;
+          }
+          .profile-social-links {
+            justify-content: center;
+          }
+          .profile-right-col {
+            width: 100%;
+            align-items: stretch !important;
+            flex-shrink: unset !important;
+          }
+          .profile-follower-row {
+            justify-content: center;
+          }
+          .profile-action-btn {
+            width: 100%;
+          }
+          .profile-bio-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .profile-wishlist {
+            order: -1;
+          }
+        }
+        .profile-items-scroll {
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+        .profile-items-table {
+          min-width: 750px;
+        }
+      `}</style>
 
       <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 20px 0' }}>The Playa Provides<span style={{ textDecoration: 'underline' }}>{isOwner ? ' Your Profile' : ' A Profile'}{'\u00a0'}</span></h1>
 
@@ -439,7 +483,7 @@ export default function PublicProfilePage() {
       <header style={{ borderBottom: '1px solid #e5e5e5', paddingBottom: '30px' }}>
 
         {/* ROW 1: Avatar + Name / @username / Location / Social Links + Followers/Edit (right) */}
-        <div style={{ display: 'flex', gap: '25px', alignItems: 'flex-start' }}>
+        <div className="profile-header-row" style={{ display: 'flex', gap: '25px', alignItems: 'flex-start' }}>
           {isEditing ? (
             <AvatarUpload url={profile.avatar_url} onUpload={(url) => setProfile({ ...profile, avatar_url: url })} />
           ) : (
@@ -452,7 +496,7 @@ export default function PublicProfilePage() {
             </div>
           )}
 
-          <div style={{ flex: 1 }}>
+          <div className="profile-info-col" style={{ flex: 1 }}>
             {isEditing ? (
               <input
                 style={{ backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', fontSize: '1.5rem', width: '100%', padding: '5px', borderRadius: '6px' }}
@@ -462,7 +506,7 @@ export default function PublicProfilePage() {
             ) : (
               <h1 style={{ fontSize: '2.2rem', margin: 0, color: '#2D241E' }}>{profile.preferred_name || username}</h1>
             )}
-            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' as const, marginTop: '5px', fontSize: '0.9rem', color: '#888' }}>
+            <div className="profile-username-row" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' as const, marginTop: '5px', fontSize: '0.9rem', color: '#888' }}>
               <span>@{username}</span>
               {profile.pronouns && <><span style={{ margin: '0 7px', color: '#ccc' }}>|</span><span>{profile.pronouns}</span></>}
               {locationStr && <><span style={{ margin: '0 7px', color: '#ccc' }}>|</span><span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><MapPin size={13} />{locationStr}</span></>}
@@ -503,7 +547,7 @@ export default function PublicProfilePage() {
               ].filter(s => links[s.key]);
               if (SOCIAL.length === 0) return null;
               return (
-                <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '6px', marginTop: '10px' }}>
+                <div className="profile-social-links" style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '6px', marginTop: '10px' }}>
                   {SOCIAL.map(s => (
                     <a key={s.key} href={/^https?:\/\//i.test(links[s.key]) ? links[s.key] : `https://${links[s.key]}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 11px', borderRadius: '99px', backgroundColor: '#f5f5f5', border: '1px solid #e5e5e5', textDecoration: 'none', fontSize: '12px', fontWeight: 600, color: s.color }}>
                       {s.icon}{s.label}
@@ -515,9 +559,9 @@ export default function PublicProfilePage() {
           </div>
 
           {/* Right: Followers/Following + Edit/Follow button */}
-          <div style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'flex-end', gap: '10px', flexShrink: 0 }}>
+          <div className="profile-right-col" style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'flex-end', gap: '10px', flexShrink: 0 }}>
             {isOwner ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
+              <div className="profile-follower-row" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
                 <button
                   onClick={() => {
                     const next = openList === 'followers' ? null : 'followers' as const;
@@ -578,6 +622,7 @@ export default function PublicProfilePage() {
                     setIsEditing(true);
                   }
                 }}
+                className="profile-action-btn"
                 style={{ padding: '8px 20px', backgroundColor: isEditing ? '#4CAF50' : '#5ECFDF', color: isEditing ? '#fff' : '#000', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
               >
                 {isEditing ? 'Save Profile' : 'Edit Profile'}
@@ -586,6 +631,7 @@ export default function PublicProfilePage() {
               <button
                 onClick={handleFollowToggle}
                 disabled={followLoading}
+                className="profile-action-btn"
                 style={{ padding: '8px 20px', backgroundColor: isFollowing ? '#f0f0f0' : '#5ECFDF', color: isFollowing ? '#666' : '#000', border: isFollowing ? '1px solid #ddd' : 'none', borderRadius: '6px', cursor: followLoading ? 'default' : 'pointer', fontWeight: 'bold', opacity: followLoading ? 0.6 : 1 }}
               >
                 {followLoading ? '...' : isFollowing ? 'Following' : 'Follow'}
@@ -667,8 +713,8 @@ export default function PublicProfilePage() {
         )}
 
         {/* ROW 2: Bio | Wish List */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginTop: '25px' }}>
-          <div>
+        <div className="profile-bio-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginTop: '25px' }}>
+          <div className="profile-bio">
             <h4 style={subheadStyle}>Bio</h4>
             {isEditing ? (
               <textarea style={editTextareaStyle} value={profile.bio || ''} onChange={e => setProfile({ ...profile, bio: e.target.value })} />
@@ -679,7 +725,7 @@ export default function PublicProfilePage() {
             )}
           </div>
 
-          <div>
+          <div className="profile-wishlist">
             <h4 style={subheadStyle}>Wish List</h4>
             <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '8px', marginBottom: wishTags.length > 0 ? '12px' : '0' }}>
               {wishTags.length === 0 && !isOwner && (
@@ -895,7 +941,8 @@ export default function PublicProfilePage() {
         {items.length === 0 ? (
           <p style={{ color: '#aaa', fontSize: '0.9rem' }}>No items listed yet.</p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '2px' }}>
+          <div className="profile-items-scroll">
+          <div className="profile-items-table" style={{ display: 'flex', flexDirection: 'column' as const, gap: '2px' }}>
             <div style={listHeaderStyle}>
               <div />
               <div>Item</div>
@@ -951,6 +998,7 @@ export default function PublicProfilePage() {
                 </div>
               );
             })}
+          </div>
           </div>
         )}
       </section>
