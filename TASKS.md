@@ -94,6 +94,8 @@ _(nothing queued)_
 ---
 
 ## ✅ Done
+- [x] Fix: Camp page layout — description + banner side-by-side (flex row, description flex:1) when both exist; banner capped at 400px centered when no description
+- [x] Fix: Camp page edit — Delete Banner button with inline "Are you sure?" confirmation; removes from Storage and sets banner_url null in DB
 - [x] Fix: Camp page — BM data (description, homebase, bm_homepage_url) now renders on unclaimed stubs whenever non-null; description has whiteSpace: pre-wrap + wordBreak: break-word + maxWidth: 720px; bm_homepage_url wired as "Website" pill on both unclaimed stubs and claimed pages (fallback when social_links.website is absent)
 - [x] Fix: Profile — "Add Year" button label corrected; new row defaults to lowest existing year minus 1 instead of always 2025
 - [x] Feature: Settings page overhaul — Identity & Contact rename/reorder, pronouns field (DB migration), required asterisks, address card layout with "Set as default" checkbox, default location pre-select on /list-item and AddItemModal, Account & Security section (Change Email, Change Password with OAuth detection, Delete Account modal), zip_code field added

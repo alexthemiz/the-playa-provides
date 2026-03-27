@@ -41,6 +41,8 @@ export default function CampPage() {
   const [editSaving, setEditSaving] = useState(false);
   const [editError, setEditError] = useState('');
   const [bannerUploading, setBannerUploading] = useState(false);
+  const [bannerDeleteConfirming, setBannerDeleteConfirming] = useState(false);
+  const [bannerDeleting, setBannerDeleting] = useState(false);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
   // Camp items state
@@ -248,6 +250,26 @@ export default function CampPage() {
   const cancelEdit = () => {
     setEditMode(false);
     setEditError('');
+  };
+
+  const handleBannerDelete = async () => {
+    setBannerDeleting(true);
+    try {
+      const url = camp.banner_url.split('?')[0];
+      const marker = '/camp-banners/';
+      const idx = url.indexOf(marker);
+      if (idx !== -1) {
+        const storagePath = url.slice(idx + marker.length);
+        await supabase.storage.from('camp-banners').remove([storagePath]);
+      }
+      await supabase.from('camps').update({ banner_url: null }).eq('id', camp.id);
+      setCamp((prev: any) => ({ ...prev, banner_url: null }));
+      setBannerDeleteConfirming(false);
+    } catch (err: any) {
+      setEditError(err.message || 'Delete failed.');
+    } finally {
+      setBannerDeleting(false);
+    }
   };
 
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -493,15 +515,15 @@ export default function CampPage() {
       {camp.is_claimed && !editMode && (
         <div style={{ marginTop: '24px' }}>
           <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
-            {/* Meta info column */}
-            <div style={{ minWidth: '160px', flexShrink: 0 }}>
+            {/* Meta info column — flex:1 so description extends to full available width */}
+            <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', marginBottom: '12px' }}>
                 {camp.avatar_url && (
                   <img src={camp.avatar_url} alt="" style={{ width: '56px', height: '56px', borderRadius: '50%', border: '3px solid #C08261', flexShrink: 0, objectFit: 'cover' as const }} />
                 )}
                 <div>
                   {camp.description && (
-                    <p style={{ fontSize: '1rem', color: '#444', margin: '0 0 8px', lineHeight: 1.6, whiteSpace: 'pre-wrap' as const, wordBreak: 'break-word' as const, maxWidth: '720px' }}>{camp.description}</p>
+                    <p style={{ fontSize: '1rem', color: '#444', margin: '0 0 8px', lineHeight: 1.6, whiteSpace: 'pre-wrap' as const, wordBreak: 'break-word' as const }}>{camp.description}</p>
                   )}
                 </div>
               </div>
@@ -540,13 +562,20 @@ export default function CampPage() {
               )}
             </div>
 
-            {/* Banner image */}
-            {camp.banner_url && (
-              <div style={{ flex: 1 }}>
-                <img src={camp.banner_url} alt="" style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover' as const, borderRadius: '10px' }} />
+            {/* Banner — only shown alongside description (Fix 1) */}
+            {camp.banner_url && camp.description && (
+              <div style={{ flexShrink: 0, width: '45%', maxWidth: '500px' }}>
+                <img src={camp.banner_url} alt="" style={{ width: '100%', height: 'auto', borderRadius: '10px' }} />
               </div>
             )}
           </div>
+
+          {/* Banner alone when no description — centered, capped at 400px (Fix 2) */}
+          {camp.banner_url && !camp.description && (
+            <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'center' }}>
+              <img src={camp.banner_url} alt="" style={{ width: '100%', maxWidth: '400px', height: 'auto', borderRadius: '10px' }} />
+            </div>
+          )}
         </div>
       )}
 
@@ -562,9 +591,27 @@ export default function CampPage() {
               <img src={camp.banner_url} alt="" style={{ width: '100%', height: '140px', objectFit: 'cover' as const, borderRadius: '8px', marginBottom: '8px' }} />
             )}
             <input type="file" accept="image/*" ref={bannerInputRef} onChange={handleBannerUpload} style={{ display: 'none' }} />
-            <button onClick={() => bannerInputRef.current?.click()} disabled={bannerUploading} style={uploadBtnStyle}>
-              {bannerUploading ? 'Uploading…' : camp.banner_url ? 'Replace Banner' : 'Upload Banner'}
-            </button>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' as const }}>
+              <button onClick={() => bannerInputRef.current?.click()} disabled={bannerUploading} style={uploadBtnStyle}>
+                {bannerUploading ? 'Uploading…' : camp.banner_url ? 'Replace Banner' : 'Upload Banner'}
+              </button>
+              {camp.banner_url && !bannerDeleteConfirming && (
+                <button onClick={() => setBannerDeleteConfirming(true)} style={{ ...uploadBtnStyle, backgroundColor: '#fff', color: '#cc3333', border: '1px solid #fca5a5' }}>
+                  Delete Banner
+                </button>
+              )}
+              {bannerDeleteConfirming && (
+                <span style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '0.85rem', color: '#cc3333' }}>
+                  Are you sure?
+                  <button onClick={handleBannerDelete} disabled={bannerDeleting} style={{ ...uploadBtnStyle, backgroundColor: '#cc3333', color: '#fff', border: 'none' }}>
+                    {bannerDeleting ? 'Deleting…' : 'Yes, delete'}
+                  </button>
+                  <button onClick={() => setBannerDeleteConfirming(false)} style={{ ...uploadBtnStyle, backgroundColor: '#fff', color: '#666', border: '1px solid #ddd' }}>
+                    Cancel
+                  </button>
+                </span>
+              )}
+            </div>
           </div>
 
           <div style={{ marginBottom: '14px' }}>
