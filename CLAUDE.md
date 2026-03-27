@@ -39,4 +39,14 @@ A peer-to-peer gear-sharing platform for the Burning Man community.
 
 ## Tone & Style
 Alex is direct, detail-oriented, and has a touch of wit. Be a grounded, high-competency peer. Own mistakes, fix them, move on. No lecture-bot behavior.
-Alex also likes to know why things aren't working, or why something is acting the way it is; he has no coding experience or technical know-how, so is trying to learn as he goes along. 
+Alex also likes to know why things aren't working, or why something is acting the way it is; he has no coding experience or technical know-how, so is trying to learn as he goes along.
+
+## Debugging Visual Issues
+
+1. **Devtools first.** When a style change isn't appearing on the live site, open browser devtools, click the element, and read `element.style` before doing anything else. This immediately identifies which file and style is responsible.
+
+2. **Find all instances before editing.** Use Ctrl+Shift+F to search for the button label text or style name across all files before making changes. Multiple components often render the same UI element (e.g. the Request button exists in find-items/page.tsx, @modal/(.)find-items/[id]/page.tsx, and find-items/[id]/page.tsx).
+
+3. **Verify file contents after CC runs.** CC's "done" confirmations on style changes are unreliable. Always check the actual file after CC reports completion.
+
+4. **Branch testing requires Vercel preview configuration.** Feature branches are not automatically deployed by Vercel. Test visual changes directly on master (low risk) or configure Vercel to build previews from feature branches before testing.

@@ -73,7 +73,7 @@ return (
         <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 16px 0' }}>
           The Playa Provides<span style={{ textDecoration: 'underline' }}> Resources{'\u00a0'}</span>
         </h1>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '24px' }}>
+        <div className="flex flex-col sm:flex-row items-start gap-4">
           <div style={{ flex: 1 }}>
             <p style={{ margin: '0 0 10px', fontSize: '1rem', color: '#555', lineHeight: 1.6 }}>
               A directory of camps offering sustainability and community services at the 2026 Burn, from composting and can crushing to bike repair and mental health support. We'll update with BRC addresses when they become available.
@@ -84,7 +84,8 @@ return (
           </div>
           <button
             onClick={() => setIsModalOpen(true)}
-            style={{ backgroundColor: '#5ECFDF', color: '#000', padding: '10px 20px', borderRadius: '6px', border: 'none', fontWeight: 'bold', cursor: 'pointer', whiteSpace: 'nowrap' as const, fontSize: '0.9rem', flexShrink: 0 }}
+            className="w-full sm:w-auto"
+            style={{ backgroundColor: '#5ECFDF', color: '#000', padding: '10px 20px', borderRadius: '6px', border: 'none', fontWeight: 'bold', cursor: 'pointer', whiteSpace: 'nowrap' as const, fontSize: '0.9rem' }}
           >
             Submit Your Camp
           </button>
