@@ -420,7 +420,7 @@ export default function CampPage() {
             <button
               onClick={editMode ? handleSaveEdit : enterEditMode}
               disabled={editMode && editSaving}
-              style={{ padding: '8px 20px', backgroundColor: editMode ? '#4CAF50' : '#5ECFDF', color: editMode ? '#fff' : '#000', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
+              style={{ padding: '8px 20px', minWidth: '140px', textAlign: 'center' as const, backgroundColor: editMode ? '#4CAF50' : '#5ECFDF', color: editMode ? '#fff' : '#000', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
             >
               {editMode ? (editSaving ? 'Saving…' : 'Save Changes') : 'Edit Camp'}
             </button>
@@ -574,8 +574,8 @@ export default function CampPage() {
 
             {/* Banner — always in right column when present; max 500px with description, 400px without */}
             {camp.banner_url && (
-              <div style={{ flexShrink: 0, width: '45%', maxWidth: camp.description ? '500px' : '400px' }}>
-                <img src={camp.banner_url} alt="" style={{ width: '100%', maxHeight: '320px', objectFit: 'cover' as const, borderRadius: '10px' }} />
+              <div style={{ flexShrink: 0, width: '35%', maxWidth: camp.description ? '380px' : '400px' }}>
+                <img src={camp.banner_url} alt="" style={{ width: '100%', maxHeight: '260px', objectFit: 'cover' as const, borderRadius: '10px' }} />
               </div>
             )}
           </div>
@@ -589,18 +589,18 @@ export default function CampPage() {
 
           {/* Banner upload */}
           <div style={{ marginBottom: '16px' }}>
-            <label style={editLabelStyle}>Banner Image</label>
+            <label style={editLabelStyle}>Cover Photo</label>
             {camp.banner_url && (
-              <img src={camp.banner_url} alt="" style={{ width: '100%', height: '140px', objectFit: 'cover' as const, borderRadius: '8px', marginBottom: '8px' }} />
+              <img src={camp.banner_url} alt="" style={{ width: '380px', maxWidth: '100%', maxHeight: '260px', objectFit: 'cover' as const, borderRadius: '8px', marginBottom: '8px', display: 'block' }} />
             )}
             <input type="file" accept="image/*" ref={bannerInputRef} onChange={handleBannerUpload} style={{ display: 'none' }} />
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' as const }}>
               <button onClick={() => bannerInputRef.current?.click()} disabled={bannerUploading} style={uploadBtnStyle}>
-                {bannerUploading ? 'Uploading…' : camp.banner_url ? 'Replace Banner' : 'Upload Banner'}
+                {bannerUploading ? 'Uploading…' : camp.banner_url ? 'Replace Photo' : 'Upload Photo'}
               </button>
               {camp.banner_url && !bannerDeleteConfirming && (
                 <button onClick={() => setBannerDeleteConfirming(true)} style={{ ...uploadBtnStyle, backgroundColor: '#fff', color: '#cc3333', border: '1px solid #fca5a5' }}>
-                  Delete Banner
+                  Delete Photo
                 </button>
               )}
               {bannerDeleteConfirming && (
@@ -700,7 +700,7 @@ export default function CampPage() {
               <div>Name</div>
               <div>Wish List</div>
               <div>Camp Years</div>
-              <div style={{ textAlign: 'center' as const }}>2026 Camp</div>
+              <div style={{ textAlign: 'center' as const }}>2026 Camp?</div>
               {editMode && <div>Actions</div>}
             </div>
 
@@ -730,7 +730,7 @@ export default function CampPage() {
                     <div style={{ minWidth: 0 }}>
                       <div style={{ fontWeight: 600, fontSize: '13px', color: '#2D241E', display: 'flex', alignItems: 'center', gap: '5px', flexWrap: 'wrap' as const }}>
                         {member.preferred_name || member.username}
-                        {isOwner && <span style={{ fontSize: '10px', color: '#bbb', fontWeight: 400 }}>(owner)</span>}
+                        {isOwner && <span style={{ fontSize: '10px', color: '#bbb', fontWeight: 400 }}>(page owner)</span>}
                         {!isOwner && member.role === 'admin' && <span style={{ fontSize: '10px', color: '#C08261', fontWeight: 600 }}>Admin</span>}
                       </div>
                       <div style={{ fontSize: '11px', color: '#aaa' }}>@{member.username}</div>
@@ -849,8 +849,8 @@ function memberGridStyle(editMode: boolean): React.CSSProperties {
   return {
     display: 'grid',
     gridTemplateColumns: editMode
-      ? 'minmax(140px, 1.5fr) minmax(80px, 2.5fr) auto 50px auto'
-      : 'minmax(140px, 1.5fr) minmax(80px, 2.5fr) auto 50px',
+      ? 'minmax(140px, 1.5fr) minmax(80px, 2.5fr) auto 70px auto'
+      : 'minmax(140px, 1.5fr) minmax(80px, 2.5fr) auto 70px',
     gap: '10px',
     alignItems: 'center',
   };

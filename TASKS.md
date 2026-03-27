@@ -94,8 +94,12 @@ _(nothing queued)_
 ---
 
 ## ✅ Done
-- [x] Fix: Camp page layout — banner always in flex row right column (max 500px with description, 400px without); maxHeight 320px objectFit cover; photo-only sits beside meta info
-- [x] Fix: Camp edit — Save Changes moved to top-right title row matching profile page pattern; toggles green when in edit mode; Cancel sits beside it
+- [x] Fix: Camp page — cover photo narrowed to 35%/380px, maxHeight 260px in side-by-side view; preview in edit mode sized to 380px×260px block
+- [x] Fix: Camp edit — "Banner Image/Banner" renamed to "Cover Photo/Photo" throughout edit panel
+- [x] Fix: Camp edit — Save/Edit button gets minWidth:140px + textAlign:center so it holds width across label changes
+- [x] Fix: Camp page — "(owner)" label in members list renamed to "(page owner)"
+- [x] Fix: Camp page — members grid 2026 Camp column widened 50px→70px; header renamed "2026 Camp?"
+- [x] Fix: Profile — Cancel button added below Save Profile button in edit mode (discards changes, exits edit mode)
 - [x] Fix: Camp page edit — Delete Banner button with inline "Are you sure?" confirmation; removes from Storage and sets banner_url null in DB
 - [x] Fix: Camp page — BM data (description, homebase, bm_homepage_url) now renders on unclaimed stubs whenever non-null; description has whiteSpace: pre-wrap + wordBreak: break-word + maxWidth: 720px; bm_homepage_url wired as "Website" pill on both unclaimed stubs and claimed pages (fallback when social_links.website is absent)
 - [x] Fix: Profile — "Add Year" button label corrected; new row defaults to lowest existing year minus 1 instead of always 2025

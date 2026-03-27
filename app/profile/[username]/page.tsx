@@ -595,41 +595,52 @@ export default function PublicProfilePage() {
               )
             )}
             {isOwner ? (
-              <button
-                onClick={() => {
-                  if (isEditing) {
-                    handleSave();
-                  } else {
-                    const aff2026 = affiliations.find(a => a.year === 2026);
-                    setDraft2026({
-                      status: aff2026?.returning_status ?? null,
-                      campInput: (aff2026?.camps as any)?.display_name || '',
-                      campId: aff2026?.camp_id || null,
-                      isOpenCamping: aff2026?.is_open_camping || false,
-                      searchResults: [],
-                      showDropdown: false,
-                    });
-                    setDraftAffiliations(
-                      affiliations
-                        .filter(a => a.year !== 2026)
-                        .map(a => ({
-                          tempId: a.id,
-                          year: a.year,
-                          is_open_camping: a.is_open_camping,
-                          campInput: (a.camps as any)?.display_name || '',
-                          campId: a.camp_id || null,
-                          searchResults: [],
-                          showDropdown: false,
-                        }))
-                    );
-                    setIsEditing(true);
-                  }
-                }}
-                className="profile-action-btn"
-                style={{ padding: '8px 20px', backgroundColor: isEditing ? '#4CAF50' : '#5ECFDF', color: isEditing ? '#fff' : '#000', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
-              >
-                {isEditing ? 'Save Profile' : 'Edit Profile'}
-              </button>
+              <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '8px', alignItems: 'flex-end' }}>
+                <button
+                  onClick={() => {
+                    if (isEditing) {
+                      handleSave();
+                    } else {
+                      const aff2026 = affiliations.find(a => a.year === 2026);
+                      setDraft2026({
+                        status: aff2026?.returning_status ?? null,
+                        campInput: (aff2026?.camps as any)?.display_name || '',
+                        campId: aff2026?.camp_id || null,
+                        isOpenCamping: aff2026?.is_open_camping || false,
+                        searchResults: [],
+                        showDropdown: false,
+                      });
+                      setDraftAffiliations(
+                        affiliations
+                          .filter(a => a.year !== 2026)
+                          .map(a => ({
+                            tempId: a.id,
+                            year: a.year,
+                            is_open_camping: a.is_open_camping,
+                            campInput: (a.camps as any)?.display_name || '',
+                            campId: a.camp_id || null,
+                            searchResults: [],
+                            showDropdown: false,
+                          }))
+                      );
+                      setIsEditing(true);
+                    }
+                  }}
+                  className="profile-action-btn"
+                  style={{ padding: '8px 20px', backgroundColor: isEditing ? '#4CAF50' : '#5ECFDF', color: isEditing ? '#fff' : '#000', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
+                >
+                  {isEditing ? 'Save Profile' : 'Edit Profile'}
+                </button>
+                {isEditing && (
+                  <button
+                    onClick={() => setIsEditing(false)}
+                    className="profile-action-btn"
+                    style={{ padding: '9px 18px', backgroundColor: 'transparent', color: '#7a4a2a', border: '1px solid #e0c8b8', borderRadius: '8px', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer' }}
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
             ) : currentUserId ? (
               <button
                 onClick={handleFollowToggle}
