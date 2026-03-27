@@ -194,13 +194,56 @@ export default function FindItemsPage() {
 
   return (
     <div style={containerStyle}>
-      <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 20px 0' }}>The Playa Provides<span style={{ textDecoration: 'underline' }}> Items to Borrow or Keep{'\u00a0'}</span></h1>
+      <style>{`
+        .fi-row { border-bottom: 1px solid #eee; padding-bottom: 12px; margin-bottom: 12px; }
+        .fi-searches { display: flex; align-items: center; gap: 12px; }
+        .fi-kw { display: flex; align-items: center; gap: 8px; }
+        .fi-loc { display: flex; align-items: center; gap: 8px; }
+        .fi-rel { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: 1; }
+        .fi-kw-input { position: relative; flex: 0 1 200px; }
+        .fi-loc-input { position: relative; flex: 0 0 120px; min-width: 120px; }
+        .fi-cat-row { display: flex; flex-wrap: wrap; gap: 8px; }
+        .fi-bottom-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
+        .fi-avail { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .fi-grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+        .title-break { display: none; }
+        @media (min-width: 768px) and (max-width: 1023px) {
+          .fi-searches { flex-wrap: wrap; column-gap: 12px; row-gap: 0; }
+          .fi-kw { flex: 0 0 calc(50% - 6px); }
+          .fi-loc { flex: 0 0 calc(50% - 6px); }
+          .fi-kw-input { flex: 1; }
+          .fi-loc-input { flex: 1; min-width: 0; }
+          .fi-rel { flex: 0 0 100%; border-top: 1px solid #eee; padding-top: 10px; margin-top: 8px; }
+        }
+        @media (max-width: 767px) {
+          .fi-searches { flex-direction: column; gap: 0; align-items: stretch; }
+          .fi-kw { flex: none; width: 100%; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px; }
+          .fi-loc { flex: none; width: 100%; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px; }
+          .fi-rel { flex: none; width: 100%; }
+          .fi-kw-input { flex: 1; }
+          .fi-loc-input { flex: 1; min-width: 0; }
+          .fi-row { margin-bottom: 8px; padding-bottom: 8px; }
+        }
+        @media (max-width: 429px) { .fi-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 430px) and (max-width: 1023px) { .fi-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 1024px) { .fi-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); } }
+        @media (max-width: 430px) { .title-break { display: block; } }
+      `}</style>
 
-      {/* ROW 1: Search + Zip + Toggle */}
-      <div style={topBarStyle}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={filterLabelStyle}>Search by keyword:</span>
-          <div style={searchWrapperStyle}>
+      {/* TODO (future session): apply same title-break <span className="title-break" /> after "Provides" in the h1 on:
+          app/resources/page.tsx, app/list-item/page.tsx, app/inventory/page.tsx,
+          app/profile/[username]/page.tsx, app/settings/page.tsx, app/camps/[slug]/page.tsx */}
+      <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 20px 0' }}>
+        The Playa Provides<span className="title-break" /><span style={{ textDecoration: 'underline' }}> Items to Borrow or Keep{'\u00a0'}</span>
+      </h1>
+
+      {/* ROW 1 (desktop): Keyword | Location | Relationship chips */}
+      {/* ROW 1+2 (landscape): Keyword+Location / Relationship chips */}
+      {/* ROW 1+2+3 (portrait): Keyword / Location / Relationship chips */}
+      <div className="fi-row fi-searches">
+        <div className="fi-kw">
+          <span style={filterLabelStyle}>Search by Keyword:</span>
+          <div className="fi-kw-input">
             <Search size={18} style={searchIconStyle} />
             <input
               type="text"
@@ -211,10 +254,9 @@ export default function FindItemsPage() {
             />
           </div>
         </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={filterLabelStyle}>Search by location:</span>
-          <div style={{ ...searchWrapperStyle, flex: '0 0 120px', minWidth: '120px' }}>
+        <div className="fi-loc">
+          <span style={filterLabelStyle}>Search by Location:</span>
+          <div className="fi-loc-input">
             <MapPin size={18} style={searchIconStyle} />
             <input
               type="text"
@@ -225,96 +267,95 @@ export default function FindItemsPage() {
             />
           </div>
         </div>
-
-        <div style={{ marginLeft: 'auto' }}>
-          <div style={{ ...toggleGroupStyle, minWidth: '108px' }}>
-            <button onClick={() => setViewMode('grid')} style={{...toggleButtonStyle, backgroundColor: viewMode === 'grid' ? '#eee' : 'transparent'}}>
-              <LayoutGrid size={20} color={viewMode === 'grid' ? '#000' : '#666'} />
-            </button>
-            <button onClick={() => setViewMode('list')} style={{...toggleButtonStyle, backgroundColor: viewMode === 'list' ? '#eee' : 'transparent'}}>
-              <List size={20} color={viewMode === 'list' ? '#000' : '#666'} />
-            </button>
-            <button onClick={() => setViewMode('map')} style={{...toggleButtonStyle, backgroundColor: viewMode === 'map' ? '#eee' : 'transparent'}}>
-              <MapIcon size={20} color={viewMode === 'map' ? '#000' : '#666'} />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* ROW 2: Relationship chips + Availability chips */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' as const, marginBottom: '12px' }}>
-        <span style={filterLabelStyle}>Show items from:</span>
-        {['Everyone', 'People I Follow', 'People Who Follow Me', 'My Campmates'].map((option) => {
-          const isActive = relationshipFilters.includes(option);
-          return (
-            <button
-              key={option}
-              onClick={() => toggleRelationship(option)}
-              style={{
-                ...chipStyle,
-                backgroundColor: isActive ? '#3ABFD4' : '#fff',
-                color: isActive ? '#000' : '#555',
-                borderColor: isActive ? '#3ABFD4' : '#ccc',
-              }}
-            >
-              {option}
-            </button>
-          );
-        })}
-        <span style={{ ...filterLabelStyle, marginLeft: 'auto' }}>Available to:</span>
-        {[{ value: 'Borrow', label: 'Borrow' }, { value: 'Keep', label: 'Keep' }].map(({ value, label }) => {
-          const isActive = availabilityFilters.includes(value);
-          return (
-            <button
-              key={value}
-              onClick={() => toggleAvailability(value)}
-              style={{
-                ...chipStyle,
-                backgroundColor: isActive ? '#3ABFD4' : '#fff',
-                color: isActive ? '#000' : '#555',
-                borderColor: isActive ? '#3ABFD4' : '#ccc',
-              }}
-            >
-              {label}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* ROW 3: Category chips */}
-      <div style={filterRowStyle}>
-        <div style={chipContainerStyle}>
-          {categories.map((cat) => {
-            const isActive = categoryFilters.includes(cat);
+        <div className="fi-rel">
+          <span style={filterLabelStyle}>Show items from:</span>
+          {['Everyone', 'People I Follow', 'People Who Follow Me', 'My Campmates'].map((option) => {
+            const isActive = relationshipFilters.includes(option);
             return (
               <button
-                key={cat}
-                onClick={() => toggleCategory(cat)}
+                key={option}
+                onClick={() => toggleRelationship(option)}
                 style={{
                   ...chipStyle,
-                  backgroundColor: isActive ? '#3ABFD4' : '#f5f5f5',
-                  color: isActive ? '#000' : '#333',
-                  borderColor: isActive ? '#3ABFD4' : '#ddd',
+                  backgroundColor: isActive ? '#3ABFD4' : '#fff',
+                  color: isActive ? '#000' : '#555',
+                  borderColor: isActive ? '#3ABFD4' : '#ccc',
                 }}
               >
-                {cat}
-                {isActive && cat !== 'All' && <X size={12} style={{marginLeft: '6px'}}/>}
+                {option}
               </button>
             );
           })}
         </div>
       </div>
 
+      {/* ROW 2 (desktop) / ROW 4 (landscape+portrait): Category chips */}
+      <div className="fi-row fi-cat-row">
+        {categories.map((cat) => {
+          const isActive = categoryFilters.includes(cat);
+          return (
+            <button
+              key={cat}
+              onClick={() => toggleCategory(cat)}
+              style={{
+                ...chipStyle,
+                backgroundColor: isActive ? '#3ABFD4' : '#f5f5f5',
+                color: isActive ? '#000' : '#333',
+                borderColor: isActive ? '#3ABFD4' : '#ddd',
+              }}
+            >
+              {cat}
+              {isActive && cat !== 'All' && <X size={12} style={{ marginLeft: '6px' }} />}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ROW 3 (desktop) / ROW 5 (portrait) / ROW 4 (landscape): Available to: chips | GLM toggle */}
+      <div className="fi-bottom-row">
+        <div className="fi-avail">
+          <span style={filterLabelStyle}>Available to:</span>
+          {[{ value: 'Borrow', label: 'Borrow' }, { value: 'Keep', label: 'Keep' }].map(({ value, label }) => {
+            const isActive = availabilityFilters.includes(value);
+            return (
+              <button
+                key={value}
+                onClick={() => toggleAvailability(value)}
+                style={{
+                  ...chipStyle,
+                  backgroundColor: isActive ? '#3ABFD4' : '#fff',
+                  color: isActive ? '#000' : '#555',
+                  borderColor: isActive ? '#3ABFD4' : '#ccc',
+                }}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+        <div style={{ ...toggleGroupStyle, minWidth: '108px' }}>
+          <button onClick={() => setViewMode('grid')} style={{ ...toggleButtonStyle, backgroundColor: viewMode === 'grid' ? '#eee' : 'transparent' }}>
+            <LayoutGrid size={20} color={viewMode === 'grid' ? '#000' : '#666'} />
+          </button>
+          <button onClick={() => setViewMode('list')} style={{ ...toggleButtonStyle, backgroundColor: viewMode === 'list' ? '#eee' : 'transparent' }}>
+            <List size={20} color={viewMode === 'list' ? '#000' : '#666'} />
+          </button>
+          <button onClick={() => setViewMode('map')} style={{ ...toggleButtonStyle, backgroundColor: viewMode === 'map' ? '#eee' : 'transparent' }}>
+            <MapIcon size={20} color={viewMode === 'map' ? '#000' : '#666'} />
+          </button>
+        </div>
+      </div>
+
       {/* CONTENT GRID */}
       {loading ? (
-        <div style={gridStyle}>{[...Array(6)].map((_, i) => <div key={i} style={skeletonStyle} />)}</div>
+        <div className="fi-grid" style={gridStyle}>{[...Array(6)].map((_, i) => <div key={i} style={skeletonStyle} />)}</div>
       ) : viewMode === 'map' ? (
         <div style={{ padding: '60px', textAlign: 'center' as const, backgroundColor: '#f9f9f9', borderRadius: '12px', color: '#aaa' }}>
           <MapIcon size={40} style={{ marginBottom: '12px', opacity: 0.3 }} />
           <p style={{ margin: 0, fontWeight: 'bold' }}>Map view coming soon</p>
         </div>
       ) : (
-        <div style={viewMode === 'grid' ? gridStyle : listContainerStyle}>
+        <div className={viewMode === 'grid' ? 'fi-grid' : ''} style={viewMode === 'grid' ? undefined : listContainerStyle}>
           {viewMode === 'list' && filteredItems.length > 0 && (
             <div style={listHeaderStyle}>
               <div style={{ width: '50px' }} />
@@ -507,7 +548,7 @@ const toggleButtonStyle: React.CSSProperties = { border: 'none', padding: '6px 1
 const filterRowStyle: React.CSSProperties = { marginBottom: '30px' };
 const chipContainerStyle: React.CSSProperties = { display: 'flex', gap: '8px', flexWrap: 'wrap' };
 const chipStyle: React.CSSProperties = { padding: '6px 14px', borderRadius: '20px', border: '1px solid', fontSize: '13px', cursor: 'pointer', fontWeight: '500', display: 'flex', alignItems: 'center' };
-const gridStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' };
+const gridStyle: React.CSSProperties = { display: 'grid', gap: '20px' };
 const listContainerStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: '2px' };
 const cardStyle: React.CSSProperties = { backgroundColor: '#fff', border: '1px solid #eee', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', overflow: 'hidden' };
 const imageWrapperStyle: React.CSSProperties = { position: 'relative' as const, width: '100%' };

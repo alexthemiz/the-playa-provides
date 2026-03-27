@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-03-24 (session 22)_
+_Last updated: 2026-03-27 (session 23)_
 
 ---
 
@@ -28,6 +28,7 @@ _Last updated: 2026-03-24 (session 22)_
 ## 🔧 Bugs & Fixes
 - [ ] **Welcome modal fires on every login** — Should only show once per account (first login only). Investigate current trigger mechanism and fix so repeat logins don't show the modal.
 - [ ] **OG preview image gets cropped when sharing links** — Current image is not 1200×630px. Resize with padding/background in Canva, re-upload to repo, re-push.
+- [ ] **Mobile portrait title line break — apply to all pages** — Insert `<span className="title-break" />` after "Provides" in the h1 title on: `app/resources/page.tsx`, `app/list-item/page.tsx`, `app/inventory/page.tsx`, `app/profile/[username]/page.tsx`, `app/settings/page.tsx`, `app/camps/[slug]/page.tsx`. Also add `.title-break { display: none; } @media (max-width: 430px) { .title-break { display: block; } }` to each page's style tag.
 
 ---
 
@@ -56,6 +57,8 @@ _Last updated: 2026-03-24 (session 22)_
 - [ ] **Camps Phase 2** — Needs further scoping. Includes: campmates filter on find-items, self-serve camp page claiming UI, camp gear inventory, playa_resources linking to camp pages.
 - [ ] **BM API: 2026 camp placements** — In May 2026 when BM announces placement, hit the live API endpoint using the BM API key (stored in .env.local) to pull 2026 camp playa addresses and populate `playa_location` on camp pages. Also upsert any new 2026 camps not yet in the DB.
 - [ ] **BM API: 2026 archive import** — Around March 2027, run `scripts/import-bm-camps.js` updated to include the 2026 S3 archive URL once BM posts it.
+- [ ] **Create camps@theplayaprovides.com** — Set up in Resend, forward to alex@theplayaprovides.com.
+- [ ] **Camp edit page — duplicate notice** — Add a small note in the edit UI: "Think there's a duplicate of your camp page? Email camps@theplayaprovides.com"
 - [ ] **SEO / noindex for restricted items** — Public items indexable by search engines; campmates-only and followers-only items should have noindex meta tag.
 - [ ] **Incomplete profile nudge** — Some users have NULL full_name (and potentially other required fields) from before required field validation was added. Options: (A) Soft banner at top of /settings page if required fields are missing — non-blocking, just a nudge; (B) One-time modal after login prompting user to complete their profile, dismissible and non-blocking; (C) Validate only on save — no proactive warning, error only appears when user next visits /settings and tries to save. Option B is most user-friendly at scale.
 - [ ] **Borrowed item detail page** — When an item is currently out on loan, determine what shows on the unique item page for: (1) the borrower, (2) the owner, (3) anyone else. Should "Request this item" be hidden? Should there be a loan status indicator?
@@ -94,15 +97,25 @@ _(nothing queued)_
 ---
 
 ## ✅ Done
-- [x] Fix: Camp page — cover photo narrowed to 35%/380px, maxHeight 260px in side-by-side view; preview in edit mode sized to 380px×260px block
-- [x] Fix: Camp edit — "Banner Image/Banner" renamed to "Cover Photo/Photo" throughout edit panel
-- [x] Fix: Camp edit — Save/Edit button gets minWidth:140px + textAlign:center so it holds width across label changes
-- [x] Fix: Camp page — "(owner)" label in members list renamed to "(page owner)"
-- [x] Fix: Camp page — members grid 2026 Camp column widened 50px→70px; header renamed "2026 Camp?"
-- [x] Fix: Profile — Cancel button added below Save Profile button in edit mode (discards changes, exits edit mode)
-- [x] Fix: Camp page edit — Delete Banner button with inline "Are you sure?" confirmation; removes from Storage and sets banner_url null in DB
-- [x] Fix: Camp page — BM data (description, homebase, bm_homepage_url) now renders on unclaimed stubs whenever non-null; description has whiteSpace: pre-wrap + wordBreak: break-word + maxWidth: 720px; bm_homepage_url wired as "Website" pill on both unclaimed stubs and claimed pages (fallback when social_links.website is absent)
-- [x] Fix: Profile — "Add Year" button label corrected; new row defaults to lowest existing year minus 1 instead of always 2025
+- [x] Feature: BM camp data import — fetched 2015–2025 JSON archives from BM public S3 URLs, seeded camps table with 5,314 unique camps (13,265 raw records, 17 same-year dupes skipped); added bm_uid and bm_homepage_url columns to camps table
+- [x] Fix: Footer BM disclaimer — added "This app is not affiliated, endorsed, or verified by Burning Man Project." to footer in matching secondary text style
+- [x] Fix: Camp autocomplete — now draws from 5,314 official BM camp names (2015–2025) instead of user-created stubs only
+- [x] Maintenance: Duplicate camp cleanup — deleted confirmed duplicate camp records via SQL; query identified "name" / "name Camp" pairs across 5,314 records
+- [x] Fix: "Add Year" button copy — removed +, capitalized to "Add Year"
+- [x] Fix: Camp year default — new affiliation row defaults to one below the lowest year already entered
+- [x] Fix: Camp page — BM data (description, homebase, bm_homepage_url) now renders on unclaimed stubs, not just claimed pages
+- [x] Fix: Camp page — description word wrap fixed with whiteSpace: pre-wrap and wordBreak: break-word
+- [x] Fix: Camp page — bm_homepage_url wired to Website pill in social links display
+- [x] Fix: Camp page — side-by-side layout when both photo and description exist
+- [x] Fix: Camp page — photo-only layout: capped at 400px wide, centered, sits beside camp info
+- [x] Fix: Camp page — delete banner photo option added to edit UI with inline confirmation
+- [x] Fix: Camp edit — "Banner Image" renamed to "Cover Photo", buttons updated to match
+- [x] Fix: Camp edit — cover photo preview matches live page rendering, not full-width banner
+- [x] Fix: Camp edit — Save Changes / Edit Camp buttons set to same fixed width
+- [x] Fix: Camp edit — Save Changes button moved to top right, matching user profile page
+- [x] Fix: Camp page — "(owner)" renamed to "(page owner)" in members list
+- [x] Fix: Camp page — "2026 Camp?" column header renamed and widened to fit on one line
+- [x] Fix: User profile edit — Cancel button added below Save Profile button
 - [x] Feature: Settings page overhaul — Identity & Contact rename/reorder, pronouns field (DB migration), required asterisks, address card layout with "Set as default" checkbox, default location pre-select on /list-item and AddItemModal, Account & Security section (Change Email, Change Password with OAuth detection, Delete Account modal), zip_code field added
 - [x] Feature: Delete Account — two-step confirmation modal in settings, `delete-account` edge function (scrubs profile PII, marks gear owner_deleted+private, unlinks camps, deletes follows/notifications/affiliations/loans/transfers, then calls auth.admin.deleteUser), homepage `?deleted=true` banner, owner_deleted guard on item detail + parallel modal + find-items query
 - [x] Fix: Delete account FK chain — resolved series of blocking constraints: `item_loans/item_transfers` NO ACTION on profiles.id → CASCADE; `gear_items.location_id` NO ACTION → SET NULL; `social_links` NOT NULL conflict → set to `{}`; `gear_items.user_id` NOT NULL conflict with SET NULL FK rule → dropped NOT NULL
@@ -174,3 +187,7 @@ _(nothing queued)_
 - [x] Fix: Resources submission form — contact email and submitter name now required fields; Instagram field added; category list updated; reply-to header fixed on `send-request-email` edge function
 - [x] Fix: Spreadsheet import user_id bug — `user_id` now added to each imported row; import aborts with error if no active session
 - [x] Design: Favicon and OG preview image added — `app/favicon.png` added; OG image configured in `layout.tsx`
+- [x] Design: find-items filter layout — responsive 3-row (desktop) / 4-row (landscape) / 5-row (portrait) layout via injected style tag; GLM toggle moved to bottom row
+- [x] Design: find-items grid — responsive columns: 2-col portrait mobile, 3-col landscape, auto-fill desktop; handled via CSS class fi-grid
+- [x] Fix: find-items title line break — `<span className="title-break" />` after "Provides" in h1 wraps to new line on portrait mobile (<430px)
+- [x] Design: Header hamburger dropdown — changed from full-width below-header strip to absolute-positioned rounded dropdown (right-aligned, 220px min-width, box shadow); bell and menu mutually close each other

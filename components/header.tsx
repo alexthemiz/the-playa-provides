@@ -304,6 +304,7 @@ export default function Header() {
                   const willOpen = !bellOpen
                   setBellOpen(willOpen)
                   if (willOpen) fetchNotifications()
+                  setMenuOpen(false)
                 }}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative' as const, padding: '4px', display: 'flex', alignItems: 'center' }}
               >
@@ -389,7 +390,7 @@ export default function Header() {
           )}
 
           <button
-            onClick={() => setMenuOpen(!menuOpen)}
+            onClick={() => { setMenuOpen(!menuOpen); setBellOpen(false); }}
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }}
           >
             {menuOpen ? <X size={24} color="#2D241E" /> : <Menu size={24} color="#2D241E" />}
@@ -406,8 +407,16 @@ export default function Header() {
             className="lg:hidden"
           />
           <div
-            className="lg:hidden flex flex-col gap-4 px-6 py-5 border-t border-[#A66D51]"
-            style={{ backgroundColor: '#E8834A', position: 'relative' as const, zIndex: 50 }}
+            style={{
+              position: 'absolute' as const, right: '16px', top: '64px',
+              width: 'auto', minWidth: '220px', borderRadius: '12px',
+              backgroundColor: '#E8834A',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+              padding: '16px 20px',
+              display: 'flex', flexDirection: 'column' as const, gap: '16px',
+              zIndex: 50,
+              border: '1px solid #A66D51',
+            }}
           >
             {navLinks}
           </div>
