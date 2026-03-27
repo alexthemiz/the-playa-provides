@@ -478,9 +478,11 @@ export default function PublicProfilePage() {
         .profile-items-table {
           min-width: 750px;
         }
+        .title-break { display: none; }
+        @media (max-width: 430px) { .title-break { display: block; } }
       `}</style>
 
-      <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 20px 0' }}>The Playa Provides<span style={{ textDecoration: 'underline' }}>{isOwner ? ' Your Profile' : ' A Profile'}{'\u00a0'}</span></h1>
+      <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 20px 0' }}>The Playa Provides<span className="title-break" /><span style={{ textDecoration: 'underline' }}>{isOwner ? ' Your Profile' : ' A Profile'}{'\u00a0'}</span></h1>
 
       {/* PROFILE HEADER */}
       <header style={{ borderBottom: '1px solid #e5e5e5', paddingBottom: '30px' }}>

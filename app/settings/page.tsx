@@ -181,7 +181,8 @@ export default function SettingsPage() {
   return (
     <div style={{ backgroundColor: 'white', minHeight: '100vh', width: '100%', color: '#111' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px 20px 0 20px', fontFamily: 'Outfit, sans-serif' }}>
-        <h1 style={{ margin: '0', fontSize: '28px', fontWeight: 'bold', color: '#2D241E' }}>The Playa Provides<span style={{ textDecoration: 'underline' }}> Account Settings{'\u00a0'}</span></h1>
+        <style>{`.title-break { display: none; } @media (max-width: 430px) { .title-break { display: block; } }`}</style>
+        <h1 style={{ margin: '0', fontSize: '28px', fontWeight: 'bold', color: '#2D241E' }}>The Playa Provides<span className="title-break" /><span style={{ textDecoration: 'underline' }}> Account Settings{'\u00a0'}</span></h1>
       </div>
       <div style={{ padding: '20px', maxWidth: '520px', margin: '0 auto', fontFamily: 'Outfit, sans-serif' }}>
 

@@ -28,8 +28,6 @@ _Last updated: 2026-03-27 (session 23)_
 ## 🔧 Bugs & Fixes
 - [ ] **Welcome modal fires on every login** — Should only show once per account (first login only). Investigate current trigger mechanism and fix so repeat logins don't show the modal.
 - [ ] **OG preview image gets cropped when sharing links** — Current image is not 1200×630px. Resize with padding/background in Canva, re-upload to repo, re-push.
-- [ ] **Mobile portrait title line break — apply to all pages** — Insert `<span className="title-break" />` after "Provides" in the h1 title on: `app/resources/page.tsx`, `app/list-item/page.tsx`, `app/inventory/page.tsx`, `app/profile/[username]/page.tsx`, `app/settings/page.tsx`, `app/camps/[slug]/page.tsx`. Also add `.title-break { display: none; } @media (max-width: 430px) { .title-break { display: block; } }` to each page's style tag.
-
 ---
 
 ## ⚡ Quick Wins
@@ -191,3 +189,5 @@ _(nothing queued)_
 - [x] Design: find-items grid — responsive columns: 2-col portrait mobile, 3-col landscape, auto-fill desktop; handled via CSS class fi-grid
 - [x] Fix: find-items title line break — `<span className="title-break" />` after "Provides" in h1 wraps to new line on portrait mobile (<430px)
 - [x] Design: Header hamburger dropdown — changed from full-width below-header strip to absolute-positioned rounded dropdown (right-aligned, 220px min-width, box shadow); bell and menu mutually close each other
+- [x] Fix: Title line break on remaining pages — `<span className="title-break" />` after "Provides" in h1 on list-item, inventory, profile, settings, camps/[slug], and resources pages; stacks title onto two lines on portrait mobile (<430px)
+- [x] Design: Header hamburger dropdown flush styling — removed border-radius, box-shadow, and border; flush to right edge (right: 0); border-top only; nav links right-aligned via textAlign: right; camp items overflow wrapper added to prevent horizontal scroll

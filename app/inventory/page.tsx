@@ -468,7 +468,8 @@ export default function InventoryPage() {
   return (
     <div style={{ backgroundColor: '#fff', fontFamily: 'Outfit, sans-serif' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px 20px 0 20px' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 8px 0' }}>The Playa Provides<span style={{ textDecoration: 'underline' }}> Your Inventory{'\u00a0'}</span></h1>
+        <style>{`.title-break { display: none; } @media (max-width: 430px) { .title-break { display: block; } }`}</style>
+        <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 8px 0' }}>The Playa Provides<span className="title-break" /><span style={{ textDecoration: 'underline' }}> Your Inventory{'\u00a0'}</span></h1>
         <p style={{ color: '#666', fontSize: '14px', margin: '0 0 20px 0', lineHeight: '1.5' }}>Add or edit items, change their availability settings, track whom you&apos;ve lent what items to, and transfer ownership of items given away. Have your items listed on a spreadsheet? Click the Import Inventory button to add them all at once.</p>
 
         {/* FILTERS + ADD BUTTON */}

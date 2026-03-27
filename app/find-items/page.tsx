@@ -202,37 +202,45 @@ export default function FindItemsPage() {
         .fi-rel { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: 1; }
         .fi-kw-input { position: relative; flex: 0 1 200px; }
         .fi-loc-input { position: relative; flex: 0 0 120px; min-width: 120px; }
-        .fi-cat-row { display: flex; flex-wrap: wrap; gap: 8px; }
+        .fi-cat-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .fi-cat-label { display: none; }
         .fi-bottom-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
         .fi-avail { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .fi-grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
         .title-break { display: none; }
-        @media (min-width: 768px) and (max-width: 1023px) {
+        @media (min-width: 430px) and (max-width: 1023px) {
           .fi-searches { flex-wrap: wrap; column-gap: 12px; row-gap: 0; }
-          .fi-kw { flex: 0 0 calc(50% - 6px); }
-          .fi-loc { flex: 0 0 calc(50% - 6px); }
+          .fi-kw { flex: 1; }
+          .fi-loc { flex: 1; }
           .fi-kw-input { flex: 1; }
           .fi-loc-input { flex: 1; min-width: 0; }
+          .fi-grid { grid-template-columns: repeat(3, 1fr); overflow: hidden; }
+          .fi-grid > * { min-width: 0; box-sizing: border-box; }
+        }
+        @media (min-width: 768px) and (max-width: 1023px) {
           .fi-rel { flex: 0 0 100%; border-top: 1px solid #eee; padding-top: 10px; margin-top: 8px; }
         }
         @media (max-width: 767px) {
-          .fi-searches { flex-direction: column; gap: 0; align-items: stretch; }
-          .fi-kw { flex: none; width: 100%; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px; }
-          .fi-loc { flex: none; width: 100%; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px; }
           .fi-rel { flex: none; width: 100%; }
           .fi-kw-input { flex: 1; }
           .fi-loc-input { flex: 1; min-width: 0; }
           .fi-row { margin-bottom: 8px; padding-bottom: 8px; }
         }
-        @media (max-width: 429px) { .fi-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (min-width: 430px) and (max-width: 1023px) { .fi-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 429px) {
+          .fi-searches { flex-direction: column; gap: 0; align-items: stretch; }
+          .fi-kw { flex: none; width: 100%; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px; }
+          .fi-loc { flex: none; width: 100%; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px; }
+          .fi-avail { flex-wrap: nowrap; }
+          .fi-avail button { padding: 4px 10px; font-size: 11px; }
+          .fi-cat-row button { padding: 4px 10px; font-size: 11px; }
+          .fi-cat-label { display: block; }
+          .fi-grid { grid-template-columns: repeat(2, 1fr); overflow: hidden; }
+          .fi-grid > * { min-width: 0; box-sizing: border-box; }
+          .title-break { display: block; }
+        }
         @media (min-width: 1024px) { .fi-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); } }
-        @media (max-width: 430px) { .title-break { display: block; } }
       `}</style>
 
-      {/* TODO (future session): apply same title-break <span className="title-break" /> after "Provides" in the h1 on:
-          app/resources/page.tsx, app/list-item/page.tsx, app/inventory/page.tsx,
-          app/profile/[username]/page.tsx, app/settings/page.tsx, app/camps/[slug]/page.tsx */}
       <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 20px 0' }}>
         The Playa Provides<span className="title-break" /><span style={{ textDecoration: 'underline' }}> Items to Borrow or Keep{'\u00a0'}</span>
       </h1>
@@ -291,6 +299,7 @@ export default function FindItemsPage() {
 
       {/* ROW 2 (desktop) / ROW 4 (landscape+portrait): Category chips */}
       <div className="fi-row fi-cat-row">
+        <span className="fi-cat-label" style={filterLabelStyle}>Categories:</span>
         {categories.map((cat) => {
           const isActive = categoryFilters.includes(cat);
           return (

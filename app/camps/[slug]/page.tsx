@@ -403,12 +403,22 @@ export default function CampPage() {
   };
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto', color: '#2D241E' }}>
+    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto', color: '#2D241E', overflowX: 'hidden' as const }}>
+      <style>{`
+        .title-break { display: none; }
+        @media (max-width: 430px) {
+          .title-break { display: block; }
+          .camp-title-row { flex-direction: column; gap: 12px; }
+          .camp-title-row button { width: 100%; }
+          .camp-content-row { flex-direction: column; }
+          .camp-content-row > div:last-child { width: 100% !important; max-width: 100% !important; }
+        }
+      `}</style>
 
       {/* Title row with edit/save button */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div className="camp-title-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: 0 }}>
-          The Playa Provides<span style={{ textDecoration: 'underline' }}> {camp.display_name}{'\u00a0'}</span>
+          The Playa Provides<span className="title-break" /><span style={{ textDecoration: 'underline' }}> {camp.display_name}{'\u00a0'}</span>
         </h1>
         {isPageOwner && (
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -524,7 +534,7 @@ export default function CampPage() {
       {/* Claimed: view mode */}
       {camp.is_claimed && !editMode && (
         <div style={{ marginTop: '24px' }}>
-          <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
+          <div className="camp-content-row" style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
             {/* Meta info column — flex:1 so description extends to full available width */}
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', marginBottom: '12px' }}>
@@ -694,7 +704,7 @@ export default function CampPage() {
         {members.length === 0 ? (
           <p style={{ color: '#aaa', fontSize: '0.9rem', fontStyle: 'italic' as const }}>No members listed yet.</p>
         ) : (
-          <div style={{ overflowX: 'auto' as const }}>
+          <div style={{ overflowX: 'auto' as const, maxWidth: '100%', width: '100%' }}>
             {/* Header row */}
             <div style={{ ...memberGridStyle(editMode), padding: '6px 12px', fontSize: '10px', fontWeight: 700, color: '#bbb', textTransform: 'uppercase' as const, letterSpacing: '0.06em', borderBottom: '2px solid #eee', marginBottom: '2px' }}>
               <div>Name</div>
@@ -812,6 +822,7 @@ export default function CampPage() {
         ) : campItems.length === 0 ? (
           <p style={{ color: '#aaa', fontSize: '0.9rem', fontStyle: 'italic' as const }}>No items have been shared by camp members yet.</p>
         ) : (
+          <div style={{ overflowX: 'auto' as const, maxWidth: '100%', width: '100%' }}>
           <div style={campViewMode === 'grid' ? campGridStyle : campListContainerStyle}>
             {campViewMode === 'list' && (
               <div style={campListHeaderStyle}>
@@ -829,6 +840,7 @@ export default function CampPage() {
                 {campViewMode === 'grid' ? <CampCardView item={item} /> : <CampListView item={item} />}
               </Link>
             ))}
+          </div>
           </div>
         )}
       </div>

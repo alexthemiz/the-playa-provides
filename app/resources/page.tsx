@@ -67,11 +67,12 @@ return (
   /* Wrap in a full-width white div to hide the black background on the sides */
   <div className="w-full bg-white min-h-screen"> 
     <div style={{ maxWidth: '72rem', margin: '0 auto', padding: '20px' }}>
+      <style>{`.title-break { display: none; } @media (max-width: 430px) { .title-break { display: block; } }`}</style>
 
       {/* Header Section */}
       <div style={{ marginBottom: '32px' }}>
         <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 16px 0' }}>
-          The Playa Provides<span style={{ textDecoration: 'underline' }}> Resources{'\u00a0'}</span>
+          The Playa Provides<span className="title-break" /><span style={{ textDecoration: 'underline' }}> Resources{'\u00a0'}</span>
         </h1>
         <div className="flex flex-col sm:flex-row items-start gap-4">
           <div style={{ flex: 1 }}>

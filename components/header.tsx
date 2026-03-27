@@ -408,14 +408,14 @@ export default function Header() {
           />
           <div
             style={{
-              position: 'absolute' as const, right: '16px', top: '64px',
-              width: 'auto', minWidth: '220px', borderRadius: '12px',
+              position: 'absolute' as const, right: '0', top: '64px',
+              width: 'auto', minWidth: '220px',
               backgroundColor: '#E8834A',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+              borderTop: '1px solid #A66D51',
               padding: '16px 20px',
               display: 'flex', flexDirection: 'column' as const, gap: '16px',
               zIndex: 50,
-              border: '1px solid #A66D51',
+              textAlign: 'right' as const,
             }}
           >
             {navLinks}
