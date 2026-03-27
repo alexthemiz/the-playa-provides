@@ -374,9 +374,12 @@ export default function PublicProfilePage() {
   };
 
   const addDraftEntry = () => {
+    const defaultYear = draftAffiliations.length > 0
+      ? Math.min(...draftAffiliations.map((d: any) => Number(d.year))) - 1
+      : maxHistoryYear;
     setDraftAffiliations(prev => [...prev, {
       tempId: Math.random().toString(36).slice(2),
-      year: maxHistoryYear,
+      year: defaultYear,
       is_open_camping: false, campInput: '', campId: null, searchResults: [], showDropdown: false,
     }]);
   };
@@ -884,7 +887,7 @@ export default function PublicProfilePage() {
                 </div>
               ))}
               <button onClick={addDraftEntry} style={{ marginTop: '4px', fontSize: '0.8rem', color: '#00aacc', background: 'none', border: '1px dashed #00aacc', borderRadius: '6px', padding: '5px 14px', cursor: 'pointer' }}>
-                + Add year
+                Add Year
               </button>
 
             </div>

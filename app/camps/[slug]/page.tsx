@@ -470,6 +470,25 @@ export default function CampPage() {
         </>
       )}
 
+      {/* BM data for unclaimed stubs — show whenever non-null */}
+      {!camp.is_claimed && (camp.description || camp.homebase || camp.bm_homepage_url) && (
+        <div style={{ marginTop: '16px' }}>
+          {camp.description && (
+            <p style={{ fontSize: '1rem', color: '#444', margin: '0 0 8px', lineHeight: 1.6, whiteSpace: 'pre-wrap' as const, wordBreak: 'break-word' as const, maxWidth: '720px' }}>
+              {camp.description}
+            </p>
+          )}
+          {camp.homebase && (
+            <p style={{ fontSize: '0.85rem', color: '#999', margin: '0 0 6px' }}>Homebase: {camp.homebase}</p>
+          )}
+          {camp.bm_homepage_url && (
+            <a href={camp.bm_homepage_url} target="_blank" rel="noopener noreferrer" style={socialPillStyle}>
+              Website
+            </a>
+          )}
+        </div>
+      )}
+
       {/* Claimed: view mode */}
       {camp.is_claimed && !editMode && (
         <div style={{ marginTop: '24px' }}>
@@ -482,7 +501,7 @@ export default function CampPage() {
                 )}
                 <div>
                   {camp.description && (
-                    <p style={{ fontSize: '1rem', color: '#444', margin: '0 0 8px', lineHeight: 1.6 }}>{camp.description}</p>
+                    <p style={{ fontSize: '1rem', color: '#444', margin: '0 0 8px', lineHeight: 1.6, whiteSpace: 'pre-wrap' as const, wordBreak: 'break-word' as const, maxWidth: '720px' }}>{camp.description}</p>
                   )}
                 </div>
               </div>
@@ -502,16 +521,21 @@ export default function CampPage() {
                   2026 Playa Address:<br /><strong>Not Returning</strong>
                 </p>
               )}
-              {/* Social links pills */}
-              {camp.social_links && Object.keys(camp.social_links).some(k => camp.social_links[k]) && (
+              {/* Social links pills — includes bm_homepage_url fallback for Website */}
+              {((camp.social_links && Object.keys(camp.social_links).some(k => camp.social_links[k])) || (!camp.social_links?.website && camp.bm_homepage_url)) && (
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' as const, marginTop: '8px' }}>
-                  {Object.entries(camp.social_links as Record<string, string>)
+                  {camp.social_links && Object.entries(camp.social_links as Record<string, string>)
                     .filter(([, url]) => !!url)
                     .map(([key, url]) => (
                       <a key={key} href={url} target="_blank" rel="noopener noreferrer" style={socialPillStyle}>
                         {socialLabelMap[key] || key}
                       </a>
                     ))}
+                  {!camp.social_links?.website && camp.bm_homepage_url && (
+                    <a href={camp.bm_homepage_url} target="_blank" rel="noopener noreferrer" style={socialPillStyle}>
+                      Website
+                    </a>
+                  )}
                 </div>
               )}
             </div>

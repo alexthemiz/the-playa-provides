@@ -94,6 +94,8 @@ _(nothing queued)_
 ---
 
 ## ✅ Done
+- [x] Fix: Camp page — BM data (description, homebase, bm_homepage_url) now renders on unclaimed stubs whenever non-null; description has whiteSpace: pre-wrap + wordBreak: break-word + maxWidth: 720px; bm_homepage_url wired as "Website" pill on both unclaimed stubs and claimed pages (fallback when social_links.website is absent)
+- [x] Fix: Profile — "Add Year" button label corrected; new row defaults to lowest existing year minus 1 instead of always 2025
 - [x] Feature: Settings page overhaul — Identity & Contact rename/reorder, pronouns field (DB migration), required asterisks, address card layout with "Set as default" checkbox, default location pre-select on /list-item and AddItemModal, Account & Security section (Change Email, Change Password with OAuth detection, Delete Account modal), zip_code field added
 - [x] Feature: Delete Account — two-step confirmation modal in settings, `delete-account` edge function (scrubs profile PII, marks gear owner_deleted+private, unlinks camps, deletes follows/notifications/affiliations/loans/transfers, then calls auth.admin.deleteUser), homepage `?deleted=true` banner, owner_deleted guard on item detail + parallel modal + find-items query
 - [x] Fix: Delete account FK chain — resolved series of blocking constraints: `item_loans/item_transfers` NO ACTION on profiles.id → CASCADE; `gear_items.location_id` NO ACTION → SET NULL; `social_links` NOT NULL conflict → set to `{}`; `gear_items.user_id` NOT NULL conflict with SET NULL FK rule → dropped NOT NULL
