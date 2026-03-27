@@ -405,16 +405,26 @@ export default function CampPage() {
   return (
     <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto', color: '#2D241E' }}>
 
-      {/* Title row with edit button */}
+      {/* Title row with edit/save button */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: 0 }}>
           The Playa Provides<span style={{ textDecoration: 'underline' }}> {camp.display_name}{'\u00a0'}</span>
         </h1>
-        {isPageOwner && !editMode && (
-          <button onClick={enterEditMode} style={editButtonStyle}>
-            <Pencil size={14} style={{ marginRight: '6px' }} />
-            Edit Camp
-          </button>
+        {isPageOwner && (
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            {editMode && (
+              <button onClick={cancelEdit} style={{ padding: '8px 20px', backgroundColor: '#f0f0f0', color: '#666', border: '1px solid #ddd', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
+                Cancel
+              </button>
+            )}
+            <button
+              onClick={editMode ? handleSaveEdit : enterEditMode}
+              disabled={editMode && editSaving}
+              style={{ padding: '8px 20px', backgroundColor: editMode ? '#4CAF50' : '#5ECFDF', color: editMode ? '#fff' : '#000', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
+            >
+              {editMode ? (editSaving ? 'Saving…' : 'Save Changes') : 'Edit Camp'}
+            </button>
+          </div>
         )}
       </div>
 
@@ -562,20 +572,13 @@ export default function CampPage() {
               )}
             </div>
 
-            {/* Banner — only shown alongside description (Fix 1) */}
-            {camp.banner_url && camp.description && (
-              <div style={{ flexShrink: 0, width: '45%', maxWidth: '500px' }}>
-                <img src={camp.banner_url} alt="" style={{ width: '100%', height: 'auto', borderRadius: '10px' }} />
+            {/* Banner — always in right column when present; max 500px with description, 400px without */}
+            {camp.banner_url && (
+              <div style={{ flexShrink: 0, width: '45%', maxWidth: camp.description ? '500px' : '400px' }}>
+                <img src={camp.banner_url} alt="" style={{ width: '100%', maxHeight: '320px', objectFit: 'cover' as const, borderRadius: '10px' }} />
               </div>
             )}
           </div>
-
-          {/* Banner alone when no description — centered, capped at 400px (Fix 2) */}
-          {camp.banner_url && !camp.description && (
-            <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'center' }}>
-              <img src={camp.banner_url} alt="" style={{ width: '100%', maxWidth: '400px', height: 'auto', borderRadius: '10px' }} />
-            </div>
-          )}
         </div>
       )}
 
@@ -678,14 +681,7 @@ export default function CampPage() {
             </div>
           </div>
 
-          {editError && <p style={{ color: '#cc0000', fontSize: '0.85rem', margin: '0 0 12px' }}>{editError}</p>}
-
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button onClick={handleSaveEdit} disabled={editSaving} style={saveBtnStyle}>
-              {editSaving ? 'Saving…' : 'Save Changes'}
-            </button>
-            <button onClick={cancelEdit} style={cancelBtnStyle}>Cancel</button>
-          </div>
+          {editError && <p style={{ color: '#cc0000', fontSize: '0.85rem', margin: 0 }}>{editError}</p>}
         </div>
       )}
 
