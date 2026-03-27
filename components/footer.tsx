@@ -49,6 +49,11 @@ export default function Footer() {
         </div>
 
       </div>
+      <div className="max-w-7xl mx-auto px-4 mt-4 text-center">
+        <p className="text-[10px] text-[#2D241E] opacity-70 font-medium">
+          This app is not affiliated, endorsed, or verified by Burning Man Project.
+        </p>
+      </div>
     </footer>
   );
 }
