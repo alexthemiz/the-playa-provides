@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-03-27 (session 23)_
+_Last updated: 2026-03-30 (session 24)_
 
 ---
 
@@ -42,7 +42,6 @@ _Last updated: 2026-03-27 (session 23)_
 ---
 
 ## 🎨 Design & Brand
-- [ ] **Profile page mobile layout** — 2-col grid rows may need responsive stacking on small screens
 
 ---
 
@@ -57,6 +56,8 @@ _Last updated: 2026-03-27 (session 23)_
 - [ ] **BM API: 2026 archive import** — Around March 2027, run `scripts/import-bm-camps.js` updated to include the 2026 S3 archive URL once BM posts it.
 - [ ] **Create camps@theplayaprovides.com** — Set up in Resend, forward to alex@theplayaprovides.com.
 - [ ] **Camp edit page — duplicate notice** — Add a small note in the edit UI: "Think there's a duplicate of your camp page? Email camps@theplayaprovides.com"
+- [ ] **New user onboarding overhaul** — build out full onboarding flow including: welcome modal sequence, guided tour of key features, and persistent onboarding checklist. Needs full scoping session before building. Key questions: what triggers "new user" state, what completion looks like, where checklist lives.
+- [ ] **Camp page: member chat** — real-time or async chat window on camp hub pages, visible to camp members only. Needs scoping (real-time vs. threaded, moderation, notifications).
 - [ ] **SEO / noindex for restricted items** — Public items indexable by search engines; campmates-only and followers-only items should have noindex meta tag.
 - [ ] **Incomplete profile nudge** — Some users have NULL full_name (and potentially other required fields) from before required field validation was added. Options: (A) Soft banner at top of /settings page if required fields are missing — non-blocking, just a nudge; (B) One-time modal after login prompting user to complete their profile, dismissible and non-blocking; (C) Validate only on save — no proactive warning, error only appears when user next visits /settings and tries to save. Option B is most user-friendly at scale.
 - [ ] **Borrowed item detail page** — When an item is currently out on loan, determine what shows on the unique item page for: (1) the borrower, (2) the owner, (3) anyone else. Should "Request this item" be hidden? Should there be a loan status indicator?
@@ -191,3 +192,17 @@ _(nothing queued)_
 - [x] Design: Header hamburger dropdown — changed from full-width below-header strip to absolute-positioned rounded dropdown (right-aligned, 220px min-width, box shadow); bell and menu mutually close each other
 - [x] Fix: Title line break on remaining pages — `<span className="title-break" />` after "Provides" in h1 on list-item, inventory, profile, settings, camps/[slug], and resources pages; stacks title onto two lines on portrait mobile (<430px)
 - [x] Design: Header hamburger dropdown flush styling — removed border-radius, box-shadow, and border; flush to right edge (right: 0); border-top only; nav links right-aligned via textAlign: right; camp items overflow wrapper added to prevent horizontal scroll
+- [x] Fix: find-items — filter layout restructured for desktop, portrait, and landscape breakpoints using CSS media queries
+- [x] Fix: find-items — grid columns responsive: 2-col portrait, 3-col landscape, auto-fill desktop
+- [x] Fix: find-items — GLM toggle repositioned to bottom of filter section above items
+- [x] Fix: find-items — "Search by keyword" and "Search by location" labels capitalized
+- [x] Fix: find-items — "Categories:" label added before category chips
+- [x] Fix: find-items — Available to chips constrained to single row on portrait with smaller sizing
+- [x] Fix: find-items — grid card overflow fixed for portrait and landscape, cards no longer bleed past page edge
+- [x] Fix: Header — hamburger dropdown right-aligned, flush with header right edge, nav links right-justified, no rounded card styling
+- [x] Fix: Mobile portrait title line break — added after "Provides" on find-items, list-item, inventory, profile, settings, camps pages
+- [x] Fix: Camp page mobile portrait — title and Edit Camp button stack vertically
+- [x] Fix: Camp page mobile portrait — photo moves below description and meta fields
+- [x] Fix: Camp page — members table horizontal scroll contained, page no longer scrolls horizontally
+- [x] Fix: Camp page — Items from Camp Members table wrapped in horizontal scroll container
+- [x] Fix: Profile page — mobile-responsive layout via embedded style tag and CSS media queries (≤640px): header stacks vertically (avatar centered, info full-width, button full-width), Wish List reorders above Bio, Bio/Wish grid collapses to single column, Available Items table horizontally scrollable
