@@ -184,8 +184,8 @@ export default function FindItemsPage() {
     const matchesAvailability = availabilityFilters.includes(itemStatus);
     const matchesRelationship = (() => {
       if (relationshipFilters.includes('Everyone')) return true;
-      if (relationshipFilters.includes('People I Follow') && followingIds.includes(item.user_id)) return true;
-      if (relationshipFilters.includes('People Who Follow Me') && followerIds.includes(item.user_id)) return true;
+      if (relationshipFilters.includes('Following') && followingIds.includes(item.user_id)) return true;
+      if (relationshipFilters.includes('Followers') && followerIds.includes(item.user_id)) return true;
       if (relationshipFilters.includes('My Campmates') && campMateIds.includes(item.user_id)) return true;
       return false;
     })();
@@ -277,7 +277,7 @@ export default function FindItemsPage() {
         </div>
         <div className="fi-rel">
           <span style={filterLabelStyle}>Show items from:</span>
-          {['Everyone', 'People I Follow', 'People Who Follow Me', 'My Campmates'].map((option) => {
+          {['Everyone', 'Following', 'Followers', 'My Campmates'].map((option) => {
             const isActive = relationshipFilters.includes(option);
             return (
               <button
