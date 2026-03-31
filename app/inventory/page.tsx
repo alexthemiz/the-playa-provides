@@ -470,7 +470,7 @@ export default function InventoryPage() {
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px 20px 0 20px' }}>
         <style>{`.title-break { display: none; } @media (max-width: 430px) { .title-break { display: block; } }`}</style>
         <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 8px 0' }}>The Playa Provides<span className="title-break" /><span style={{ textDecoration: 'underline' }}> Your Inventory{'\u00a0'}</span></h1>
-        <p style={{ color: '#666', fontSize: '14px', margin: '0 0 20px 0', lineHeight: '1.5' }}>Add or edit items, change their availability settings, track whom you&apos;ve lent what items to, and transfer ownership of items given away. Have your items listed on a spreadsheet? Click the Import Inventory button to add them all at once.</p>
+        <p style={{ color: '#666', fontSize: '14px', margin: '0 0 20px 0', lineHeight: '1.5' }}>Add or edit items, change their availability settings, track whom you&apos;ve lent what items to, and transfer ownership of items given away.<br />Have your items listed on a spreadsheet? Click the Import Inventory button to add them all at once.</p>
 
         {/* FILTERS + ADD BUTTON */}
         <div style={filterBarStyle}>
@@ -1015,7 +1015,7 @@ function getStatusToggleStyle(optionValue: string, currentStatus: string): React
     return { padding: '3px 8px', fontSize: '0.7rem', borderRadius: '4px', cursor: 'pointer', fontWeight: isActive ? 'bold' : 'normal', border: '1px solid #3ABFD4', backgroundColor: isActive ? '#3ABFD4' : '#fff', color: isActive ? '#000' : '#00aacc', whiteSpace: 'nowrap' as const };
   }
   if (optionValue === 'Available to Keep') {
-    return { padding: '3px 8px', fontSize: '0.7rem', borderRadius: '4px', cursor: 'pointer', fontWeight: isActive ? 'bold' : 'normal', border: '1px solid #E8834A', backgroundColor: isActive ? '#E8834A' : '#fff', color: isActive ? '#000' : '#a06040', whiteSpace: 'nowrap' as const };
+    return { padding: '3px 8px', fontSize: '0.7rem', borderRadius: '4px', cursor: 'pointer', fontWeight: isActive ? 'bold' : 'normal', border: '1px solid #d896ff', backgroundColor: isActive ? '#d896ff' : '#fff', color: isActive ? '#000' : '#9b4dca', whiteSpace: 'nowrap' as const };
   }
   return { padding: '3px 8px', fontSize: '0.7rem', borderRadius: '4px', cursor: 'pointer', fontWeight: isActive ? 'bold' : 'normal', border: '1px solid #ddd', backgroundColor: isActive ? '#e0e0e0' : '#fff', color: isActive ? '#444' : '#999', whiteSpace: 'nowrap' as const };
 }
@@ -1039,7 +1039,7 @@ const locationOptionStyle: React.CSSProperties = { display: 'flex', alignItems: 
 
 // Action buttons
 const lendButtonStyle: React.CSSProperties = { height: '30px', padding: '0 14px', fontSize: '0.75rem', backgroundColor: '#3ABFD4', color: '#000', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' as const };
-const transferButtonStyle: React.CSSProperties = { height: '30px', padding: '0 14px', fontSize: '0.75rem', backgroundColor: '#E8834A', color: '#000', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' as const };
+const transferButtonStyle: React.CSSProperties = { height: '30px', padding: '0 14px', fontSize: '0.75rem', backgroundColor: '#d896ff', color: '#000', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' as const };
 const makeAvailableButtonStyle: React.CSSProperties = { height: '30px', padding: '0 14px', fontSize: '0.75rem', backgroundColor: '#f0f0f0', color: '#666', border: '1px solid #ddd', borderRadius: '5px', cursor: 'pointer', fontWeight: 'normal', whiteSpace: 'nowrap' as const };
 const pendingBadgeStyle: React.CSSProperties = { display: 'inline-block', padding: '2px 8px', backgroundColor: '#fef3c7', color: '#92400e', borderRadius: '10px', fontSize: '0.7rem', fontWeight: 700 };
 const handsOverButtonStyle: React.CSSProperties = { height: '28px', padding: '0 10px', fontSize: '0.7rem', backgroundColor: '#16a34a', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' as const };
