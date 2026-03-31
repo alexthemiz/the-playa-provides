@@ -113,7 +113,7 @@ export default function HomePage() {
           { header: 'Engage in <em>Radical Interdependence</em>', body: 'Others may have what you need; you may have what others need.' },
           { header: 'A <em>Decommodification</em> Modification', body: 'Make the pursuit of decommodification a year-round endeavor.' },
           { header: 'Lending is a Type of <em>Gifting</em>', body: 'How many Amazon orders can you help others avoid?' },
-          { header: '<em>Participate</em> From Your Storage Space', body: "Not going this year? Just because you're not doesn't mean your stuff can't." },
+          { header: '<em>Participate</em> From Your Storage Space', body: "Just because you're not going this year doesn't mean your stuff can't." },
         ].map(({ header, body }, i) => (
           <div key={i} style={{ textAlign: 'center' as const }}>
             <p style={{ fontSize: '1.05rem', fontWeight: 700, color: '#2D241E', margin: '0 0 8px' }} dangerouslySetInnerHTML={{ __html: header }} />
@@ -121,44 +121,6 @@ export default function HomePage() {
           </div>
         ))}
       </div>
-
-      {/* Polaroid Marquee */}
-      {marqueeItems.length > 0 && (
-        <div style={{ width: '100%', backgroundColor: '#ffffff' }}>
-          <p style={{ textAlign: 'center' as const, fontSize: '1.2rem', fontWeight: 700, color: '#2D241E', marginBottom: '16px', padding: '0 20px' }}>
-            Missing supplies for the burn? See what users have made available.
-          </p>
-        <div style={{ overflow: 'hidden' as const, width: '100%', padding: '0 0 40px' }}>
-          <div
-            onMouseEnter={() => setMarqueeHovered(true)}
-            onMouseLeave={() => setMarqueeHovered(false)}
-            style={{
-              display: 'flex',
-              gap: '24px',
-              width: 'max-content',
-              animation: 'marquee 60s linear infinite',
-              animationPlayState: marqueeHovered ? 'paused' : 'running',
-              paddingLeft: '24px',
-            }}
-          >
-            {[...marqueeItems, ...marqueeItems].map((item: any, i: number) => (
-              <a
-                key={i}
-                href={`/find-items/${item.id}`}
-                style={{ textDecoration: 'none', flexShrink: 0 }}
-              >
-                <PolaroidPhoto
-                  src={item.image_urls[0]}
-                  alt={item.item_name}
-                  itemId={item.id}
-                  imageSize={160}
-                />
-              </a>
-            ))}
-          </div>
-        </div>
-        </div>
-      )}
 
       {/* Wishlist Ticker */}
       {wishlistTags.length > 0 && (
@@ -202,6 +164,44 @@ export default function HomePage() {
               ))}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Polaroid Marquee */}
+      {marqueeItems.length > 0 && (
+        <div style={{ width: '100%', backgroundColor: '#ffffff' }}>
+          <p style={{ textAlign: 'center' as const, fontSize: '1.2rem', fontWeight: 700, color: '#2D241E', marginBottom: '16px', padding: '0 20px' }}>
+            Missing supplies for the burn? See what users have made available.
+          </p>
+        <div style={{ overflow: 'hidden' as const, width: '100%', padding: '0 0 40px' }}>
+          <div
+            onMouseEnter={() => setMarqueeHovered(true)}
+            onMouseLeave={() => setMarqueeHovered(false)}
+            style={{
+              display: 'flex',
+              gap: '24px',
+              width: 'max-content',
+              animation: 'marquee 60s linear infinite',
+              animationPlayState: marqueeHovered ? 'paused' : 'running',
+              paddingLeft: '24px',
+            }}
+          >
+            {[...marqueeItems, ...marqueeItems].map((item: any, i: number) => (
+              <a
+                key={i}
+                href={`/find-items/${item.id}`}
+                style={{ textDecoration: 'none', flexShrink: 0 }}
+              >
+                <PolaroidPhoto
+                  src={item.image_urls[0]}
+                  alt={item.item_name}
+                  itemId={item.id}
+                  imageSize={160}
+                />
+              </a>
+            ))}
+          </div>
+        </div>
         </div>
       )}
 
