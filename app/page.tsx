@@ -124,7 +124,7 @@ export default function HomePage() {
 
       {/* Wishlist Ticker */}
       {wishlistTags.length > 0 && (
-        <div style={{ padding: '40px 0 20px', backgroundColor: '#fff' }}>
+        <div style={{ padding: '40px 0 40px', backgroundColor: '#fff' }}>
           <p style={{ textAlign: 'center' as const, fontSize: '1.2rem', fontWeight: 700, color: '#2D241E', marginBottom: '16px', padding: '0 20px' }}>
             Burners are looking for these items. Can you help them out?
           </p>
@@ -169,7 +169,7 @@ export default function HomePage() {
 
       {/* Polaroid Marquee */}
       {marqueeItems.length > 0 && (
-        <div style={{ width: '100%', backgroundColor: '#ffffff' }}>
+        <div style={{ width: '100%', backgroundColor: '#ffffff', paddingTop: '40px' }}>
           <p style={{ textAlign: 'center' as const, fontSize: '1.2rem', fontWeight: 700, color: '#2D241E', marginBottom: '16px', padding: '0 20px' }}>
             Missing supplies for the burn? See what users have made available.
           </p>
