@@ -97,7 +97,7 @@ export default function HomePage() {
           color: '#2D241E',
           fontWeight: '700',
         }}>
-          Why let your stuff collect dust in storage when it could be collecting dust on playa?
+          But the playa can only provide because people provide.
         </p>
 
         {/* Main Borrow/Lend Actions */}
@@ -107,19 +107,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Numbered list */}
-      <div style={{ maxWidth: '860px', margin: '0 auto', padding: '40px 20px 40px', display: 'flex', flexDirection: 'column' as const, gap: '28px' }}>
+      {/* 2×2 Card Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '24px', maxWidth: '860px', margin: '0 auto', padding: '40px 20px' }}>
         {[
-          { n: '1', title: 'Easily keep track of what you own', sub: 'Your inventory stays private until you decide what to share, when, and with whom.' },
-          { n: '2', title: 'Lend or give away what you\'re not using', sub: 'Make it easier and cheaper for your fellow burners to get to BRC.' },
-          { n: '3', title: 'Borrow what you need', sub: 'Skip the Amazon order. Someone in the community probably has it already.' },
-        ].map(({ n, title, sub }) => (
-          <div key={n} style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
-            <span style={{ fontSize: '2.4rem', fontWeight: '900', color: '#3ABFD4', lineHeight: 1, flexShrink: 0, width: '40px', textAlign: 'center' as const }}>{n}</span>
-            <div>
-              <p style={{ margin: '0 0 4px', fontSize: '1.05rem', fontWeight: '700', color: '#2D241E' }}>{title}</p>
-              <p style={{ margin: 0, fontSize: '0.95rem', color: '#777', lineHeight: '1.5' }}>{sub}</p>
-            </div>
+          { header: 'Engage in <em>Radical Interdependence</em>', body: 'Others may have what you need; you may have what others need.' },
+          { header: 'A <em>Decommodification</em> Modification', body: 'Make the pursuit of decommodification a year-round endeavor.' },
+          { header: 'Lending is a Type of <em>Gifting</em>', body: 'How many Amazon orders can you help others avoid?' },
+          { header: '<em>Participate</em> From Your Storage Space', body: "Not going this year? Just because you're not doesn't mean your stuff can't." },
+        ].map(({ header, body }, i) => (
+          <div key={i} style={{ backgroundColor: '#fff', border: '1px solid #eee', borderRadius: '12px', padding: '24px' }}>
+            <p style={{ fontSize: '1.05rem', fontWeight: 700, color: '#2D241E', margin: '0 0 8px' }} dangerouslySetInnerHTML={{ __html: header }} />
+            <p style={{ fontSize: '0.95rem', color: '#777', lineHeight: 1.5, margin: 0 }}>{body}</p>
           </div>
         ))}
       </div>
@@ -209,7 +207,7 @@ export default function HomePage() {
 
       {/* On-Playa Resources */}
       <div style={{ textAlign: 'center' as const, padding: '40px 20px 60px' }}>
-        <p style={{ fontSize: '1.2rem', color: '#666', marginBottom: '16px', fontWeight: 700 }}>
+        <p style={{ fontSize: '1.2rem', color: '#2D241E', marginBottom: '16px', fontWeight: 700 }}>
           Find the camps providing services that make Burning Man more sustainable
         </p>
         <Link href="/resources" style={resourceBtn}>On-Playa Resources</Link>
@@ -232,7 +230,7 @@ const primaryBtn = {
 
 const secondaryBtn = {
   padding: '14px 32px',
-  backgroundColor: '#E8834A',
+  backgroundColor: '#d896ff',
   color: '#000',
   borderRadius: '12px',
   textDecoration: 'none',
