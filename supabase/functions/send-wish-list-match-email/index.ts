@@ -13,7 +13,8 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { recipientId, senderName, senderUsername, selectedItems, note } = await req.json()
+    const { recipientId, senderName, senderUsername, selectedItems, note, inventoryItems: rawInventoryItems } = await req.json()
+    const inventoryItems = rawInventoryItems || []
 
     const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
@@ -42,7 +43,13 @@ serve(async (req: Request) => {
     }
 
     const itemListHtml = (selectedItems as string[])
-      .map((item: string) => `<li style="margin: 4px 0;">${item}</li>`)
+      .map((item: string) => {
+        const inventoryMatch = (inventoryItems as any[]).find((i: any) => i.name === item)
+        if (inventoryMatch) {
+          return `<li style="margin: 4px 0;"><a href="${inventoryMatch.url}" style="color: #00ccff; font-weight: bold;">${item}</a> <span style="font-size: 0.85em; color: #999;">(view listing)</span></li>`
+        }
+        return `<li style="margin: 4px 0;">${item}</li>`
+      })
       .join('')
 
     const noteHtml = note

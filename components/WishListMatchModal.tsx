@@ -12,13 +12,14 @@ interface Props {
   };
   wishTags: string[];
   currentUserId: string;
+  isFollowing: boolean;
   onClose: () => void;
 }
 
-export default function WishListMatchModal({ profile, wishTags, currentUserId, onClose }: Props) {
+export default function WishListMatchModal({ profile, wishTags, currentUserId, isFollowing, onClose }: Props) {
   const [myItems, setMyItems] = useState<any[]>([]);
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
-  const [selectedItemNames, setSelectedItemNames] = useState<Set<string>>(new Set());
+  const [selectedItemIds, setSelectedItemIds] = useState<Map<string, string>>(new Map());
   const [note, setNote] = useState('');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
@@ -30,8 +31,9 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, o
     async function fetchMyInventory() {
       const { data } = await supabase
         .from('gear_items')
-        .select('id, item_name')
+        .select('id, item_name, visibility')
         .eq('user_id', currentUserId)
+        .neq('availability_status', 'Not Available')
         .order('item_name', { ascending: true });
       setMyItems(data || []);
     }
@@ -46,16 +48,16 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, o
     });
   };
 
-  const toggleItem = (name: string) => {
-    setSelectedItemNames(prev => {
-      const next = new Set(prev);
-      next.has(name) ? next.delete(name) : next.add(name);
+  const toggleItem = (id: string, name: string) => {
+    setSelectedItemIds(prev => {
+      const next = new Map(prev);
+      next.has(id) ? next.delete(id) : next.set(id, name);
       return next;
     });
   };
 
-  const allSelected = [...selectedTags, ...selectedItemNames];
-  const canSend = allSelected.length > 0 && !sending;
+  const allSelected = [...selectedTags, ...[...selectedItemIds.values()]];
+  const canSend = allSelected.length > 0 && note.trim().length > 0 && !sending;
 
   const handleSend = async () => {
     setSending(true);
@@ -81,6 +83,12 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, o
       });
       if (notifErr) throw new Error(notifErr.message);
 
+      // Build inventory items with URLs for the email
+      const inventoryItems = [...selectedItemIds.entries()].map(([id, name]) => ({
+        name,
+        url: `https://theplayaprovides.com/find-items/${id}`,
+      }));
+
       // Fire-and-forget email
       supabase.functions.invoke('send-wish-list-match-email', {
         body: {
@@ -88,6 +96,7 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, o
           senderName,
           senderUsername,
           selectedItems: allSelected,
+          inventoryItems,
           note: note.trim() || null,
         },
       }).catch(() => {});
@@ -118,10 +127,10 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, o
         ) : (
           <>
             <h2 style={{ margin: '0 0 4px', color: '#2D241E', fontSize: '1.15rem', paddingRight: '24px' }}>
-              Let {recipientName} know what you have
+              Can you make {recipientName}&apos;s wish list dreams come true?
             </h2>
             <p style={{ margin: '0 0 20px', color: '#888', fontSize: '0.85rem' }}>
-              Select the items from their wish list that you have, or choose from your inventory.
+              Select the items from their wish list you have, and any from your inventory you think they may want
             </p>
 
             {/* Wish list tag checkboxes */}
@@ -141,39 +150,45 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, o
             </div>
 
             {/* Inventory items */}
-            <p style={sectionLabelStyle}>
-              Or select from your inventory
-              <a
-                href="/list-item"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ marginLeft: '10px', fontSize: '0.78rem', color: '#00aacc', textDecoration: 'none', fontWeight: 600 }}
-              >
-                + Add Item to Inventory
-              </a>
-            </p>
+            <p style={sectionLabelStyle}>Share a listing from your inventory</p>
             {myItems.length === 0 ? (
               <p style={{ fontSize: '0.85rem', color: '#aaa', fontStyle: 'italic' as const, marginBottom: '20px' }}>
                 No items in your inventory yet.
               </p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '8px', marginBottom: '20px', maxHeight: '180px', overflowY: 'auto' as const, paddingRight: '4px' }}>
-                {myItems.map(item => (
-                  <label key={item.id} style={checkRowStyle}>
-                    <input
-                      type="checkbox"
-                      checked={selectedItemNames.has(item.item_name)}
-                      onChange={() => toggleItem(item.item_name)}
-                      style={{ accentColor: '#5ECFDF', width: '15px', height: '15px', flexShrink: 0 }}
-                    />
-                    <span style={{ fontSize: '0.95rem', color: '#2D241E' }}>{item.item_name}</span>
-                  </label>
-                ))}
+                {myItems.map(item => {
+                  const visLabel = (() => {
+                    if (!item.visibility || item.visibility === 'public') return null;
+                    if (item.visibility === 'campmates') return 'campmates only';
+                    if (item.visibility === 'followers' || item.visibility === 'followers_campmates') {
+                      return isFollowing ? null : 'followers only';
+                    }
+                    if (item.visibility === 'private') return 'private';
+                    return null;
+                  })();
+                  return (
+                    <label key={item.id} style={checkRowStyle}>
+                      <input
+                        type="checkbox"
+                        checked={selectedItemIds.has(item.id)}
+                        onChange={() => toggleItem(item.id, item.item_name)}
+                        style={{ accentColor: '#5ECFDF', width: '15px', height: '15px', flexShrink: 0 }}
+                      />
+                      <span style={{ fontSize: '0.95rem', color: '#2D241E' }}>{item.item_name}</span>
+                      {visLabel && (
+                        <span style={{ fontSize: '0.72rem', color: '#aaa', marginLeft: '6px', fontStyle: 'italic' }}>
+                          {visLabel}
+                        </span>
+                      )}
+                    </label>
+                  );
+                })}
               </div>
             )}
 
             {/* Note */}
-            <p style={{ ...sectionLabelStyle, marginBottom: '6px' }}>Add a note <span style={{ color: '#bbb', fontWeight: 400 }}>(optional)</span></p>
+            <p style={{ ...sectionLabelStyle, marginBottom: '6px' }}>Add a note <span style={{ color: '#dc2626', fontWeight: 400 }}>*</span></p>
             <textarea
               value={note}
               onChange={e => setNote(e.target.value)}

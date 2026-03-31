@@ -1024,6 +1024,7 @@ export default function PublicProfilePage() {
           profile={profile}
           wishTags={wishTags}
           currentUserId={currentUserId}
+          isFollowing={isFollowing}
           onClose={() => setShowWishMatchModal(false)}
         />
       )}

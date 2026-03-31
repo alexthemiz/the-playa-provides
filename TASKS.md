@@ -96,6 +96,14 @@ _(nothing queued)_
 ---
 
 ## ✅ Done
+- [x] Fix: find-items — relationship filter chips renamed: "People I Follow" → "Following", "People Who Follow Me" → "Followers"; filter logic updated to match
+- [x] Design: Homepage — hero line replaced with "But the playa can only provide because people provide."
+- [x] Design: Homepage — Lend Items button color changed from orange (#E8834A) to purple (#d896ff)
+- [x] Design: Homepage — numbered list replaced with 2×2 card grid (no borders, centered text, maxWidth 1000px) with four principle-based cards
+- [x] Design: Homepage — On-Playa Resources text color changed from #666 to #2D241E
+- [x] Design: Homepage — wishlist ticker moved above polaroid marquee
+- [x] Design: Homepage — wishlist ticker and polaroid marquee wrapped in shared faint purple background (rgba(216,150,255,0.08)) to visually connect them as one unit
+- [x] Fix: Homepage — card body copy updated: "Just because you're not going this year doesn't mean your stuff can't."
 - [x] Feature: BM camp data import — fetched 2015–2025 JSON archives from BM public S3 URLs, seeded camps table with 5,314 unique camps (13,265 raw records, 17 same-year dupes skipped); added bm_uid and bm_homepage_url columns to camps table
 - [x] Fix: Footer BM disclaimer — added "This app is not affiliated, endorsed, or verified by Burning Man Project." to footer in matching secondary text style
 - [x] Fix: Camp autocomplete — now draws from 5,314 official BM camp names (2015–2025) instead of user-created stubs only
@@ -192,6 +200,10 @@ _(nothing queued)_
 - [x] Design: Header hamburger dropdown — changed from full-width below-header strip to absolute-positioned rounded dropdown (right-aligned, 220px min-width, box shadow); bell and menu mutually close each other
 - [x] Fix: Title line break on remaining pages — `<span className="title-break" />` after "Provides" in h1 on list-item, inventory, profile, settings, camps/[slug], and resources pages; stacks title onto two lines on portrait mobile (<430px)
 - [x] Design: Header hamburger dropdown flush styling — removed border-radius, box-shadow, and border; flush to right edge (right: 0); border-top only; nav links right-aligned via textAlign: right; camp items overflow wrapper added to prevent horizontal scroll
+- [x] Fix: notifications RLS — added INSERT policy for wish_list_match type gated on actor_id = auth.uid() (was missing, causing silent 403 on send)
+- [x] Fix: WishListMatchModal — added isFollowing prop; updated copy (title + subhead + section labels + note required asterisk); removed "+ Add Item to Inventory" link; inventory fetch now excludes Not Available items and fetches visibility column; selectedItemIds Map replaces selectedItemNames Set (id→name); note now required to enable Send; visibility labels on inventory items (followers only / campmates only / private)
+- [x] Fix: WishListMatchModal — inventoryItems array (name + URL) built from selectedItemIds and passed to edge function body
+- [x] Fix: send-wish-list-match-email edge function — inventory items now render as clickable links in email; wish-list-only tags render as plain text; safe fallback if inventoryItems absent — **redeploy via Supabase Dashboard required**
 - [x] Copy: Homepage hero tagline updated — "Why let your stuff collect dust..." → "But the playa can only provide because people provide." _(branch: feature/homepage-copy)_
 - [x] Design: Homepage "Lend Items" button color — changed from #E8834A (orange) to #d896ff (purple) _(branch: feature/homepage-copy)_
 - [x] Design: Homepage numbered list → 2×2 card grid — four Principles cards (Radical Interdependence, Decommodification, Gifting, Participate) with italic emphasis via dangerouslySetInnerHTML _(branch: feature/homepage-copy)_
