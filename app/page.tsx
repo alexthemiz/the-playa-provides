@@ -122,88 +122,91 @@ export default function HomePage() {
         ))}
       </div>
 
-      {/* Wishlist Ticker */}
-      {wishlistTags.length > 0 && (
-        <div style={{ padding: '40px 0 40px', backgroundColor: '#fff' }}>
-          <p style={{ textAlign: 'center' as const, fontSize: '1.2rem', fontWeight: 700, color: '#2D241E', marginBottom: '16px', padding: '0 20px' }}>
-            Burners are looking for these items. Can you help them out?
-          </p>
-          <div style={{ overflow: 'hidden' as const, width: '100%', paddingTop: '8px', paddingBottom: '12px' }}>
-            <div
-              onMouseEnter={() => setWishlistHovered(true)}
-              onMouseLeave={() => setWishlistHovered(false)}
-              style={{
-                display: 'flex',
-                gap: '12px',
-                width: 'max-content',
-                animation: 'wishlistTicker 50s linear infinite',
-                animationPlayState: wishlistHovered ? 'paused' : 'running',
-                paddingLeft: '20px',
-                alignItems: 'center',
-              }}
-            >
-              {[...wishlistTags, ...wishlistTags].map(({ tag, username }, i) => (
-                <a
-                  key={i}
-                  href={`/profile/${username}`}
-                  style={{
-                    flexShrink: 0,
-                    padding: '5px 14px',
-                    borderRadius: '20px',
-                    border: '1px solid #3ABFD4',
-                    backgroundColor: '#f0fcff',
-                    color: '#007a99',
-                    fontSize: '0.85rem',
-                    fontWeight: 500,
-                    textDecoration: 'none',
-                    whiteSpace: 'nowrap' as const,
-                  }}
-                >
-                  {tag}
-                </a>
-              ))}
+      {/* Wishlist Ticker + Polaroid Marquee — shared background */}
+      <div style={{ backgroundColor: 'rgba(216,150,255,0.08)', padding: '0' }}>
+        {/* Wishlist Ticker */}
+        {wishlistTags.length > 0 && (
+          <div style={{ padding: '40px 0 20px' }}>
+            <p style={{ textAlign: 'center' as const, fontSize: '1.2rem', fontWeight: 700, color: '#2D241E', marginBottom: '16px', padding: '0 20px' }}>
+              Burners are looking for these items. Can you help them out?
+            </p>
+            <div style={{ overflow: 'hidden' as const, width: '100%', paddingTop: '8px', paddingBottom: '12px' }}>
+              <div
+                onMouseEnter={() => setWishlistHovered(true)}
+                onMouseLeave={() => setWishlistHovered(false)}
+                style={{
+                  display: 'flex',
+                  gap: '12px',
+                  width: 'max-content',
+                  animation: 'wishlistTicker 50s linear infinite',
+                  animationPlayState: wishlistHovered ? 'paused' : 'running',
+                  paddingLeft: '20px',
+                  alignItems: 'center',
+                }}
+              >
+                {[...wishlistTags, ...wishlistTags].map(({ tag, username }, i) => (
+                  <a
+                    key={i}
+                    href={`/profile/${username}`}
+                    style={{
+                      flexShrink: 0,
+                      padding: '5px 14px',
+                      borderRadius: '20px',
+                      border: '1px solid #3ABFD4',
+                      backgroundColor: '#f0fcff',
+                      color: '#007a99',
+                      fontSize: '0.85rem',
+                      fontWeight: 500,
+                      textDecoration: 'none',
+                      whiteSpace: 'nowrap' as const,
+                    }}
+                  >
+                    {tag}
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Polaroid Marquee */}
-      {marqueeItems.length > 0 && (
-        <div style={{ width: '100%', backgroundColor: '#ffffff', paddingTop: '40px' }}>
-          <p style={{ textAlign: 'center' as const, fontSize: '1.2rem', fontWeight: 700, color: '#2D241E', marginBottom: '16px', padding: '0 20px' }}>
-            Missing supplies for the burn? See what users have made available.
-          </p>
-        <div style={{ overflow: 'hidden' as const, width: '100%', padding: '0 0 40px' }}>
-          <div
-            onMouseEnter={() => setMarqueeHovered(true)}
-            onMouseLeave={() => setMarqueeHovered(false)}
-            style={{
-              display: 'flex',
-              gap: '24px',
-              width: 'max-content',
-              animation: 'marquee 60s linear infinite',
-              animationPlayState: marqueeHovered ? 'paused' : 'running',
-              paddingLeft: '24px',
-            }}
-          >
-            {[...marqueeItems, ...marqueeItems].map((item: any, i: number) => (
-              <a
-                key={i}
-                href={`/find-items/${item.id}`}
-                style={{ textDecoration: 'none', flexShrink: 0 }}
+        {/* Polaroid Marquee */}
+        {marqueeItems.length > 0 && (
+          <div style={{ width: '100%' }}>
+            <p style={{ textAlign: 'center' as const, fontSize: '1.2rem', fontWeight: 700, color: '#2D241E', marginBottom: '16px', padding: '0 20px' }}>
+              Missing supplies for the burn? See what users have made available.
+            </p>
+            <div style={{ overflow: 'hidden' as const, width: '100%', padding: '0 0 40px' }}>
+              <div
+                onMouseEnter={() => setMarqueeHovered(true)}
+                onMouseLeave={() => setMarqueeHovered(false)}
+                style={{
+                  display: 'flex',
+                  gap: '24px',
+                  width: 'max-content',
+                  animation: 'marquee 60s linear infinite',
+                  animationPlayState: marqueeHovered ? 'paused' : 'running',
+                  paddingLeft: '24px',
+                }}
               >
-                <PolaroidPhoto
-                  src={item.image_urls[0]}
-                  alt={item.item_name}
-                  itemId={item.id}
-                  imageSize={160}
-                />
-              </a>
-            ))}
+                {[...marqueeItems, ...marqueeItems].map((item: any, i: number) => (
+                  <a
+                    key={i}
+                    href={`/find-items/${item.id}`}
+                    style={{ textDecoration: 'none', flexShrink: 0 }}
+                  >
+                    <PolaroidPhoto
+                      src={item.image_urls[0]}
+                      alt={item.item_name}
+                      itemId={item.id}
+                      imageSize={160}
+                    />
+                  </a>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* On-Playa Resources */}
       <div style={{ textAlign: 'center' as const, padding: '40px 20px 60px' }}>
