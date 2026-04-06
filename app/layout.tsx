@@ -1,6 +1,7 @@
 import './globals.css'
 import Header from '../components/header'
 import Footer from '../components/footer'
+import FeedbackWidget from '../components/FeedbackWidget'
 import Script from 'next/script'
 
 export const metadata = {
@@ -44,6 +45,7 @@ export default function RootLayout({
         </main>
 
         <Footer />
+        <FeedbackWidget />
       </body>
     </html>
   )
