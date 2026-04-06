@@ -19,6 +19,7 @@ interface Props {
 export default function WishListMatchModal({ profile, wishTags, currentUserId, isFollowing, onClose }: Props) {
   const [myItems, setMyItems] = useState<any[]>([]);
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
+  const [tagTerms, setTagTerms] = useState<Map<string, 'borrow' | 'keep'>>(new Map());
   const [selectedItemIds, setSelectedItemIds] = useState<Map<string, string>>(new Map());
   const [note, setNote] = useState('');
   const [sending, setSending] = useState(false);
@@ -31,7 +32,7 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, i
     async function fetchMyInventory() {
       const { data } = await supabase
         .from('gear_items')
-        .select('id, item_name, visibility')
+        .select('id, item_name, visibility, availability_status')
         .eq('user_id', currentUserId)
         .neq('availability_status', 'Not Available')
         .order('item_name', { ascending: true });
@@ -41,11 +42,12 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, i
   }, [currentUserId]);
 
   const toggleTag = (tag: string) => {
-    setSelectedTags(prev => {
-      const next = new Set(prev);
-      next.has(tag) ? next.delete(tag) : next.add(tag);
-      return next;
-    });
+    if (selectedTags.has(tag)) {
+      setSelectedTags(prev => { const next = new Set(prev); next.delete(tag); return next; });
+      setTagTerms(prev => { const next = new Map(prev); next.delete(tag); return next; });
+    } else {
+      setSelectedTags(prev => { const next = new Set(prev); next.add(tag); return next; });
+    }
   };
 
   const toggleItem = (id: string, name: string) => {
@@ -57,7 +59,8 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, i
   };
 
   const allSelected = [...selectedTags, ...[...selectedItemIds.values()]];
-  const canSend = allSelected.length > 0 && note.trim().length > 0 && !sending;
+  const allCheckedTagsHaveTerms = [...selectedTags].every(tag => tagTerms.has(tag));
+  const canSend = allSelected.length > 0 && note.trim().length > 0 && allCheckedTagsHaveTerms && !sending;
 
   const handleSend = async () => {
     setSending(true);
@@ -79,15 +82,19 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, i
         recipient_id: profile.id,
         actor_id: currentUserId,
         item_id: null,
-        meta: { items: allSelected, note: note.trim() || null },
+        meta: { items: [...selectedTags].map(tag => `${tag} (${tagTerms.get(tag)})`), note: note.trim() || null },
       });
       if (notifErr) throw new Error(notifErr.message);
 
-      // Build inventory items with URLs for the email
-      const inventoryItems = [...selectedItemIds.entries()].map(([id, name]) => ({
-        name,
-        url: `https://theplayaprovides.com/find-items/${id}`,
-      }));
+      // Build inventory items with URLs and availability status for the email
+      const inventoryItems = [...selectedItemIds.entries()].map(([id, name]) => {
+        const itemData = myItems.find(i => i.id === id);
+        return {
+          name,
+          url: `https://theplayaprovides.com/find-items/${id}`,
+          availStatus: itemData?.availability_status || '',
+        };
+      });
 
       // Fire-and-forget email
       supabase.functions.invoke('send-wish-list-match-email', {
@@ -96,7 +103,10 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, i
           senderName,
           senderUsername,
           senderId: currentUserId,
-          selectedItems: allSelected,
+          selectedWishItems: [...selectedTags].map(tag => ({
+            name: tag,
+            term: tagTerms.get(tag),
+          })),
           inventoryItems,
           note: note.trim() || null,
         },
@@ -128,30 +138,55 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, i
         ) : (
           <>
             <h2 style={{ margin: '0 0 4px', color: '#2D241E', fontSize: '1.15rem', paddingRight: '24px' }}>
-              Can you make {recipientName}&apos;s wish list dreams come true?
+              Help make {recipientName}&apos;s wish list dreams come true
             </h2>
             <p style={{ margin: '0 0 20px', color: '#888', fontSize: '0.85rem' }}>
               Select the items from their wish list you have, and any from your inventory you think they may want
             </p>
 
             {/* Wish list tag checkboxes */}
-            <p style={sectionLabelStyle}>Their wish list</p>
-            <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '8px', marginBottom: '20px' }}>
+            <p style={sectionLabelStyle}>Their wish list <span style={{ color: '#dc2626' }}>*</span></p>
+            <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '8px', marginBottom: '8px' }}>
               {wishTags.map(tag => (
-                <label key={tag} style={checkRowStyle}>
-                  <input
-                    type="checkbox"
-                    checked={selectedTags.has(tag)}
-                    onChange={() => toggleTag(tag)}
-                    style={{ accentColor: '#5ECFDF', width: '15px', height: '15px', flexShrink: 0 }}
-                  />
-                  <span style={{ fontSize: '0.95rem', color: '#2D241E' }}>{tag}</span>
-                </label>
+                <div key={tag} style={{ display: 'flex', flexDirection: 'column' as const, gap: '6px' }}>
+                  <label style={checkRowStyle}>
+                    <input
+                      type="checkbox"
+                      checked={selectedTags.has(tag)}
+                      onChange={() => toggleTag(tag)}
+                      style={{ accentColor: '#5ECFDF', width: '15px', height: '15px', flexShrink: 0 }}
+                    />
+                    <span style={{ fontSize: '0.95rem', color: '#2D241E' }}>{tag}</span>
+                  </label>
+                  {selectedTags.has(tag) && (
+                    <div style={{ display: 'flex', gap: '12px', paddingLeft: '32px' }}>
+                      {(['borrow', 'keep'] as const).map(term => (
+                        <label key={term} style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', fontSize: '0.85rem', color: '#555' }}>
+                          <input
+                            type="radio"
+                            name={`term-${tag}`}
+                            value={term}
+                            checked={tagTerms.get(tag) === term}
+                            onChange={() => setTagTerms(prev => new Map(prev).set(tag, term))}
+                            style={{ accentColor: '#5ECFDF' }}
+                          />
+                          {term === 'borrow' ? 'To Borrow' : 'To Keep'}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
 
+            {[...selectedTags].some(tag => !tagTerms.has(tag)) && (
+              <p style={{ fontSize: '0.8rem', color: '#dc2626', margin: '-8px 0 12px' }}>
+                Please select To Borrow or To Keep for each checked item.
+              </p>
+            )}
+
             {/* Inventory items */}
-            <p style={sectionLabelStyle}>Share a listing from your inventory</p>
+            <p style={{ ...sectionLabelStyle, marginTop: '12px' }}>Share a listing from your inventory</p>
             {myItems.length === 0 ? (
               <p style={{ fontSize: '0.85rem', color: '#aaa', fontStyle: 'italic' as const, marginBottom: '20px' }}>
                 No items in your inventory yet.
@@ -168,6 +203,11 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, i
                     if (item.visibility === 'private') return 'private';
                     return null;
                   })();
+                  const availLabel = (() => {
+                    if (item.availability_status === 'Available to Borrow') return 'to borrow';
+                    if (item.availability_status === 'Available to Keep') return 'to keep';
+                    return null;
+                  })();
                   return (
                     <label key={item.id} style={checkRowStyle}>
                       <input
@@ -180,6 +220,11 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, i
                       {visLabel && (
                         <span style={{ fontSize: '0.72rem', color: '#aaa', marginLeft: '6px', fontStyle: 'italic' }}>
                           {visLabel}
+                        </span>
+                      )}
+                      {availLabel && (
+                        <span style={{ fontSize: '0.72rem', color: '#aaa', marginLeft: 'auto', fontStyle: 'italic' as const }}>
+                          {availLabel}
                         </span>
                       )}
                     </label>

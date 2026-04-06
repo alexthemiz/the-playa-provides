@@ -13,7 +13,7 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { recipientId, senderName, senderUsername, senderId, selectedItems, note, inventoryItems: rawInventoryItems } = await req.json()
+    const { recipientId, senderName, senderUsername, senderId, selectedWishItems, note, inventoryItems: rawInventoryItems } = await req.json()
     const inventoryItems = rawInventoryItems || []
 
     const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
@@ -54,15 +54,18 @@ serve(async (req: Request) => {
       senderEmail = senderUser?.email
     }
 
-    const itemListHtml = (selectedItems as string[])
-      .map((item: string) => {
-        const inventoryMatch = (inventoryItems as any[]).find((i: any) => i.name === item)
-        if (inventoryMatch) {
-          return `<li style="margin: 4px 0;"><a href="${inventoryMatch.url}" style="color: #00ccff; font-weight: bold;">${item}</a> <span style="font-size: 0.85em; color: #999;">(view listing)</span></li>`
-        }
-        return `<li style="margin: 4px 0;">${item}</li>`
-      })
-      .join('')
+    const wishListHtml = (selectedWishItems as { name: string; term: string }[])
+      .map(({ name, term }) =>
+        `<li style="margin: 4px 0;">${name} <span style="font-size: 0.85em; color: #888;">(${term})</span></li>`
+      ).join('')
+
+    const inventoryHtml = (inventoryItems as { name: string; url: string; availStatus: string }[])
+      .map(({ name, url, availStatus }) => {
+        const label = availStatus === 'Available to Borrow' ? 'to borrow'
+          : availStatus === 'Available to Keep' ? 'to keep'
+          : '';
+        return `<li style="margin: 4px 0;"><a href="${url}" style="color: #00ccff; font-weight: bold;">${name}</a>${label ? ` <span style="font-size: 0.85em; color: #888;">(${label})</span>` : ''} <span style="font-size: 0.85em; color: #999;">(view listing)</span></li>`;
+      }).join('')
 
     const noteHtml = note
       ? `<div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 16px 0;">
@@ -87,8 +90,14 @@ serve(async (req: Request) => {
             <h1 style="color: #C08261;">Someone has what you're looking for!</h1>
             <p>Hey ${recipientName}, <a href="https://theplayaprovides.com/profile/${senderUsername}" style="color: #C08261; font-weight: bold;">${senderName}</a> says they have some items from your wish list:</p>
             <ul style="background: #fdf3ec; border: 1px solid #f0d8c8; padding: 15px 15px 15px 30px; border-radius: 8px; margin: 16px 0;">
-              ${itemListHtml}
+              ${wishListHtml}
             </ul>
+            ${inventoryItems.length > 0 ? `
+              <p style="margin-top: 20px;">They also have these items you might like:</p>
+              <ul style="background: #f3f4f6; border: 1px solid #e5e7eb; padding: 15px 15px 15px 30px; border-radius: 8px; margin: 8px 0;">
+                ${inventoryHtml}
+              </ul>
+            ` : ''}
             ${noteHtml}
             <p style="margin-top: 20px;">Reply to this email to let ${senderName} know if you're interested.</p>
             <p style="font-size: 0.8em; color: #999; margin-top: 24px;">
