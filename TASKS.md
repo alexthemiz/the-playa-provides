@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-03-30 (session 24)_
+_Last updated: 2026-04-06 (session 25)_
 
 ---
 
@@ -13,7 +13,6 @@ _Last updated: 2026-03-30 (session 24)_
 ---
 
 ## 🎯 Next Session Priority
-- [ ] **Update homepage copy** — Add a 4th point to the numbered list. Content TBD.
 - [ ] **Fix OG image crop** — Resize to 1200×630px with padding/background in Canva, re-upload, re-push.
 
 ---
@@ -208,6 +207,9 @@ _(nothing queued)_
 - [x] Design: Homepage "Lend Items" button color — changed from #E8834A (orange) to #d896ff (purple) _(branch: feature/homepage-copy)_
 - [x] Design: Homepage numbered list → 2×2 card grid — four Principles cards (Radical Interdependence, Decommodification, Gifting, Participate) with italic emphasis via dangerouslySetInnerHTML _(branch: feature/homepage-copy)_
 - [x] Fix: Homepage "On-Playa Resources" subhead color — changed from #666 (gray) to #2D241E (dark brown) _(branch: feature/homepage-copy)_
+- [x] Fix: find-items relationship filter chips renamed — "People I Follow" → "Following", "People Who Follow Me" → "Followers"
+- [x] Design: Inventory purple pass — Transfer To button and To Keep toggle changed from orange (#E8834A) to purple (#d896ff); inventory subhead line break added
+- [x] Feature: In-app feedback widget — `FeedbackWidget` component (floating button, modal, session-gated); `send-feedback-notification` edge function (Resend → alex@); inserts to existing `feedback` table; wired into root layout after Footer
 - [x] Fix: find-items — filter layout restructured for desktop, portrait, and landscape breakpoints using CSS media queries
 - [x] Fix: find-items — grid columns responsive: 2-col portrait, 3-col landscape, auto-fill desktop
 - [x] Fix: find-items — GLM toggle repositioned to bottom of filter section above items
