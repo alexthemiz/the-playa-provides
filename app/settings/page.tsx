@@ -37,6 +37,8 @@ export default function SettingsPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteStep, setDeleteStep] = useState<'confirm1' | 'deleting' | 'error'>('confirm1');
   const [deleteError, setDeleteError] = useState('');
+  const [deleteLocationIndex, setDeleteLocationIndex] = useState<number | null>(null);
+  const [toast, setToast] = useState<{ message: string; isError?: boolean } | null>(null);
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get('setup') === 'true') {
@@ -121,8 +123,8 @@ export default function SettingsPage() {
       : { error: null };
     const lErr = iErr || uErr;
 
-    if (pErr || lErr) alert("Error saving: " + (pErr?.message || lErr?.message));
-    else alert("Settings saved!");
+    if (pErr || lErr) showToast("Error saving: " + (pErr?.message || lErr?.message), true);
+    else showToast("Settings saved!");
 
     setSaving(false);
   }
@@ -172,6 +174,19 @@ export default function SettingsPage() {
       setDeleteError(err.message || 'Something went wrong.');
       setDeleteStep('error');
     }
+  }
+
+  async function handleDeleteLocation(index: number) {
+    const loc = locations[index];
+    if (!loc._isNew && loc.id) {
+      await supabase.from('locations').delete().eq('id', loc.id);
+    }
+    setLocations(prev => prev.filter((_, i) => i !== index));
+  }
+
+  function showToast(message: string, isError = false) {
+    setToast({ message, isError });
+    setTimeout(() => setToast(null), 3000);
   }
 
   if (loading) return <div style={{ padding: '100px', textAlign: 'center', backgroundColor: 'white', minHeight: '100vh' }}>Syncing...</div>;
@@ -268,11 +283,11 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              {/* Row 4: Item Request Email */}
+              {/* Row 4: Contact Email for Messaging */}
               <div>
-                <label style={labelStyle}>Item Request Email</label>
+                <label style={labelStyle}>Contact Email for Messaging</label>
                 <p style={fieldNoteStyle}>
-                  Borrow requests will be sent here instead of your primary account email. This stays hidden until you reply.
+                  The email address you want to use for messaging with other users. This stays hidden until you reply.
                 </p>
                 <input
                   style={inputStyle}
@@ -287,20 +302,20 @@ export default function SettingsPage() {
 
           {/* LOCATIONS */}
           <section style={sectionStyle}>
-            <h3 style={sectionHeaderStyle}>Locations of Your Items</h3>
+            <h3 style={sectionHeaderStyle}>Where Your Items Are Stored</h3>
             <p style={{ color: '#666', fontSize: '12px', marginBottom: '12px', lineHeight: '1.5' }}>
-              These addresses will appear as options to select when adding items to your inventory.
+              These addresses appear as options when adding items to your inventory. Only city, state, and zip are visible on your available items.
             </p>
             {locations.map((loc, index) => (
               <div key={index} style={addressCardStyle}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '8px', marginBottom: '8px', alignItems: 'center' }}>
                   <input
                     style={inputStyle}
                     placeholder="Label (e.g. Home)"
                     value={loc.label || ''}
                     onChange={e => updateLocation(index, 'label', e.target.value)}
                   />
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: '#555', cursor: 'pointer' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: '#555', cursor: 'pointer', whiteSpace: 'nowrap' as const }}>
                     <input
                       type="checkbox"
                       checked={loc.is_default || false}
@@ -309,6 +324,26 @@ export default function SettingsPage() {
                     />
                     Set as default
                   </label>
+                  {!loc.is_default && (
+                    <button
+                      onClick={() => !loc.is_default && setDeleteLocationIndex(index)}
+                      disabled={loc.is_default}
+                      title={loc.is_default ? 'Cannot remove your default location' : 'Remove this location'}
+                      style={{
+                        padding: '4px 10px',
+                        backgroundColor: loc.is_default ? '#f5f5f5' : '#fff0f0',
+                        color: loc.is_default ? '#bbb' : '#cc0000',
+                        border: `1px solid ${loc.is_default ? '#e0e0e0' : '#ffaaaa'}`,
+                        borderRadius: '6px',
+                        cursor: loc.is_default ? 'not-allowed' as const : 'pointer' as const,
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        whiteSpace: 'nowrap' as const,
+                      }}
+                    >
+                      Remove
+                    </button>
+                  )}
                 </div>
                 <input
                   style={{ ...inputStyle, marginBottom: '8px' }}
@@ -413,6 +448,51 @@ export default function SettingsPage() {
 
         </div>
       </div>
+
+      {/* Delete location confirmation modal */}
+      {deleteLocationIndex !== null && (
+        <div style={{ position: 'fixed' as const, inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ backgroundColor: '#fff', padding: '28px 24px', borderRadius: '12px', maxWidth: '360px', width: '90%' }}>
+            <h3 style={{ margin: '0 0 12px', fontSize: '1.1rem', color: '#111' }}>Remove this location?</h3>
+            <p style={{ margin: '0 0 20px', fontSize: '0.9rem', color: '#555', lineHeight: 1.5 }}>This can't be undone.</p>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                onClick={() => setDeleteLocationIndex(null)}
+                style={{ flex: 1, padding: '10px', backgroundColor: '#eee', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => { handleDeleteLocation(deleteLocationIndex); setDeleteLocationIndex(null); }}
+                style={{ flex: 1, padding: '10px', backgroundColor: '#fff0f0', color: '#cc0000', border: '1px solid #ffaaaa', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast */}
+      {toast && (
+        <div style={{
+          position: 'fixed' as const,
+          bottom: '24px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: toast.isError ? '#dc2626' : '#2D241E',
+          color: '#fff',
+          padding: '12px 24px',
+          borderRadius: '8px',
+          fontSize: '0.9rem',
+          fontWeight: 600,
+          zIndex: 9999,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+          whiteSpace: 'nowrap' as const,
+        }}>
+          {toast.message}
+        </div>
+      )}
 
       {/* Delete account modal */}
       {showDeleteModal && (
