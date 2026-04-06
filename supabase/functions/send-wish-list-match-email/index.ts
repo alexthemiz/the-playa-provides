@@ -85,16 +85,12 @@ serve(async (req: Request) => {
         html: `
           <div style="font-family: sans-serif; color: #333; max-width: 600px;">
             <h1 style="color: #C08261;">Someone has what you're looking for!</h1>
-            <p>Hey ${recipientName}, <strong>${senderName}</strong> says they have some items from your wish list:</p>
+            <p>Hey ${recipientName}, <a href="https://theplayaprovides.com/profile/${senderUsername}" style="color: #C08261; font-weight: bold;">${senderName}</a> says they have some items from your wish list:</p>
             <ul style="background: #fdf3ec; border: 1px solid #f0d8c8; padding: 15px 15px 15px 30px; border-radius: 8px; margin: 16px 0;">
               ${itemListHtml}
             </ul>
             ${noteHtml}
-            <p>
-              <a href="https://theplayaprovides.com/profile/${senderUsername}" style="display: inline-block; padding: 12px 24px; background: #5ECFDF; color: #000; text-decoration: none; border-radius: 8px; font-weight: bold;">
-                View ${senderName}'s Profile
-              </a>
-            </p>
+            <p style="margin-top: 20px;">Reply to this email to let ${senderName} know if you're interested.</p>
             <p style="font-size: 0.8em; color: #999; margin-top: 24px;">
               Sent via <a href="https://theplayaprovides.com" style="color: #C08261;">The Playa Provides</a>
             </p>
