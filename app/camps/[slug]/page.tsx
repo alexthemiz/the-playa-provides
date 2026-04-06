@@ -867,8 +867,8 @@ function memberGridStyle(editMode: boolean): React.CSSProperties {
   return {
     display: 'grid',
     gridTemplateColumns: editMode
-      ? 'minmax(140px, 1.5fr) minmax(80px, 1fr) minmax(80px, 2.5fr) auto 70px auto'
-      : 'minmax(140px, 1.5fr) minmax(80px, 1fr) minmax(80px, 2.5fr) auto 70px',
+      ? 'minmax(140px, 1.5fr) 120px minmax(80px, 2.5fr) auto 70px auto'
+      : 'minmax(140px, 1.5fr) 120px minmax(80px, 2.5fr) auto 70px',
     gap: '10px',
     alignItems: 'center',
   };
