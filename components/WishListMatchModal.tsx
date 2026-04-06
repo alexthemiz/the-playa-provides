@@ -148,8 +148,8 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, i
             <p style={sectionLabelStyle}>Their wish list <span style={{ color: '#dc2626' }}>*</span></p>
             <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '8px', marginBottom: '8px' }}>
               {wishTags.map(tag => (
-                <div key={tag} style={{ display: 'flex', flexDirection: 'column' as const, gap: '6px' }}>
-                  <label style={checkRowStyle}>
+                <label key={tag} style={{ ...checkRowStyle, justifyContent: 'space-between' as const }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <input
                       type="checkbox"
                       checked={selectedTags.has(tag)}
@@ -157,25 +157,23 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, i
                       style={{ accentColor: '#5ECFDF', width: '15px', height: '15px', flexShrink: 0 }}
                     />
                     <span style={{ fontSize: '0.95rem', color: '#2D241E' }}>{tag}</span>
-                  </label>
-                  {selectedTags.has(tag) && (
-                    <div style={{ display: 'flex', gap: '12px', paddingLeft: '32px' }}>
-                      {(['borrow', 'keep'] as const).map(term => (
-                        <label key={term} style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', fontSize: '0.85rem', color: '#555' }}>
-                          <input
-                            type="radio"
-                            name={`term-${tag}`}
-                            value={term}
-                            checked={tagTerms.get(tag) === term}
-                            onChange={() => setTagTerms(prev => new Map(prev).set(tag, term))}
-                            style={{ accentColor: '#5ECFDF' }}
-                          />
-                          {term === 'borrow' ? 'To Borrow' : 'To Keep'}
-                        </label>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '12px', flexShrink: 0 }}>
+                    {(['borrow', 'keep'] as const).map(term => (
+                      <label key={term} onClick={e => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', fontSize: '0.82rem', color: '#555' }}>
+                        <input
+                          type="radio"
+                          name={`term-${tag}`}
+                          value={term}
+                          checked={tagTerms.get(tag) === term}
+                          onChange={() => setTagTerms(prev => new Map(prev).set(tag, term))}
+                          style={{ accentColor: '#5ECFDF' }}
+                        />
+                        {term === 'borrow' ? 'Borrow' : 'Keep'}
+                      </label>
+                    ))}
+                  </div>
+                </label>
               ))}
             </div>
 
