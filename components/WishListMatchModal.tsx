@@ -169,7 +169,7 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, i
                           onChange={() => setTagTerms(prev => new Map(prev).set(tag, term))}
                           style={{ accentColor: '#5ECFDF' }}
                         />
-                        {term === 'borrow' ? 'Borrow' : 'Keep'}
+                        {term === 'borrow' ? 'To Borrow' : 'To Keep'}
                       </label>
                     ))}
                   </div>
@@ -184,7 +184,7 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, i
             )}
 
             {/* Inventory items */}
-            <p style={{ ...sectionLabelStyle, marginTop: '12px' }}>Share a listing from your inventory</p>
+            <p style={{ ...sectionLabelStyle, marginTop: '12px' }}>Share a listing from your inventory <span style={{ fontWeight: 400, color: '#aaa' }}>(Optional)</span></p>
             {myItems.length === 0 ? (
               <p style={{ fontSize: '0.85rem', color: '#aaa', fontStyle: 'italic' as const, marginBottom: '20px' }}>
                 No items in your inventory yet.
