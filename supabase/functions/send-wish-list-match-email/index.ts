@@ -56,15 +56,15 @@ serve(async (req: Request) => {
 
     const wishListHtml = (selectedWishItems as { name: string; term: string }[])
       .map(({ name, term }) =>
-        `<li style="margin: 4px 0;">${name} <span style="font-size: 0.85em; color: #888;">(${term})</span></li>`
+        `<li style="margin: 4px 0;">${name} - To ${term}</li>`
       ).join('')
 
     const inventoryHtml = (inventoryItems as { name: string; url: string; availStatus: string }[])
       .map(({ name, url, availStatus }) => {
-        const label = availStatus === 'Available to Borrow' ? 'to borrow'
-          : availStatus === 'Available to Keep' ? 'to keep'
+        const label = availStatus === 'Available to Borrow' ? 'To borrow'
+          : availStatus === 'Available to Keep' ? 'To keep'
           : '';
-        return `<li style="margin: 4px 0;"><a href="${url}" style="color: #00ccff; font-weight: bold;">${name}</a>${label ? ` <span style="font-size: 0.85em; color: #888;">(${label})</span>` : ''} <span style="font-size: 0.85em; color: #999;">(view listing)</span></li>`;
+        return `<li style="margin: 4px 0;"><a href="${url}" style="color: #C08261; font-weight: bold;">${name}</a>${label ? ` - ${label}` : ''}</li>`;
       }).join('')
 
     const noteHtml = note
@@ -94,7 +94,7 @@ serve(async (req: Request) => {
             </ul>
             ${inventoryItems.length > 0 ? `
               <p style="margin-top: 20px;">They also have these items you might like:</p>
-              <ul style="background: #f3f4f6; border: 1px solid #e5e7eb; padding: 15px 15px 15px 30px; border-radius: 8px; margin: 8px 0;">
+              <ul style="background: #f5e6ff; border: 1px solid #e8c8ff; padding: 15px 15px 15px 30px; border-radius: 8px; margin: 8px 0;">
                 ${inventoryHtml}
               </ul>
             ` : ''}
