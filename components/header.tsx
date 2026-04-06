@@ -136,7 +136,7 @@ export default function Header() {
     <>
       <Link href="/resources" onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>On-Playa Resources</Link>
       <Link href="/find-items" onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>Find Items</Link>
-      <Link href="/list-item" onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition whitespace-nowrap`}>Offer an Item</Link>
+      <Link href="/list-item" onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition whitespace-nowrap`}>Offer Items</Link>
       <Link href="/inventory" onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>My Inventory</Link>
       {username && (
         <Link href={`/profile/${username}`} onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>My Profile</Link>
@@ -153,7 +153,7 @@ export default function Header() {
     <>
       <Link href="/resources" onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>On-Playa Resources</Link>
       <Link href="/find-items" onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>Find Items</Link>
-      <Link href="/list-item" onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition whitespace-nowrap`}>Offer an Item</Link>
+      <Link href="/list-item" onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition whitespace-nowrap`}>Offer Items</Link>
       <Link
         href="/login"
         onClick={() => setMenuOpen(false)}
@@ -180,7 +180,7 @@ export default function Header() {
           <Link href="/resources" className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>On-Playa Resources</Link>
           <span style={{ color: '#2D241E', opacity: 0.35, fontSize: '14px', userSelect: 'none' as const }}>|</span>
           <Link href="/find-items" className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>Find Items</Link>
-          <Link href="/list-item" className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition whitespace-nowrap`}>Offer an Item</Link>
+          <Link href="/list-item" className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition whitespace-nowrap`}>Offer Items</Link>
 
           {user ? (
             <>
@@ -253,7 +253,7 @@ export default function Header() {
                               case 'camp_claim_denied': return { text: `Your claim for ${campName} was not approved`, href: `/camps/${campSlug}` }
                               case 'loan_return_confirmed': return { text: `confirmed return of ${itemName}`, href: '/inventory' }
                               case 'camp_member_removed': return { text: `You have been removed from ${campName}`, href: '/' }
-                              case 'wish_list_match': { const items = (n.meta as any)?.items; return { text: `says they have: ${Array.isArray(items) ? items.join(', ') : 'something on your wish list'}`, href: `/profile/${(n.actor as any)?.username}` } }
+                              case 'wish_list_match': { const items = (n.meta as any)?.items; const formatted = Array.isArray(items) ? items.map((i: string) => i.replace('(borrow)', '(to borrow)').replace('(keep)', '(to keep)')).join(', ') : 'something on your wish list'; return { text: `says they have: ${formatted}`, href: `/profile/${(n.actor as any)?.username}` } }
                               default: return { text: 'sent you a notification', href: '/inventory' }
                             }
                           })()
@@ -361,6 +361,7 @@ export default function Header() {
                             case 'camp_claim_denied': return { text: `Your claim for ${campName} was not approved`, href: `/camps/${campSlug}` }
                             case 'loan_return_confirmed': return { text: `confirmed return of ${itemName}`, href: '/inventory' }
                             case 'camp_member_removed': return { text: `You have been removed from ${campName}`, href: '/' }
+                            case 'wish_list_match': { const items = (n.meta as any)?.items; const formatted = Array.isArray(items) ? items.map((i: string) => i.replace('(borrow)', '(to borrow)').replace('(keep)', '(to keep)')).join(', ') : 'something on your wish list'; return { text: `says they have: ${formatted}`, href: `/profile/${(n.actor as any)?.username}` } }
                             default: return { text: 'sent you a notification', href: '/inventory' }
                           }
                         })()
