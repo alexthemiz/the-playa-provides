@@ -287,7 +287,7 @@ export default function SettingsPage() {
               <div>
                 <label style={labelStyle}>Contact Email for Messaging</label>
                 <p style={fieldNoteStyle}>
-                  The email address you want to use for messaging with other users. This stays hidden until you reply.
+                  The email address you want to use for messaging with other users.<br />This stays hidden until you reply.
                 </p>
                 <input
                   style={inputStyle}
@@ -304,7 +304,7 @@ export default function SettingsPage() {
           <section style={sectionStyle}>
             <h3 style={sectionHeaderStyle}>Where Your Items Are Stored</h3>
             <p style={{ color: '#666', fontSize: '12px', marginBottom: '12px', lineHeight: '1.5' }}>
-              These addresses appear as options when adding items to your inventory. Only city, state, and zip are visible on your available items.
+              These addresses appear as options when adding items to your inventory.<br />Only city, state, and zip are visible on available item listings.
             </p>
             {locations.map((loc, index) => (
               <div key={index} style={addressCardStyle}>
@@ -324,26 +324,24 @@ export default function SettingsPage() {
                     />
                     Set as default
                   </label>
-                  {!loc.is_default && (
-                    <button
-                      onClick={() => !loc.is_default && setDeleteLocationIndex(index)}
-                      disabled={loc.is_default}
-                      title={loc.is_default ? 'Cannot remove your default location' : 'Remove this location'}
-                      style={{
-                        padding: '4px 10px',
-                        backgroundColor: loc.is_default ? '#f5f5f5' : '#fff0f0',
-                        color: loc.is_default ? '#bbb' : '#cc0000',
-                        border: `1px solid ${loc.is_default ? '#e0e0e0' : '#ffaaaa'}`,
-                        borderRadius: '6px',
-                        cursor: loc.is_default ? 'not-allowed' as const : 'pointer' as const,
-                        fontSize: '0.75rem',
-                        fontWeight: 600,
-                        whiteSpace: 'nowrap' as const,
-                      }}
-                    >
-                      Remove
-                    </button>
-                  )}
+                  <button
+                    onClick={() => !loc.is_default && setDeleteLocationIndex(index)}
+                    disabled={loc.is_default}
+                    title={loc.is_default ? 'Cannot remove your default location' : 'Remove this location'}
+                    style={{
+                      padding: '4px 10px',
+                      backgroundColor: loc.is_default ? '#f5f5f5' : '#fff0f0',
+                      color: loc.is_default ? '#bbb' : '#cc0000',
+                      border: `1px solid ${loc.is_default ? '#e0e0e0' : '#ffaaaa'}`,
+                      borderRadius: '6px',
+                      cursor: loc.is_default ? 'not-allowed' as const : 'pointer' as const,
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      whiteSpace: 'nowrap' as const,
+                    }}
+                  >
+                    Remove
+                  </button>
                 </div>
                 <input
                   style={{ ...inputStyle, marginBottom: '8px' }}
