@@ -95,6 +95,7 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, i
           recipientId: profile.id,
           senderName,
           senderUsername,
+          senderId: currentUserId,
           selectedItems: allSelected,
           inventoryItems,
           note: note.trim() || null,

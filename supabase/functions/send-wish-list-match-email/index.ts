@@ -13,7 +13,7 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { recipientId, senderName, senderUsername, selectedItems, note, inventoryItems: rawInventoryItems } = await req.json()
+    const { recipientId, senderName, senderUsername, senderId, selectedItems, note, inventoryItems: rawInventoryItems } = await req.json()
     const inventoryItems = rawInventoryItems || []
 
     const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
@@ -42,6 +42,18 @@ serve(async (req: Request) => {
       throw new Error('Could not find recipient email')
     }
 
+    let senderEmail: string | undefined
+    const { data: senderProfileData } = await adminClient
+      .from('profiles')
+      .select('contact_email')
+      .eq('id', senderId)
+      .single()
+    senderEmail = senderProfileData?.contact_email
+    if (!senderEmail) {
+      const { data: { user: senderUser } } = await adminClient.auth.admin.getUserById(senderId)
+      senderEmail = senderUser?.email
+    }
+
     const itemListHtml = (selectedItems as string[])
       .map((item: string) => {
         const inventoryMatch = (inventoryItems as any[]).find((i: any) => i.name === item)
@@ -68,6 +80,7 @@ serve(async (req: Request) => {
       body: JSON.stringify({
         from: 'The Playa Provides <hello@theplayaprovides.com>',
         to: [recipientEmail],
+        reply_to: senderEmail ? [senderEmail] : undefined,
         subject: `${senderName} has something on your wish list`,
         html: `
           <div style="font-family: sans-serif; color: #333; max-width: 600px;">
