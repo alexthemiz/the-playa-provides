@@ -110,7 +110,7 @@ export default function CampPage() {
         // Fetch affiliations with member profiles (including role and wish_list)
         const { data: affData } = await supabase
           .from('user_camp_affiliations')
-          .select('year, role, profiles(id, username, preferred_name, avatar_url, wish_list)')
+          .select('year, role, profiles(id, username, preferred_name, avatar_url, wish_list, city, state)')
           .eq('camp_id', campData.id)
           .order('year', { ascending: false });
 
@@ -708,6 +708,7 @@ export default function CampPage() {
             {/* Header row */}
             <div style={{ ...memberGridStyle(editMode), padding: '6px 12px', fontSize: '10px', fontWeight: 700, color: '#bbb', textTransform: 'uppercase' as const, letterSpacing: '0.06em', borderBottom: '2px solid #eee', marginBottom: '2px' }}>
               <div>Name</div>
+              <div>Location</div>
               <div>Wish List</div>
               <div>Camp Years</div>
               <div style={{ textAlign: 'center' as const }}>2026 Camp?</div>
@@ -746,6 +747,11 @@ export default function CampPage() {
                       <div style={{ fontSize: '11px', color: '#aaa' }}>@{member.username}</div>
                     </div>
                   </Link>
+
+                  {/* Location column */}
+                  <div style={{ fontSize: '12px', color: '#888' }}>
+                    {[member.city, member.state].filter(Boolean).join(', ') || <span style={{ color: '#ccc' }}>—</span>}
+                  </div>
 
                   {/* Wish List column */}
                   <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '4px', alignItems: 'center' }}>
@@ -861,8 +867,8 @@ function memberGridStyle(editMode: boolean): React.CSSProperties {
   return {
     display: 'grid',
     gridTemplateColumns: editMode
-      ? 'minmax(140px, 1.5fr) minmax(80px, 2.5fr) auto 70px auto'
-      : 'minmax(140px, 1.5fr) minmax(80px, 2.5fr) auto 70px',
+      ? 'minmax(140px, 1.5fr) minmax(80px, 1fr) minmax(80px, 2.5fr) auto 70px auto'
+      : 'minmax(140px, 1.5fr) minmax(80px, 1fr) minmax(80px, 2.5fr) auto 70px',
     gap: '10px',
     alignItems: 'center',
   };
