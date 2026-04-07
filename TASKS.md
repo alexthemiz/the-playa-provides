@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-04-06 (session 25)_
+_Last updated: 2026-04-07 (session 25)_
 
 ---
 
@@ -224,3 +224,15 @@ _(nothing queued)_
 - [x] Fix: Camp page — members table horizontal scroll contained, page no longer scrolls horizontally
 - [x] Fix: Camp page — Items from Camp Members table wrapped in horizontal scroll container
 - [x] Fix: Profile page — mobile-responsive layout via embedded style tag and CSS media queries (≤640px): header stacks vertically (avatar centered, info full-width, button full-width), Wish List reorders above Bio, Bio/Wish grid collapses to single column, Available Items table horizontally scrollable
+- [x] Feature: In-app feedback widget — floating button (bottom right, logged-in only), modal with Type/Description/Email fields, inserts into feedback Supabase table, triggers send-feedback-notification edge function to alex@theplayaprovides.com, page URL captured automatically
+- [x] Deploy: send-feedback-notification edge function — deployed via Supabase Dashboard, Verify JWT off
+- [x] Fix: Wish list match email reply-to — senderId passed in modal invoke body and edge function; sender email looked up via service role client; reply_to added to Resend call so replies go to sender not hello@
+- [x] Fix: Wish list match email — sender name now hyperlinked to their profile in opening line; teal button replaced with "Reply to this email to let [name] know if you're interested."
+- [x] Feature: Wish list match modal — Borrow/Keep radio buttons added inline on each wish list tag row, always visible; required before sending; validation hint shown if checked tag has no term selected; title updated to "Help make [name]'s wish list dreams come true"
+- [x] Feature: Wish list match email — wish list items and inventory items rendered in separate sections; wish list items show term (To borrow / To keep); inventory items show availability status and appear in light purple (#f5e6ff) section with header "They also have these items you might like:"
+- [x] Fix: Wish list match bell notification — (borrow)/(keep) updated to (to borrow)/(to keep) in both desktop and mobile bell switch statements
+- [x] Fix: Settings page — delete location button added to each address card; grayed out and disabled on default location, active on non-default; confirmation modal before delete; new unsaved locations removed from state only, saved locations deleted from DB
+- [x] Fix: Settings page — copy updates: "Item Request Email" → "Contact Email for Messaging"; field note updated; "Locations of Your Items" → "Where Your Items Are Stored"; location section note updated with line breaks
+- [x] Fix: Settings page — browser alert() calls replaced with inline toast (fixed bottom-center, dark background, auto-dismisses after 3 seconds)
+- [x] Fix: Header — "Offer an Item" renamed to "Offer Items" across all four instances in header
+- [x] Feature: Camp members table — Location column added between Name and Wish List; pulls city and state from profiles; fixed-width 120px column; grid template tightened
