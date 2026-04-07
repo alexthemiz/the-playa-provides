@@ -97,7 +97,7 @@ export default function SettingsPage() {
     const { data: existingUser } = await supabase
       .from('profiles')
       .select('id')
-      .eq('username', profile.username.trim())
+      .eq('username', profile.username.trim().toLowerCase())
       .neq('id', user.id)
       .maybeSingle();
     if (existingUser) {
@@ -106,7 +106,7 @@ export default function SettingsPage() {
       return;
     }
 
-    const { error: pErr } = await supabase.from('profiles').upsert({ id: user.id, ...profile, updated_at: new Date() });
+    const { error: pErr } = await supabase.from('profiles').upsert({ id: user.id, ...profile, username: profile.username.trim().toLowerCase(), updated_at: new Date() });
 
     const newLocs = locations
       .filter(l => l._isNew)
@@ -235,7 +235,7 @@ export default function SettingsPage() {
                   <input
                     style={inputStyle}
                     value={profile.username || ''}
-                    onChange={e => { setProfile({ ...profile, username: e.target.value }); setFieldErrors(p => ({ ...p, username: '' })); }}
+                    onChange={e => { setProfile({ ...profile, username: e.target.value.toLowerCase() }); setFieldErrors(p => ({ ...p, username: '' })); }}
                   />
                   {fieldErrors.username && <span style={errorStyle}>{fieldErrors.username}</span>}
                 </div>

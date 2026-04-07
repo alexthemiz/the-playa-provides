@@ -57,7 +57,7 @@ export default function PublicProfilePage() {
         const { data: profileData } = await supabase
           .from('profiles')
           .select('*')
-          .eq('username', username)
+          .eq('username', username.toLowerCase())
           .single();
 
         if (profileData) {
@@ -509,10 +509,10 @@ export default function PublicProfilePage() {
                 onChange={e => setProfile({ ...profile, preferred_name: e.target.value })}
               />
             ) : (
-              <h1 style={{ fontSize: '2.2rem', margin: 0, color: '#2D241E' }}>{profile.preferred_name || username}</h1>
+              <h1 style={{ fontSize: '2.2rem', margin: 0, color: '#2D241E' }}>{profile.preferred_name || profile.username || username}</h1>
             )}
             <div className="profile-username-row" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' as const, marginTop: '5px', fontSize: '0.9rem', color: '#888' }}>
-              <span>@{username}</span>
+              <span>@{profile?.username || username}</span>
               {profile.pronouns && <><span style={{ margin: '0 7px', color: '#ccc' }}>|</span><span>{profile.pronouns}</span></>}
               {locationStr && <><span style={{ margin: '0 7px', color: '#ccc' }}>|</span><span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><MapPin size={13} />{locationStr}</span></>}
             </div>
