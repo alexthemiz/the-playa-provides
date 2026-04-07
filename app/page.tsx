@@ -97,7 +97,7 @@ export default function HomePage() {
           color: '#2D241E',
           fontWeight: '700',
         }}>
-          But the playa can only provide because people provide.
+          ...but the playa only provides because people provide.
         </p>
 
         {/* Main Borrow/Lend Actions */}
