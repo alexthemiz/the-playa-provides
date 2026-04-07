@@ -25,7 +25,6 @@ _Last updated: 2026-04-07 (session 25)_
 ---
 
 ## 🔧 Bugs & Fixes
-- [ ] **Welcome modal fires on every login** — Should only show once per account (first login only). Investigate current trigger mechanism and fix so repeat logins don't show the modal.
 - [ ] **OG preview image gets cropped when sharing links** — Current image is not 1200×630px. Resize with padding/background in Canva, re-upload to repo, re-push.
 ---
 
@@ -45,7 +44,9 @@ _Last updated: 2026-04-07 (session 25)_
 ---
 
 ## 💡 Ideas & Long Term
-- [ ] **Custom Supabase Auth domain** — Upgrade to Supabase Pro, set `auth.theplayaprovides.com` as custom auth domain + DNS config. Fixes Google OAuth consent screen showing `bklycpitofjrjhizttny.supabase.co` instead of the app domain.
+ - [ ] /camps page — currently blank; consider building as a searchable directory of all camps with claimed/unclaimed pages
+ - [ ] /profile page — currently blank; consider redirecting logged-in users to their own profile (/profile/[username]), or building as a member directory
+ - [ ] **Custom Supabase Auth domain** — Upgrade to Supabase Pro, set `auth.theplayaprovides.com` as custom auth domain + DNS config. Fixes Google OAuth consent screen showing `bklycpitofjrjhizttny.supabase.co` instead of the app domain.
 - [ ] **Dispute arbitration UI** — Loans with `status = disputed` have no admin UI yet; flagged for future resolution flow.
 - [ ] **Loan renewal / extension** — Extend return_by date without completing and re-creating the loan.
 - [ ] **Camp-scoped gear sharing** — Share items with your camp only using `visibility` column + camp membership check.
@@ -95,6 +96,8 @@ _(nothing queued)_
 ---
 
 ## ✅ Done
+- [x] Fix: Username case sensitivity — dropped unique_username constraint, replaced with case-insensitive unique index on lower(username); existing usernames backfilled to lowercase; settings input auto-lowercases on keystroke; uniqueness check and upsert normalize to lowercase; profile page URL lookup lowercased so /profile/Alex and /profile/alex resolve identically
+- [x] **Welcome modal fires on every login** — Should only show once per account (first login only). Investigate current trigger mechanism and fix so repeat logins don't show the modal.
 - [x] Fix: find-items — relationship filter chips renamed: "People I Follow" → "Following", "People Who Follow Me" → "Followers"; filter logic updated to match
 - [x] Design: Homepage — hero line replaced with "But the playa can only provide because people provide."
 - [x] Design: Homepage — Lend Items button color changed from orange (#E8834A) to purple (#d896ff)

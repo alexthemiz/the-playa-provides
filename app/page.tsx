@@ -110,10 +110,10 @@ export default function HomePage() {
       {/* 2×2 Card Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '40px 32px', maxWidth: '1000px', margin: '0 auto', padding: '40px 20px' }}>
         {[
-          { header: 'Engage in <em>Radical Interdependence</em>', body: 'Others may have what you need; you may have what others need.' },
-          { header: 'A <em>Decommodification</em> Modification', body: 'Make the pursuit of decommodification a year-round endeavor.' },
-          { header: 'Lending is a Type of <em>Gifting</em>', body: 'How many Amazon orders can you help others avoid?' },
-          { header: '<em>Participate</em> From Your Storage Space', body: "Just because you're not going this year doesn't mean your stuff can't." },
+          { header: 'Engage in Radical Interdependence', body: 'Others may have what you need; you may have what others need.' },
+          { header: 'A Decommodification Modification', body: 'Make the pursuit of decommodification a year-round endeavor.' },
+          { header: 'Lending is a Type of Gifting', body: 'How many Amazon orders can you help others avoid?' },
+          { header: 'Participate From Your Storage Space', body: "Just because you're not going this year doesn't mean your stuff can't." },
         ].map(({ header, body }, i) => (
           <div key={i} style={{ textAlign: 'center' as const }}>
             <p style={{ fontSize: '1.05rem', fontWeight: 700, color: '#2D241E', margin: '0 0 8px' }} dangerouslySetInnerHTML={{ __html: header }} />
