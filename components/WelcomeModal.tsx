@@ -40,17 +40,16 @@ export default function WelcomeModal({ userId, onClose }: WelcomeModalProps) {
             The Playa Provides you<br />with a Welcome
           </h1>
           <p style={{ margin: 0, color: '#666', fontSize: '1rem', lineHeight: '1.6' }}>
-            You&rsquo;re now part of a community of Burners sharing gear and supplies,
-            making it more affordable for more people to get to the playa.
+            You&rsquo;re now part of a community of the coolest Burners trying to make it more affordable for more people to get to the playa.
           </p>
         </div>
 
         {/* How it works */}
         <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '14px', marginBottom: '32px' }}>
           {[
-            { num: '1', title: 'List items you\'re willing to lend or gift.', desc: 'Use the site as your online inventory, then toggle items when they become available or unavailable.' },
-            { num: '2', title: 'Search the listings for items you need', desc: 'Filter by category and location, to borrow or to keep.' },
-            { num: '3', title: 'Connect and cover your bases right from the start', desc: 'When requesting to borrow an item, you and its owner can discuss any terms directly.' },
+            { num: '1', title: 'Use the site as your online inventory', desc: 'Then toggle items to make them available to borrow or keep.' },
+            { num: '2', title: 'Search the listings for items you need', desc: 'When requesting to borrow, you and its owner can discuss terms directly.' },
+            { num: '3', title: 'Connect and collaborate with campmates', desc: 'Add your playa history to access camp features and inventories.' },
           ].map(step => (
             <div key={step.num} style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
               <div style={{ width: '30px', height: '30px', borderRadius: '50%', backgroundColor: '#C08261', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.85rem', flexShrink: 0 }}>
