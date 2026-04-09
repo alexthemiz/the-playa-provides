@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-04-07 (session 25)_
+_Last updated: 2026-04-09 (session 25 cont.)_
 
 ---
 
@@ -96,7 +96,16 @@ _(nothing queued)_
 ---
 
 ## ✅ Done
-- [x] Fix: Username case sensitivity — dropped unique_username constraint, replaced with case-insensitive unique index on lower(username); existing usernames backfilled to lowercase; settings input auto-lowercases on keystroke; uniqueness check and upsert normalize to lowercase; profile page URL lookup lowercased so /profile/Alex and /profile/alex resolve identically
+- [x] Fix: Profile page visibility filtering — owner sees all available items; logged-in non-owner sees only items they have access to based on follow/campmate relationship; logged-out visitors see public items only
+- [x] Feature: Profile page Available Items — "Manage Inventory" (purple) and "Add New Item" (teal) buttons added to section header, owner-only; Add New Item opens AddItemModal inline
+- [x] Feature: Profile page Available Items — item rows now open item page in new tab on click; View → column removed; Visible To column added for owner view
+- [x] Fix: Find Items list view — View → column removed
+- [x] Fix: Signup redirect — email signup now lands on /profile/[username]; Google OAuth redirect updated to /settings?setup=true
+- [x] Fix: Welcome modal moved to profile page — triggers on first visit when has_seen_welcome is false and viewer is owner
+ - [x] Fix: Settings page — after first save, redirects to /profile/[username] so Google OAuth users land on their profile after completing setup
+ - [x] Fix: Signup redirect — replaced router.refresh() + router.push() with window.location.href hard nav to eliminate inventory flash
+ - [x] Fix: Welcome modal button layout — "Set Up Your Profile →" is now the primary CTA (right, colored); "Browse Items" and "List Items" are secondary (left/middle); "List My First Item" removed
+ - [x] Fix: Username case sensitivity — dropped unique_username constraint, replaced with case-insensitive unique index on lower(username); existing usernames backfilled to lowercase; settings input auto-lowercases on keystroke; uniqueness check and upsert normalize to lowercase; profile page URL lookup lowercased so /profile/Alex and /profile/alex resolve identically
 - [x] **Welcome modal fires on every login** — Should only show once per account (first login only). Investigate current trigger mechanism and fix so repeat logins don't show the modal.
 - [x] Fix: find-items — relationship filter chips renamed: "People I Follow" → "Following", "People Who Follow Me" → "Followers"; filter logic updated to match
 - [x] Design: Homepage — hero line replaced with "But the playa can only provide because people provide."
