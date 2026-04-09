@@ -67,16 +67,16 @@ export default function WelcomeModal({ userId, onClose }: WelcomeModalProps) {
         {/* CTAs */}
         <div style={{ display: 'flex', gap: '10px' }}>
           <button onClick={() => goTo('/find-items')} style={secondaryBtnStyle}>
-            Browse Items
+            Browse<br />Items
+          </button>
+          <button onClick={() => goTo('/list-item')} style={secondaryBtnStyle}>
+            List<br />Items
           </button>
           {username && (
-            <button onClick={() => goTo(`/profile/${username}`)} style={secondaryBtnStyle}>
-              My Profile
+            <button onClick={() => goTo(`/profile/${username}`)} style={primaryBtnStyle}>
+              Set Up Your Profile →
             </button>
           )}
-          <button onClick={() => goTo('/list-item')} style={primaryBtnStyle}>
-            List My First Item →
-          </button>
         </div>
 
         <button onClick={dismiss} style={{ marginTop: '16px', background: 'none', border: 'none', color: '#aaa', fontSize: '0.8rem', cursor: 'pointer', width: '100%' }}>

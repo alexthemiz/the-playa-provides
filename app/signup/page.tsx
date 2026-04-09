@@ -72,9 +72,8 @@ export default function SignUpPage() {
       setLoading(false);
     } else {
       setMessage('Account created! Redirecting...');
-      router.refresh();
       setTimeout(() => {
-        router.push('/profile/' + username.toLowerCase().trim());
+        window.location.href = '/profile/' + username.toLowerCase().trim();
       }, 1500);
     }
   };
