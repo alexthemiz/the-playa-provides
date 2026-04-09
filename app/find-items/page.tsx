@@ -374,7 +374,6 @@ export default function FindItemsPage() {
               <div>Location</div>
               <div>Owner</div>
               <div>Terms</div>
-              <div />
             </div>
           )}
           {filteredItems.map(item => (
@@ -539,7 +538,6 @@ function ListView({ item }: { item: any }) {
         ) : ownerName}
       </div>
       <div style={{ ...listColMeta, fontSize: '11px', color: '#888' }}>{termsSummary || '—'}</div>
-      <div style={{ color: '#3ABFD4', fontWeight: 'bold', fontSize: '12px', flexShrink: 0 }}>View →</div>
     </div>
   );
 }
@@ -567,7 +565,7 @@ const itemTitleStyle: React.CSSProperties = { margin: 0, color: '#111', fontSize
 const categoryLabelStyle: React.CSSProperties = { color: '#3ABFD4', fontSize: '11px', margin: '4px 0 12px 0', textTransform: 'uppercase', fontWeight: 'bold' };
 const metaRowStyle: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', color: '#777', fontSize: '12px', borderTop: '1px solid #f5f5f5', paddingTop: '10px' };
 const metaItemStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '4px' };
-const LIST_COLS = '50px 160px 1fr 140px 120px 110px 1fr 70px';
+const LIST_COLS = '50px 160px 1fr 140px 120px 110px 1fr';
 const listHeaderStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: LIST_COLS, gap: '10px', padding: '8px 12px', fontSize: '10px', fontWeight: '700', color: '#aaa', textTransform: 'uppercase' as const, letterSpacing: '0.06em', borderBottom: '2px solid #eee' };
 const listStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: LIST_COLS, gap: '10px', alignItems: 'center', padding: '10px 12px', backgroundColor: '#fff', borderBottom: '1px solid #f5f5f5' };
 const listColName: React.CSSProperties = { overflow: 'hidden' };

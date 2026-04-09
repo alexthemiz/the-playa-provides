@@ -22,7 +22,7 @@ export default function SignUpPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/inventory`,
+        redirectTo: `${window.location.origin}/auth/callback?next=/settings?setup=true`,
       },
     })
     if (error) setMessage(`Error: ${error.message}`)
@@ -74,7 +74,7 @@ export default function SignUpPage() {
       setMessage('Account created! Redirecting...');
       router.refresh();
       setTimeout(() => {
-        router.push('/inventory');
+        router.push('/profile/' + username.toLowerCase().trim());
       }, 1500);
     }
   };

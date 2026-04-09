@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
+import Link from 'next/link';
 import AvatarUpload from '@/components/AvatarUpload';
 import WishListMatchModal from '@/components/WishListMatchModal';
+import AddItemModal from '@/components/AddItemModal';
 import { MapPin, Package, Globe, Linkedin, Instagram, Facebook } from 'lucide-react';
 
 export default function PublicProfilePage() {
@@ -32,6 +34,7 @@ export default function PublicProfilePage() {
   const [affiliations, setAffiliations] = useState<any[]>([]);
   const [draftAffiliations, setDraftAffiliations] = useState<any[]>([]);
   const [showWishMatchModal, setShowWishMatchModal] = useState(false);
+  const [showAddItem, setShowAddItem] = useState(false);
 
   // 2026 returning status — managed separately from regular year drafts
   const [draft2026, setDraft2026] = useState<{
@@ -90,13 +93,42 @@ export default function PublicProfilePage() {
             setIsFollowing(!!followRow);
           }
 
-          const { data: gearData } = await supabase
-            .from('gear_items')
-            .select('*, locations(city, state)')
-            .eq('user_id', profileData.id)
-            .in('availability_status', ['Available to Keep', 'Available to Borrow']);
-
-          setItems(gearData || []);
+          if (sessionUserId && sessionUserId !== profileData.id) {
+            // Non-owner logged in: fetch gear and relationship data in parallel
+            const [gearRes, followsRes, viewerCampsRes, ownerCampsRes] = await Promise.all([
+              supabase.from('gear_items').select('*, locations(city, state)').eq('user_id', profileData.id).in('availability_status', ['Available to Keep', 'Available to Borrow']),
+              supabase.from('user_follows').select('follower_id').eq('follower_id', sessionUserId).eq('following_id', profileData.id).maybeSingle(),
+              supabase.from('user_camp_affiliations').select('camp_id').eq('user_id', sessionUserId),
+              supabase.from('user_camp_affiliations').select('camp_id').eq('user_id', profileData.id),
+            ]);
+            const allGear = gearRes.data || [];
+            const viewerFollowsOwner = !!followsRes.data;
+            const viewerCampIds = new Set((viewerCampsRes.data || []).map((r: any) => r.camp_id).filter(Boolean));
+            const ownerCampIds = (ownerCampsRes.data || []).map((r: any) => r.camp_id).filter(Boolean);
+            const sharesCamp = ownerCampIds.some((id: string) => viewerCampIds.has(id));
+            setItems(allGear.filter((item: any) => {
+              const v = item.visibility;
+              if (!v || v === 'public') return true;
+              if (v === 'followers') return viewerFollowsOwner;
+              if (v === 'campmates') return sharesCamp;
+              if (v === 'followers_campmates') return viewerFollowsOwner || sharesCamp;
+              if (v === 'private') return false;
+              return false;
+            }));
+          } else {
+            // Owner sees all; logged-out viewer sees only public items
+            const { data: gearData } = await supabase
+              .from('gear_items')
+              .select('*, locations(city, state)')
+              .eq('user_id', profileData.id)
+              .in('availability_status', ['Available to Keep', 'Available to Borrow']);
+            const allGear = gearData || [];
+            if (!sessionUserId) {
+              setItems(allGear.filter((item: any) => !item.visibility || item.visibility === 'public'));
+            } else {
+              setItems(allGear);
+            }
+          }
 
           const { data: affData } = await supabase
             .from('user_camp_affiliations')
@@ -411,6 +443,16 @@ export default function PublicProfilePage() {
       setDraft2026(prev => ({ ...prev, searchResults: [], showDropdown: false }));
     }
   };
+
+  async function refetchOwnerGear() {
+    if (!profile) return;
+    const { data: gearData } = await supabase
+      .from('gear_items')
+      .select('*, locations(city, state)')
+      .eq('user_id', profile.id)
+      .in('availability_status', ['Available to Keep', 'Available to Borrow']);
+    setItems(gearData || []);
+  }
 
   if (loading) return <div style={{ color: '#2D241E', padding: '40px' }}>Loading...</div>;
   if (!profile) return <div style={{ color: '#2D241E', padding: '40px' }}>User not found.</div>;
@@ -953,20 +995,35 @@ export default function PublicProfilePage() {
 
       {/* AVAILABLE ITEMS */}
       <section style={{ marginTop: '40px' }}>
-        <h2 style={{ color: '#2D241E', marginBottom: '16px', fontSize: '20px' }}>Available Items</h2>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <h2 style={{ color: '#2D241E', fontSize: '20px', margin: 0 }}>Available Items</h2>
+          {isOwner && (
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <Link href="/inventory" style={{ backgroundColor: '#d896ff', color: '#000', borderRadius: 6, padding: '6px 14px', fontSize: '0.8rem', fontWeight: 600, border: 'none', textDecoration: 'none', display: 'inline-block' }}>
+                Manage Inventory
+              </Link>
+              <button
+                onClick={() => setShowAddItem(true)}
+                style={{ backgroundColor: '#5ECFDF', color: '#000', borderRadius: 6, padding: '6px 14px', fontSize: '0.8rem', fontWeight: 600, border: 'none', cursor: 'pointer' }}
+              >
+                Add New Item
+              </button>
+            </div>
+          )}
+        </div>
         {items.length === 0 ? (
           <p style={{ color: '#aaa', fontSize: '0.9rem' }}>No items listed yet.</p>
         ) : (
           <div className="profile-items-scroll">
           <div className="profile-items-table" style={{ display: 'flex', flexDirection: 'column' as const, gap: '2px' }}>
-            <div style={listHeaderStyle}>
+            <div style={{ ...listHeaderStyle, gridTemplateColumns: isOwner ? '50px 160px 1fr 140px 120px 1fr 80px' : '50px 160px 1fr 140px 120px 1fr' }}>
               <div />
               <div>Item</div>
               <div>Description</div>
               <div>Category</div>
               <div>Location</div>
               <div>Terms</div>
-              <div />
+              {isOwner && <div>Visible To</div>}
             </div>
             {items.map(item => {
               const loc = item.locations
@@ -978,46 +1035,58 @@ export default function PublicProfilePage() {
                 item.loss_price ? `Loss agr. $${item.loss_price}` : null,
                 item.return_terms ? 'Custom terms' : null,
               ].filter(Boolean).join(' · ');
+              const visLabel = (() => {
+                const v = item.visibility;
+                if (!v || v === 'public') return 'Everyone';
+                if (v === 'followers') return 'Followers';
+                if (v === 'campmates') return 'Campmates';
+                if (v === 'followers_campmates') return 'Flwrs + Camps';
+                if (v === 'private') return 'Just Me';
+                return 'Everyone';
+              })();
 
               return (
-                <div key={item.id} style={listRowStyle}>
-                  <div style={listImgStyle}>
-                    {item.image_urls?.[0]
-                      ? <img src={item.image_urls[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' as const }} />
-                      : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#ccc' }}><Package size={16} /></div>
-                    }
-                  </div>
-                  <div style={{ overflow: 'hidden' }}>
-                    <div style={{ fontWeight: '600', color: '#111', fontSize: '14px' }}>{item.item_name}</div>
-                    <div style={{ fontSize: '10px', color: '#5ECFDF', fontWeight: 'bold', textTransform: 'uppercase' as const, marginTop: '2px' }}>
-                      {item.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}
+                <a key={item.id} href={`/find-items/${item.id}`} target="_blank" style={{ display: 'block', textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
+                  <div style={{ ...listRowStyle, gridTemplateColumns: isOwner ? '50px 160px 1fr 140px 120px 1fr 80px' : '50px 160px 1fr 140px 120px 1fr' }}>
+                    <div style={listImgStyle}>
+                      {item.image_urls?.[0]
+                        ? <img src={item.image_urls[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' as const }} />
+                        : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#ccc' }}><Package size={16} /></div>
+                      }
                     </div>
-                    {isOwner && item.visibility && item.visibility !== 'public' && (
-                      <div style={{ display: 'inline-block', marginTop: '3px', fontSize: '9px', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.04em', padding: '1px 6px', borderRadius: '10px', backgroundColor: '#fdf3ec', color: '#C08261', border: '1px solid #f0d8c8' }}>
-                        {{
-                          followers: 'Followers',
-                          campmates: 'Campmates',
-                          followers_and_campmates: 'Following + Campmates',
-                        }[item.visibility as string] ?? item.visibility}
+                    <div style={{ overflow: 'hidden' }}>
+                      <div style={{ fontWeight: '600', color: '#111', fontSize: '14px' }}>{item.item_name}</div>
+                      <div style={{ fontSize: '10px', color: '#5ECFDF', fontWeight: 'bold', textTransform: 'uppercase' as const, marginTop: '2px' }}>
+                        {item.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}
+                      </div>
+                    </div>
+                    <div style={listColStyle}>{item.description || '—'}</div>
+                    <div style={listColStyle}>{item.category}</div>
+                    <div style={{ ...listColStyle, display: 'flex', alignItems: 'center', gap: '3px' }}>
+                      <MapPin size={11} style={{ flexShrink: 0 }} />{loc}
+                    </div>
+                    <div style={{ ...listColStyle, fontSize: '11px', color: '#888' }}>{termsSummary || '—'}</div>
+                    {isOwner && (
+                      <div style={{ fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: 10, backgroundColor: '#fdf3ec', color: '#C08261', border: '1px solid #f0d8c8', alignSelf: 'center', width: 'fit-content' as const }}>
+                        {visLabel}
                       </div>
                     )}
                   </div>
-                  <div style={listColStyle}>{item.description || '—'}</div>
-                  <div style={listColStyle}>{item.category}</div>
-                  <div style={{ ...listColStyle, display: 'flex', alignItems: 'center', gap: '3px' }}>
-                    <MapPin size={11} style={{ flexShrink: 0 }} />{loc}
-                  </div>
-                  <div style={{ ...listColStyle, fontSize: '11px', color: '#888' }}>{termsSummary || '—'}</div>
-                  <div style={{ flexShrink: 0 }}>
-                    <a href={`/find-items/${item.id}`} style={{ color: '#5ECFDF', textDecoration: 'none', fontWeight: 'bold', fontSize: '12px' }}>View →</a>
-                  </div>
-                </div>
+                </a>
               );
             })}
           </div>
           </div>
         )}
       </section>
+
+      {showAddItem && (
+        <AddItemModal
+          itemToEdit={null}
+          onClose={() => setShowAddItem(false)}
+          onSuccess={() => { setShowAddItem(false); refetchOwnerGear(); }}
+        />
+      )}
 
       {showWishMatchModal && profile && currentUserId && (
         <WishListMatchModal
