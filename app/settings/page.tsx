@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 
 const US_STATES = ["", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"];
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [showSetupBanner, setShowSetupBanner] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -124,7 +126,12 @@ export default function SettingsPage() {
     const lErr = iErr || uErr;
 
     if (pErr || lErr) showToast("Error saving: " + (pErr?.message || lErr?.message), true);
-    else showToast("Settings saved!");
+    else {
+      showToast("Settings saved!");
+      if (profile.has_seen_welcome === false) {
+        router.push(`/profile/${profile.username.trim().toLowerCase()}`);
+      }
+    }
 
     setSaving(false);
   }

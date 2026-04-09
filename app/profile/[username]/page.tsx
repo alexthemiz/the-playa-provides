@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 import AvatarUpload from '@/components/AvatarUpload';
 import WishListMatchModal from '@/components/WishListMatchModal';
+import WelcomeModal from '@/components/WelcomeModal';
 import AddItemModal from '@/components/AddItemModal';
 import { MapPin, Package, Globe, Linkedin, Instagram, Facebook } from 'lucide-react';
 
@@ -35,6 +36,7 @@ export default function PublicProfilePage() {
   const [draftAffiliations, setDraftAffiliations] = useState<any[]>([]);
   const [showWishMatchModal, setShowWishMatchModal] = useState(false);
   const [showAddItem, setShowAddItem] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   // 2026 returning status — managed separately from regular year drafts
   const [draft2026, setDraft2026] = useState<{
@@ -66,7 +68,10 @@ export default function PublicProfilePage() {
         if (profileData) {
           setProfile(profileData);
           setWishTags(Array.isArray(profileData.wish_list) ? profileData.wish_list : []);
-          if (sessionUserId && sessionUserId === profileData.id) setIsOwner(true);
+          if (sessionUserId && sessionUserId === profileData.id) {
+            setIsOwner(true);
+            if (profileData.has_seen_welcome === false) setShowWelcome(true);
+          }
           setCurrentUserId(sessionUserId);
 
           const { count, error: followerErr } = await supabase
@@ -1096,6 +1101,10 @@ export default function PublicProfilePage() {
           isFollowing={isFollowing}
           onClose={() => setShowWishMatchModal(false)}
         />
+      )}
+
+      {showWelcome && profile && (
+        <WelcomeModal userId={profile.id} onClose={() => setShowWelcome(false)} />
       )}
     </div>
   );
