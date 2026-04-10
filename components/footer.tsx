@@ -5,10 +5,10 @@ import { Instagram } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="border-t border-[#A66D51] py-5" style={{ backgroundColor: '#E8834A' }}>
-      <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
-        
-        {/* Left Side: Branding */}
+    <footer className="border-t border-[#A66D51] py-4" style={{ backgroundColor: '#E8834A' }}>
+      <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-3">
+
+        {/* Left: Branding */}
         <div className="flex flex-col items-center md:items-start flex-1">
           <h2 className="text-xl font-black text-[#2D241E] tracking-tighter uppercase leading-none">
             THE PLAYA PROVIDES<span style={{ textDecoration: 'underline' }}>{'\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0'}</span>
@@ -18,21 +18,20 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* Center: Full Legal Navigation */}
-        <nav className="flex gap-8 text-sm font-bold text-[#2D241E] flex-1 justify-center">
-          <Link href="/about" className="hover:text-white transition-colors whitespace-nowrap">
-            About
-          </Link>
-          <Link href="/terms" className="hover:text-white transition-colors whitespace-nowrap">
-            Terms & Conditions
-          </Link>
-          <Link href="/privacy" className="hover:text-white transition-colors whitespace-nowrap">
-            Privacy Policy
-          </Link>
-        </nav>
+        {/* Center: Nav + BM disclaimer stacked */}
+        <div className="flex-1 flex flex-col items-center gap-1">
+          <nav className="flex gap-8 text-sm font-bold text-[#2D241E]">
+            <Link href="/about" className="hover:text-white transition-colors whitespace-nowrap">About</Link>
+            <Link href="/terms" className="hover:text-white transition-colors whitespace-nowrap">Terms & Conditions</Link>
+            <Link href="/privacy" className="hover:text-white transition-colors whitespace-nowrap">Privacy Policy</Link>
+          </nav>
+          <p className="text-[10px] text-[#2D241E] opacity-70 font-medium text-center">
+            This app is not affiliated, endorsed, or verified by Burning Man Project.
+          </p>
+        </div>
 
-        {/* Right Side: Instagram + Credit */}
-        <div className="flex-1 flex flex-col items-center md:items-end gap-2">
+        {/* Right: Instagram + Credit */}
+        <div className="flex-1 flex flex-col items-center md:items-end gap-1">
           <a
             href="https://www.instagram.com/theplayaprovides_/"
             target="_blank"
@@ -48,11 +47,6 @@ export default function Footer() {
           </p>
         </div>
 
-      </div>
-      <div className="max-w-7xl mx-auto px-4 mt-4 text-center">
-        <p className="text-[10px] text-[#2D241E] opacity-70 font-medium">
-          This app is not affiliated, endorsed, or verified by Burning Man Project.
-        </p>
       </div>
     </footer>
   );
