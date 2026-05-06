@@ -27,9 +27,9 @@ const headerBtnStyle: React.CSSProperties = {
   justifyContent: 'space-between',
   alignItems: 'center',
   width: '100%',
-  background: 'none',
+  backgroundColor: '#f5f5f5',
   border: 'none',
-  padding: '20px 0',
+  padding: '14px 16px',
   cursor: 'pointer',
   textAlign: 'left' as const,
 };
@@ -109,7 +109,7 @@ const SECTIONS = [
           While it&rsquo;s damn near-impossible to decommodify the prep for Burning Man entirely, we can engage in the pursuit of decommodification. The Playa Provides is for anyone who cares about this pursuit, tries to live more sustainably, hates buying new things from big corporations, and wants to take the circular economy for a spin. Or frankly doesn&rsquo;t have the dough to pay full retail.
         </p>
         <p style={{ ...pStyle, fontSize: '0.8rem', color: '#aaa', marginBottom: 0 }}>
-          <sup>*</sup>The ten official principles + the one they should make official
+          <sup>*</sup><a href="https://burningman.org/about-us/10-principles/" target="_blank" rel="noopener noreferrer" style={inlineLinkStyle}>The ten official principles</a> + the one <a href="https://www.11thprincipleconsent.org/" target="_blank" rel="noopener noreferrer" style={inlineLinkStyle}>they should make official</a>
         </p>
       </div>
     ),
@@ -155,7 +155,7 @@ const SECTIONS = [
         <p style={{ ...pStyle, marginBottom: 0 }}>
           And because I can, allow me one moment of shameless self-promotion: if you have an event coming up&mdash;corporate retreat, wedding, bar mitzvah, festival, private party, whatever&mdash;consider hiring{' '}
           <a href="https://www.smoreslab.com" target="_blank" rel="noopener noreferrer" style={inlineLinkStyle}>The S&rsquo;mores Lab</a>{' '}
-          for an extra sweet interactive experience. Or if you&rsquo;re looking for a communications manager or copywriter for your organization, consider hiring me!
+          for an extra sweet interactive experience. Or if you&rsquo;re looking for a communications manager or copywriter for your organization, consider <a href="https://www.alexmizrahi.com/" target="_blank" rel="noopener noreferrer" style={inlineLinkStyle}>hiring me</a>!
         </p>
       </div>
     ),
@@ -180,8 +180,8 @@ const SECTIONS = [
           <li style={{ ...pStyle, marginBottom: '12px' }}>
   <strong>
   <a 
-    href="#" 
-    style={{ ...inlineLinkStyle, color: '#2D241E', textDecoration: 'none' }} 
+    href="#"
+    style={{ ...inlineLinkStyle }}
     onClick={(e) => { e.preventDefault(); new Audio('/bopit.mp3').play(); }}
   >
     Bop it!
@@ -189,9 +189,7 @@ const SECTIONS = [
 </strong>
           </li>
           <li style={{ ...pStyle, marginBottom: 0 }}>
-            <strong>Fund it!</strong> You know what else is decommodified? This website! It&rsquo;s free, and I really want to keep it that way. But you know what&rsquo;s not decommodified? Society! Running a website, especially when people start to use it (supposedly)! If you find value in our site or simply believe in our mission, and feel like kicking in a few bucks, email me at{' '}
-            <a href="mailto:alex@theplayaprovides.com" style={inlineLinkStyle}>alex@theplayaprovides.com</a>{' '}
-            and we&rsquo;ll figure out the best way to do that.
+            <strong>Fund it!</strong> You know what else is decommodified? This website! It&rsquo;s free, and I really want to keep it that way. But you know what&rsquo;s not decommodified? Society! Running a website, especially when people start to use it (supposedly)! If you find value in our site or simply believe in our mission, and feel like kicking in a few bucks, <a href="mailto:alex@theplayaprovides.com" style={inlineLinkStyle}>email me</a> and we&rsquo;ll figure out the best way to do that.
           </li>
         </ul>
       </div>
