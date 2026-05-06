@@ -80,15 +80,6 @@ const captionStyle: React.CSSProperties = {
   textAlign: 'center' as const,
 };
 
-const emailLinkStyle: React.CSSProperties = {
-  display: 'inline-block',
-  marginTop: '6px',
-  fontSize: '1rem',
-  fontWeight: 600,
-  color: '#00aacc',
-  textDecoration: 'none',
-};
-
 const inlineLinkStyle: React.CSSProperties = {
   color: '#00aacc',
   textDecoration: 'underline',
@@ -96,118 +87,113 @@ const inlineLinkStyle: React.CSSProperties = {
 
 const SECTIONS = [
   {
-    title: 'What Is This?',
-    content: (
-      <p style={pStyle}>
-        The Playa Provides is a peer-to-peer gear-sharing platform built for the Burning Man
-        community, and anyone who shares its values. The idea is simple: veterans who've done
-        this before have tents, bikes, shade structures, and camp gear sitting in storage. New
-        burners and returning ones with less stuff need exactly that. This platform connects
-        them. Radical gifting, made practical.
-      </p>
-    ),
-  },
-  {
-    title: "Why It's Needed",
+    title: 'Why?',
     content: (
       <div>
-        <div style={whyRowStyle}>
-          <p style={{ ...pStyle, marginBottom: 0, flex: 1 }}>
-            Getting to Black Rock City isn't cheap. According to the{' '}
-            <a href="https://blackrockcitycensus.org/" target="_blank" rel="noopener noreferrer" style={inlineLinkStyle}>
-              2024 Burning Man Census
-            </a>
-            , the median participant spends around $2,000 just to get to and from BRC.
-          </p>
-          <figure style={sideFigureStyle}>
-            <img src="/Spend_to_and_from_BRC.png" alt="Chart: travel spend to/from BRC" style={sideChartStyle} />
-            <figcaption style={captionStyle}>Source: 2024 Burning Man Census</figcaption>
-          </figure>
-        </div>
-
-        <div style={whyRowStyle}>
-          <p style={{ ...pStyle, marginBottom: 0, flex: 1 }}>
-            In Nevada alone, participants spend an average of around $750 per person on food,
-            fuel, lodging, and supplies.
-          </p>
-          <figure style={sideFigureStyle}>
-            <img src="/Avg_spend_in_Nevada_per_participant.png" alt="Chart: average Nevada spend per participant" style={sideChartStyle} />
-            <figcaption style={captionStyle}>Source: 2024 Burning Man Census</figcaption>
-          </figure>
-        </div>
-
-        <div style={whyRowStyle}>
-          <p style={{ ...pStyle, marginBottom: 0, flex: 1 }}>
-            About 1 in 3 attendees at any given Burn is a first-timer, buying gear from scratch,
-            often never to use it again.
-          </p>
-          <figure style={sideFigureStyle}>
-            <img src="/Proportion_of_virgins.png" alt="Chart: proportion of first-timers" style={sideChartStyle} />
-            <figcaption style={captionStyle}>Source: 2024 Burning Man Census</figcaption>
-          </figure>
-        </div>
-
-        <div style={whyRowStyle}>
-          <p style={{ ...pStyle, marginBottom: 0, flex: 1 }}>
-            And most people who have ever been to Burning Man have only gone once or twice.
-            That's a lot of tents, shade structures, and camp gear sitting in storage; gear that
-            could be going to the playa instead.
-          </p>
-          <figure style={sideFigureStyle}>
-            <img src="/Number_of_burns_attended.png" alt="Chart: number of burns attended" style={sideChartStyle} />
-            <figcaption style={captionStyle}>Source: 2024 Burning Man Census</figcaption>
-          </figure>
-        </div>
-
-        <p style={{ ...pStyle, marginBottom: 0 }}>
-          The gear already exists. It's sitting in storage units across the country. The Playa
-          Provides gets it moving.
+        <p style={pStyle}>
+          Going to Burning Man? Cool. Super cool. The coolest. Buying a lot of stuff for it? Not cool. The opposite of cool. A bummer.
+        </p>
+        <p style={pStyle}>
+          Sure, one of Burning Man&rsquo;s eleven principles<sup>*</sup> is decommodification. But that only applies to when you&rsquo;re there. Burning Man may be decommodified, but getting to Burning Man sure as heck isn&rsquo;t. It requires months of excessive commodification.
+        </p>
+        <p style={pStyle}>
+          Every year brings thousands of virgin burners to the playa. And every year, thousands of veteran burners decide to sit this one out. The Playa Provides wants to make it easier for the latter to lend their gear to the former, to make a modification to decommodification.
+        </p>
+        <p style={pStyle}>
+          Because why let your stuff collect dust in storage when it could be earning dust on playa? And why give Amazon or Walmart or Target your money when so much of what you need is already in a bin, a storage unit or a basement, itching to be put to use?
+        </p>
+        <p style={pStyle}>
+          Just because you&rsquo;re not going doesn&rsquo;t mean your stuff can&rsquo;t.
+        </p>
+        <p style={pStyle}>
+          While it&rsquo;s damn near-impossible to decommodify the prep for Burning Man entirely, we can engage in the pursuit of decommodification. The Playa Provides is for anyone who cares about this pursuit, tries to live more sustainably, hates buying new things from big corporations, and wants to take the circular economy for a spin. Or frankly doesn&rsquo;t have the dough to pay full retail.
+        </p>
+        <p style={{ ...pStyle, fontSize: '0.8rem', color: '#aaa', marginBottom: 0 }}>
+          <sup>*</sup>The ten official principles + the one they should make official
         </p>
       </div>
     ),
   },
   {
-    title: 'Who Made This?',
+    title: 'How?',
     content: (
       <div>
         <p style={pStyle}>
-          The Playa Provides was built by a small group of burners who got tired of watching perfectly
-          good gear sit in storage every year. It's a side project, built with love and a lot of
-          late nights.
+          We know that there&rsquo;s some risk involved with lending items out&mdash;they may break, they may get lost, they may come back covered in stickers, they may come back incessantly chatting about all the craaaaazy things that happened to them at the Burn. Dude, you&rsquo;re a spork, chill out.
+        </p>
+        <p style={pStyle}>
+          Yet what would going to Burning Man&mdash;or not going to Burning Man&mdash;be without a little risk? You&rsquo;re brave, you&rsquo;ve climbed to the top of scaffold towers and made out with strangers in the cargo holds of art cars; what&rsquo;s a little lending of gear if it means others can climb the same towers and make out with the same strangers?
+        </p>
+        <p style={pStyle}>
+          The terms and the exchange happen directly between lender and lendee. When listing an item, you set your terms right up front: &ldquo;If item is returned broken, you agree to x; if item not returned, you agree to y.&rdquo; It&rsquo;s up to the lendee to accept your terms, or counter; this happens via email, so there&rsquo;s a written record of whatever&rsquo;s agreed upon between you.
+        </p>
+        <p style={pStyle}>
+          But maybe you have an aversion to strangers and would rather make items only available to people you know, giving it a level of trustitude and vouchiness. We get it, you know some great people (some questionable ones, too; you are a burner, after all), so you can choose an item&rsquo;s visibility: to your followers, your campmates, both, or anyone.
         </p>
         <p style={{ ...pStyle, marginBottom: 0 }}>
-          Follow along:{' '}
-          <a
-            href="https://www.instagram.com/theplayaprovides_/"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={inlineLinkStyle}
-          >
-            <Instagram size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px', marginBottom: '2px' }} />
-            @theplayaprovides_
-          </a>
+          To find your camps, simply add your Burning Man history to your profile, save, then click on the camp name to see all your campmates from across the years who&rsquo;ve also joined. You now have a private borrowing hub just for your camp. Neeeeeeeeat.
         </p>
       </div>
     ),
   },
   {
-    title: 'Support the Project',
+    title: 'Who?',
     content: (
       <div>
-        <p style={pStyle}>
-          This is a community project and we're genuinely open to collaborators. Got a feature
-          idea? Think something should work differently? Know how to code or design and want to
-          contribute? Questions, bug reports, other ideas? We'd love to hear from you.{' '}
-          <a href="mailto:hello@theplayaprovides.com" style={emailLinkStyle}>
-            📧 hello@theplayaprovides.com
-          </a>
+        <p style={pStyle}><strong>Who built this site? Who am I talking to right now?</strong><br />
+          Me. I&rsquo;m Alex.
+        </p>
+        <p style={pStyle}><strong>&ldquo;I&rsquo;m&rdquo;? Then what&rsquo;s with all that &ldquo;we&rdquo; business?</strong><br />
+          It sounds better. Like it might make you think that this site was built by Coursera&rsquo;s finest software engineering graduates. But nope, it&rsquo;s just me. Well, me and my boy Claude here.
+        </p>
+        <p style={pStyle}><strong>Ugh, another vibe coded website?</strong><br />
+          I know, I know. Such a cliche. But rest assured: while I built this site using Claude Code, I did all the writing and designing myself. Besides, if it wasn&rsquo;t for vibe coding, the site wouldn&rsquo;t have been built at all, and you wouldn&rsquo;t be saving money on lag bolts and air mattresses and unicorn onesies.
         </p>
         <p style={pStyle}>
-          While the site is free to use and we plan to keep it that way, it takes real time and
-          money to build and maintain. If you're getting value out of it or simply believe in our
-          mission and want to kick in a few bucks, we'd be genuinely grateful. Reach out and
-          we'll send a Venmo link over.
+          Anyway, I&rsquo;m Alex, and I feel strongly that there&rsquo;s too much stuff, that pretty much everything that needs to be made has already been made, way more than necessary, and if we just worked together and communicated better and made ourselves a little uncomfortable, we&rsquo;d be able to make more people&rsquo;s dreams of making out with strangers in the cargo holds of art cars come true. Isn&rsquo;t that what this is all about?
         </p>
+        <p style={{ ...pStyle, marginBottom: 0 }}>
+          And because I can, allow me one moment of shameless self-promotion: if you have an event coming up&mdash;corporate retreat, wedding, bar mitzvah, festival, private party, whatever&mdash;consider hiring{' '}
+          <a href="https://www.smoreslab.com" target="_blank" rel="noopener noreferrer" style={inlineLinkStyle}>The S&rsquo;mores Lab</a>{' '}
+          for an extra sweet interactive experience. Or if you&rsquo;re looking for a communications manager or copywriter for your organization, consider hiring me!
+        </p>
+      </div>
+    ),
+  },
+  {
+    title: 'Can I Help?',
+    content: (
+      <div>
+        <p style={pStyle}>Love that burnery spirit. You can help in so many ways:</p>
+        <ul style={{ paddingLeft: '20px', margin: '0 0 16px' }}>
+          <li style={{ ...pStyle, marginBottom: '12px' }}>
+            <strong>Use the site!</strong> Add items to your inventory, make them available for borrowing, give something away, request items from others.
+          </li>
+          <li style={{ ...pStyle, marginBottom: '12px' }}>
+            <strong>Share it!</strong> With your friends and campmates, in your WhatsApp groups and planning meetings, and everywhere burners gather and scheme. Don&rsquo;t exclude your former burner and non-burner friends, they&rsquo;re invited to the party too.
+          </li>
+          <li style={{ ...pStyle, marginBottom: '12px' }}>
+            <strong>Improve it!</strong> Just having you here already makes the site better, because you are wonderful and your presence makes everywhere you go brighter and sweeter and prettier. But you also have a great big brain and lots of hard skills, so if you have any feature ideas, discover any bugs, want to help with design or social media, or contribute in some other way, please reach out to{' '}
+            <a href="mailto:hello@theplayaprovides.com" style={inlineLinkStyle}>hello@theplayaprovides.com</a>.{' '}
+            We could use all the help we can get, and are grateful for any you can give us.
+          </li>
+          <li style={{ ...pStyle, marginBottom: '12px' }}>
+  <strong>
+  <a 
+    href="#" 
+    style={{ ...inlineLinkStyle, color: '#2D241E', textDecoration: 'none' }} 
+    onClick={(e) => { e.preventDefault(); new Audio('/bopit.mp3').play(); }}
+  >
+    Bop it!
+  </a>
+</strong>
+          </li>
+          <li style={{ ...pStyle, marginBottom: 0 }}>
+            <strong>Fund it!</strong> You know what else is decommodified? This website! It&rsquo;s free, and I really want to keep it that way. But you know what&rsquo;s not decommodified? Society! Running a website, especially when people start to use it (supposedly)! If you find value in our site or simply believe in our mission, and feel like kicking in a few bucks, email me at{' '}
+            <a href="mailto:alex@theplayaprovides.com" style={inlineLinkStyle}>alex@theplayaprovides.com</a>{' '}
+            and we&rsquo;ll figure out the best way to do that.
+          </li>
+        </ul>
       </div>
     ),
   },
@@ -228,7 +214,6 @@ export default function AboutPage() {
     <div style={pageStyle}>
       <div style={containerStyle}>
         <h1 style={h1Style}>The Playa Provides<span style={{ textDecoration: 'underline' }}> An About Page{'\u00a0'}</span></h1>
-
         <div>
           {SECTIONS.map((section, i) => {
             const isOpen = openSections.has(i);
