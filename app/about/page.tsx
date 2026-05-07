@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type React from 'react';
-import { ChevronDown, Instagram } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 
 const pageStyle: React.CSSProperties = {
   backgroundColor: '#fff',
@@ -53,32 +53,6 @@ const pStyle: React.CSSProperties = {
   marginBottom: '16px',
 };
 
-const whyRowStyle: React.CSSProperties = {
-  display: 'flex',
-  gap: '20px',
-  alignItems: 'flex-start',
-  marginBottom: '20px',
-};
-
-const sideFigureStyle: React.CSSProperties = {
-  flexShrink: 0,
-  width: '225px',
-};
-
-const sideChartStyle: React.CSSProperties = {
-  width: '100%',
-  height: 'auto',
-  display: 'block',
-  borderRadius: '6px',
-  border: '1px solid #e5e5e5',
-};
-
-const captionStyle: React.CSSProperties = {
-  fontSize: '0.7rem',
-  color: '#aaa',
-  marginTop: '4px',
-  textAlign: 'center' as const,
-};
 
 const inlineLinkStyle: React.CSSProperties = {
   color: '#00aacc',
@@ -140,6 +114,7 @@ const SECTIONS = [
     title: 'Who?',
     content: (
       <div>
+        <br /><p>Who what?</p>
         <p style={pStyle}><strong>Who built this site? Who am I talking to right now?</strong><br />
           Me. I&rsquo;m Alex.
         </p>
@@ -165,19 +140,15 @@ const SECTIONS = [
     content: (
       <div>
         <p style={pStyle}>Love that burnery spirit. You can help in so many ways:</p>
-        <ul style={{ paddingLeft: '20px', margin: '0 0 16px' }}>
-          <li style={{ ...pStyle, marginBottom: '12px' }}>
-            <strong>Use the site!</strong> Add items to your inventory, make them available for borrowing, give something away, request items from others.
-          </li>
-          <li style={{ ...pStyle, marginBottom: '12px' }}>
-            <strong>Share it!</strong> With your friends and campmates, in your WhatsApp groups and planning meetings, and everywhere burners gather and scheme. Don&rsquo;t exclude your former burner and non-burner friends, they&rsquo;re invited to the party too.
-          </li>
-          <li style={{ ...pStyle, marginBottom: '12px' }}>
+        <p>
+            <strong>Use the site!</strong> Add items to your inventory, make them available for borrowing, give something away, request items from others.</p>
+          <p>
+            <strong>Share it!</strong> With your friends and campmates, in your WhatsApp groups and planning meetings, and everywhere burners gather and scheme. Don&rsquo;t exclude your former burner and non-burner friends, they&rsquo;re invited to the party too.</p>
+          <p>
             <strong>Improve it!</strong> Just having you here already makes the site better, because you are wonderful and your presence makes everywhere you go brighter and sweeter and prettier. But you also have a great big brain and lots of hard skills, so if you have any feature ideas, discover any bugs, want to help with design or social media, or contribute in some other way, please reach out to{' '}
             <a href="mailto:hello@theplayaprovides.com" style={inlineLinkStyle}>hello@theplayaprovides.com</a>.{' '}
-            We could use all the help we can get, and are grateful for any you can give us.
-          </li>
-          <li style={{ ...pStyle, marginBottom: '12px' }}>
+            We could use all the help we can get, and are grateful for any you can give us.</p>
+          <p>
   <strong>
   <a 
     href="#"
@@ -187,11 +158,10 @@ const SECTIONS = [
     Bop it!
   </a>
 </strong>
-          </li>
-          <li style={{ ...pStyle, marginBottom: 0 }}>
+          </p>
+          <p>
             <strong>Fund it!</strong> You know what else is decommodified? This website! It&rsquo;s free, and I really want to keep it that way. But you know what&rsquo;s not decommodified? Society! Running a website, especially when people start to use it (supposedly)! If you find value in our site or simply believe in our mission, and feel like kicking in a few bucks, <a href="mailto:alex@theplayaprovides.com" style={inlineLinkStyle}>email me</a> and we&rsquo;ll figure out the best way to do that.
-          </li>
-        </ul>
+          </p>
       </div>
     ),
   },
