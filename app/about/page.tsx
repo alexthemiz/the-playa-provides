@@ -114,7 +114,7 @@ const SECTIONS = [
     title: 'Who?',
     content: (
       <div>
-        <br /><p>Who what?</p>
+        <br /><p style={pStyle}>Who what?</p>
         <p style={pStyle}><strong>Who built this site? Who am I talking to right now?</strong><br />
           Me. I&rsquo;m Alex.
         </p>
@@ -140,17 +140,17 @@ const SECTIONS = [
     content: (
       <div>
         <p style={pStyle}>Love that burnery spirit. You can help in so many ways:</p>
-        <p>
+        <p style={pStyle}>
             <strong>Use the site!</strong> Add items to your inventory, make them available for borrowing, give something away, request items from others.</p>
-          <p>
+          <p style={pStyle}>
             <strong>Share it!</strong> With your friends and campmates, in your WhatsApp groups and planning meetings, and everywhere burners gather and scheme. Don&rsquo;t exclude your former burner and non-burner friends, they&rsquo;re invited to the party too.</p>
-          <p>
+          <p style={pStyle}>
             <strong>Improve it!</strong> Just having you here already makes the site better, because you are wonderful and your presence makes everywhere you go brighter and sweeter and prettier. But you also have a great big brain and lots of hard skills, so if you have any feature ideas, discover any bugs, want to help with design or social media, or contribute in some other way, please reach out to{' '}
             <a href="mailto:hello@theplayaprovides.com" style={inlineLinkStyle}>hello@theplayaprovides.com</a>.{' '}
             We could use all the help we can get, and are grateful for any you can give us.</p>
-          <p>
+          <p style={pStyle}>
   <strong>
-  <a 
+  <a
     href="#"
     style={{ ...inlineLinkStyle }}
     onClick={(e) => { e.preventDefault(); new Audio('/bopit.mp3').play(); }}
@@ -159,7 +159,7 @@ const SECTIONS = [
   </a>
 </strong>
           </p>
-          <p>
+          <p style={{ ...pStyle, marginBottom: 0 }}>
             <strong>Fund it!</strong> You know what else is decommodified? This website! It&rsquo;s free, and I really want to keep it that way. But you know what&rsquo;s not decommodified? Society! Running a website, especially when people start to use it (supposedly)! If you find value in our site or simply believe in our mission, and feel like kicking in a few bucks, <a href="mailto:alex@theplayaprovides.com" style={inlineLinkStyle}>email me</a> and we&rsquo;ll figure out the best way to do that.
           </p>
       </div>
