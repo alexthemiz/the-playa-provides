@@ -1038,7 +1038,7 @@ export default function PublicProfilePage() {
                 item.return_by ? `Return by ${new Date(item.return_by).toLocaleDateString()}` : null,
                 item.damage_price ? `Damage agr. $${item.damage_price}` : null,
                 item.loss_price ? `Loss agr. $${item.loss_price}` : null,
-                item.return_terms ? 'Custom terms' : null,
+                item.return_terms ? item.return_terms : null,
               ].filter(Boolean).join(' · ');
               const visPills = (() => {
                 const v = item.visibility;
