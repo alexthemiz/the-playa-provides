@@ -53,10 +53,10 @@ export default function AddItemModal({
         }
         const [followingRes, campRes] = await Promise.all([
           supabase.from('user_follows').select('following_id').eq('follower_id', user.id),
-          supabase.from('user_camp_affiliations').select('camp_id').eq('user_id', user.id),
+          supabase.from('user_camp_affiliations').select('camp_id').eq('user_id', user.id).not('camp_id', 'is', null),
         ]);
         setFollowingIds((followingRes.data || []).map((r: any) => r.following_id));
-        const myCampIds = (campRes.data || []).map((r: any) => r.camp_id);
+        const myCampIds = (campRes.data || []).map((r: any) => r.camp_id).filter(Boolean);
         if (myCampIds.length > 0) {
           const { data: campMembers } = await supabase.from('user_camp_affiliations').select('user_id').in('camp_id', myCampIds).neq('user_id', user.id);
           setCampMateIds([...new Set((campMembers || []).map((r: any) => r.user_id))]);
