@@ -52,7 +52,8 @@ function ListItemPageInner() {
   useEffect(() => {
     async function fetchLocations() {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession();
+        const user = session?.user ?? null;
         if (user) {
           const { data: profileData } = await supabase.from('profiles').select('preferred_name').eq('id', user.id).maybeSingle();
           if (profileData?.preferred_name) setDisplayName(profileData.preferred_name);
@@ -64,7 +65,8 @@ function ListItemPageInner() {
           setFollowingIds((followingRes.data || []).map((r: any) => r.following_id));
           const myCampIds = (campRes.data || []).map((r: any) => r.camp_id).filter(Boolean);
           if (myCampIds.length > 0) {
-            const { data: campMembers } = await supabase.from('user_camp_affiliations').select('user_id').in('camp_id', myCampIds).neq('user_id', user.id);
+            const { data: campMembers, error: campMatesErr } = await supabase.from('user_camp_affiliations').select('user_id').in('camp_id', myCampIds).neq('user_id', user.id);
+            if (campMatesErr) console.error('campMates error:', campMatesErr);
             setCampMateIds([...new Set((campMembers || []).map((r: any) => r.user_id))]);
           }
 
