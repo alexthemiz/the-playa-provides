@@ -144,18 +144,17 @@ export default function InventoryPage() {
   }
 
   async function updateStatus(itemId: number, newStatus: string) {
+    const update: any = { availability_status: newStatus };
+    if (newStatus === 'Not Available') update.visibility = 'private';
     const { error } = await supabase
       .from('gear_items')
-      .update({
-        availability_status: newStatus,
-        visibility: newStatus === 'Not Available' ? 'private' : 'public',
-      })
+      .update(update)
       .eq('id', itemId);
     if (!error) {
       setItems(prev => prev.map(i => i.id === itemId ? {
         ...i,
         availability_status: newStatus,
-        visibility: newStatus === 'Not Available' ? 'private' : 'public',
+        ...(newStatus === 'Not Available' ? { visibility: 'private' } : {}),
       } : i));
     }
   }
