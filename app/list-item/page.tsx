@@ -454,7 +454,7 @@ export default function ListItemPage() {
 const pageWrapperStyle: React.CSSProperties = { backgroundColor: '#fff', minHeight: '100vh', width: '100%' };
 const containerStyle: React.CSSProperties = { padding: '20px 20px 60px', maxWidth: '520px', margin: '0 auto' };
 const formStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column' as const, gap: '14px', marginTop: '16px' };
-const sectionStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column' as const, gap: '5px' };
+const sectionStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column' as const, gap: '3px' };
 const labelStyle: React.CSSProperties = { fontSize: '12px', color: '#555', fontWeight: '600', textTransform: 'uppercase' as const, letterSpacing: '0.04em' };
 const hintStyle: React.CSSProperties = { fontSize: '12px', color: '#888', margin: '0', lineHeight: '1.5' };
 const inputStyle: React.CSSProperties = { padding: '9px 12px', borderRadius: '8px', border: '1px solid #ddd', backgroundColor: '#fff', color: '#111', fontSize: '14px', outline: 'none', width: '100%', boxSizing: 'border-box' as const };
