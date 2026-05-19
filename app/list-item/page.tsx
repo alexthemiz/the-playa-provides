@@ -321,7 +321,10 @@ function ListItemPageInner() {
           {/* VISIBILITY — only shown when item is available */}
           {availability !== 'Not Available' && (
             <div style={sectionStyle}>
-              <label style={labelStyle}>Who Can See This?</label>
+              <label style={labelStyle}>Select who can view this item</label>
+              {campMateIds.length === 0 && (
+                <p style={hintStyle}>Add your camp history <a href="/settings" target="_blank" rel="noreferrer" style={{ color: '#5ECFDF', fontWeight: 600, textDecoration: 'none' }}>to your profile</a> to unlock campmates-only sharing</p>
+              )}
               <select
                 value={visibility}
                 onChange={e => setVisibility(e.target.value)}
