@@ -1,7 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { supabase } from '@/lib/supabaseClient';
+
+const MapView = dynamic(() => import('@/components/MapView'), { ssr: false });
 import ImageSlider from '@/components/ImageSlider';
 import { Search, LayoutGrid, List, MapPin, User, Package, Map as MapIcon, X } from 'lucide-react';
 import Link from 'next/link';
@@ -109,7 +112,7 @@ export default function FindItemsPage() {
 
       const [profilesRes, locationsRes] = await Promise.all([
         supabase.from('profiles').select('id, preferred_name, contact_email, username').in('id', userIds),
-        supabase.from('locations').select('id, city, state, zip_code').in('id', locationIds)
+        supabase.from('locations').select('id, city, state, zip_code, latitude, longitude').in('id', locationIds)
       ]);
 
       const enrichedItems = gear.map(item => ({
@@ -176,7 +179,7 @@ export default function FindItemsPage() {
     }
   };
 
-  const filteredItems = items.filter(item => {
+  const filteredItems = useMemo(() => items.filter(item => {
     const isAvailable = item.availability_status !== 'Not Available';
     const matchesSearch = item.item_name?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesZip = !zipQuery || item.locations?.zip_code?.includes(zipQuery);
@@ -191,7 +194,7 @@ export default function FindItemsPage() {
       return false;
     })();
     return isAvailable && matchesSearch && matchesZip && matchesCategory && matchesAvailability && matchesRelationship;
-  });
+  }), [items, searchQuery, zipQuery, categoryFilters, availabilityFilters, relationshipFilters, followingIds, followerIds, campMateIds]);
 
   return (
     <div style={containerStyle}>
@@ -360,10 +363,7 @@ export default function FindItemsPage() {
       {loading ? (
         <div className="fi-grid" style={gridStyle}>{[...Array(6)].map((_, i) => <div key={i} style={skeletonStyle} />)}</div>
       ) : viewMode === 'map' ? (
-        <div style={{ padding: '60px', textAlign: 'center' as const, backgroundColor: '#f9f9f9', borderRadius: '12px', color: '#aaa' }}>
-          <MapIcon size={40} style={{ marginBottom: '12px', opacity: 0.3 }} />
-          <p style={{ margin: 0, fontWeight: 'bold' }}>Map view coming soon</p>
-        </div>
+        <MapView items={filteredItems} onSelectItem={handleOpenItem} />
       ) : (
         <div className={viewMode === 'grid' ? 'fi-grid' : ''} style={viewMode === 'grid' ? undefined : listContainerStyle}>
           {viewMode === 'list' && filteredItems.length > 0 && (

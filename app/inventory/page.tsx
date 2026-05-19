@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { geocodeZip } from '@/lib/geocodeZip';
 import Link from 'next/link';
 
 const US_STATES = ["", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"];
@@ -344,9 +345,10 @@ export default function InventoryPage() {
     const { data: { session } } = await supabase.auth.getSession();
     const uid = session?.user?.id;
     if (!uid) return;
+    const coords = await geocodeZip(newLoanLocData.zip_code);
     const { data: newLoc, error } = await supabase
       .from('locations')
-      .insert({ label: newLoanLocData.label, address_line_1: newLoanLocData.address_line_1, city: newLoanLocData.city, state: newLoanLocData.state, zip_code: newLoanLocData.zip_code, user_id: uid })
+      .insert({ label: newLoanLocData.label, address_line_1: newLoanLocData.address_line_1, city: newLoanLocData.city, state: newLoanLocData.state, zip_code: newLoanLocData.zip_code, user_id: uid, ...(coords ?? {}) })
       .select('id')
       .single();
     if (newLoc && !error) {

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { geocodeZip } from '@/lib/geocodeZip';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Camera, CheckCircle2 } from 'lucide-react';
 
@@ -156,9 +157,10 @@ function ListItemPageInner() {
       let resolvedLocationId: string | null = selectedLocationId || null;
       if (selectedLocationId === '__new__') {
         if (!newLocData.label) { alert("Please give your new location a label (e.g. Home)."); return; }
+        const coords = await geocodeZip(newLocData.zip_code);
         const { data: newLoc, error: locErr } = await supabase
           .from('locations')
-          .insert({ ...newLocData, user_id: user.id })
+          .insert({ ...newLocData, user_id: user.id, ...(coords ?? {}) })
           .select('id')
           .single();
         if (locErr || !newLoc) { alert(`Error saving location: ${locErr?.message}`); return; }

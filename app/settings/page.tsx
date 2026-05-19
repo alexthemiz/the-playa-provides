@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
+import { geocodeZip } from '@/lib/geocodeZip';
 
 const US_STATES = ["", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"];
 
@@ -110,12 +111,25 @@ export default function SettingsPage() {
 
     const { error: pErr } = await supabase.from('profiles').upsert({ id: user.id, ...profile, username: profile.username.trim().toLowerCase(), updated_at: new Date() });
 
-    const newLocs = locations
+    const newLocsRaw = locations
       .filter(l => l._isNew)
       .map(({ _isNew, id, ...rest }) => ({ ...rest, user_id: user.id }));
-    const existingLocs = locations
+    const newLocs = await Promise.all(
+      newLocsRaw.map(async loc => {
+        const coords = await geocodeZip(loc.zip_code);
+        return { ...loc, ...(coords ?? {}) };
+      })
+    );
+    const existingLocsRaw = locations
       .filter(l => !l._isNew)
       .map(({ _isNew, ...rest }) => ({ ...rest, user_id: user.id }));
+    const existingLocs = await Promise.all(
+      existingLocsRaw.map(async loc => {
+        if (loc.latitude != null) return loc;
+        const coords = await geocodeZip(loc.zip_code);
+        return { ...loc, ...(coords ?? {}) };
+      })
+    );
 
     const { error: iErr } = newLocs.length > 0
       ? await supabase.from('locations').insert(newLocs)
