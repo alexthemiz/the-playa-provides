@@ -38,6 +38,7 @@ function ListItemPageInner() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [followingIds, setFollowingIds] = useState<string[]>([]);
   const [campMateIds, setCampMateIds] = useState<string[]>([]);
+  const [campDataLoaded, setCampDataLoaded] = useState(false);
 
   // Controlled text-field state (replaces uncontrolled name= inputs)
   const [itemName, setItemName] = useState('');
@@ -68,6 +69,7 @@ function ListItemPageInner() {
             if (campMatesErr) console.error('campMates error:', campMatesErr);
             setCampMateIds([...new Set((campMembers || []).map((r: any) => r.user_id))]);
           }
+          setCampDataLoaded(true);
 
           const { data, error } = await supabase.from('locations').select('id, label, is_default').eq('user_id', user.id);
           if (error) console.error('fetchLocations error:', error);
@@ -341,7 +343,7 @@ function ListItemPageInner() {
             {availability !== 'Not Available' && (
               <div style={sectionStyle}>
                 <label style={labelStyle}>Who can view this item</label>
-                {campMateIds.length === 0 && (
+                {campDataLoaded && campMateIds.length === 0 && (
                   <p style={hintStyle}>Add your camp history <a href="/settings" target="_blank" rel="noreferrer" style={{ color: '#5ECFDF', fontWeight: 600, textDecoration: 'none' }}>to your profile</a> to unlock campmates-only sharing</p>
                 )}
                 <select
