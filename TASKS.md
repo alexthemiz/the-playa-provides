@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-04-09 (session 25 cont.)_
+_Last updated: 2026-05-18 (session 26)_
 
 ---
 
@@ -35,7 +35,9 @@ _Last updated: 2026-04-09 (session 25 cont.)_
 ---
 
 ## 🚀 Features
+- [ ] **Welcome email** — `send-welcome-email` edge function triggered by Supabase DB webhook on INSERT to `profiles` table; sends from hello@theplayaprovides.com; copy drafted in Word doc (needs editing before build)
 - [ ] **Resources directory submission from camp edit panel** — Visible only to logged-in camp page owners. Pre-fills camp name and pulls contact email from page owner's profile. Submits for backend approval same as the public form. Framed as a benefit of claiming your camp page, not a requirement.
+- [ ] **BM packing list page (/packing-list)** — curated master list of ~60-80 items across 6-8 categories. Three states per item: "I Have" (prompts adding to inventory, private by default), "I Have Extra" (opens list-item funnel pre-filled with item name), "I Need" (one-click adds to wish list). State persisted to packing_list jsonb column on profiles. Content (the actual list) needs to be drafted before building.
 
 ---
 
@@ -46,6 +48,7 @@ _Last updated: 2026-04-09 (session 25 cont.)_
 ## 💡 Ideas & Long Term
  - [ ] /camps page — currently blank; consider building as a searchable directory of all camps with claimed/unclaimed pages
  - [ ] /profile page — currently blank; consider redirecting logged-in users to their own profile (/profile/[username]), or building as a member directory
+ - [ ] **Shepherd.js product tour** — two single-page tours (profile page, inventory page); steps highlight key UI elements; seen state stored in `onboarding_tours_seen` jsonb on profiles; build after UI stabilizes
  - [ ] **Custom Supabase Auth domain** — Upgrade to Supabase Pro, set `auth.theplayaprovides.com` as custom auth domain + DNS config. Fixes Google OAuth consent screen showing `bklycpitofjrjhizttny.supabase.co` instead of the app domain.
 - [ ] **Dispute arbitration UI** — Loans with `status = disputed` have no admin UI yet; flagged for future resolution flow.
 - [ ] **Loan renewal / extension** — Extend return_by date without completing and re-creating the loan.
@@ -54,7 +57,6 @@ _Last updated: 2026-04-09 (session 25 cont.)_
 - [ ] **Camps Phase 2** — Needs further scoping. Includes: campmates filter on find-items, self-serve camp page claiming UI, camp gear inventory, playa_resources linking to camp pages.
 - [ ] **BM API: 2026 camp placements** — In May 2026 when BM announces placement, hit the live API endpoint using the BM API key (stored in .env.local) to pull 2026 camp playa addresses and populate `playa_location` on camp pages. Also upsert any new 2026 camps not yet in the DB.
 - [ ] **BM API: 2026 archive import** — Around March 2027, run `scripts/import-bm-camps.js` updated to include the 2026 S3 archive URL once BM posts it.
-- [ ] **Create camps@theplayaprovides.com** — Set up in Resend, forward to alex@theplayaprovides.com.
 - [ ] **Camp edit page — duplicate notice** — Add a small note in the edit UI: "Think there's a duplicate of your camp page? Email camps@theplayaprovides.com"
 - [ ] **New user onboarding overhaul** — build out full onboarding flow including: welcome modal sequence, guided tour of key features, and persistent onboarding checklist. Needs full scoping session before building. Key questions: what triggers "new user" state, what completion looks like, where checklist lives.
 - [ ] **Camp page: member chat** — real-time or async chat window on camp hub pages, visible to camp members only. Needs scoping (real-time vs. threaded, moderation, notifications).
@@ -106,7 +108,6 @@ _(nothing queued)_
  - [x] Fix: Signup redirect — replaced router.refresh() + router.push() with window.location.href hard nav to eliminate inventory flash
  - [x] Fix: Welcome modal button layout — "Set Up Your Profile →" is now the primary CTA (right, colored); "Browse Items" and "List Items" are secondary (left/middle); "List My First Item" removed
  - [x] Fix: Username case sensitivity — dropped unique_username constraint, replaced with case-insensitive unique index on lower(username); existing usernames backfilled to lowercase; settings input auto-lowercases on keystroke; uniqueness check and upsert normalize to lowercase; profile page URL lookup lowercased so /profile/Alex and /profile/alex resolve identically
-- [x] **Welcome modal fires on every login** — Should only show once per account (first login only). Investigate current trigger mechanism and fix so repeat logins don't show the modal.
 - [x] Fix: find-items — relationship filter chips renamed: "People I Follow" → "Following", "People Who Follow Me" → "Followers"; filter logic updated to match
 - [x] Design: Homepage — hero line replaced with "But the playa can only provide because people provide."
 - [x] Design: Homepage — Lend Items button color changed from orange (#E8834A) to purple (#d896ff)
@@ -248,3 +249,9 @@ _(nothing queued)_
 - [x] Fix: Settings page — browser alert() calls replaced with inline toast (fixed bottom-center, dark background, auto-dismisses after 3 seconds)
 - [x] Fix: Header — "Offer an Item" renamed to "Offer Items" across all four instances in header
 - [x] Feature: Camp members table — Location column added between Name and Wish List; pulls city and state from profiles; fixed-width 120px column; grid template tightened
+- [x] Fix: theplayaprovides.org — redirects to theplayaprovides.com via Squarespace domain forwarding (301 permanent)
+- [x] Setup: camps@theplayaprovides.com created in Google Workspace
+- [x] Design: Footer — tightened height; nav links and BM disclaimer moved to same rows as Instagram handle and credit line
+- [x] Content: About page — full copy overhaul with new accordion sections (Why? / How? / Who? / Can I Help?); Bop It audio easter egg
+- [x] Content: TPP How-To Guide — fully updated Word doc reflecting all recent changes
+- [x] Fix: Campmates Only visibility option grayed out — `user_camp_affiliations` rows with null `camp_id` (open camping / returning-status rows) poisoned the PostgREST `.in()` filter with a 400 Bad Request, silently zeroing out campMateIds; fixed with `.not('camp_id', 'is', null)` at DB query level in `list-item/page.tsx`, `inventory/page.tsx`, `AddItemModal.tsx`, and `find-items/page.tsx`; also switched `getUser()` → `getSession()` on list-item to prevent lock contention silently skipping the fetch
