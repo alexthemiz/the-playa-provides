@@ -1045,7 +1045,7 @@ export default function PublicProfilePage() {
                 if (!v || v === 'public') return 'Everyone';
                 if (v === 'followers') return 'Followers';
                 if (v === 'campmates') return 'Campmates';
-                if (v === 'followers_campmates') return 'Flwrs + Camps';
+                if (v === 'followers_and_campmates') return 'Flwrs + Camps';
                 if (v === 'private') return 'Just Me';
                 return 'Everyone';
               })();
