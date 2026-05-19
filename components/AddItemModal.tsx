@@ -259,7 +259,7 @@ export default function AddItemModal({
           {/* LENDING TERMS */}
           {availability === 'Available to Borrow' && (
             <div style={sectionStyle}>
-              <label style={labelStyle}>Lending Terms <span style={{ fontSize: '11px', color: '#aaa', fontWeight: '500', textTransform: 'none' as const, letterSpacing: '0' }}>— all optional</span></label>
+              <label style={labelStyle}>Lending Terms <span style={{ fontSize: '11px', color: '#aaa', fontWeight: '500', textTransform: 'none' as const, letterSpacing: '0' }}>— all optional but encouraged</span></label>
               <p style={hintStyle}>Borrowers see this before they request. Set expectations upfront to avoid issues later.</p>
               <div style={unifiedBoxStyle}>
                 <textarea
@@ -360,7 +360,7 @@ const radioLabelStyle: React.CSSProperties = { flex: 1, padding: '10px 12px', bo
 const detailsBoxStyle: React.CSSProperties = { marginTop: '10px', padding: '14px', backgroundColor: '#f9f9f9', borderRadius: '10px', border: '1px solid #eee' };
 const unifiedBoxStyle: React.CSSProperties = { marginTop: '6px', backgroundColor: '#fff', borderRadius: '10px', border: '1px solid #ddd', overflow: 'hidden' };
 const unifiedTextareaStyle: React.CSSProperties = { display: 'block', width: '100%', minHeight: '80px', padding: '12px 14px', border: 'none', background: 'transparent', fontSize: '14px', color: '#111', resize: 'vertical' as const, outline: 'none', boxSizing: 'border-box' as const, fontFamily: 'inherit' };
-const trayStyle: React.CSSProperties = { backgroundColor: '#f9f9f9', borderTop: '1px solid #e8e8e8', padding: '12px 14px', display: 'flex', gap: '10px' };
+const trayStyle: React.CSSProperties = { padding: '12px 14px', display: 'flex', gap: '10px' };
 const trayItemStyle: React.CSSProperties = { flex: 1, minWidth: 0 };
 const trayLabelStyle: React.CSSProperties = { fontSize: '11px', color: '#777', fontWeight: '600', textTransform: 'uppercase' as const, letterSpacing: '0.04em' };
 const trayHintStyle: React.CSSProperties = { fontSize: '11px', color: '#aaa', margin: '2px 0 4px', fontStyle: 'italic' as const };
