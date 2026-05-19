@@ -115,21 +115,13 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
             </span>
           </div>
 
-          {/* Pick up / Return by row — outside the lending terms box */}
-          {!isGift && (item.pickup_by || item.return_by) && (
+          {/* Return by pill */}
+          {!isGift && item.return_by && (
             <div style={dateRow}>
-              {item.pickup_by && (
-                <span style={datePill}>
-                  <Calendar size={13} />
-                  Pick up by: <strong>{new Date(item.pickup_by).toLocaleDateString()}</strong>
-                </span>
-              )}
-              {item.return_by && (
-                <span style={datePill}>
-                  <Calendar size={13} />
-                  Return by: <strong>{new Date(item.return_by).toLocaleDateString()}</strong>
-                </span>
-              )}
+              <span style={datePill}>
+                <Calendar size={13} />
+                Return by: <strong>{new Date(item.return_by).toLocaleDateString()}</strong>
+              </span>
             </div>
           )}
 

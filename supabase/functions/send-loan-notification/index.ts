@@ -42,7 +42,6 @@ serve(async (req: Request) => {
 
     const termsHtml = `
       <table style="border-collapse: collapse; width: 100%; margin: 12px 0;">
-        <tr><td style="padding: 6px 0; color: #888; font-size: 0.85em;">Pick up by</td><td style="padding: 6px 0;">${formatDate(loan.pickup_by)}</td></tr>
         <tr><td style="padding: 6px 0; color: #888; font-size: 0.85em;">Return by</td><td style="padding: 6px 0;">${formatDate(loan.return_by)}</td></tr>
         <tr><td style="padding: 6px 0; color: #888; font-size: 0.85em;">Damage fee</td><td style="padding: 6px 0;">${loan.damage_agreement != null ? `$${loan.damage_agreement}` : 'Not specified'}</td></tr>
         <tr><td style="padding: 6px 0; color: #888; font-size: 0.85em;">Loss fee</td><td style="padding: 6px 0;">${loan.loss_agreement != null ? `$${loan.loss_agreement}` : 'Not specified'}</td></tr>

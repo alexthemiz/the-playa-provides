@@ -8,7 +8,6 @@ interface Props {
     id: string
     item_name: string
     // terms pre-filled from the listing
-    pickup_by?: string | null
     return_by?: string | null
     damage_fee?: number | null
     borrowing_terms?: string | null
@@ -22,7 +21,6 @@ export default function LendModal({ item, ownerId, onClose, onSuccess }: Props) 
   const [query, setQuery] = useState('')
   const [matched, setMatched] = useState<{ id: string; username: string; preferred_name: string | null } | null>(null)
   const [lookupError, setLookupError] = useState('')
-  const [pickupBy, setPickupBy] = useState(item.pickup_by || '')
   const [returnBy, setReturnBy] = useState(item.return_by || '')
   const [damageAgreement, setDamageAgreement] = useState(item.damage_fee != null ? String(item.damage_fee) : '')
   const [lossAgreement, setLossAgreement] = useState('')
@@ -62,7 +60,6 @@ export default function LendModal({ item, ownerId, onClose, onSuccess }: Props) 
           item_id: item.id,
           owner_id: ownerId,
           borrower_id: matched.id,
-          pickup_by: pickupBy || null,
           return_by: returnBy || null,
           damage_agreement: damageAgreement ? parseFloat(damageAgreement) : null,
           loss_agreement: lossAgreement ? parseFloat(lossAgreement) : null,
@@ -116,19 +113,15 @@ export default function LendModal({ item, ownerId, onClose, onSuccess }: Props) 
 
         <div style={termsGridStyle}>
           <div>
-            <label style={labelStyle}>Pick up by</label>
-            <input type="date" value={pickupBy} onChange={e => setPickupBy(e.target.value)} style={inputStyle} />
-          </div>
-          <div>
             <label style={labelStyle}>Return by</label>
             <input type="date" value={returnBy} onChange={e => setReturnBy(e.target.value)} style={inputStyle} />
           </div>
           <div>
-            <label style={labelStyle}>Damage Agreement ($)</label>
+            <label style={labelStyle}>If Damaged ($)</label>
             <input type="number" min="0" value={damageAgreement} onChange={e => setDamageAgreement(e.target.value)} placeholder="0" style={inputStyle} />
           </div>
           <div>
-            <label style={labelStyle}>Loss Agreement ($)</label>
+            <label style={labelStyle}>If Not Returned ($)</label>
             <input type="number" min="0" value={lossAgreement} onChange={e => setLossAgreement(e.target.value)} placeholder="0" style={inputStyle} />
           </div>
         </div>
@@ -170,5 +163,5 @@ const matchedBoxStyle: React.CSSProperties = { backgroundColor: '#f0fdf4', borde
 const errorStyle: React.CSSProperties = { color: '#dc2626', fontSize: '0.85rem', margin: '4px 0' }
 const cancelButtonStyle: React.CSSProperties = { padding: '10px 18px', backgroundColor: '#f0f0f0', color: '#666', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }
 const confirmButtonStyle: React.CSSProperties = { padding: '10px 18px', backgroundColor: '#5ECFDF', color: '#000', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }
-const termsGridStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }
+const termsGridStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }
 const labelStyle: React.CSSProperties = { display: 'block', fontSize: '0.75rem', color: '#888', marginBottom: '5px' }

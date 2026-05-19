@@ -44,7 +44,6 @@ function ListItemPageInner() {
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [condition, setCondition] = useState(CONDITIONS[0]);
   const [description, setDescription] = useState('');
-  const [pickupBy, setPickupBy] = useState('');
   const [returnBy, setReturnBy] = useState('');
   const [damagePrice, setDamagePrice] = useState('');
   const [lossPrice, setLossPrice] = useState('');
@@ -102,7 +101,6 @@ function ListItemPageInner() {
               setCondition(existingItem.condition || CONDITIONS[0]);
               setDescription(existingItem.description || '');
               // Dates come back as ISO strings — strip to YYYY-MM-DD for <input type="date">
-              setPickupBy(existingItem.pickup_by ? existingItem.pickup_by.split('T')[0] : '');
               setReturnBy(existingItem.return_by ? existingItem.return_by.split('T')[0] : '');
               setDamagePrice(existingItem.damage_price != null ? String(existingItem.damage_price) : '');
               setLossPrice(existingItem.loss_price != null ? String(existingItem.loss_price) : '');
@@ -174,7 +172,6 @@ function ListItemPageInner() {
         availability_status: availability,
         visibility: availability === 'Not Available' ? 'private' : visibility,
         description,
-        pickup_by: pickupBy || null,
         return_by: returnBy || null,
         damage_price: damagePrice ? parseInt(damagePrice, 10) : null,
         loss_price: lossPrice ? parseInt(lossPrice, 10) : null,
@@ -353,83 +350,40 @@ function ListItemPageInner() {
             </div>
           )}
 
-          {/* PICK UP BY — only for Gift It, shown after visibility */}
-          {availability === 'Available to Keep' && (
-            <div style={sectionStyle}>
-              <label style={labelStyle}>Pick up by</label>
-              <input
-                type="date"
-                style={inputStyle}
-                value={pickupBy}
-                onChange={e => setPickupBy(e.target.value)}
-              />
-            </div>
-          )}
-
-          {/* TERMS FOR BORROW */}
+          {/* LENDING TERMS */}
           {availability === 'Available to Borrow' && (
             <div style={sectionStyle}>
-              <label style={labelStyle}>Terms for Borrowing</label>
-              <p style={{ ...hintStyle, fontStyle: 'italic' }}>Be specific and clear now and avoid potential headaches later.</p>
-              <div style={detailsBoxStyle}>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <div style={{ flex: 1 }}>
-                    <label style={labelStyle}>Pick up by</label>
-                    <input
-                      type="date"
-                      style={{ ...inputStyle, marginTop: '5px' }}
-                      value={pickupBy}
-                      onChange={e => setPickupBy(e.target.value)}
-                    />
+              <label style={labelStyle}>Lending Terms <span style={{ fontSize: '11px', color: '#aaa', fontWeight: '500', textTransform: 'none' as const, letterSpacing: '0' }}>— all optional</span></label>
+              <p style={hintStyle}>Borrowers see this before they request. Set expectations upfront to avoid issues later.</p>
+              <div style={unifiedBoxStyle}>
+                <textarea
+                  placeholder="e.g. Please clean before returning, no modifications."
+                  style={unifiedTextareaStyle}
+                  value={returnTerms}
+                  onChange={e => setReturnTerms(e.target.value)}
+                />
+                <div style={trayStyle}>
+                  <div style={trayItemStyle}>
+                    <div style={trayLabelStyle}>Return by</div>
+                    <div style={trayHintStyle}>Gear must be back by:</div>
+                    <input type="date" style={trayInputStyle} value={returnBy} onChange={e => setReturnBy(e.target.value)} />
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <label style={labelStyle}>Return by</label>
-                    <input
-                      type="date"
-                      style={{ ...inputStyle, marginTop: '5px' }}
-                      value={returnBy}
-                      onChange={e => setReturnBy(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px' }}>
-                  <div>
-                    <label style={labelStyle}>Damage Agreement</label>
-                    <p style={{ ...hintStyle, fontStyle: 'italic', margin: '2px 0 5px' }}>If returned damaged, you agree to pay:</p>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ fontSize: '14px', color: '#555', fontWeight: 600 }}>$</span>
-                      <input
-                        type="number"
-                        placeholder="0"
-                        style={{ ...inputStyle, flex: 1 }}
-                        value={damagePrice}
-                        onChange={e => setDamagePrice(e.target.value)}
-                      />
+                  <div style={trayItemStyle}>
+                    <div style={trayLabelStyle}>If Damaged</div>
+                    <div style={trayHintStyle}>Borrower pays:</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span style={{ fontSize: '13px', color: '#777', fontWeight: 600 }}>$</span>
+                      <input type="number" placeholder="0" style={{ ...trayInputStyle, flex: 1, width: 0 }} value={damagePrice} onChange={e => setDamagePrice(e.target.value)} />
                     </div>
                   </div>
-                  <div>
-                    <label style={labelStyle}>Loss Agreement</label>
-                    <p style={{ ...hintStyle, fontStyle: 'italic', margin: '2px 0 5px' }}>If not returned, you agree to pay:</p>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ fontSize: '14px', color: '#555', fontWeight: 600 }}>$</span>
-                      <input
-                        type="number"
-                        placeholder="0"
-                        style={{ ...inputStyle, flex: 1 }}
-                        value={lossPrice}
-                        onChange={e => setLossPrice(e.target.value)}
-                      />
+                  <div style={trayItemStyle}>
+                    <div style={trayLabelStyle}>If Not Returned</div>
+                    <div style={trayHintStyle}>Borrower pays:</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span style={{ fontSize: '13px', color: '#777', fontWeight: 600 }}>$</span>
+                      <input type="number" placeholder="0" style={{ ...trayInputStyle, flex: 1, width: 0 }} value={lossPrice} onChange={e => setLossPrice(e.target.value)} />
                     </div>
                   </div>
-                </div>
-                <div style={{ marginTop: '10px' }}>
-                  <label style={labelStyle}>Specify Your Terms</label>
-                  <textarea
-                    placeholder="e.g. Please clean before returning, no modifications, return by the date agreed."
-                    style={{ ...inputStyle, minHeight: '80px', marginTop: '5px' }}
-                    value={returnTerms}
-                    onChange={e => setReturnTerms(e.target.value)}
-                  />
                 </div>
               </div>
             </div>
@@ -507,6 +461,13 @@ const inputStyle: React.CSSProperties = { padding: '9px 12px', borderRadius: '8p
 const radioGroupStyle: React.CSSProperties = { display: 'flex', flexDirection: 'row' as const, gap: '8px' };
 const radioLabelStyle: React.CSSProperties = { flex: 1, padding: '10px 12px', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' };
 const detailsBoxStyle: React.CSSProperties = { marginTop: '10px', padding: '14px', backgroundColor: '#f9f9f9', borderRadius: '10px', border: '1px solid #eee' };
+const unifiedBoxStyle: React.CSSProperties = { marginTop: '6px', backgroundColor: '#fff', borderRadius: '10px', border: '1px solid #ddd', overflow: 'hidden' };
+const unifiedTextareaStyle: React.CSSProperties = { display: 'block', width: '100%', minHeight: '80px', padding: '12px 14px', border: 'none', background: 'transparent', fontSize: '14px', color: '#111', resize: 'vertical' as const, outline: 'none', boxSizing: 'border-box' as const, fontFamily: 'inherit' };
+const trayStyle: React.CSSProperties = { backgroundColor: '#f9f9f9', borderTop: '1px solid #e8e8e8', padding: '12px 14px', display: 'flex', gap: '10px' };
+const trayItemStyle: React.CSSProperties = { flex: 1, minWidth: 0 };
+const trayLabelStyle: React.CSSProperties = { fontSize: '11px', color: '#777', fontWeight: '600', textTransform: 'uppercase' as const, letterSpacing: '0.04em' };
+const trayHintStyle: React.CSSProperties = { fontSize: '11px', color: '#aaa', margin: '2px 0 4px', fontStyle: 'italic' as const };
+const trayInputStyle: React.CSSProperties = { padding: '7px 10px', borderRadius: '7px', border: '1px solid #ddd', backgroundColor: '#fff', color: '#111', fontSize: '13px', outline: 'none', width: '100%', boxSizing: 'border-box' as const };
 const submitButtonStyle: React.CSSProperties = { padding: '14px', backgroundColor: '#5ECFDF', color: 'black', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', fontSize: '15px', marginTop: '8px' };
 const photoUploadContainer: React.CSSProperties = { display: 'flex', gap: '10px', flexWrap: 'wrap' as const };
 const photoPlaceholder: React.CSSProperties = { width: '80px', height: '80px', borderRadius: '10px', border: '2px dashed #ddd', display: 'flex', flexDirection: 'column' as const, alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#aaa', fontSize: '10px', textAlign: 'center' as const, gap: '4px' };

@@ -133,7 +133,6 @@ export default function AddItemModal({
       availability_status: availability,
       visibility: availability === 'Not Available' ? 'private' : visibility,
       description: formData.get('description'),
-      pickup_by: formData.get('pickup_by') || null,
       return_by: formData.get('return_by') || null,
       damage_price: formData.get('damage_price') ? parseInt(formData.get('damage_price') as string, 10) : null,
       loss_price: formData.get('loss_price') ? parseInt(formData.get('loss_price') as string, 10) : null,
@@ -223,13 +222,6 @@ export default function AddItemModal({
               ))}
             </div>
 
-            {/* Pick up by — only for Keep */}
-            {availability === 'Available to Keep' && (
-              <div style={{ ...detailsBoxStyle, marginTop: '10px' }}>
-                <label style={labelStyle}>Pick up by</label>
-                <input type="date" name="pickup_by" defaultValue={itemToEdit?.pickup_by} style={{ ...inputStyle, marginTop: '5px' }} />
-              </div>
-            )}
           </div>
 
           {/* VISIBILITY — only shown when item is available */}
@@ -264,41 +256,40 @@ export default function AddItemModal({
             </div>
           )}
 
-          {/* TERMS FOR BORROW */}
+          {/* LENDING TERMS */}
           {availability === 'Available to Borrow' && (
             <div style={sectionStyle}>
-              <label style={labelStyle}>Terms for Borrowing</label>
-              <p style={{ ...hintStyle, fontStyle: 'italic' }}>The more you agree on now, the less chance of a headache later.</p>
-              <div style={detailsBoxStyle}>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <div style={{ flex: 1 }}>
-                    <label style={labelStyle}>Pick up by</label>
-                    <input type="date" name="pickup_by" defaultValue={itemToEdit?.pickup_by} style={{ ...inputStyle, marginTop: '5px' }} />
+              <label style={labelStyle}>Lending Terms <span style={{ fontSize: '11px', color: '#aaa', fontWeight: '500', textTransform: 'none' as const, letterSpacing: '0' }}>— all optional</span></label>
+              <p style={hintStyle}>Borrowers see this before they request. Set expectations upfront to avoid issues later.</p>
+              <div style={unifiedBoxStyle}>
+                <textarea
+                  placeholder="e.g. Please clean before returning, no modifications."
+                  style={unifiedTextareaStyle}
+                  value={returnTerms}
+                  onChange={e => setReturnTerms(e.target.value)}
+                />
+                <div style={trayStyle}>
+                  <div style={trayItemStyle}>
+                    <div style={trayLabelStyle}>Return by</div>
+                    <div style={trayHintStyle}>Gear must be back by:</div>
+                    <input type="date" name="return_by" defaultValue={itemToEdit?.return_by} style={trayInputStyle} />
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <label style={labelStyle}>Return by</label>
-                    <input type="date" name="return_by" defaultValue={itemToEdit?.return_by} style={{ ...inputStyle, marginTop: '5px' }} />
+                  <div style={trayItemStyle}>
+                    <div style={trayLabelStyle}>If Damaged</div>
+                    <div style={trayHintStyle}>Borrower pays:</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span style={{ fontSize: '13px', color: '#777', fontWeight: 600 }}>$</span>
+                      <input type="number" name="damage_price" defaultValue={itemToEdit?.damage_price} placeholder="0" style={{ ...trayInputStyle, flex: 1, width: 0 }} />
+                    </div>
                   </div>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px' }}>
-                  <div>
-                    <label style={labelStyle}>Damage Fee ($)</label>
-                    <input type="number" name="damage_price" defaultValue={itemToEdit?.damage_price} placeholder="0" style={{ ...inputStyle, marginTop: '5px' }} />
+                  <div style={trayItemStyle}>
+                    <div style={trayLabelStyle}>If Not Returned</div>
+                    <div style={trayHintStyle}>Borrower pays:</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span style={{ fontSize: '13px', color: '#777', fontWeight: 600 }}>$</span>
+                      <input type="number" name="loss_price" defaultValue={itemToEdit?.loss_price} placeholder="0" style={{ ...trayInputStyle, flex: 1, width: 0 }} />
+                    </div>
                   </div>
-                  <div>
-                    <label style={labelStyle}>Loss Fee ($)</label>
-                    <input type="number" name="loss_price" defaultValue={itemToEdit?.loss_price} placeholder="0" style={{ ...inputStyle, marginTop: '5px' }} />
-                  </div>
-                </div>
-                <div style={{ marginTop: '10px' }}>
-                  <label style={labelStyle}>Specify Your Terms</label>
-                  <textarea
-                    name="return_terms"
-                    placeholder="e.g. Please clean before returning, no modifications, return by the date agreed."
-                    style={{ ...inputStyle, minHeight: '80px', marginTop: '5px' }}
-                    value={returnTerms}
-                    onChange={e => setReturnTerms(e.target.value)}
-                  />
                 </div>
               </div>
             </div>
@@ -367,6 +358,13 @@ const inputStyle: React.CSSProperties = { padding: '9px 12px', borderRadius: '8p
 const radioGroupStyle: React.CSSProperties = { display: 'flex', flexDirection: 'row' as const, gap: '8px' };
 const radioLabelStyle: React.CSSProperties = { flex: 1, padding: '10px 12px', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' };
 const detailsBoxStyle: React.CSSProperties = { marginTop: '10px', padding: '14px', backgroundColor: '#f9f9f9', borderRadius: '10px', border: '1px solid #eee' };
+const unifiedBoxStyle: React.CSSProperties = { marginTop: '6px', backgroundColor: '#fff', borderRadius: '10px', border: '1px solid #ddd', overflow: 'hidden' };
+const unifiedTextareaStyle: React.CSSProperties = { display: 'block', width: '100%', minHeight: '80px', padding: '12px 14px', border: 'none', background: 'transparent', fontSize: '14px', color: '#111', resize: 'vertical' as const, outline: 'none', boxSizing: 'border-box' as const, fontFamily: 'inherit' };
+const trayStyle: React.CSSProperties = { backgroundColor: '#f9f9f9', borderTop: '1px solid #e8e8e8', padding: '12px 14px', display: 'flex', gap: '10px' };
+const trayItemStyle: React.CSSProperties = { flex: 1, minWidth: 0 };
+const trayLabelStyle: React.CSSProperties = { fontSize: '11px', color: '#777', fontWeight: '600', textTransform: 'uppercase' as const, letterSpacing: '0.04em' };
+const trayHintStyle: React.CSSProperties = { fontSize: '11px', color: '#aaa', margin: '2px 0 4px', fontStyle: 'italic' as const };
+const trayInputStyle: React.CSSProperties = { padding: '7px 10px', borderRadius: '7px', border: '1px solid #ddd', backgroundColor: '#fff', color: '#111', fontSize: '13px', outline: 'none', width: '100%', boxSizing: 'border-box' as const };
 const photoPlaceholderStyle: React.CSSProperties = { width: '80px', height: '80px', borderRadius: '10px', border: '2px dashed #ddd', display: 'flex', flexDirection: 'column' as const, alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#aaa', fontSize: '10px', textAlign: 'center' as const, gap: '4px' };
 const photoPreviewStyle: React.CSSProperties = { width: '80px', height: '80px', objectFit: 'cover' as const, borderRadius: '10px', border: '1px solid #eee' };
 const removePhotoBtnStyle: React.CSSProperties = { position: 'absolute' as const, top: '-5px', right: '-5px', backgroundColor: '#ff4444', color: 'white', border: 'none', borderRadius: '50%', width: '20px', height: '20px', fontSize: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' };

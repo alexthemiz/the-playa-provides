@@ -43,7 +43,6 @@ export interface ItemLoan {
   borrower_confirmed_pickup: boolean;
   borrower_confirmed_return: boolean;
   owner_confirmed_return: boolean;
-  pickup_by: string | null;
   return_by: string | null;
   damage_agreement: number | null;
   loss_agreement: number | null;

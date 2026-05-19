@@ -9,7 +9,6 @@ interface RequestModalProps {
 
 function buildInitialMessage(item: any): string {
   const terms: string[] = [];
-  if (item.pickup_by) terms.push(`• Pick up by: ${new Date(item.pickup_by).toLocaleDateString()}`);
   if (item.return_by) terms.push(`• Return by: ${new Date(item.return_by).toLocaleDateString()}`);
   if (item.damage_price) terms.push(`• Damage agreement: $${item.damage_price}`);
   if (item.loss_price) terms.push(`• Loss agreement: $${item.loss_price}`);
@@ -110,17 +109,11 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
           ) : (
             <>
               {/* --- BORROWING TERMS --- */}
-              {(item.pickup_by || item.return_by || item.return_terms || item.damage_price || item.loss_price) && (
+              {(item.return_by || item.return_terms || item.damage_price || item.loss_price) && (
                 <div className="flex gap-3 mb-5">
-                  {(item.pickup_by || item.return_by || item.damage_price || item.loss_price) && (
+                  {(item.return_by || item.damage_price || item.loss_price) && (
                     <div className="bg-gray-50 rounded-xl border border-gray-100 p-3 flex-1 space-y-2">
                       <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Borrowing Terms</h4>
-                      {item.pickup_by && (
-                        <div className="flex items-center gap-2 text-sm text-gray-700">
-                          <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                          <span>Pick up by: <strong>{new Date(item.pickup_by).toLocaleDateString()}</strong></span>
-                        </div>
-                      )}
                       {item.return_by && (
                         <div className="flex items-center gap-2 text-sm text-gray-700">
                           <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" />

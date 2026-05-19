@@ -417,13 +417,12 @@ export default function FindItemsPage() {
               </div>
             </div>
 
-            {(selectedItem.pickup_by || selectedItem.return_by || selectedItem.return_terms || selectedItem.damage_price || selectedItem.loss_price) && (
+            {(selectedItem.return_by || selectedItem.return_terms || selectedItem.damage_price || selectedItem.loss_price) && (
               <div style={{ marginBottom: '20px', padding: '14px', backgroundColor: '#fdf3ec', borderRadius: '12px', fontSize: '13px', border: '1px solid #f0d8c8' }}>
                 <div style={{ fontWeight: '700', color: '#C08261', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase' as const, letterSpacing: '0.08em' }}>Borrowing Terms</div>
-                {(selectedItem.pickup_by || selectedItem.return_by) && (
+                {selectedItem.return_by && (
                   <div style={{ display: 'flex', gap: '20px', marginBottom: '6px', color: '#555' }}>
-                    {selectedItem.pickup_by && <span>Pick up by: <strong>{new Date(selectedItem.pickup_by).toLocaleDateString()}</strong></span>}
-                    {selectedItem.return_by && <span>Return by: <strong>{new Date(selectedItem.return_by).toLocaleDateString()}</strong></span>}
+                    <span>Return by: <strong>{new Date(selectedItem.return_by).toLocaleDateString()}</strong></span>
                   </div>
                 )}
                 {(selectedItem.damage_price || selectedItem.loss_price) && (
