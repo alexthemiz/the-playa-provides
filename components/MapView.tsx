@@ -24,6 +24,13 @@ function createCountIcon(count: number) {
   });
 }
 
+// Forces Leaflet to recalculate container size on first render (needed after dynamic import)
+function MapInit() {
+  const map = useMap();
+  useEffect(() => { setTimeout(() => map.invalidateSize(), 0); }, []);
+  return null;
+}
+
 // Recenter the map whenever the set of coords changes
 function MapRecenter({ center, zoom }: { center: [number, number]; zoom: number }) {
   const map = useMap();
@@ -83,6 +90,7 @@ export default function MapView({ items, onSelectItem }: Props) {
         zoom={zoom}
         style={{ height: '600px', width: '100%', borderRadius: '12px', border: '1px solid #eee' }}
       >
+        <MapInit />
         <MapRecenter center={center} zoom={zoom} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
