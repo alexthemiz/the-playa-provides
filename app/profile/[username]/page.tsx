@@ -1067,12 +1067,12 @@ export default function PublicProfilePage() {
                         {item.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}
                       </div>
                     </div>
-                    <div style={listColStyle}>{item.description || '—'}</div>
+                    <div style={{ ...listColStyle, whiteSpace: 'normal', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{item.description || '—'}</div>
                     <div style={listColStyle}>{item.category}</div>
                     <div style={{ ...listColStyle, display: 'flex', alignItems: 'center', gap: '3px' }}>
                       <MapPin size={11} style={{ flexShrink: 0 }} />{loc}
                     </div>
-                    <div style={{ ...listColStyle, fontSize: '11px', color: '#888' }}>{termsSummary || '—'}</div>
+                    <div style={{ ...listColStyle, fontSize: '11px', color: '#888', whiteSpace: 'normal', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{termsSummary || '—'}</div>
                     {isOwner && (
                       <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '3px', alignSelf: 'center' }}>
                         {visPills.map(p => (
