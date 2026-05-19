@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>List Item Form — Interactive Preview</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #fff; display: flex; justify-content: center; }
+
+    .page-header { max-width: 520px; margin: 0 auto; padding: 20px 0 0; }
+    .page-header h1 { font-size: 28px; font-weight: bold; color: #2D241E; margin: 0 0 8px; }
+    .page-header h1 u { text-decoration: underline; }
+    .page-header p { color: #666; font-size: 14px; margin: 0; line-height: 1.5; }
+
+    .outer { max-width: 520px; margin: 0 auto; padding: 0 0 40px; display: flex; flex-direction: column; gap: 12px; }
+
+    .box { padding: 12px 20px 20px; background: #f4f4f4; border-radius: 16px; display: flex; flex-direction: column; gap: 14px; margin-top: 16px; }
+
+    .section { display: flex; flex-direction: column; gap: 3px; }
+    .label { font-size: 12px; color: #555; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+    .label-opt { font-size: 11px; color: #aaa; font-weight: 500; text-transform: none; letter-spacing: 0; margin-left: 6px; }
+    .hint { font-size: 12px; color: #888; margin: 0; line-height: 1.5; }
+    .input { padding: 9px 12px; border-radius: 8px; border: 1px solid #ddd; background: #fff; color: #111; font-size: 14px; outline: none; width: 100%; font-family: inherit; }
+    textarea.input { min-height: 80px; resize: vertical; }
+    select.input { appearance: auto; }
+
+    .grid-3 { display: grid; grid-template-columns: 3fr 2fr 2fr; gap: 10px; }
+
+    .radio-group { display: flex; gap: 8px; }
+    .radio-card { flex: 1; padding: 10px 12px; border-radius: 10px; border: 1px solid #eee; background: #fff; cursor: pointer; user-select: none; transition: border 0.15s, background 0.15s; }
+    .radio-card.selected { border: 2px solid #5ECFDF; background: #f0fbff; }
+    .radio-card .rc-title { font-weight: bold; color: #111; font-size: 13px; }
+    .radio-card .rc-sub { font-size: 11px; color: #777; }
+
+    .unified-box { margin-top: 6px; background: #fff; border-radius: 10px; border: 1px solid #ddd; overflow: hidden; }
+    .unified-box textarea { display: block; width: 100%; min-height: 80px; padding: 12px 14px; border: none; background: transparent; font-size: 14px; font-family: inherit; color: #111; resize: vertical; outline: none; }
+    .tray { padding: 12px 14px; display: flex; gap: 10px; border-top: 1px solid #e8e8e8; }
+    .tray > div { flex: 1; min-width: 0; }
+    .tray-label { font-size: 11px; color: #777; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+    .tray-hint { font-size: 11px; color: #aaa; margin: 2px 0 4px; font-style: italic; }
+    .tray-input { padding: 7px 10px; border-radius: 7px; border: 1px solid #ddd; background: #fff; color: #111; font-size: 13px; outline: none; width: 100%; font-family: inherit; }
+    .dollar-wrap { display: flex; align-items: center; gap: 5px; }
+    .dollar { font-size: 13px; color: #777; font-weight: 600; }
+
+    .photo-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .photo-placeholder { width: 80px; height: 80px; border-radius: 10px; border: 2px dashed #ddd; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #aaa; font-size: 11px; cursor: pointer; background: #fff; }
+    .photo-placeholder svg { width: 22px; height: 22px; stroke: #bbb; fill: none; }
+
+    .submit-btn { padding: 14px; background: #5ECFDF; color: black; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 15px; width: 100%; margin-top: 4px; }
+
+    /* collapsible sections */
+    .collapsible { overflow: hidden; transition: max-height 0.25s ease, opacity 0.2s ease; max-height: 600px; opacity: 1; }
+    .collapsible.hidden { max-height: 0; opacity: 0; pointer-events: none; }
+  </style>
+</head>
+<body>
+  <div style="width:100%; padding: 0 20px">
+
+    <div class="page-header">
+      <h1>The Playa Provides <u>This Item&nbsp;</u></h1>
+      <p>Add an item to your inventory, then make it available to the public, your campmates, or people you follow—or keep it private until you decide to share, and you set the terms.</p>
+    </div>
+
+    <div class="outer">
+
+      <!-- BOX 1: Item details + photos -->
+      <div class="box" style="padding-bottom:12px">
+
+        <div class="section">
+          <span class="label">Item Name</span>
+          <input class="input" placeholder="e.g. Coleman 2-Burner Stove" />
+        </div>
+
+        <div class="grid-3">
+          <div class="section">
+            <span class="label">Category</span>
+            <select class="input"><option>Shelter</option></select>
+          </div>
+          <div class="section">
+            <span class="label">Condition</span>
+            <select class="input"><option>Good</option></select>
+          </div>
+          <div class="section">
+            <span class="label">Stored At</span>
+            <select class="input"><option>Home</option></select>
+          </div>
+        </div>
+
+        <div class="section">
+          <span class="label">Description</span>
+          <p class="hint">Share details and specs, existing damage, and any other useful information.</p>
+          <textarea class="input" placeholder="Describe your item"></textarea>
+        </div>
+
+        <div class="section">
+          <span class="label">Photos (Max 4)</span>
+          <div class="photo-row">
+            <div class="photo-placeholder">
+              <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+              Add photos
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- BOX 2: Availability + conditional sections -->
+      <div class="box" style="margin-top:0; padding-bottom:20px">
+
+        <div class="section">
+          <span class="label">Availability</span>
+          <div class="radio-group">
+            <div class="radio-card selected" onclick="setAvailability('lend')">
+              <div class="rc-title">Lend It</div>
+              <div class="rc-sub">Set your terms below</div>
+            </div>
+            <div class="radio-card" onclick="setAvailability('gift')">
+              <div class="rc-title">Gift It</div>
+              <div class="rc-sub">Give the item away</div>
+            </div>
+            <div class="radio-card" onclick="setAvailability('private')">
+              <div class="rc-title">Keep it Private</div>
+              <div class="rc-sub">Add to your inventory</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visibility — hidden when Keep it Private -->
+        <div class="section collapsible" id="visibility-section">
+          <span class="label">Who can view this item</span>
+          <p class="hint">Add your camp history <a href="#" style="color:#5ECFDF;font-weight:600;text-decoration:none">to your profile</a> to unlock campmates-only sharing</p>
+          <select class="input">
+            <option>Everyone</option>
+            <option>People you follow</option>
+            <option disabled style="color:#bbb">Campmates only</option>
+            <option disabled style="color:#bbb">Following &amp; Campmates</option>
+          </select>
+        </div>
+
+        <!-- Lending Terms — only for Lend It -->
+        <div class="section collapsible" id="lending-section">
+          <span class="label">Lending Terms <span class="label-opt">— all optional but encouraged</span></span>
+          <p class="hint">Borrowers see this before they request. Set expectations upfront to avoid issues later.</p>
+          <div class="unified-box">
+            <textarea placeholder="e.g. Please clean before returning, no modifications."></textarea>
+            <div class="tray">
+              <div>
+                <div class="tray-label">Return by</div>
+                <div class="tray-hint">Gear must be back by:</div>
+                <input type="date" class="tray-input" />
+              </div>
+              <div>
+                <div class="tray-label">If Damaged</div>
+                <div class="tray-hint">Borrower pays:</div>
+                <div class="dollar-wrap">
+                  <span class="dollar">$</span>
+                  <input type="number" placeholder="0" class="tray-input" style="flex:1;width:0" />
+                </div>
+              </div>
+              <div>
+                <div class="tray-label">If Not Returned</div>
+                <div class="tray-hint">Borrower pays:</div>
+                <div class="dollar-wrap">
+                  <span class="dollar">$</span>
+                  <input type="number" placeholder="0" class="tray-input" style="flex:1;width:0" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <button class="submit-btn">List Your Item</button>
+
+    </div>
+  </div>
+
+  <script>
+    function setAvailability(mode) {
+      // update radio cards
+      document.querySelectorAll('.radio-card').forEach(c => c.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+
+      const visibility = document.getElementById('visibility-section');
+      const lending = document.getElementById('lending-section');
+
+      if (mode === 'lend') {
+        visibility.classList.remove('hidden');
+        lending.classList.remove('hidden');
+      } else if (mode === 'gift') {
+        visibility.classList.remove('hidden');
+        lending.classList.add('hidden');
+      } else {
+        visibility.classList.add('hidden');
+        lending.classList.add('hidden');
+      }
+    }
+  </script>
+</body>
+</html>

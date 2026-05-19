@@ -223,191 +223,193 @@ function ListItemPageInner() {
 
         <form onSubmit={handleSubmit} style={formStyle}>
 
-          {/* ITEM NAME */}
-          <div style={sectionStyle}>
-            <label style={labelStyle}>Item Name</label>
-            <input
-              required
-              placeholder="e.g. Coleman 2-Burner Stove"
-              style={inputStyle}
-              value={itemName}
-              onChange={e => setItemName(e.target.value)}
-            />
-          </div>
+          {/* BOX 1: Item details + photos */}
+          <div style={formBoxStyle}>
 
-          {/* CATEGORY + CONDITION + STORED AT — one row */}
-          <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr 2fr', gap: '10px' }}>
             <div style={sectionStyle}>
-              <label style={labelStyle}>Category</label>
-              <select style={inputStyle} value={category} onChange={e => setCategory(e.target.value)}>
-                {CATEGORIES.map(cat => <option key={cat}>{cat}</option>)}
-              </select>
-            </div>
-            <div style={sectionStyle}>
-              <label style={labelStyle}>Condition</label>
-              <select style={inputStyle} value={condition} onChange={e => setCondition(e.target.value)}>
-                {CONDITIONS.map(c => <option key={c}>{c}</option>)}
-              </select>
-            </div>
-            <div style={sectionStyle}>
-              <label style={labelStyle}>Stored At</label>
-              <select
-                style={inputStyle}
-                value={selectedLocationId}
-                onChange={e => setSelectedLocationId(e.target.value)}
+              <label style={labelStyle}>Item Name</label>
+              <input
                 required
-              >
-                <option value="" disabled>— Location —</option>
-                {locations.map(loc => <option key={loc.id} value={loc.id}>{loc.label}</option>)}
-                <option value="__new__">+ Add new location</option>
-              </select>
-            </div>
-          </div>
-
-          {/* NEW LOCATION FORM — full width, shown below the grid when "+ Add new location" is selected */}
-          {selectedLocationId === '__new__' && (
-            <div style={{ padding: '12px', backgroundColor: '#f9f9f9', borderRadius: '10px', border: '1px solid #eee', display: 'flex', flexDirection: 'column' as const, gap: '8px' }}>
-              <p style={{ margin: '0 0 4px', fontSize: '11px', color: '#888', fontWeight: 600, textTransform: 'uppercase' as const }}>New Location — saved to your settings</p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                <input style={inputStyle} placeholder="Label (e.g. Home)" value={newLocData.label} onChange={e => setNewLocData({ ...newLocData, label: e.target.value })} />
-                <input style={inputStyle} placeholder="Street Address" value={newLocData.address_line_1} onChange={e => setNewLocData({ ...newLocData, address_line_1: e.target.value })} />
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '8px' }}>
-                <input style={inputStyle} placeholder="City" value={newLocData.city} onChange={e => setNewLocData({ ...newLocData, city: e.target.value })} />
-                <select style={inputStyle} value={newLocData.state} onChange={e => setNewLocData({ ...newLocData, state: e.target.value })}>
-                  {US_STATES.map(s => <option key={s} value={s}>{s || 'State'}</option>)}
-                </select>
-                <input style={inputStyle} placeholder="Zip" value={newLocData.zip_code} onChange={e => setNewLocData({ ...newLocData, zip_code: e.target.value })} />
-              </div>
-            </div>
-          )}
-
-          {/* DESCRIPTION */}
-          <div style={sectionStyle}>
-            <label style={labelStyle}>Description</label>
-            <p style={hintStyle}>Share details and specs, existing damage, and any other useful information.</p>
-            <textarea
-              placeholder="Describe your item"
-              style={{ ...inputStyle, minHeight: '80px' }}
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-            />
-          </div>
-
-          {/* AVAILABILITY */}
-          <div style={sectionStyle}>
-            <label style={labelStyle}>Availability</label>
-            <div style={radioGroupStyle}>
-              {[
-                { id: 'Available to Borrow', label: 'Lend It',        sub: 'Set your terms below' },
-                { id: 'Available to Keep',   label: 'Gift It',         sub: 'Give the item away' },
-                { id: 'Not Available',       label: 'Keep it Private', sub: 'Add to your inventory' },
-              ].map(status => (
-                <label key={status.id} style={{
-                  ...radioLabelStyle,
-                  border: availability === status.id ? '2px solid #5ECFDF' : '1px solid #eee',
-                  backgroundColor: availability === status.id ? '#f0fbff' : '#fff',
-                }}>
-                  <input type="radio" value={status.id} checked={availability === status.id} onChange={e => setAvailability(e.target.value)} style={{ display: 'none' }} />
-                  <div>
-                    <div style={{ fontWeight: 'bold', color: '#111', fontSize: '13px' }}>{status.label}</div>
-                    <div style={{ fontSize: '11px', color: '#777' }}>{status.sub}</div>
-                  </div>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* VISIBILITY — only shown when item is available */}
-          {availability !== 'Not Available' && (
-            <div style={sectionStyle}>
-              <label style={labelStyle}>Select who can view this item</label>
-              {campMateIds.length === 0 && (
-                <p style={hintStyle}>Add your camp history <a href="/settings" target="_blank" rel="noreferrer" style={{ color: '#5ECFDF', fontWeight: 600, textDecoration: 'none' }}>to your profile</a> to unlock campmates-only sharing</p>
-              )}
-              <select
-                value={visibility}
-                onChange={e => setVisibility(e.target.value)}
+                placeholder="e.g. Coleman 2-Burner Stove"
                 style={inputStyle}
-              >
-                <option value="public">Everyone</option>
-                <option
-                  value="followers"
-                  disabled={followingIds.length === 0}
-                  style={{ color: followingIds.length === 0 ? '#bbb' : 'inherit' }}
-                  title={followingIds.length === 0 ? 'Follow users to unlock this' : undefined}
-                >People you follow</option>
-                <option
-                  value="campmates"
-                  disabled={campMateIds.length === 0}
-                  style={{ color: campMateIds.length === 0 ? '#bbb' : 'inherit' }}
-                  title={campMateIds.length === 0 ? 'Add a camp to your profile to unlock this' : undefined}
-                >Campmates only</option>
-                <option
-                  value="followers_and_campmates"
-                  disabled={followingIds.length === 0 || campMateIds.length === 0}
-                  style={{ color: followingIds.length === 0 || campMateIds.length === 0 ? '#bbb' : 'inherit' }}
-                  title={followingIds.length === 0 || campMateIds.length === 0 ? 'Follow users or join a camp to unlock this' : undefined}
-                >Following &amp; Campmates</option>
-              </select>
+                value={itemName}
+                onChange={e => setItemName(e.target.value)}
+              />
             </div>
-          )}
 
-          {/* LENDING TERMS */}
-          {availability === 'Available to Borrow' && (
+            <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr 2fr', gap: '10px' }}>
+              <div style={sectionStyle}>
+                <label style={labelStyle}>Category</label>
+                <select style={inputStyle} value={category} onChange={e => setCategory(e.target.value)}>
+                  {CATEGORIES.map(cat => <option key={cat}>{cat}</option>)}
+                </select>
+              </div>
+              <div style={sectionStyle}>
+                <label style={labelStyle}>Condition</label>
+                <select style={inputStyle} value={condition} onChange={e => setCondition(e.target.value)}>
+                  {CONDITIONS.map(c => <option key={c}>{c}</option>)}
+                </select>
+              </div>
+              <div style={sectionStyle}>
+                <label style={labelStyle}>Stored At</label>
+                <select
+                  style={inputStyle}
+                  value={selectedLocationId}
+                  onChange={e => setSelectedLocationId(e.target.value)}
+                  required
+                >
+                  <option value="" disabled>— Location —</option>
+                  {locations.map(loc => <option key={loc.id} value={loc.id}>{loc.label}</option>)}
+                  <option value="__new__">+ Add new location</option>
+                </select>
+              </div>
+            </div>
+
+            {selectedLocationId === '__new__' && (
+              <div style={{ padding: '12px', backgroundColor: '#f9f9f9', borderRadius: '10px', border: '1px solid #eee', display: 'flex', flexDirection: 'column' as const, gap: '8px' }}>
+                <p style={{ margin: '0 0 4px', fontSize: '11px', color: '#888', fontWeight: 600, textTransform: 'uppercase' as const }}>New Location — saved to your settings</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                  <input style={inputStyle} placeholder="Label (e.g. Home)" value={newLocData.label} onChange={e => setNewLocData({ ...newLocData, label: e.target.value })} />
+                  <input style={inputStyle} placeholder="Street Address" value={newLocData.address_line_1} onChange={e => setNewLocData({ ...newLocData, address_line_1: e.target.value })} />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '8px' }}>
+                  <input style={inputStyle} placeholder="City" value={newLocData.city} onChange={e => setNewLocData({ ...newLocData, city: e.target.value })} />
+                  <select style={inputStyle} value={newLocData.state} onChange={e => setNewLocData({ ...newLocData, state: e.target.value })}>
+                    {US_STATES.map(s => <option key={s} value={s}>{s || 'State'}</option>)}
+                  </select>
+                  <input style={inputStyle} placeholder="Zip" value={newLocData.zip_code} onChange={e => setNewLocData({ ...newLocData, zip_code: e.target.value })} />
+                </div>
+              </div>
+            )}
+
             <div style={sectionStyle}>
-              <label style={labelStyle}>Lending Terms <span style={{ fontSize: '11px', color: '#aaa', fontWeight: '500', textTransform: 'none' as const, letterSpacing: '0' }}>— all optional but encouraged</span></label>
-              <p style={hintStyle}>Borrowers see this before they request. Set expectations upfront to avoid issues later.</p>
-              <div style={unifiedBoxStyle}>
-                <textarea
-                  placeholder="e.g. Please clean before returning, no modifications."
-                  style={unifiedTextareaStyle}
-                  value={returnTerms}
-                  onChange={e => setReturnTerms(e.target.value)}
-                />
-                <div style={trayStyle}>
-                  <div style={trayItemStyle}>
-                    <div style={trayLabelStyle}>Return by</div>
-                    <div style={trayHintStyle}>Gear must be back by:</div>
-                    <input type="date" style={trayInputStyle} value={returnBy} onChange={e => setReturnBy(e.target.value)} />
+              <label style={labelStyle}>Description</label>
+              <p style={hintStyle}>Share details and specs, existing damage, and any other useful information.</p>
+              <textarea
+                placeholder="Describe your item"
+                style={{ ...inputStyle, minHeight: '80px' }}
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+              />
+            </div>
+
+            <div style={sectionStyle}>
+              <label style={labelStyle}>Photos (Max 4)</label>
+              <div style={photoUploadContainer}>
+                <input type="file" accept="image/*" multiple onChange={handleFileUpload} disabled={uploading} style={{ display: 'none' }} id="file-upload" />
+                <label htmlFor="file-upload" style={photoPlaceholder}>
+                  <Camera size={22} />
+                  <span>{uploading ? 'Uploading...' : 'Add photos'}</span>
+                </label>
+                {imageUrls.map((url, i) => (
+                  <div key={url + i} style={{ position: 'relative' as const }}>
+                    <img src={url} style={photoPreviewImg} alt="Preview" />
+                    <button type="button" onClick={() => setImageUrls(imageUrls.filter((_, idx) => idx !== i))} style={removePhotoBtn}>✕</button>
                   </div>
-                  <div style={trayItemStyle}>
-                    <div style={trayLabelStyle}>If Damaged</div>
-                    <div style={trayHintStyle}>Borrower pays:</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span style={{ fontSize: '13px', color: '#777', fontWeight: 600 }}>$</span>
-                      <input type="number" placeholder="0" style={{ ...trayInputStyle, flex: 1, width: 0 }} value={damagePrice} onChange={e => setDamagePrice(e.target.value)} />
+                ))}
+              </div>
+            </div>
+
+          </div>
+
+          {/* BOX 2: Availability + visibility + lending terms */}
+          <div style={formBoxStyle}>
+
+            <div style={sectionStyle}>
+              <label style={labelStyle}>Availability</label>
+              <div style={radioGroupStyle}>
+                {[
+                  { id: 'Available to Borrow', label: 'Lend It',        sub: 'Set your terms below' },
+                  { id: 'Available to Keep',   label: 'Gift It',         sub: 'Give the item away' },
+                  { id: 'Not Available',       label: 'Keep it Private', sub: 'Add to your inventory' },
+                ].map(status => (
+                  <label key={status.id} style={{
+                    ...radioLabelStyle,
+                    border: availability === status.id ? '2px solid #5ECFDF' : '1px solid #eee',
+                    backgroundColor: availability === status.id ? '#f0fbff' : '#fff',
+                  }}>
+                    <input type="radio" value={status.id} checked={availability === status.id} onChange={e => setAvailability(e.target.value)} style={{ display: 'none' }} />
+                    <div>
+                      <div style={{ fontWeight: 'bold', color: '#111', fontSize: '13px' }}>{status.label}</div>
+                      <div style={{ fontSize: '11px', color: '#777' }}>{status.sub}</div>
                     </div>
-                  </div>
-                  <div style={trayItemStyle}>
-                    <div style={trayLabelStyle}>If Not Returned</div>
-                    <div style={trayHintStyle}>Borrower pays:</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span style={{ fontSize: '13px', color: '#777', fontWeight: 600 }}>$</span>
-                      <input type="number" placeholder="0" style={{ ...trayInputStyle, flex: 1, width: 0 }} value={lossPrice} onChange={e => setLossPrice(e.target.value)} />
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {availability !== 'Not Available' && (
+              <div style={sectionStyle}>
+                <label style={labelStyle}>Who can view this item</label>
+                {campMateIds.length === 0 && (
+                  <p style={hintStyle}>Add your camp history <a href="/settings" target="_blank" rel="noreferrer" style={{ color: '#5ECFDF', fontWeight: 600, textDecoration: 'none' }}>to your profile</a> to unlock campmates-only sharing</p>
+                )}
+                <select
+                  value={visibility}
+                  onChange={e => setVisibility(e.target.value)}
+                  style={inputStyle}
+                >
+                  <option value="public">Everyone</option>
+                  <option
+                    value="followers"
+                    disabled={followingIds.length === 0}
+                    style={{ color: followingIds.length === 0 ? '#bbb' : 'inherit' }}
+                    title={followingIds.length === 0 ? 'Follow users to unlock this' : undefined}
+                  >People you follow</option>
+                  <option
+                    value="campmates"
+                    disabled={campMateIds.length === 0}
+                    style={{ color: campMateIds.length === 0 ? '#bbb' : 'inherit' }}
+                    title={campMateIds.length === 0 ? 'Add a camp to your profile to unlock this' : undefined}
+                  >Campmates only</option>
+                  <option
+                    value="followers_and_campmates"
+                    disabled={followingIds.length === 0 || campMateIds.length === 0}
+                    style={{ color: followingIds.length === 0 || campMateIds.length === 0 ? '#bbb' : 'inherit' }}
+                    title={followingIds.length === 0 || campMateIds.length === 0 ? 'Follow users or join a camp to unlock this' : undefined}
+                  >Following &amp; Campmates</option>
+                </select>
+              </div>
+            )}
+
+            {availability === 'Available to Borrow' && (
+              <div style={sectionStyle}>
+                <label style={labelStyle}>Lending Terms <span style={{ fontSize: '11px', color: '#aaa', fontWeight: '500', textTransform: 'none' as const, letterSpacing: '0' }}>— all optional but encouraged</span></label>
+                <p style={hintStyle}>Borrowers see this before they request. Set expectations upfront to avoid issues later.</p>
+                <div style={unifiedBoxStyle}>
+                  <textarea
+                    placeholder="e.g. Please clean before returning, no modifications."
+                    style={unifiedTextareaStyle}
+                    value={returnTerms}
+                    onChange={e => setReturnTerms(e.target.value)}
+                  />
+                  <div style={trayStyle}>
+                    <div style={trayItemStyle}>
+                      <div style={trayLabelStyle}>Return by</div>
+                      <div style={trayHintStyle}>Gear must be back by:</div>
+                      <input type="date" style={trayInputStyle} value={returnBy} onChange={e => setReturnBy(e.target.value)} />
+                    </div>
+                    <div style={trayItemStyle}>
+                      <div style={trayLabelStyle}>If Damaged</div>
+                      <div style={trayHintStyle}>Borrower pays:</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ fontSize: '13px', color: '#777', fontWeight: 600 }}>$</span>
+                        <input type="number" placeholder="0" style={{ ...trayInputStyle, flex: 1, width: 0 }} value={damagePrice} onChange={e => setDamagePrice(e.target.value)} />
+                      </div>
+                    </div>
+                    <div style={trayItemStyle}>
+                      <div style={trayLabelStyle}>If Not Returned</div>
+                      <div style={trayHintStyle}>Borrower pays:</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ fontSize: '13px', color: '#777', fontWeight: 600 }}>$</span>
+                        <input type="number" placeholder="0" style={{ ...trayInputStyle, flex: 1, width: 0 }} value={lossPrice} onChange={e => setLossPrice(e.target.value)} />
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* PHOTOS */}
-          <div style={sectionStyle}>
-            <label style={labelStyle}>Photos (Max 4)</label>
-            <div style={photoUploadContainer}>
-              <input type="file" accept="image/*" multiple onChange={handleFileUpload} disabled={uploading} style={{ display: 'none' }} id="file-upload" />
-              <label htmlFor="file-upload" style={photoPlaceholder}>
-                <Camera size={22} />
-                <span>{uploading ? 'Uploading...' : 'Add photos'}</span>
-              </label>
-              {imageUrls.map((url, i) => (
-                <div key={url + i} style={{ position: 'relative' as const }}>
-                  <img src={url} style={photoPreviewImg} alt="Preview" />
-                  <button type="button" onClick={() => setImageUrls(imageUrls.filter((_, idx) => idx !== i))} style={removePhotoBtn}>✕</button>
-                </div>
-              ))}
-            </div>
           </div>
 
           <button type="submit" disabled={loading || uploading} style={submitButtonStyle}>
@@ -456,7 +458,8 @@ export default function ListItemPage() {
 // --- STYLES ---
 const pageWrapperStyle: React.CSSProperties = { backgroundColor: '#fff', minHeight: '100vh', width: '100%' };
 const containerStyle: React.CSSProperties = { padding: '20px 20px 60px', maxWidth: '520px', margin: '0 auto' };
-const formStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column' as const, gap: '14px', marginTop: '16px' };
+const formStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column' as const, gap: '12px', marginTop: '16px' };
+const formBoxStyle: React.CSSProperties = { backgroundColor: '#f4f4f4', borderRadius: '16px', padding: '12px 20px 20px', display: 'flex', flexDirection: 'column' as const, gap: '14px' };
 const sectionStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column' as const, gap: '3px' };
 const labelStyle: React.CSSProperties = { fontSize: '12px', color: '#555', fontWeight: '600', textTransform: 'uppercase' as const, letterSpacing: '0.04em' };
 const hintStyle: React.CSSProperties = { fontSize: '12px', color: '#888', margin: '0', lineHeight: '1.5' };
@@ -466,7 +469,7 @@ const radioLabelStyle: React.CSSProperties = { flex: 1, padding: '10px 12px', bo
 const detailsBoxStyle: React.CSSProperties = { marginTop: '10px', padding: '14px', backgroundColor: '#f9f9f9', borderRadius: '10px', border: '1px solid #eee' };
 const unifiedBoxStyle: React.CSSProperties = { marginTop: '6px', backgroundColor: '#fff', borderRadius: '10px', border: '1px solid #ddd', overflow: 'hidden' };
 const unifiedTextareaStyle: React.CSSProperties = { display: 'block', width: '100%', minHeight: '80px', padding: '12px 14px', border: 'none', background: 'transparent', fontSize: '14px', color: '#111', resize: 'vertical' as const, outline: 'none', boxSizing: 'border-box' as const, fontFamily: 'inherit' };
-const trayStyle: React.CSSProperties = { padding: '12px 14px', display: 'flex', gap: '10px' };
+const trayStyle: React.CSSProperties = { padding: '12px 14px', display: 'flex', gap: '10px', borderTop: '1px solid #e8e8e8' };
 const trayItemStyle: React.CSSProperties = { flex: 1, minWidth: 0 };
 const trayLabelStyle: React.CSSProperties = { fontSize: '11px', color: '#777', fontWeight: '600', textTransform: 'uppercase' as const, letterSpacing: '0.04em' };
 const trayHintStyle: React.CSSProperties = { fontSize: '11px', color: '#aaa', margin: '2px 0 4px', fontStyle: 'italic' as const };
