@@ -1040,14 +1040,16 @@ export default function PublicProfilePage() {
                 item.loss_price ? `Loss agr. $${item.loss_price}` : null,
                 item.return_terms ? 'Custom terms' : null,
               ].filter(Boolean).join(' · ');
-              const visLabel = (() => {
+              const visPills = (() => {
                 const v = item.visibility;
-                if (!v || v === 'public') return 'Everyone';
-                if (v === 'followers') return 'Followers';
-                if (v === 'campmates') return 'Campmates';
-                if (v === 'followers_and_campmates') return 'Flwrs + Camps';
-                if (v === 'private') return 'Just Me';
-                return 'Everyone';
+                if (v === 'followers') return [{ label: 'Followers', bg: '#f0effe', color: '#6D28D9', border: '#ddd6fe' }];
+                if (v === 'campmates') return [{ label: 'Campmates', bg: '#f0fdf4', color: '#15803D', border: '#bbf7d0' }];
+                if (v === 'followers_and_campmates') return [
+                  { label: 'Followers', bg: '#f0effe', color: '#6D28D9', border: '#ddd6fe' },
+                  { label: 'Campmates', bg: '#f0fdf4', color: '#15803D', border: '#bbf7d0' },
+                ];
+                if (v === 'private') return [{ label: 'Just Me', bg: '#fdf3ec', color: '#C08261', border: '#f0d8c8' }];
+                return [{ label: 'Everyone', bg: '#fdf3ec', color: '#C08261', border: '#f0d8c8' }];
               })();
 
               return (
@@ -1072,8 +1074,12 @@ export default function PublicProfilePage() {
                     </div>
                     <div style={{ ...listColStyle, fontSize: '11px', color: '#888' }}>{termsSummary || '—'}</div>
                     {isOwner && (
-                      <div style={{ fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: 10, backgroundColor: '#fdf3ec', color: '#C08261', border: '1px solid #f0d8c8', alignSelf: 'center', width: 'fit-content' as const }}>
-                        {visLabel}
+                      <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '3px', alignSelf: 'center' }}>
+                        {visPills.map(p => (
+                          <div key={p.label} style={{ fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: 10, backgroundColor: p.bg, color: p.color, border: `1px solid ${p.border}`, width: 'fit-content' as const }}>
+                            {p.label}
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
