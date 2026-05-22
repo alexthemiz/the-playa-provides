@@ -219,7 +219,7 @@ export default function SettingsPage() {
       <div style={{ backgroundColor: '#FDFAF4', borderBottom: '2px solid #1C1610', padding: '28px 40px' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: '#9A8878', marginBottom: '8px' }}>Account</div>
-          <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: '1.9rem', fontWeight: 900, color: '#1C1610', margin: 0, lineHeight: 1.05 }}>
+          <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.9rem', fontWeight: 900, color: '#1C1610', margin: 0, lineHeight: 1.05 }}>
             Account <em style={{ fontStyle: 'italic', color: '#1E8A82' }}>Settings.</em>
           </h1>
         </div>
@@ -571,8 +571,8 @@ export default function SettingsPage() {
 }
 
 const sectionStyle = { border: '1.5px solid rgba(28,22,16,0.15)', padding: '16px', backgroundColor: '#FDFAF4', boxShadow: '2px 2px 0 rgba(28,22,16,0.06)' };
-const sectionHeaderStyle = { margin: '0 0 14px 0', fontFamily: "'Fraunces', serif", fontSize: '1rem', fontWeight: 700 as const, color: '#1C1610' };
-const subHeaderStyle = { margin: '0 0 8px', fontFamily: "'Fraunces', serif", fontSize: '0.9rem', fontWeight: 700 as const, color: '#1C1610' };
+const sectionHeaderStyle = { margin: '0 0 14px 0', fontFamily: "'Arvo', serif", fontSize: '1rem', fontWeight: 700 as const, color: '#1C1610' };
+const subHeaderStyle = { margin: '0 0 8px', fontFamily: "'Arvo', serif", fontSize: '0.9rem', fontWeight: 700 as const, color: '#1C1610' };
 const labelStyle = { display: 'block', fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: '700' as const, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: '#9A8878', marginBottom: '5px' };
 const fieldNoteStyle = { color: '#9A8878', fontSize: '0.68rem', margin: '0 0 5px', lineHeight: '1.4' as const };
 const errorStyle = { display: 'block', color: '#dc2626', fontSize: '0.72rem', marginTop: '3px' } as const;

@@ -102,7 +102,7 @@ export default function AboutPage() {
       <div style={{ backgroundColor: PAPER_LT, borderBottom: `2px solid ${INK}`, padding: '28px 40px' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto' }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: INK_LITE, marginBottom: '8px' }}>About</div>
-          <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: '2rem', fontWeight: 900, color: INK, margin: 0, lineHeight: 1.05 }}>
+          <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '2rem', fontWeight: 900, color: INK, margin: 0, lineHeight: 1.05 }}>
             An <em style={{ fontStyle: 'italic', color: TEAL }}>About</em> Page.
           </h1>
         </div>
@@ -123,7 +123,7 @@ export default function AboutPage() {
                   cursor: 'pointer', textAlign: 'left' as const,
                 }}
               >
-                <span style={{ fontFamily: "'Fraunces', serif", fontSize: '1.1rem', fontWeight: 700, color: INK }}>{section.title}</span>
+                <span style={{ fontFamily: "'Arvo', serif", fontSize: '1.1rem', fontWeight: 700, color: INK }}>{section.title}</span>
                 <ChevronDown size={18} style={{ flexShrink: 0, color: INK_LITE, transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }} />
               </button>
               {isOpen && <div>{section.content}</div>}

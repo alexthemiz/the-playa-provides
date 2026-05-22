@@ -15,7 +15,7 @@ export default function Footer() {
 
         {/* Branding */}
         <div>
-          <div style={{ fontFamily: "'Fraunces', serif", fontSize: '1rem', fontWeight: 700, color: PAPER, letterSpacing: '-0.01em' }}>
+          <div style={{ fontFamily: "'Arvo', serif", fontSize: '1rem', fontWeight: 700, color: PAPER, letterSpacing: '-0.01em' }}>
             The Playa <em style={{ fontStyle: 'italic', color: LIME }}>Provides</em>
           </div>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.6rem', color: INK_LITE, marginTop: '4px', letterSpacing: '0.06em' }}>

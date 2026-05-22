@@ -230,7 +230,7 @@ export default function FindItemsPage() {
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: INK_LITE, marginBottom: '8px' }}>
             Browse
           </div>
-          <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: '1.9rem', fontWeight: 900, lineHeight: 1.05, color: INK, margin: '0 0 18px' }}>
+          <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.9rem', fontWeight: 900, lineHeight: 1.05, color: INK, margin: '0 0 18px' }}>
             Find what you <em style={{ fontStyle: 'italic', color: TEAL }}>need.</em>
           </h1>
 
@@ -328,7 +328,7 @@ export default function FindItemsPage() {
         ) : filteredItems.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 20px' }}>
             <div style={{ fontSize: '3.5rem', marginBottom: '16px' }}>🏜️</div>
-            <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: '1.3rem', fontWeight: 700, fontStyle: 'italic', marginBottom: '8px', color: INK }}>Nothing out there right now.</h3>
+            <h3 style={{ fontFamily: "'Arvo', serif", fontSize: '1.3rem', fontWeight: 700, fontStyle: 'italic', marginBottom: '8px', color: INK }}>Nothing out there right now.</h3>
             <p style={{ color: INK_MID, fontSize: '0.9rem' }}>Try adjusting your filters, or check back after someone lists something.</p>
           </div>
         ) : (
@@ -375,14 +375,14 @@ export default function FindItemsPage() {
                     </div>
 
                     {/* Caption below photo */}
-                    <span style={{ display: 'block', textAlign: 'center', fontFamily: "'Fraunces', serif", fontSize: '0.65rem', fontStyle: 'italic', color: INK_MID, marginTop: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <span style={{ display: 'block', textAlign: 'center', fontFamily: "'Arvo', serif", fontSize: '0.65rem', fontStyle: 'italic', color: INK_MID, marginTop: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {item.item_name}
                     </span>
                   </div>
 
                   {/* Card body */}
                   <div style={{ padding: '12px 14px 14px' }}>
-                    <div style={{ fontFamily: "'Fraunces', serif", fontSize: '0.95rem', fontWeight: 700, color: INK, marginBottom: '4px', lineHeight: 1.2 }}>
+                    <div style={{ fontFamily: "'Arvo', serif", fontSize: '0.95rem', fontWeight: 700, color: INK, marginBottom: '4px', lineHeight: 1.2 }}>
                       {item.item_name}
                     </div>
                     <div style={{ fontSize: '0.75rem', color: INK_LITE, display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '8px' }}>
@@ -455,7 +455,7 @@ export default function FindItemsPage() {
 
             <div style={{ padding: '24px 28px 28px' }}>
               {/* Title + meta */}
-              <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: '1.5rem', fontWeight: 900, color: INK, margin: '0 0 6px', lineHeight: 1.1 }}>
+              <h2 style={{ fontFamily: "'Arvo', serif", fontSize: '1.5rem', fontWeight: 900, color: INK, margin: '0 0 6px', lineHeight: 1.1 }}>
                 {selectedItem.item_name}
               </h2>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', fontSize: '0.82rem', color: INK_MID }}>

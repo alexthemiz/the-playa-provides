@@ -213,7 +213,7 @@ export default function HomePage() {
             })
             el.innerHTML = `
               <div style="width:66px;height:66px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;background:${PAPER}">${(item as any).emoji || '📦'}</div>
-              <span style="display:block;text-align:center;font-size:0.48rem;font-family:'Fraunces',serif;font-style:italic;color:${INK_MID};margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${label}</span>
+              <span style="display:block;text-align:center;font-size:0.48rem;font-family:'Arvo',serif;font-style:italic;color:${INK_MID};margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${label}</span>
             `
           }
 
@@ -377,7 +377,7 @@ export default function HomePage() {
           backgroundColor: PAPER_LT,
         }}>
           <h1 style={{
-            fontFamily: "'Fraunces', serif",
+            fontFamily: "'Arvo', serif",
             fontSize: 'clamp(2.4rem, 4vw, 3.8rem)',
             fontWeight: 900, lineHeight: 1.02, letterSpacing: '-0.02em',
             color: INK, margin: '0 0 18px',
@@ -438,7 +438,7 @@ export default function HomePage() {
               {/* Wish list row */}
               <div style={{ padding: '16px 0', overflow: 'hidden', borderBottom: `1.5px solid rgba(28,22,16,0.14)` }}>
                 <div style={{ padding: '0 24px 10px', display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                  <span style={{ fontFamily: "'Fraunces', serif", fontSize: '0.95rem', fontWeight: 700, color: INK }}>The Wish List</span>
+                  <span style={{ fontFamily: "'Arvo', serif", fontSize: '0.95rem', fontWeight: 700, color: INK }}>The Wish List</span>
                   <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', color: INK_LITE }}>— hover to pause</span>
                 </div>
                 <div style={{ overflow: 'hidden' }}>
@@ -476,7 +476,7 @@ export default function HomePage() {
               {/* Available items row */}
               <div style={{ padding: '16px 0', overflow: 'hidden' }}>
                 <div style={{ padding: '0 24px 10px', display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                  <span style={{ fontFamily: "'Fraunces', serif", fontSize: '0.95rem', fontWeight: 700, color: INK }}>Available Now</span>
+                  <span style={{ fontFamily: "'Arvo', serif", fontSize: '0.95rem', fontWeight: 700, color: INK }}>Available Now</span>
                   <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', color: INK_LITE }}>— from the community</span>
                 </div>
                 <div style={{ overflow: 'hidden' }}>
@@ -517,7 +517,7 @@ export default function HomePage() {
                                 : <span style={{ fontSize: '1.3rem', opacity: 0.55 }}>{emoji}</span>
                               }
                             </div>
-                            <span style={{ display: 'block', textAlign: 'center', fontFamily: "'Fraunces', serif", fontSize: '0.55rem', fontStyle: 'italic', color: INK_MID, marginTop: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            <span style={{ display: 'block', textAlign: 'center', fontFamily: "'Arvo', serif", fontSize: '0.55rem', fontStyle: 'italic', color: INK_MID, marginTop: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                               {label}
                             </span>
                           </a>
@@ -568,7 +568,7 @@ export default function HomePage() {
       <section style={{ backgroundColor: PAPER_LT, padding: '52px 40px', borderBottom: `2px solid ${INK}` }}>
         <div style={{ maxWidth: '960px', margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '24px' }}>
-            <span style={{ fontFamily: "'Fraunces', serif", fontSize: '1.3rem', fontWeight: 700, color: INK }}>The playa can only provide because people provide.</span>
+            <span style={{ fontFamily: "'Arvo', serif", fontSize: '1.3rem', fontWeight: 700, color: INK }}>The playa can only provide because people provide.</span>
           </div>
           <div style={{
             display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)',
@@ -586,8 +586,8 @@ export default function HomePage() {
                 borderBottom: i < 2       ? `1px solid ${INK}` : 'none',
                 backgroundColor: ['#FDFAF4','#F8F4E8','#F4F8EC','#F8F2EE'][i],
               }}>
-                <span style={{ position: 'absolute', top: '10px', right: '12px', fontFamily: "'Fraunces', serif", fontSize: '2.6rem', fontWeight: 900, fontStyle: 'italic', opacity: 0.07, userSelect: 'none' as const }}>{n}</span>
-                <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: '1.02rem', fontWeight: 700, color: INK, marginBottom: '7px', paddingRight: '30px', lineHeight: 1.25, margin: '0 0 7px' }}>{title}</h3>
+                <span style={{ position: 'absolute', top: '10px', right: '12px', fontFamily: "'Arvo', serif", fontSize: '2.6rem', fontWeight: 900, fontStyle: 'italic', opacity: 0.07, userSelect: 'none' as const }}>{n}</span>
+                <h3 style={{ fontFamily: "'Arvo', serif", fontSize: '1.02rem', fontWeight: 700, color: INK, marginBottom: '7px', paddingRight: '30px', lineHeight: 1.25, margin: '0 0 7px' }}>{title}</h3>
                 <p style={{ fontSize: '0.86rem', color: INK_MID, lineHeight: 1.65, margin: 0 }}>{body}</p>
               </div>
             ))}
@@ -600,7 +600,7 @@ export default function HomePage() {
 
       {/* ── RESOURCES ────────────────────────────────────────────────────── */}
       <section style={{ backgroundColor: PAPER_DK, textAlign: 'center', padding: '56px 40px 64px' }}>
-        <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: '1.5rem', fontWeight: 700, fontStyle: 'italic', color: INK, marginBottom: '10px' }}>
+        <h2 style={{ fontFamily: "'Arvo', serif", fontSize: '1.5rem', fontWeight: 700, fontStyle: 'italic', color: INK, marginBottom: '10px' }}>
           On-Playa Resources
         </h2>
         <p style={{ color: INK_MID, fontSize: '0.92rem', marginBottom: '28px', maxWidth: '420px', marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>

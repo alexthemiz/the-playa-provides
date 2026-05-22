@@ -35,7 +35,7 @@ const innerStyle: React.CSSProperties = {
 }
 
 const logoStyle: React.CSSProperties = {
-  fontFamily: "'Fraunces', serif",
+  fontFamily: "'Arvo', serif",
   fontSize: '1.1rem',
   fontWeight: 700,
   color: PAPER,
@@ -251,7 +251,7 @@ export default function Header() {
       <div onClick={() => setBellOpen(false)} style={{ position: 'fixed' as const, inset: 0, zIndex: 49 }} />
       <div style={dropdownStyle}>
         <div style={dropdownHeaderStyle}>
-          <span style={{ fontWeight: 700, color: INK, fontSize: '0.88rem', fontFamily: "'Fraunces', serif" }}>
+          <span style={{ fontWeight: 700, color: INK, fontSize: '0.88rem', fontFamily: "'Arvo', serif" }}>
             Notifications
           </span>
           {unreadCount > 0 && (

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
@@ -487,7 +487,7 @@ export default function PublicProfilePage() {
       <div style={{ backgroundColor: '#FDFAF4', borderBottom: '2px solid #1C1610', padding: '28px 40px' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: '#9A8878', marginBottom: '8px' }}>Community</div>
-          <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: '1.9rem', fontWeight: 900, color: '#1C1610', margin: 0, lineHeight: 1.05 }}>
+          <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.9rem', fontWeight: 900, color: '#1C1610', margin: 0, lineHeight: 1.05 }}>
             {isOwner ? <>Your <em style={{ fontStyle: 'italic', color: '#1E8A82' }}>Profile.</em></> : <><em style={{ fontStyle: 'italic', color: '#1E8A82' }}>A</em> Profile.</>}
           </h1>
         </div>

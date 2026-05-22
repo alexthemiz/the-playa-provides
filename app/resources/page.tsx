@@ -61,7 +61,7 @@ export default function ResourcesPage() {
         <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '24px', flexWrap: 'wrap' }}>
           <div>
             <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: INK_LITE, marginBottom: '8px' }}>Directory</div>
-            <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: '1.9rem', fontWeight: 900, color: INK, margin: '0 0 12px', lineHeight: 1.05 }}>
+            <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.9rem', fontWeight: 900, color: INK, margin: '0 0 12px', lineHeight: 1.05 }}>
               On-Playa <em style={{ fontStyle: 'italic', color: TEAL }}>Resources.</em>
             </h1>
             <p style={{ fontSize: '0.9rem', color: INK_MID, lineHeight: 1.65, maxWidth: '560px', margin: 0 }}>
@@ -83,17 +83,17 @@ export default function ResourcesPage() {
       {/* Content */}
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 40px 64px' }}>
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '80px 20px', fontFamily: "'Fraunces', serif", fontSize: '1rem', fontStyle: 'italic', color: INK_LITE }}>
+          <div style={{ textAlign: 'center', padding: '80px 20px', fontFamily: "'Arvo', serif", fontSize: '1rem', fontStyle: 'italic', color: INK_LITE }}>
             Dusting off the records…
           </div>
         ) : fetchError ? (
           <div style={{ textAlign: 'center', padding: '60px 20px', border: `1.5px solid rgba(28,22,16,0.12)`, backgroundColor: PAPER_LT }}>
-            <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: '1.2rem', fontWeight: 700, color: INK, marginBottom: '8px' }}>Couldn't load resources</h3>
+            <h3 style={{ fontFamily: "'Arvo', serif", fontSize: '1.2rem', fontWeight: 700, color: INK, marginBottom: '8px' }}>Couldn't load resources</h3>
             <p style={{ color: INK_MID, fontSize: '0.9rem' }}>Something went wrong. Try refreshing the page.</p>
           </div>
         ) : resources.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 20px', border: `1.5px solid rgba(28,22,16,0.12)`, backgroundColor: PAPER_LT }}>
-            <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: '1.2rem', fontWeight: 700, color: INK, marginBottom: '8px' }}>No verified resources yet</h3>
+            <h3 style={{ fontFamily: "'Arvo', serif", fontSize: '1.2rem', fontWeight: 700, color: INK, marginBottom: '8px' }}>No verified resources yet</h3>
             <p style={{ color: INK_MID, fontSize: '0.9rem' }}>New submissions are being reviewed. Check back soon!</p>
           </div>
         ) : (
@@ -113,7 +113,7 @@ export default function ResourcesPage() {
                   </div>
 
                   {/* Camp name */}
-                  <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 700, color: INK, fontSize: '1rem', marginBottom: '8px', lineHeight: 1.25 }}>
+                  <div style={{ fontFamily: "'Arvo', serif", fontWeight: 700, color: INK, fontSize: '1rem', marginBottom: '8px', lineHeight: 1.25 }}>
                     {res.camp_name}
                   </div>
 

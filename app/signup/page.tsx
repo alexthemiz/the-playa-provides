@@ -142,7 +142,7 @@ export default function SignUpPage() {
 }
 
 const eyebrowStyle: React.CSSProperties = { fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: INK_LITE, marginBottom: '8px' }
-const h1Style: React.CSSProperties = { fontFamily: "'Fraunces', serif", fontSize: '1.8rem', fontWeight: 900, color: INK, margin: '0 0 24px', lineHeight: 1.1 }
+const h1Style: React.CSSProperties = { fontFamily: "'Arvo', serif", fontSize: '1.8rem', fontWeight: 900, color: INK, margin: '0 0 24px', lineHeight: 1.1 }
 const labelStyle: React.CSSProperties = { display: 'block', fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: '#9A8878', marginBottom: '7px' }
 const inputStyle: React.CSSProperties = { width: '100%', padding: '11px 13px', backgroundColor: '#FDFAF4', border: '1.5px solid rgba(28,22,16,0.25)', color: '#1C1610', outline: 'none', boxSizing: 'border-box' as const, fontSize: '0.95rem', fontFamily: 'inherit' }
 const ctaStyle: React.CSSProperties = { width: '100%', backgroundColor: '#1E8A82', color: '#fff', padding: '13px', fontWeight: 700, border: '2px solid #1C1610', boxShadow: '3px 3px 0 #1C1610', fontSize: '0.95rem', fontFamily: 'inherit' }

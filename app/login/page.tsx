@@ -46,7 +46,7 @@ export default function Login() {
         <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: INK_LITE, marginBottom: '8px' }}>
           Welcome back
         </div>
-        <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: '1.8rem', fontWeight: 900, color: INK, margin: '0 0 24px', lineHeight: 1.1 }}>
+        <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.8rem', fontWeight: 900, color: INK, margin: '0 0 24px', lineHeight: 1.1 }}>
           Sign <em style={{ fontStyle: 'italic', color: TEAL }}>In.</em>
         </h1>
 
