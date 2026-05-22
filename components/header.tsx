@@ -335,6 +335,8 @@ export default function Header() {
 
         {/* Desktop nav — hidden below lg */}
         <nav style={navStyle} className="hidden lg:flex">
+          <Link href="/about" style={linkStyle} className="hover-nav-link">About</Link>
+          <span style={pipeStyle}>|</span>
           <Link href="/resources" style={linkStyle} className="hover-nav-link">On-Playa Resources</Link>
           <span style={pipeStyle}>|</span>
           <Link href="/find-items" style={linkStyle} className="hover-nav-link">Find Items</Link>
@@ -414,6 +416,7 @@ export default function Header() {
         <>
           <div onClick={() => setMenuOpen(false)} style={{ position: 'fixed' as const, inset: 0, zIndex: 49 }} className="lg:hidden" />
           <div style={mobileMenuStyle} className="lg:hidden">
+            <Link href="/about"       onClick={() => setMenuOpen(false)} style={mobileLinkStyle}>About</Link>
             <Link href="/resources"   onClick={() => setMenuOpen(false)} style={mobileLinkStyle}>On-Playa Resources</Link>
             <Link href="/find-items"  onClick={() => setMenuOpen(false)} style={mobileLinkStyle}>Find Items</Link>
             <Link href="/list-item"   onClick={() => setMenuOpen(false)} style={mobileOfferStyle}>Offer Items</Link>

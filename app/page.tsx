@@ -364,7 +364,7 @@ export default function HomePage() {
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
       <section style={{
         display: 'grid',
-        gridTemplateColumns: '52% 48%',
+        gridTemplateColumns: '60% 40%',
         borderBottom: `2px solid ${INK}`,
         minHeight: '420px',
       }}>
@@ -409,10 +409,6 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div style={{ marginTop: '14px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: INK_LITE, fontFamily: "'Space Mono', monospace" }}>
-            <span style={{ color: RUST }}>↗</span>
-            <span>no account needed to browse</span>
-          </div>
         </div>
 
         {/* Right panel */}
@@ -451,7 +447,7 @@ export default function HomePage() {
                     onMouseLeave={() => setWishHovered(false)}
                     style={{
                       display: 'flex', gap: '8px', width: 'max-content', paddingLeft: '24px',
-                      animation: 'scrollL 38s linear infinite',
+                      animation: 'scrollL 55s linear infinite',
                       animationPlayState: wishHovered ? 'paused' : 'running',
                     }}
                   >
@@ -518,7 +514,7 @@ export default function HomePage() {
                             <div style={{ width: '78px', height: '78px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: PAPER, overflow: 'hidden' }}>
                               {imgUrl
                                 ? <img src={imgUrl} alt={label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                : <span style={{ fontSize: '2rem' }}>{emoji}</span>
+                                : <span style={{ fontSize: '1.3rem', opacity: 0.55 }}>{emoji}</span>
                               }
                             </div>
                             <span style={{ display: 'block', textAlign: 'center', fontFamily: "'Fraunces', serif", fontSize: '0.55rem', fontStyle: 'italic', color: INK_MID, marginTop: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -570,8 +566,8 @@ export default function HomePage() {
 
       {/* ── FIELD NOTES ──────────────────────────────────────────────────── */}
       <section style={{ backgroundColor: PAPER_LT, padding: '52px 40px', borderBottom: `2px solid ${INK}` }}>
-        <div style={{ maxWidth: '960px' }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '28px' }}>
+        <div style={{ maxWidth: '960px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '24px' }}>
             <span style={{ fontFamily: "'Fraunces', serif", fontSize: '1.3rem', fontWeight: 700, color: INK }}>Field Notes</span>
             <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.62rem', color: INK_LITE }}>— in case you need convincing</span>
           </div>
@@ -580,20 +576,19 @@ export default function HomePage() {
             border: `2px solid ${INK}`,
           }}>
             {[
-              { n: 'I',   ey: 'Field Note 01', title: 'Radical Interdependence',        body: 'Others may have what you need. You may have what others need. Turns out that\'s enough.' },
-              { n: 'II',  ey: 'Field Note 02', title: 'Decommodification, Actually',    body: 'Make it a year-round thing. Every shared item is one less Amazon order. Do the math.' },
-              { n: 'III', ey: 'Field Note 03', title: 'Lending is a Type of Gifting',   body: 'You don\'t even have to give it away. Let someone borrow it. That counts.' },
-              { n: 'IV',  ey: 'Field Note 04', title: 'Not Going This Year?',           body: 'Your gear still can. Let it earn its keep while it collects dust in your garage.' },
-            ].map(({ n, ey, title, body }, i) => (
+              { n: 'I',   title: 'Radical Interdependence',        body: 'Others may have what you need. You may have what others need. Turns out that\'s enough.' },
+              { n: 'II',  title: 'Decommodification, Actually',    body: 'Make it a year-round thing. Every shared item is one less Amazon order. Do the math.' },
+              { n: 'III', title: 'Lending is a Type of Gifting',   body: 'You don\'t even have to give it away. Let someone borrow it. That counts.' },
+              { n: 'IV',  title: 'Not Going This Year?',           body: 'Your gear still can. Let it earn its keep while it collects dust in your garage.' },
+            ].map(({ n, title, body }, i) => (
               <div key={i} style={{
-                padding: '28px 26px', position: 'relative',
+                padding: '20px 22px', position: 'relative',
                 borderRight:  i % 2 === 0 ? `1px solid ${INK}` : 'none',
                 borderBottom: i < 2       ? `1px solid ${INK}` : 'none',
                 backgroundColor: ['#FDFAF4','#F8F4E8','#F4F8EC','#F8F2EE'][i],
               }}>
-                <span style={{ position: 'absolute', top: '12px', right: '14px', fontFamily: "'Fraunces', serif", fontSize: '3rem', fontWeight: 900, fontStyle: 'italic', opacity: 0.07, userSelect: 'none' as const }}>{n}</span>
-                <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: INK_LITE, marginBottom: '9px' }}>{ey}</div>
-                <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: '1.02rem', fontWeight: 700, color: INK, marginBottom: '8px', paddingRight: '30px', lineHeight: 1.25 }}>{title}</h3>
+                <span style={{ position: 'absolute', top: '10px', right: '12px', fontFamily: "'Fraunces', serif", fontSize: '2.6rem', fontWeight: 900, fontStyle: 'italic', opacity: 0.07, userSelect: 'none' as const }}>{n}</span>
+                <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: '1.02rem', fontWeight: 700, color: INK, marginBottom: '7px', paddingRight: '30px', lineHeight: 1.25, margin: '0 0 7px' }}>{title}</h3>
                 <p style={{ fontSize: '0.86rem', color: INK_MID, lineHeight: 1.65, margin: 0 }}>{body}</p>
               </div>
             ))}

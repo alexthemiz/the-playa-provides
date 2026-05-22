@@ -104,7 +104,7 @@ export default function FeedbackWidget() {
             width: 48,
             height: 48,
             borderRadius: '50%',
-            backgroundColor: '#E8834A',
+            backgroundColor: '#1E8A82',
             border: 'none',
             cursor: 'pointer',
             display: 'flex',
@@ -204,7 +204,7 @@ export default function FeedbackWidget() {
                   style={{
                     width: '100%',
                     padding: 10,
-                    backgroundColor: '#E8834A',
+                    backgroundColor: '#1E8A82',
                     color: '#000',
                     border: 'none',
                     borderRadius: 8,
