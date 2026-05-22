@@ -32,12 +32,16 @@ const RUST     = '#C24820'
 const TEAL     = '#1E8A82'
 
 // headline weight varies per font — some only have 400
+// stroke: optional -webkit-text-stroke value to fake boldness on single-weight fonts
 const FONTS: {
-  num: string; name: string; cls: string; hw: number; note: string
+  num: string; name: string; cls: string; hw: number; stroke?: string; note: string
 }[] = [
   { num: '01', name: 'Alfa Slab One',   cls: alfaSlab.className,  hw: 400, note: 'Maximum chonk. One weight, all attitude. Very boxy slab.' },
   { num: '02', name: 'Bitter',          cls: bitter.className,    hw: 900, note: 'Crisp editorial slab. Built for screen reading. Clean and sturdy.' },
-  { num: '03', name: 'Special Elite',   cls: specialEl.className, hw: 400, note: 'Actual typewriter character — uneven ink, slightly roughed-up.' },
+  { num: '03', name: 'Special Elite (default)', cls: specialEl.className, hw: 400, note: 'Default weight — single-cut font, no bold variant exists.' },
+  { num: '03A', name: 'Special Elite +light stroke', cls: specialEl.className, hw: 400, stroke: '0.4px', note: 'CSS stroke trick: -webkit-text-stroke 0.4px — slightly heavier ink.' },
+  { num: '03B', name: 'Special Elite +medium stroke', cls: specialEl.className, hw: 400, stroke: '0.75px', note: 'CSS stroke trick: -webkit-text-stroke 0.75px — noticeably bolder.' },
+  { num: '03C', name: 'Special Elite +heavy stroke', cls: specialEl.className, hw: 400, stroke: '1.1px', note: 'CSS stroke trick: -webkit-text-stroke 1.1px — boldest, still legible.' },
   { num: '04', name: 'Courier Prime',   cls: courier.className,   hw: 700, note: 'Clean monospaced typewriter. Precise, techy, retro terminal.' },
   { num: '05', name: 'Abril Fatface',   cls: abril.className,     hw: 400, note: 'Ultra-high contrast display. Extremely thin/thick strokes. Poster energy.' },
   { num: '06', name: 'Oswald',          cls: oswald.className,    hw: 700, note: 'Condensed sans-serif. Tall, boxy, industrial. Very different from the rest.' },
@@ -62,7 +66,7 @@ export default function FontPreviewPage() {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '2px', border: `2px solid ${INK}` }}>
-          {FONTS.map(({ num, name, cls, hw, note }, i) => (
+          {FONTS.map(({ num, name, cls, hw, stroke, note }, i) => (
             <div
               key={num}
               style={{
@@ -89,7 +93,7 @@ export default function FontPreviewPage() {
               {/* Hero headline */}
               <h2
                 className={cls}
-                style={{ fontSize: 'clamp(1.8rem, 2.6vw, 2.5rem)', fontWeight: hw, lineHeight: 1.06, letterSpacing: '-0.01em', color: INK, margin: '0 0 14px' }}
+                style={{ fontSize: 'clamp(1.8rem, 2.6vw, 2.5rem)', fontWeight: hw, lineHeight: 1.06, letterSpacing: '-0.01em', color: INK, margin: '0 0 14px', WebkitTextStroke: stroke ?? 'unset' } as React.CSSProperties}
               >
                 Gear sharing<br />for the{' '}
                 <em style={{ fontStyle: 'italic', color: RUST }}>Burning Man</em>{' '}
@@ -97,7 +101,7 @@ export default function FontPreviewPage() {
               </h2>
 
               {/* Section title */}
-              <div className={cls} style={{ fontSize: '1rem', fontWeight: hw >= 700 ? 700 : 400, borderTop: `1.5px solid rgba(28,22,16,0.15)`, paddingTop: '11px', marginBottom: '10px', color: INK }}>
+              <div className={cls} style={{ fontSize: '1rem', fontWeight: hw >= 700 ? 700 : 400, borderTop: `1.5px solid rgba(28,22,16,0.15)`, paddingTop: '11px', marginBottom: '10px', color: INK, WebkitTextStroke: stroke ?? 'unset' } as React.CSSProperties}>
                 The playa can only provide because people provide.
               </div>
 
