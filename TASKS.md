@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-05-22 (session 28)_
+_Last updated: 2026-05-22 (session 29)_
 
 ---
 
@@ -13,6 +13,7 @@ _Last updated: 2026-05-22 (session 28)_
 ---
 
 ## 🎯 Next Session Priority
+- [ ] **End-to-end smoke test** — Walk through the live site: profile identity in header band, active nav highlighting, find-items (cards/list/map toggle), wish list chips, playa history badges.
 - [ ] **Fix OG image crop** — Resize to 1200×630px with padding/background in Canva, re-upload, re-push.
 
 ---
@@ -42,9 +43,9 @@ _Last updated: 2026-05-22 (session 28)_
 ---
 
 ## 🎨 Design & Brand
-- [ ] **Re-integrate map view into new find-items design** — Remote had `feat: map view on find-items with zip-based geocoding` and `fix: invalidateSize` commits. During the visual overhaul rebase, the map view UI was dropped (kept only lat/lng in locations query). Need to add map toggle back to the new polaroid-grid design.
-- [ ] **Font swap** — Fraunces serif was chosen pragmatically to finish the overhaul. If it feels too "AI", swap to a different serif as a one-line CSS change in globals.css. Defer until after the overhaul is live-tested.
-- [ ] **Copy/headline pass** — Page-level copy and eyebrow labels can be tightened after the visual overhaul is confirmed. Defer.
+- [x] **Re-integrate map view into new find-items design** — Done: cards/list/map toggle added to results bar; MapView loaded via dynamic import; list view added as a bonus. _(session 29)_
+- [x] **Copy/headline pass — eyebrows** — "My Gear", "Browse", "About" eyebrows removed from Inventory, Find Items, and About pages. _(session 29)_
+- [ ] **Font swap** — Arvo serif is current. If it feels wrong after live-testing, swap as a one-line change in globals.css. Defer.
 
 ---
 
@@ -259,3 +260,12 @@ _(nothing queued)_
 - [x] Content: TPP How-To Guide — fully updated Word doc reflecting all recent changes
 - [x] Fix: Campmates Only visibility option grayed out — `user_camp_affiliations` rows with null `camp_id` (open camping / returning-status rows) poisoned the PostgREST `.in()` filter with a 400 Bad Request, silently zeroing out campMateIds; fixed with `.not('camp_id', 'is', null)` at DB query level in `list-item/page.tsx`, `inventory/page.tsx`, `AddItemModal.tsx`, and `find-items/page.tsx`; also switched `getUser()` → `getSession()` on list-item to prevent lock contention silently skipping the fetch
 - [x] Design: Full visual overhaul — "Playful Field Guide" design system shipped across all 15 pages/components: Fraunces serif headlines, Space Mono labels, warm ink/paper palette (#1C1610 / #F6F1E8), offset-shadow buttons, ink borders, no border-radius, grain texture. Header (dark ink + lime accent), footer, homepage (polaroid marquee + Frogger easter egg + field notes grid), find-items (5-col polaroid grid, centered modal, category chips), login, signup, about (accordion), resources, settings, inventory, list-item, profile. Teal #1E8A82 replaces old #3ABFD4/#5ECFDF throughout.
+- [x] Fix: Header active-page nav highlighting — usePathname() drives lime highlight on current page (desktop + mobile); previously hardcoded to "Offer Items" only. _(session 29)_
+- [x] Design: Inventory — "My Gear" eyebrow removed; spreadsheet hint updated to "Click Import Inventory to add multiple items via spreadsheet." _(session 29)_
+- [x] Design: About — "About" eyebrow removed from page header band. _(session 29)_
+- [x] Design: Find Items — "Browse" eyebrow removed; pipe separators replaced with flex group divs (no more stray | at end of Category row); keyword field narrowed to ~45%; "Search by Location:" label added before ZIP; Cards/List/Map view toggle added to results bar; list view added as new view mode; MapView dynamically imported. _(session 29)_
+- [x] Design: Profile — "Community / Your Profile" eyebrow and duplicate identity block removed from main content area; full identity (avatar, name, @username, pronouns, location, social links, follower/following counts, Edit/Follow button) moved into the page header band. _(session 29)_
+- [x] Fix: Profile × encoding corruption — Ã— (garbled UTF-8) fixed to × in wish list remove button, followers/following modal close button, and playa history remove-year button. _(session 29)_
+- [x] Design: Profile "Manage Inventory" button — updated from purple (#d896ff) to teal + 2px ink border + 2px offset shadow, matching the new design system. _(session 29)_
+- [x] Design: Profile wish list — tags updated to square corners, Space Mono text, ink-bordered teal chips; input/Add button updated to new design tokens; "I have one of these" button updated to ink border + offset shadow. _(session 29)_
+- [x] Design: Profile Playa History — year badges updated to mustard background (#D4A020) + white Space Mono text; affiliation cards use paper-dk background + ink border. _(session 29)_
