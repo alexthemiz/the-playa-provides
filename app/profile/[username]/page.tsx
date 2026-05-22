@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
@@ -38,7 +38,7 @@ export default function PublicProfilePage() {
   const [showAddItem, setShowAddItem] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
 
-  // 2026 returning status — managed separately from regular year drafts
+  // 2026 returning status â€” managed separately from regular year drafts
   const [draft2026, setDraft2026] = useState<{
     status: 'yes' | 'maybe' | 'no' | null;
     campInput: string;
@@ -328,7 +328,7 @@ export default function PublicProfilePage() {
       });
     }
 
-    // 2026 returning row — handled separately
+    // 2026 returning row â€” handled separately
     if (draft2026.status) {
       const row: Record<string, any> = {
         user_id: profile.id,
@@ -468,9 +468,9 @@ export default function PublicProfilePage() {
   const returningBadge = (status: string | null) => {
     if (!status) return null;
     const cfg = {
-      yes:   { label: '✓ Returning',     bg: '#dcfce7', color: '#16a34a', border: '#86efac' },
+      yes:   { label: 'âœ“ Returning',     bg: '#dcfce7', color: '#16a34a', border: '#86efac' },
       maybe: { label: '? Maybe',          bg: '#fef9c3', color: '#92400e', border: '#fde68a' },
-      no:    { label: '✗ Not returning',  bg: '#fee2e2', color: '#dc2626', border: '#fca5a5' },
+      no:    { label: 'âœ— Not returning',  bg: '#fee2e2', color: '#dc2626', border: '#fca5a5' },
     }[status as 'yes' | 'maybe' | 'no'];
     if (!cfg) return null;
     return (
@@ -481,7 +481,19 @@ export default function PublicProfilePage() {
   };
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px', color: '#2D241E' }}>
+    <div style={{ backgroundColor: '#F6F1E8', minHeight: '100vh' }}>
+
+      {/* Page header band */}
+      <div style={{ backgroundColor: '#FDFAF4', borderBottom: '2px solid #1C1610', padding: '28px 40px' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: '#9A8878', marginBottom: '8px' }}>Community</div>
+          <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: '1.9rem', fontWeight: 900, color: '#1C1610', margin: 0, lineHeight: 1.05 }}>
+            {isOwner ? <>Your <em style={{ fontStyle: 'italic', color: '#1E8A82' }}>Profile.</em></> : <><em style={{ fontStyle: 'italic', color: '#1E8A82' }}>A</em> Profile.</>}
+          </h1>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px 40px', color: '#1C1610' }}>
       <style>{`
         @media (max-width: 640px) {
           .profile-header-row {
@@ -529,10 +541,9 @@ export default function PublicProfilePage() {
         @media (max-width: 430px) { .title-break { display: block; } }
       `}</style>
 
-      <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 20px 0' }}>The Playa Provides<span className="title-break" /><span style={{ textDecoration: 'underline' }}>{isOwner ? ' Your Profile' : ' A Profile'}{'\u00a0'}</span></h1>
 
       {/* PROFILE HEADER */}
-      <header style={{ borderBottom: '1px solid #e5e5e5', paddingBottom: '30px' }}>
+      <header style={{ borderBottom: '1.5px solid rgba(28,22,16,0.12)', paddingBottom: '30px' }}>
 
         {/* ROW 1: Avatar + Name / @username / Location / Social Links + Followers/Edit (right) */}
         <div className="profile-header-row" style={{ display: 'flex', gap: '25px', alignItems: 'flex-start' }}>
@@ -595,7 +606,7 @@ export default function PublicProfilePage() {
                 { key: 'bluesky',   label: 'Bluesky',   icon: null,                    color: '#0085FF' },
                 { key: 'linkedin',  label: 'LinkedIn',  icon: <Linkedin size={14} />,  color: '#0A66C2' },
                 { key: 'eplaya',    label: 'ePlaya',    icon: null,                    color: '#8B4513' },
-                { key: 'website',   label: 'Website',   icon: <Globe size={14} />,     color: '#00aacc' },
+                { key: 'website',   label: 'Website',   icon: <Globe size={14} />,     color: '#1E8A82' },
               ].filter(s => links[s.key]);
               if (SOCIAL.length === 0) return null;
               return (
@@ -620,18 +631,18 @@ export default function PublicProfilePage() {
                     setOpenList(next);
                     if (next === 'followers') fetchList('followers');
                   }}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: openList === 'followers' ? '#00aacc' : '#888', fontWeight: openList === 'followers' ? 600 : 400, fontSize: '0.85rem' }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: openList === 'followers' ? '#1E8A82' : '#9A8878', fontWeight: openList === 'followers' ? 600 : 400, fontSize: '0.85rem' }}
                 >
                   {followerCount} {followerCount === 1 ? 'follower' : 'followers'}
                 </button>
-                <span style={{ color: '#ccc' }}>·</span>
+                <span style={{ color: '#ccc' }}>Â·</span>
                 <button
                   onClick={() => {
                     const next = openList === 'following' ? null : 'following' as const;
                     setOpenList(next);
                     if (next === 'following') fetchList('following');
                   }}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: openList === 'following' ? '#00aacc' : '#888', fontWeight: openList === 'following' ? 600 : 400, fontSize: '0.85rem' }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: openList === 'following' ? '#1E8A82' : '#9A8878', fontWeight: openList === 'following' ? 600 : 400, fontSize: '0.85rem' }}
                 >
                   {followingCount} following
                 </button>
@@ -676,7 +687,7 @@ export default function PublicProfilePage() {
                     }
                   }}
                   className="profile-action-btn"
-                  style={{ padding: '8px 20px', backgroundColor: isEditing ? '#4CAF50' : '#5ECFDF', color: isEditing ? '#fff' : '#000', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
+                  style={{ padding: '8px 20px', backgroundColor: isEditing ? '#16a34a' : '#1E8A82', color: '#fff', border: '2px solid #1C1610', boxShadow: '2px 2px 0 #1C1610', cursor: 'pointer', fontWeight: 'bold' }}
                 >
                   {isEditing ? 'Save Profile' : 'Edit Profile'}
                 </button>
@@ -684,7 +695,7 @@ export default function PublicProfilePage() {
                   <button
                     onClick={() => setIsEditing(false)}
                     className="profile-action-btn"
-                    style={{ padding: '9px 18px', backgroundColor: 'transparent', color: '#7a4a2a', border: '1px solid #e0c8b8', borderRadius: '8px', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer' }}
+                    style={{ padding: '9px 18px', backgroundColor: 'transparent', color: '#4A3828', border: '1.5px solid rgba(28,22,16,0.2)', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer' }}
                   >
                     Cancel
                   </button>
@@ -695,7 +706,7 @@ export default function PublicProfilePage() {
                 onClick={handleFollowToggle}
                 disabled={followLoading}
                 className="profile-action-btn"
-                style={{ padding: '8px 20px', backgroundColor: isFollowing ? '#f0f0f0' : '#5ECFDF', color: isFollowing ? '#666' : '#000', border: isFollowing ? '1px solid #ddd' : 'none', borderRadius: '6px', cursor: followLoading ? 'default' : 'pointer', fontWeight: 'bold', opacity: followLoading ? 0.6 : 1 }}
+                style={{ padding: '8px 20px', backgroundColor: isFollowing ? '#EDE5D0' : '#1E8A82', color: isFollowing ? '#4A3828' : '#fff', border: isFollowing ? '1.5px solid rgba(28,22,16,0.2)' : '2px solid #1C1610', boxShadow: isFollowing ? 'none' : '2px 2px 0 #1C1610', cursor: followLoading ? 'default' : 'pointer', fontWeight: 'bold', opacity: followLoading ? 0.6 : 1 }}
               >
                 {followLoading ? '...' : isFollowing ? 'Following' : 'Follow'}
               </button>
@@ -719,7 +730,7 @@ export default function PublicProfilePage() {
               {/* Modal header */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>
                 <span style={{ fontWeight: 700, fontSize: '14px', color: '#2D241E', textTransform: 'capitalize' as const }}>{openList}</span>
-                <button onClick={() => setOpenList(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: '18px', lineHeight: 1, padding: '2px 6px' }}>×</button>
+                <button onClick={() => setOpenList(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: '18px', lineHeight: 1, padding: '2px 6px' }}>Ã—</button>
               </div>
 
               {/* Column headers */}
@@ -761,7 +772,7 @@ export default function PublicProfilePage() {
                       </a>
                       <button
                         onClick={() => handleListFollowToggle(entry.id, openList!)}
-                        style={{ padding: '5px 14px', backgroundColor: entry.isFollowing ? '#f0f0f0' : '#5ECFDF', color: entry.isFollowing ? '#666' : '#000', border: entry.isFollowing ? '1px solid #ddd' : 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}
+                        style={{ padding: '5px 14px', backgroundColor: entry.isFollowing ? '#EDE5D0' : '#1E8A82', color: entry.isFollowing ? '#4A3828' : '#fff', border: entry.isFollowing ? '1px solid rgba(28,22,16,0.2)' : '1.5px solid #1C1610', cursor: 'pointer', fontWeight: 600, fontSize: '12px' }}
                       >
                         {entry.isFollowing ? 'Following' : 'Follow'}
                       </button>
@@ -795,10 +806,10 @@ export default function PublicProfilePage() {
                 <span style={{ color: '#aaa', fontStyle: 'italic' as const, fontSize: '0.9rem' }}>No wishlist yet.</span>
               )}
               {wishTags.map(tag => (
-                <span key={tag} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 14px', borderRadius: '20px', border: '1px solid #5ECFDF', backgroundColor: '#f0fcff', color: '#007a99', fontSize: '0.85rem', fontWeight: 500 }}>
+                <span key={tag} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 14px', borderRadius: '20px', border: '1px solid #1E8A82', backgroundColor: '#D4EDEB', color: '#1E8A82', fontSize: '0.85rem', fontWeight: 500 }}>
                   {tag}
                   {isOwner && (
-                    <button onClick={() => removeTag(tag)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '0', lineHeight: 1, color: '#005566', fontSize: '14px', fontWeight: 'bold' }} aria-label={`Remove ${tag}`}>×</button>
+                    <button onClick={() => removeTag(tag)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '0', lineHeight: 1, color: '#005566', fontSize: '14px', fontWeight: 'bold' }} aria-label={`Remove ${tag}`}>Ã—</button>
                   )}
                 </span>
               ))}
@@ -806,7 +817,7 @@ export default function PublicProfilePage() {
             {isOwner && (
               <div style={{ display: 'flex', gap: '8px' }}>
                 <input type="text" value={tagInput} placeholder="Add an item..." onChange={e => setTagInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }} disabled={tagSaving} style={{ flex: 1, backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', padding: '6px 10px', borderRadius: '6px', fontSize: '13px', outline: 'none', opacity: tagSaving ? 0.5 : 1 }} />
-                <button onClick={addTag} disabled={tagSaving} style={{ backgroundColor: '#5ECFDF', color: '#000', border: 'none', borderRadius: '6px', padding: '6px 14px', fontWeight: 600, fontSize: '13px', cursor: tagSaving ? 'default' as const : 'pointer' as const, opacity: tagSaving ? 0.5 : 1 }}>Add</button>
+                <button onClick={addTag} disabled={tagSaving} style={{ backgroundColor: '#1E8A82', color: '#fff', border: '1.5px solid #1C1610', padding: '6px 14px', fontWeight: 600, fontSize: '13px', cursor: tagSaving ? 'default' as const : 'pointer' as const, opacity: tagSaving ? 0.5 : 1 }}>Add</button>
               </div>
             )}
             {!isOwner && currentUserId && wishTags.length > 0 && (
@@ -849,7 +860,7 @@ export default function PublicProfilePage() {
                     );
                   })}
                 </div>
-                {/* Camp field — shown when Yes or Maybe */}
+                {/* Camp field â€” shown when Yes or Maybe */}
                 {(draft2026.status === 'yes' || draft2026.status === 'maybe') && (
                   <div>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: '#555', marginBottom: '6px', cursor: 'pointer', width: 'fit-content' as const }}>
@@ -879,7 +890,7 @@ export default function PublicProfilePage() {
                               </div>
                             ))}
                             {draft2026.campInput.trim() && !draft2026.searchResults.some((c: any) => c.display_name.toLowerCase() === draft2026.campInput.trim().toLowerCase()) && (
-                              <div onMouseDown={() => setDraft2026(prev => ({ ...prev, showDropdown: false }))} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '0.875rem', color: '#00aacc', borderTop: draft2026.searchResults.length > 0 ? '1px solid #f0f0f0' : undefined }}>
+                              <div onMouseDown={() => setDraft2026(prev => ({ ...prev, showDropdown: false }))} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '0.875rem', color: '#1E8A82', borderTop: draft2026.searchResults.length > 0 ? '1px solid #f0f0f0' : undefined }}>
                                 Add "{draft2026.campInput}" as a new camp
                               </div>
                             )}
@@ -935,7 +946,7 @@ export default function PublicProfilePage() {
                             </div>
                           ))}
                           {draft.campInput.trim() && !draft.searchResults.some((c: any) => c.display_name.toLowerCase() === draft.campInput.trim().toLowerCase()) && (
-                            <div onMouseDown={() => updateDraft(draft.tempId, { showDropdown: false })} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '0.875rem', color: '#00aacc', borderTop: draft.searchResults.length > 0 ? '1px solid #f0f0f0' : undefined }}>
+                            <div onMouseDown={() => updateDraft(draft.tempId, { showDropdown: false })} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '0.875rem', color: '#1E8A82', borderTop: draft.searchResults.length > 0 ? '1px solid #f0f0f0' : undefined }}>
                               Add "{draft.campInput}" as a new camp
                             </div>
                           )}
@@ -943,10 +954,10 @@ export default function PublicProfilePage() {
                       )}
                     </div>
                   )}
-                  <button onClick={() => removeDraftEntry(draft.tempId)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ccc', fontSize: '1.2rem', lineHeight: 1, flexShrink: 0, padding: '4px', paddingTop: '6px' }} aria-label="Remove">×</button>
+                  <button onClick={() => removeDraftEntry(draft.tempId)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ccc', fontSize: '1.2rem', lineHeight: 1, flexShrink: 0, padding: '4px', paddingTop: '6px' }} aria-label="Remove">Ã—</button>
                 </div>
               ))}
-              <button onClick={addDraftEntry} style={{ marginTop: '4px', fontSize: '0.8rem', color: '#00aacc', background: 'none', border: '1px dashed #00aacc', borderRadius: '6px', padding: '5px 14px', cursor: 'pointer' }}>
+              <button onClick={addDraftEntry} style={{ marginTop: '4px', fontSize: '0.8rem', color: '#1E8A82', background: 'none', border: '1px dashed #1E8A82', borderRadius: '6px', padding: '5px 14px', cursor: 'pointer' }}>
                 Add Year
               </button>
 
@@ -964,7 +975,7 @@ export default function PublicProfilePage() {
                     {aff.is_open_camping ? (
                       <span style={{ fontSize: '0.82rem', color: '#aaa', fontStyle: 'italic' as const }}>Open Camping</span>
                     ) : campSlug ? (
-                      <a href={`/camps/${campSlug}`} style={{ fontSize: '0.82rem', color: '#00aacc', textDecoration: 'none', fontWeight: 500 }}>{campName}</a>
+                      <a href={`/camps/${campSlug}`} style={{ fontSize: '0.82rem', color: '#1E8A82', textDecoration: 'none', fontWeight: 500 }}>{campName}</a>
                     ) : campName ? (
                       <span style={{ fontSize: '0.82rem', color: '#555' }}>{campName}</span>
                     ) : null}
@@ -982,7 +993,7 @@ export default function PublicProfilePage() {
           )}
         </div>{/* end playa history */}
 
-        {/* PLAYA STORY — full width below playa history */}
+        {/* PLAYA STORY â€” full width below playa history */}
         <div style={{ marginTop: '20px' }}>
           <h4 style={subheadStyle}>Got a good &quot;playa provides&quot; story?</h4>
           {isEditing ? (
@@ -1009,7 +1020,7 @@ export default function PublicProfilePage() {
               </Link>
               <button
                 onClick={() => setShowAddItem(true)}
-                style={{ backgroundColor: '#5ECFDF', color: '#000', borderRadius: 6, padding: '6px 14px', fontSize: '0.8rem', fontWeight: 600, border: 'none', cursor: 'pointer' }}
+                style={{ backgroundColor: '#1E8A82', color: '#fff', padding: '6px 14px', fontSize: '0.8rem', fontWeight: 600, border: '1.5px solid #1C1610', cursor: 'pointer' }}
               >
                 Add New Item
               </button>
@@ -1033,13 +1044,13 @@ export default function PublicProfilePage() {
             {items.map(item => {
               const loc = item.locations
                 ? [item.locations.city, item.locations.state].filter(Boolean).join(', ')
-                : '—';
+                : 'â€”';
               const termsSummary = [
                 item.return_by ? `Return by ${new Date(item.return_by).toLocaleDateString()}` : null,
                 item.damage_price ? `Damage agr. $${item.damage_price}` : null,
                 item.loss_price ? `Loss agr. $${item.loss_price}` : null,
                 item.return_terms ? item.return_terms : null,
-              ].filter(Boolean).join(' · ');
+              ].filter(Boolean).join(' Â· ');
               const visPills = (() => {
                 const v = item.visibility;
                 if (v === 'followers') return [{ label: 'Followers', bg: '#f0effe', color: '#6D28D9', border: '#ddd6fe' }];
@@ -1063,16 +1074,16 @@ export default function PublicProfilePage() {
                     </div>
                     <div style={{ overflow: 'hidden' }}>
                       <div style={{ fontWeight: '600', color: '#111', fontSize: '14px' }}>{item.item_name}</div>
-                      <div style={{ fontSize: '10px', color: '#5ECFDF', fontWeight: 'bold', textTransform: 'uppercase' as const, marginTop: '2px' }}>
+                      <div style={{ fontSize: '10px', color: '#1E8A82', fontWeight: 'bold', textTransform: 'uppercase' as const, marginTop: '2px' }}>
                         {item.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}
                       </div>
                     </div>
-                    <div style={{ ...listColStyle, whiteSpace: 'normal', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{item.description || '—'}</div>
+                    <div style={{ ...listColStyle, whiteSpace: 'normal', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{item.description || 'â€”'}</div>
                     <div style={listColStyle}>{item.category}</div>
                     <div style={{ ...listColStyle, display: 'flex', alignItems: 'center', gap: '3px' }}>
                       <MapPin size={11} style={{ flexShrink: 0 }} />{loc}
                     </div>
-                    <div style={{ ...listColStyle, fontSize: '11px', color: '#888', whiteSpace: 'normal', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{termsSummary || '—'}</div>
+                    <div style={{ ...listColStyle, fontSize: '11px', color: '#888', whiteSpace: 'normal', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{termsSummary || 'â€”'}</div>
                     {isOwner && (
                       <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '3px', alignSelf: 'center' }}>
                         {visPills.map(p => (
@@ -1113,15 +1124,16 @@ export default function PublicProfilePage() {
         <WelcomeModal userId={profile.id} onClose={() => setShowWelcome(false)} />
       )}
     </div>
+    </div>
   );
 }
 
 // --- STYLES ---
 const LIST_COLS = '50px 160px 1fr 140px 120px 1fr 60px';
 
-const subheadStyle: React.CSSProperties = { color: '#555', textTransform: 'uppercase', fontSize: '0.88rem', fontWeight: 800, marginBottom: '10px', marginTop: 0, letterSpacing: '0.04em' };
-const editTextareaStyle: React.CSSProperties = { width: '100%', backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', padding: '10px', height: '80px', borderRadius: '6px', boxSizing: 'border-box', outline: 'none' };
-const listHeaderStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: LIST_COLS, gap: '10px', padding: '8px 12px', fontSize: '10px', fontWeight: '700', color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '2px solid #eee' };
-const listRowStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: LIST_COLS, gap: '10px', alignItems: 'center', padding: '10px 12px', backgroundColor: '#fff', borderBottom: '1px solid #f5f5f5' };
-const listImgStyle: React.CSSProperties = { width: '50px', height: '50px', borderRadius: '6px', overflow: 'hidden', backgroundColor: '#000', flexShrink: 0 };
-const listColStyle: React.CSSProperties = { fontSize: '12px', color: '#666', overflow: 'hidden', whiteSpace: 'nowrap' };
+const subheadStyle: React.CSSProperties = { fontFamily: "'Space Mono', monospace", color: '#9A8878', textTransform: 'uppercase' as const, fontSize: '0.6rem', fontWeight: 700, marginBottom: '10px', marginTop: 0, letterSpacing: '0.08em' };
+const editTextareaStyle: React.CSSProperties = { width: '100%', backgroundColor: '#FDFAF4', color: '#1C1610', border: '1.5px solid rgba(28,22,16,0.25)', padding: '10px', height: '80px', boxSizing: 'border-box' as const, outline: 'none' };
+const listHeaderStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: LIST_COLS, gap: '10px', padding: '8px 12px', fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', fontWeight: 700, color: '#9A8878', textTransform: 'uppercase' as const, letterSpacing: '0.06em', borderBottom: '1.5px solid rgba(28,22,16,0.12)' };
+const listRowStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: LIST_COLS, gap: '10px', alignItems: 'center', padding: '10px 12px', backgroundColor: '#FDFAF4', borderBottom: '1px solid rgba(28,22,16,0.06)' };
+const listImgStyle: React.CSSProperties = { width: '50px', height: '50px', overflow: 'hidden', backgroundColor: '#EDE5D0', flexShrink: 0 };
+const listColStyle: React.CSSProperties = { fontSize: '12px', color: '#4A3828', overflow: 'hidden', whiteSpace: 'nowrap' as const };

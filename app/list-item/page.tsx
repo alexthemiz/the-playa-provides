@@ -218,11 +218,17 @@ function ListItemPageInner() {
 
   return (
     <div style={pageWrapperStyle}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px 20px 0 20px' }}>
-        <style>{`.title-break { display: none; } @media (max-width: 430px) { .title-break { display: block; } }`}</style>
-        <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 8px 0' }}>The Playa Provides<span className="title-break" /><span style={{ textDecoration: 'underline' }}> This Item{'\u00a0'}</span></h1>
-        <p style={{ color: '#666', fontSize: '14px', margin: 0, lineHeight: '1.5' }}>Add an item to your inventory, then make it available to the public, your campmates, or people you follow—or keep it private until you decide to share, and you set the terms.</p>
+
+      {/* Page header band */}
+      <div style={{ backgroundColor: '#FDFAF4', borderBottom: '2px solid #1C1610', padding: '28px 40px' }}>
+        <div style={{ maxWidth: '520px', margin: '0 auto' }}>
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: '#9A8878', marginBottom: '8px' }}>Add to Inventory</div>
+          <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: '1.9rem', fontWeight: 900, color: '#1C1610', margin: 0, lineHeight: 1.05 }}>
+            List <em style={{ fontStyle: 'italic', color: '#1E8A82' }}>This Item.</em>
+          </h1>
+        </div>
       </div>
+
       <div style={containerStyle}>
 
         <form onSubmit={handleSubmit} style={formStyle}>
@@ -329,7 +335,7 @@ function ListItemPageInner() {
                 ].map(status => (
                   <label key={status.id} style={{
                     ...radioLabelStyle,
-                    border: availability === status.id ? '2px solid #5ECFDF' : '1px solid #eee',
+                    border: availability === status.id ? '2px solid #1E8A82' : '1px solid #eee',
                     backgroundColor: availability === status.id ? '#f0fbff' : '#fff',
                   }}>
                     <input type="radio" value={status.id} checked={availability === status.id} onChange={e => setAvailability(e.target.value)} style={{ display: 'none' }} />
@@ -346,7 +352,7 @@ function ListItemPageInner() {
               <div style={sectionStyle}>
                 <label style={labelStyle}>Who can view this item</label>
                 {campDataLoaded && campMateIds.length === 0 && (
-                  <p style={hintStyle}>Add your camp history <a href="/settings" target="_blank" rel="noreferrer" style={{ color: '#5ECFDF', fontWeight: 600, textDecoration: 'none' }}>to your profile</a> to unlock campmates-only sharing</p>
+                  <p style={hintStyle}>Add your camp history <a href="/settings" target="_blank" rel="noreferrer" style={{ color: '#1E8A82', fontWeight: 600, textDecoration: 'none' }}>to your profile</a> to unlock campmates-only sharing</p>
                 )}
                 <select
                   value={visibility}
@@ -460,31 +466,31 @@ export default function ListItemPage() {
 }
 
 // --- STYLES ---
-const pageWrapperStyle: React.CSSProperties = { backgroundColor: '#fff', minHeight: '100vh', width: '100%' };
+const pageWrapperStyle: React.CSSProperties = { backgroundColor: '#F6F1E8', minHeight: '100vh', width: '100%' };
 const containerStyle: React.CSSProperties = { padding: '20px 20px 60px', maxWidth: '520px', margin: '0 auto' };
 const formStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column' as const, gap: '12px', marginTop: '16px' };
-const formBoxStyle: React.CSSProperties = { backgroundColor: '#f4f4f4', borderRadius: '16px', padding: '12px 20px 20px', display: 'flex', flexDirection: 'column' as const, gap: '14px' };
+const formBoxStyle: React.CSSProperties = { backgroundColor: '#EDE5D0', padding: '12px 20px 20px', display: 'flex', flexDirection: 'column' as const, gap: '14px', border: '1.5px solid rgba(28,22,16,0.1)' };
 const sectionStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column' as const, gap: '3px' };
-const labelStyle: React.CSSProperties = { fontSize: '12px', color: '#555', fontWeight: '600', textTransform: 'uppercase' as const, letterSpacing: '0.04em' };
-const hintStyle: React.CSSProperties = { fontSize: '12px', color: '#888', margin: '0', lineHeight: '1.5' };
-const inputStyle: React.CSSProperties = { padding: '9px 12px', borderRadius: '8px', border: '1px solid #ddd', backgroundColor: '#fff', color: '#111', fontSize: '14px', outline: 'none', width: '100%', boxSizing: 'border-box' as const };
+const labelStyle: React.CSSProperties = { fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: '#9A8878' };
+const hintStyle: React.CSSProperties = { fontSize: '12px', color: '#9A8878', margin: '0', lineHeight: '1.5' };
+const inputStyle: React.CSSProperties = { padding: '9px 12px', border: '1.5px solid rgba(28,22,16,0.25)', backgroundColor: '#FDFAF4', color: '#1C1610', fontSize: '14px', outline: 'none', width: '100%', boxSizing: 'border-box' as const };
 const radioGroupStyle: React.CSSProperties = { display: 'flex', flexDirection: 'row' as const, gap: '8px' };
-const radioLabelStyle: React.CSSProperties = { flex: 1, padding: '10px 12px', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' };
-const detailsBoxStyle: React.CSSProperties = { marginTop: '10px', padding: '14px', backgroundColor: '#f9f9f9', borderRadius: '10px', border: '1px solid #eee' };
-const unifiedBoxStyle: React.CSSProperties = { marginTop: '6px', backgroundColor: '#fff', borderRadius: '10px', border: '1px solid #ddd', overflow: 'hidden' };
-const unifiedTextareaStyle: React.CSSProperties = { display: 'block', width: '100%', minHeight: '80px', padding: '12px 14px', border: 'none', background: 'transparent', fontSize: '14px', color: '#111', resize: 'vertical' as const, outline: 'none', boxSizing: 'border-box' as const, fontFamily: 'inherit' };
-const trayStyle: React.CSSProperties = { padding: '12px 14px', display: 'flex', gap: '10px', borderTop: '1px solid #e8e8e8' };
+const radioLabelStyle: React.CSSProperties = { flex: 1, padding: '10px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' };
+const detailsBoxStyle: React.CSSProperties = { marginTop: '10px', padding: '14px', backgroundColor: '#FDFAF4', border: '1.5px solid rgba(28,22,16,0.12)' };
+const unifiedBoxStyle: React.CSSProperties = { marginTop: '6px', backgroundColor: '#FDFAF4', border: '1.5px solid rgba(28,22,16,0.2)', overflow: 'hidden' };
+const unifiedTextareaStyle: React.CSSProperties = { display: 'block', width: '100%', minHeight: '80px', padding: '12px 14px', border: 'none', background: 'transparent', fontSize: '14px', color: '#1C1610', resize: 'vertical' as const, outline: 'none', boxSizing: 'border-box' as const, fontFamily: 'inherit' };
+const trayStyle: React.CSSProperties = { padding: '12px 14px', display: 'flex', gap: '10px', borderTop: '1px solid rgba(28,22,16,0.1)' };
 const trayItemStyle: React.CSSProperties = { flex: 1, minWidth: 0 };
-const trayLabelStyle: React.CSSProperties = { fontSize: '11px', color: '#777', fontWeight: '600', textTransform: 'uppercase' as const, letterSpacing: '0.04em' };
-const trayHintStyle: React.CSSProperties = { fontSize: '11px', color: '#aaa', margin: '2px 0 4px', fontStyle: 'italic' as const };
-const trayInputStyle: React.CSSProperties = { padding: '7px 10px', borderRadius: '7px', border: '1px solid #ddd', backgroundColor: '#fff', color: '#111', fontSize: '13px', outline: 'none', width: '100%', boxSizing: 'border-box' as const };
-const submitButtonStyle: React.CSSProperties = { padding: '14px', backgroundColor: '#5ECFDF', color: 'black', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', fontSize: '15px', marginTop: '8px' };
+const trayLabelStyle: React.CSSProperties = { fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', color: '#9A8878', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.04em' };
+const trayHintStyle: React.CSSProperties = { fontSize: '11px', color: '#9A8878', margin: '2px 0 4px', fontStyle: 'italic' as const };
+const trayInputStyle: React.CSSProperties = { padding: '7px 10px', border: '1.5px solid rgba(28,22,16,0.25)', backgroundColor: '#FDFAF4', color: '#1C1610', fontSize: '13px', outline: 'none', width: '100%', boxSizing: 'border-box' as const };
+const submitButtonStyle: React.CSSProperties = { padding: '14px', backgroundColor: '#1E8A82', color: '#fff', border: '2px solid #1C1610', boxShadow: '3px 3px 0 #1C1610', fontWeight: 'bold', cursor: 'pointer', fontSize: '15px', marginTop: '8px' };
 const photoUploadContainer: React.CSSProperties = { display: 'flex', gap: '10px', flexWrap: 'wrap' as const };
-const photoPlaceholder: React.CSSProperties = { width: '80px', height: '80px', borderRadius: '10px', border: '2px dashed #ddd', display: 'flex', flexDirection: 'column' as const, alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#aaa', fontSize: '10px', textAlign: 'center' as const, gap: '4px' };
-const photoPreviewImg: React.CSSProperties = { width: '80px', height: '80px', objectFit: 'cover' as const, borderRadius: '10px', border: '1px solid #eee' };
+const photoPlaceholder: React.CSSProperties = { width: '80px', height: '80px', border: '2px dashed rgba(28,22,16,0.2)', display: 'flex', flexDirection: 'column' as const, alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#9A8878', fontSize: '10px', textAlign: 'center' as const, gap: '4px' };
+const photoPreviewImg: React.CSSProperties = { width: '80px', height: '80px', objectFit: 'cover' as const, border: '1px solid rgba(28,22,16,0.12)' };
 const removePhotoBtn: React.CSSProperties = { position: 'absolute' as const, top: '-5px', right: '-5px', backgroundColor: '#ff4444', color: 'white', border: 'none', borderRadius: '50%', width: '20px', height: '20px', fontSize: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' };
 const modalOverlayStyle: React.CSSProperties = { position: 'fixed' as const, top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 };
-const modalContentStyle: React.CSSProperties = { backgroundColor: '#fff', padding: '40px', borderRadius: '24px', width: '90%', maxWidth: '400px', textAlign: 'center' as const, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' };
+const modalContentStyle: React.CSSProperties = { backgroundColor: '#FDFAF4', padding: '40px', width: '90%', maxWidth: '400px', textAlign: 'center' as const, border: '2px solid #1C1610', boxShadow: '6px 6px 0 #1C1610' };
 const checkCircleStyle: React.CSSProperties = { width: '70px', height: '70px', backgroundColor: '#f0fdf4', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto' };
-const primaryActionBtn: React.CSSProperties = { padding: '13px', backgroundColor: '#5ECFDF', color: 'black', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', width: '100%' };
-const secondaryActionBtn: React.CSSProperties = { padding: '13px', backgroundColor: '#f5f5f5', color: '#666', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', width: '100%' };
+const primaryActionBtn: React.CSSProperties = { padding: '13px', backgroundColor: '#1E8A82', color: '#fff', border: '2px solid #1C1610', boxShadow: '3px 3px 0 #1C1610', fontWeight: 'bold', cursor: 'pointer', width: '100%' };
+const secondaryActionBtn: React.CSSProperties = { padding: '13px', backgroundColor: '#EDE5D0', color: '#4A3828', border: '1.5px solid rgba(28,22,16,0.2)', fontWeight: 'bold', cursor: 'pointer', width: '100%' };

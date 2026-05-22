@@ -1,41 +1,64 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import dynamic from 'next/dynamic';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-
-const MapView = dynamic(() => import('@/components/MapView'), { ssr: false });
 import ImageSlider from '@/components/ImageSlider';
-import { Search, LayoutGrid, List, MapPin, User, Package, Map as MapIcon, X } from 'lucide-react';
+import { Search, MapPin, User, Package, X } from 'lucide-react';
 import Link from 'next/link';
 import RequestModal from '@/components/RequestModal';
 
-export default function FindItemsPage() {
-  const [items, setItems] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [zipQuery, setZipQuery] = useState('');
-  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('grid');
-  
-  // Multi-select states
-  const [categoryFilters, setCategoryFilters] = useState<string[]>(['All']);
-  const [availabilityFilters, setAvailabilityFilters] = useState<string[]>(['Keep', 'Borrow']);
+// ── Design tokens ────────────────────────────────────────────────────────────
+const INK      = '#1C1610'
+const INK_MID  = '#4A3828'
+const INK_LITE = '#9A8878'
+const PAPER    = '#F6F1E8'
+const PAPER_DK = '#EDE5D0'
+const PAPER_LT = '#FDFAF4'
+const LIME     = '#B8CC2A'
+const LIME_DK  = '#8A9A10'
+const TEAL     = '#1E8A82'
+const TEAL_LT  = '#D4EDEB'
+const RUST     = '#C24820'
+const RUST_LT  = '#F5E0D8'
+const MUSTARD  = '#D4A020'
+const MUSTARD_LT = '#F5F0D0'
 
-  // Relationship filter states
-  const [userId, setUserId] = useState<string | null>(null);
+const CATEGORY_EMOJI: Record<string, string> = {
+  'Bikes & Transport':  '🚲',
+  'Clothing & Fun':     '🧥',
+  'Kitchen & Water':    '🥘',
+  'Power & Lighting':   '🔆',
+  'Safety & First Aid': '🩹',
+  'Shelter & Shade':    '⛺',
+  'Tools & Hardware':   '🔧',
+  'Miscellaneous':      '📦',
+}
+
+// Slight rotation per card for polaroid feel
+const CARD_ROTS = [0.6, -0.8, 0.3, -1.1, 0.7, -0.4, 1.0, -0.5, 0.9, -1.2, 0.4, -0.7]
+
+export default function FindItemsPage() {
+  const [items,               setItems]               = useState<any[]>([]);
+  const [loading,             setLoading]             = useState(true);
+  const [searchQuery,         setSearchQuery]         = useState('');
+  const [zipQuery,            setZipQuery]            = useState('');
+
+  const [categoryFilters,     setCategoryFilters]     = useState<string[]>(['All']);
+  const [availabilityFilters, setAvailabilityFilters] = useState<string[]>(['Keep', 'Borrow']);
   const [relationshipFilters, setRelationshipFilters] = useState<string[]>(['Everyone']);
+
+  const [userId,       setUserId]       = useState<string | null>(null);
   const [followingIds, setFollowingIds] = useState<string[]>([]);
-  const [followerIds, setFollowerIds] = useState<string[]>([]);
-  const [campMateIds, setCampMateIds] = useState<string[]>([]);
-  
-  // Modal States
-  const [selectedItem, setSelectedItem] = useState<any>(null);
-  const [showRequestForm, setShowRequestForm] = useState(false);
+  const [followerIds,  setFollowerIds]  = useState<string[]>([]);
+  const [campMateIds,  setCampMateIds]  = useState<string[]>([]);
+
+  const [selectedItem,     setSelectedItem]     = useState<any>(null);
+  const [showRequestForm,  setShowRequestForm]  = useState(false);
 
   const categories = [
-    'All', 'Bikes & Transport', 'Clothing & Fun', 'Kitchen & Water', 
-    'Power & Lighting', 'Safety & First Aid', 'Shelter & Shade', 
-    'Tools & Hardware', 'Miscellaneous'
+    'All', 'Bikes & Transport', 'Clothing & Fun', 'Kitchen & Water',
+    'Power & Lighting', 'Safety & First Aid', 'Shelter & Shade',
+    'Tools & Hardware', 'Miscellaneous',
   ];
 
   useEffect(() => {
@@ -43,12 +66,10 @@ export default function FindItemsPage() {
     fetchRelationships();
   }, []);
 
-  // URL Sync Logic: Handles refresh and browser back/forward buttons
   useEffect(() => {
     const syncModalWithUrl = () => {
       const pathParts = window.location.pathname.split('/');
       const idFromUrl = pathParts[pathParts.length - 1];
-      
       if (idFromUrl && idFromUrl !== 'find-items' && items.length > 0) {
         const item = items.find(i => i.id === idFromUrl);
         if (item) setSelectedItem(item);
@@ -57,7 +78,6 @@ export default function FindItemsPage() {
         setShowRequestForm(false);
       }
     };
-
     if (!loading) {
       syncModalWithUrl();
       window.addEventListener('popstate', syncModalWithUrl);
@@ -67,66 +87,49 @@ export default function FindItemsPage() {
 
   async function fetchRelationships() {
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) return
-      setUserId(session.user.id)
-
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      setUserId(session.user.id);
       const [followingRes, followersRes] = await Promise.all([
         supabase.from('user_follows').select('following_id').eq('follower_id', session.user.id),
         supabase.from('user_follows').select('follower_id').eq('following_id', session.user.id),
-      ])
-
-      setFollowingIds((followingRes.data || []).map((r: any) => r.following_id))
-      setFollowerIds((followersRes.data || []).map((r: any) => r.follower_id))
-
+      ]);
+      setFollowingIds((followingRes.data || []).map((r: any) => r.following_id));
+      setFollowerIds((followersRes.data || []).map((r: any) => r.follower_id));
       const { data: myAffiliations } = await supabase
-        .from('user_camp_affiliations')
-        .select('camp_id')
-        .eq('user_id', session.user.id)
-        .not('camp_id', 'is', null)
-      const myCampIds = (myAffiliations || []).map((r: any) => r.camp_id).filter(Boolean)
+        .from('user_camp_affiliations').select('camp_id')
+        .eq('user_id', session.user.id).not('camp_id', 'is', null);
+      const myCampIds = (myAffiliations || []).map((r: any) => r.camp_id).filter(Boolean);
       if (myCampIds.length === 0) {
-        setCampMateIds([])
+        setCampMateIds([]);
       } else {
         const { data: campMembers } = await supabase
-          .from('user_camp_affiliations')
-          .select('user_id')
-          .in('camp_id', myCampIds)
-          .neq('user_id', session.user.id)
-        const unique = [...new Set((campMembers || []).map((r: any) => r.user_id))]
-        setCampMateIds(unique)
+          .from('user_camp_affiliations').select('user_id')
+          .in('camp_id', myCampIds).neq('user_id', session.user.id);
+        setCampMateIds([...new Set((campMembers || []).map((r: any) => r.user_id))]);
       }
-    } catch (err: any) {
-      console.error('fetchRelationships error:', err.message)
-    }
+    } catch (err: any) { console.error('fetchRelationships error:', err.message); }
   }
 
   async function fetchItems() {
     setLoading(true);
     try {
-      const { data: gear, error: gearError } = await supabase.from('gear_items').select('*').eq('owner_deleted', false);
+      const { data: gear, error: gearError } = await supabase
+        .from('gear_items').select('*').eq('owner_deleted', false);
       if (gearError) throw gearError;
-
-      const userIds = [...new Set(gear.map(i => i.user_id))];
-      const locationIds = [...new Set(gear.map(i => i.location_id).filter(id => id))];
-
+      const userIds     = [...new Set(gear.map((i: any) => i.user_id))];
+      const locationIds = [...new Set(gear.map((i: any) => i.location_id).filter((id: any) => id))];
       const [profilesRes, locationsRes] = await Promise.all([
         supabase.from('profiles').select('id, preferred_name, contact_email, username').in('id', userIds),
-        supabase.from('locations').select('id, city, state, zip_code, latitude, longitude').in('id', locationIds)
+        supabase.from('locations').select('id, city, state, zip_code, latitude, longitude').in('id', locationIds),
       ]);
-
-      const enrichedItems = gear.map(item => ({
+      setItems(gear.map((item: any) => ({
         ...item,
-        profiles: profilesRes.data?.find(p => p.id === item.user_id),
-        locations: locationsRes.data?.find(l => l.id === item.location_id)
-      }));
-
-      setItems(enrichedItems);
-    } catch (err: any) {
-      console.error('Fetch error:', err.message);
-    } finally {
-      setLoading(false);
-    }
+        profiles:  profilesRes.data?.find((p: any) => p.id === item.user_id),
+        locations: locationsRes.data?.find((l: any) => l.id === item.location_id),
+      })));
+    } catch (err: any) { console.error('Fetch error:', err.message); }
+    finally { setLoading(false); }
   }
 
   const handleOpenItem = (item: any) => {
@@ -141,462 +144,404 @@ export default function FindItemsPage() {
   };
 
   const toggleCategory = (cat: string) => {
-    if (cat === 'All') {
-      setCategoryFilters(['All']);
-    } else {
-      setCategoryFilters(prev => {
-        const newFilters = prev.filter(f => f !== 'All');
-        if (newFilters.includes(cat)) {
-          const filtered = newFilters.filter(f => f !== cat);
-          return filtered.length === 0 ? ['All'] : filtered;
-        }
-        return [...newFilters, cat];
-      });
-    }
+    if (cat === 'All') { setCategoryFilters(['All']); return; }
+    setCategoryFilters(prev => {
+      const without = prev.filter(f => f !== 'All');
+      if (without.includes(cat)) {
+        const next = without.filter(f => f !== cat);
+        return next.length === 0 ? ['All'] : next;
+      }
+      return [...without, cat];
+    });
   };
 
   const toggleAvailability = (mode: string) => {
     setAvailabilityFilters(prev => {
-      if (prev.includes(mode)) {
-        return prev.length === 1 ? prev : prev.filter(m => m !== mode);
-      }
+      if (prev.includes(mode)) return prev.length === 1 ? prev : prev.filter(m => m !== mode);
       return [...prev, mode];
     });
   };
 
   const toggleRelationship = (option: string) => {
-    if (option === 'Everyone') {
-      setRelationshipFilters(['Everyone']);
-    } else {
-      setRelationshipFilters(prev => {
-        const without = prev.filter(f => f !== 'Everyone');
-        if (without.includes(option)) {
-          const filtered = without.filter(f => f !== option);
-          return filtered.length === 0 ? ['Everyone'] : filtered;
-        }
-        return [...without, option];
-      });
-    }
+    if (option === 'Everyone') { setRelationshipFilters(['Everyone']); return; }
+    setRelationshipFilters(prev => {
+      const without = prev.filter(f => f !== 'Everyone');
+      if (without.includes(option)) {
+        const next = without.filter(f => f !== option);
+        return next.length === 0 ? ['Everyone'] : next;
+      }
+      return [...without, option];
+    });
   };
 
-  const filteredItems = useMemo(() => items.filter(item => {
-    const isAvailable = item.availability_status !== 'Not Available';
-    const matchesSearch = item.item_name?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesZip = !zipQuery || item.locations?.zip_code?.includes(zipQuery);
-    const matchesCategory = categoryFilters.includes('All') || categoryFilters.includes(item.category);
+  const filteredItems = items.filter(item => {
+    if (item.availability_status === 'Not Available') return false;
+    if (!item.item_name?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (zipQuery && !item.locations?.zip_code?.includes(zipQuery)) return false;
+    if (!categoryFilters.includes('All') && !categoryFilters.includes(item.category)) return false;
     const itemStatus = item.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow';
-    const matchesAvailability = availabilityFilters.includes(itemStatus);
-    const matchesRelationship = (() => {
-      if (relationshipFilters.includes('Everyone')) return true;
-      if (relationshipFilters.includes('Following') && followingIds.includes(item.user_id)) return true;
-      if (relationshipFilters.includes('Followers') && followerIds.includes(item.user_id)) return true;
-      if (relationshipFilters.includes('My Campmates') && campMateIds.includes(item.user_id)) return true;
-      return false;
-    })();
-    return isAvailable && matchesSearch && matchesZip && matchesCategory && matchesAvailability && matchesRelationship;
-  }), [items, searchQuery, zipQuery, categoryFilters, availabilityFilters, relationshipFilters, followingIds, followerIds, campMateIds]);
+    if (!availabilityFilters.includes(itemStatus)) return false;
+    if (!relationshipFilters.includes('Everyone')) {
+      const inFollowing  = relationshipFilters.includes('Following')   && followingIds.includes(item.user_id);
+      const inFollowers  = relationshipFilters.includes('Followers')   && followerIds.includes(item.user_id);
+      const inCampmates  = relationshipFilters.includes('My Campmates') && campMateIds.includes(item.user_id);
+      if (!inFollowing && !inFollowers && !inCampmates) return false;
+    }
+    return true;
+  });
+
+  // ── Chip helpers ─────────────────────────────────────────────────────────
+  function chipStyle(active: boolean, accent?: string): React.CSSProperties {
+    if (active && accent) return {
+      padding: '6px 14px', fontSize: '0.78rem', fontWeight: 600, whiteSpace: 'nowrap' as const,
+      border: `1.5px solid ${accent}`, background: accent, color: '#fff', cursor: 'pointer',
+      fontFamily: 'inherit', transition: 'all 0.12s',
+    };
+    if (active) return {
+      padding: '6px 14px', fontSize: '0.78rem', fontWeight: 600, whiteSpace: 'nowrap' as const,
+      border: `1.5px solid ${INK}`, background: INK, color: PAPER, cursor: 'pointer',
+      fontFamily: 'inherit', transition: 'all 0.12s',
+    };
+    return {
+      padding: '6px 14px', fontSize: '0.78rem', fontWeight: 500, whiteSpace: 'nowrap' as const,
+      border: `1.5px solid rgba(28,22,16,0.2)`, background: PAPER_LT, color: INK_MID,
+      cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.12s',
+    };
+  }
+
+  const CAT_ACCENTS: Record<string, string> = {
+    'Shelter & Shade':    TEAL,
+    'Power & Lighting':   MUSTARD,
+    'Clothing & Fun':     RUST,
+    'Bikes & Transport':  LIME_DK,
+    'Safety & First Aid': '#7B4FCF',
+    'Kitchen & Water':    '#1E8A82',
+    'Tools & Hardware':   INK_MID,
+    'Miscellaneous':      INK_LITE,
+  };
 
   return (
-    <div style={containerStyle}>
-      <style>{`
-        .fi-row { border-bottom: 1px solid #eee; padding-bottom: 12px; margin-bottom: 12px; }
-        .fi-searches { display: flex; align-items: center; gap: 12px; }
-        .fi-kw { display: flex; align-items: center; gap: 8px; }
-        .fi-loc { display: flex; align-items: center; gap: 8px; }
-        .fi-rel { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: 1; }
-        .fi-kw-input { position: relative; flex: 0 1 200px; }
-        .fi-loc-input { position: relative; flex: 0 0 120px; min-width: 120px; }
-        .fi-cat-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-        .fi-cat-label { display: none; }
-        .fi-bottom-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
-        .fi-avail { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        .fi-grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
-        .title-break { display: none; }
-        @media (min-width: 430px) and (max-width: 1023px) {
-          .fi-searches { flex-wrap: wrap; column-gap: 12px; row-gap: 0; }
-          .fi-kw { flex: 1; }
-          .fi-loc { flex: 1; }
-          .fi-kw-input { flex: 1; }
-          .fi-loc-input { flex: 1; min-width: 0; }
-          .fi-grid { grid-template-columns: repeat(3, 1fr); overflow: hidden; }
-          .fi-grid > * { min-width: 0; box-sizing: border-box; }
-        }
-        @media (min-width: 768px) and (max-width: 1023px) {
-          .fi-rel { flex: 0 0 100%; border-top: 1px solid #eee; padding-top: 10px; margin-top: 8px; }
-        }
-        @media (max-width: 767px) {
-          .fi-rel { flex: none; width: 100%; }
-          .fi-kw-input { flex: 1; }
-          .fi-loc-input { flex: 1; min-width: 0; }
-          .fi-row { margin-bottom: 8px; padding-bottom: 8px; }
-        }
-        @media (max-width: 429px) {
-          .fi-searches { flex-direction: column; gap: 0; align-items: stretch; }
-          .fi-kw { flex: none; width: 100%; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px; }
-          .fi-loc { flex: none; width: 100%; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 8px; }
-          .fi-avail { flex-wrap: nowrap; }
-          .fi-avail button { padding: 4px 10px; font-size: 11px; }
-          .fi-cat-row button { padding: 4px 10px; font-size: 11px; }
-          .fi-cat-label { display: block; }
-          .fi-grid { grid-template-columns: repeat(2, 1fr); overflow: hidden; }
-          .fi-grid > * { min-width: 0; box-sizing: border-box; }
-          .title-break { display: block; }
-        }
-        @media (min-width: 1024px) { .fi-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); } }
-      `}</style>
+    <div style={{ backgroundColor: PAPER, minHeight: '100vh', color: INK }}>
 
-      <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#2D241E', margin: '0 0 20px 0' }}>
-        The Playa Provides<span className="title-break" /><span style={{ textDecoration: 'underline' }}> Items to Borrow or Keep{'\u00a0'}</span>
-      </h1>
+      {/* ── PAGE HEADER BAND ───────────────────────────────────────────── */}
+      <div style={{ backgroundColor: PAPER_LT, borderBottom: `2px solid ${INK}`, padding: '28px 40px 0' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
 
-      {/* ROW 1 (desktop): Keyword | Location | Relationship chips */}
-      {/* ROW 1+2 (landscape): Keyword+Location / Relationship chips */}
-      {/* ROW 1+2+3 (portrait): Keyword / Location / Relationship chips */}
-      <div className="fi-row fi-searches">
-        <div className="fi-kw">
-          <span style={filterLabelStyle}>Search by Keyword:</span>
-          <div className="fi-kw-input">
-            <Search size={18} style={searchIconStyle} />
-            <input
-              type="text"
-              placeholder="Item name or type..."
-              style={searchInputStyle}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: INK_LITE, marginBottom: '8px' }}>
+            Browse
+          </div>
+          <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: '1.9rem', fontWeight: 900, lineHeight: 1.05, color: INK, margin: '0 0 18px' }}>
+            Find what you <em style={{ fontStyle: 'italic', color: TEAL }}>need.</em>
+          </h1>
+
+          {/* Search row */}
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', border: `2px solid ${INK}`, background: PAPER_LT, padding: '0 14px', gap: '10px' }}>
+              <Search size={16} color={INK_LITE} style={{ flexShrink: 0 }} />
+              <input
+                type="text"
+                placeholder="Search by keyword…"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontFamily: 'Outfit, sans-serif', fontSize: '0.92rem', color: INK, padding: '11px 0' }}
+              />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', border: `2px solid ${INK}`, background: PAPER_LT, padding: '0 14px', gap: '8px', width: '140px' }}>
+              <MapPin size={14} color={INK_LITE} style={{ flexShrink: 0 }} />
+              <input
+                type="text"
+                placeholder="ZIP"
+                value={zipQuery}
+                onChange={e => setZipQuery(e.target.value)}
+                style={{ width: '100%', border: 'none', background: 'transparent', outline: 'none', fontFamily: 'Outfit, sans-serif', fontSize: '0.92rem', color: INK, padding: '11px 0' }}
+              />
+            </div>
+          </div>
+
+          {/* Filter rows */}
+          <style>{`
+            .fi-filters { display: flex; align-items: center; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 12px; flex-wrap: wrap; }
+            .fi-filters::-webkit-scrollbar { display: none; }
+            .fi-pipe { color: #ccc; font-size: 0.75rem; flex-shrink: 0; }
+            .fi-label { font-family: 'Space Mono', monospace; font-size: 0.55rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: ${INK_LITE}; white-space: nowrap; flex-shrink: 0; }
+          `}</style>
+
+          <div className="fi-filters">
+            <span className="fi-label">Category</span>
+            {categories.map(cat => (
+              <button key={cat} onClick={() => toggleCategory(cat)}
+                style={chipStyle(categoryFilters.includes(cat), cat !== 'All' ? CAT_ACCENTS[cat] : undefined)}>
+                {cat}
+              </button>
+            ))}
+
+            <span className="fi-pipe">|</span>
+            <span className="fi-label">Show from</span>
+            {['Everyone', 'Following', 'Followers', 'My Campmates'].map(opt => (
+              <button key={opt} onClick={() => toggleRelationship(opt)}
+                style={chipStyle(relationshipFilters.includes(opt))}>
+                {opt}
+              </button>
+            ))}
+
+            <span className="fi-pipe">|</span>
+            <span className="fi-label">Available to</span>
+            {['Borrow', 'Keep'].map(opt => (
+              <button key={opt} onClick={() => toggleAvailability(opt)}
+                style={chipStyle(availabilityFilters.includes(opt), opt === 'Borrow' ? TEAL : RUST)}>
+                {opt}
+              </button>
+            ))}
           </div>
         </div>
-        <div className="fi-loc">
-          <span style={filterLabelStyle}>Search by Location:</span>
-          <div className="fi-loc-input">
-            <MapPin size={18} style={searchIconStyle} />
-            <input
-              type="text"
-              placeholder="Zip"
-              style={searchInputStyle}
-              value={zipQuery}
-              onChange={(e) => setZipQuery(e.target.value)}
-            />
+      </div>
+
+      {/* ── RESULTS BAR ────────────────────────────────────────────────── */}
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '20px 40px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.68rem', color: INK_LITE, fontWeight: 700, letterSpacing: '0.06em' }}>
+          {loading ? 'Loading…' : <><strong style={{ color: INK }}>{filteredItems.length}</strong> items available</>}
+        </div>
+      </div>
+
+      {/* ── GRID ───────────────────────────────────────────────────────── */}
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '20px 40px 64px' }}>
+        <style>{`
+          .fi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 24px;
+          }
+          @media (min-width: 1100px) { .fi-grid { grid-template-columns: repeat(5, 1fr); } }
+          @media (min-width:  860px) and (max-width: 1099px) { .fi-grid { grid-template-columns: repeat(4, 1fr); } }
+          @media (min-width:  600px) and (max-width:  859px) { .fi-grid { grid-template-columns: repeat(3, 1fr); } }
+          @media (max-width: 599px)  { .fi-grid { grid-template-columns: repeat(2, 1fr); } }
+          .item-card { transition: transform 0.12s, box-shadow 0.12s; cursor: pointer; }
+          .item-card:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 ${INK} !important; }
+        `}</style>
+
+        {loading ? (
+          <div className="fi-grid">
+            {[...Array(10)].map((_, i) => (
+              <div key={i} style={{ backgroundColor: PAPER_DK, aspectRatio: '3/4', border: `1.5px solid rgba(28,22,16,0.1)` }} />
+            ))}
           </div>
-        </div>
-        <div className="fi-rel">
-          <span style={filterLabelStyle}>Show items from:</span>
-          {['Everyone', 'Following', 'Followers', 'My Campmates'].map((option) => {
-            const isActive = relationshipFilters.includes(option);
-            return (
-              <button
-                key={option}
-                onClick={() => toggleRelationship(option)}
-                style={{
-                  ...chipStyle,
-                  backgroundColor: isActive ? '#3ABFD4' : '#fff',
-                  color: isActive ? '#000' : '#555',
-                  borderColor: isActive ? '#3ABFD4' : '#ccc',
-                }}
-              >
-                {option}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+        ) : filteredItems.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '80px 20px' }}>
+            <div style={{ fontSize: '3.5rem', marginBottom: '16px' }}>🏜️</div>
+            <h3 style={{ fontFamily: "'Fraunces', serif", fontSize: '1.3rem', fontWeight: 700, fontStyle: 'italic', marginBottom: '8px', color: INK }}>Nothing out there right now.</h3>
+            <p style={{ color: INK_MID, fontSize: '0.9rem' }}>Try adjusting your filters, or check back after someone lists something.</p>
+          </div>
+        ) : (
+          <div className="fi-grid">
+            {filteredItems.map((item, i) => {
+              const emoji    = CATEGORY_EMOJI[item.category] || '📦';
+              const hasImg   = Array.isArray(item.image_urls) && item.image_urls.length > 0;
+              const isKeep   = item.availability_status === 'Available to Keep';
+              const owner    = item.profiles?.preferred_name || item.profiles?.username || 'Member';
+              const location = item.locations ? [item.locations.city, item.locations.state].filter(Boolean).join(', ') : null;
+              const rot      = CARD_ROTS[i % CARD_ROTS.length];
 
-      {/* ROW 2 (desktop) / ROW 4 (landscape+portrait): Category chips */}
-      <div className="fi-row fi-cat-row">
-        <span className="fi-cat-label" style={filterLabelStyle}>Categories:</span>
-        {categories.map((cat) => {
-          const isActive = categoryFilters.includes(cat);
-          return (
-            <button
-              key={cat}
-              onClick={() => toggleCategory(cat)}
-              style={{
-                ...chipStyle,
-                backgroundColor: isActive ? '#3ABFD4' : '#f5f5f5',
-                color: isActive ? '#000' : '#333',
-                borderColor: isActive ? '#3ABFD4' : '#ddd',
-              }}
-            >
-              {cat}
-              {isActive && cat !== 'All' && <X size={12} style={{ marginLeft: '6px' }} />}
-            </button>
-          );
-        })}
-      </div>
+              return (
+                <div
+                  key={item.id}
+                  className="item-card"
+                  onClick={() => handleOpenItem(item)}
+                  style={{
+                    backgroundColor: PAPER_LT,
+                    border: `1.5px solid rgba(28,22,16,0.15)`,
+                    boxShadow: `3px 3px 0 rgba(28,22,16,0.12)`,
+                  }}
+                >
+                  {/* Polaroid photo area */}
+                  <div style={{ backgroundColor: PAPER_LT, padding: '8px 8px 28px', borderBottom: `1.5px solid rgba(28,22,16,0.1)`, position: 'relative', transform: `rotate(${rot}deg)` }}>
+                    {/* Borrow / Keep ribbon */}
+                    <div style={{
+                      position: 'absolute', top: '8px', left: '-2px', zIndex: 5,
+                      backgroundColor: isKeep ? RUST : LIME,
+                      color: isKeep ? '#fff' : INK,
+                      fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', fontWeight: 700,
+                      letterSpacing: '0.06em', padding: '3px 8px',
+                      boxShadow: `1px 1px 0 rgba(28,22,16,0.2)`,
+                    }}>
+                      {isKeep ? 'Free Keep' : 'Borrow'}
+                    </div>
 
-      {/* ROW 3 (desktop) / ROW 5 (portrait) / ROW 4 (landscape): Available to: chips | GLM toggle */}
-      <div className="fi-bottom-row">
-        <div className="fi-avail">
-          <span style={filterLabelStyle}>Available to:</span>
-          {[{ value: 'Borrow', label: 'Borrow' }, { value: 'Keep', label: 'Keep' }].map(({ value, label }) => {
-            const isActive = availabilityFilters.includes(value);
-            return (
-              <button
-                key={value}
-                onClick={() => toggleAvailability(value)}
-                style={{
-                  ...chipStyle,
-                  backgroundColor: isActive ? '#3ABFD4' : '#fff',
-                  color: isActive ? '#000' : '#555',
-                  borderColor: isActive ? '#3ABFD4' : '#ccc',
-                }}
-              >
-                {label}
-              </button>
-            );
-          })}
-        </div>
-        <div style={{ ...toggleGroupStyle, minWidth: '108px' }}>
-          <button onClick={() => setViewMode('grid')} style={{ ...toggleButtonStyle, backgroundColor: viewMode === 'grid' ? '#eee' : 'transparent' }}>
-            <LayoutGrid size={20} color={viewMode === 'grid' ? '#000' : '#666'} />
-          </button>
-          <button onClick={() => setViewMode('list')} style={{ ...toggleButtonStyle, backgroundColor: viewMode === 'list' ? '#eee' : 'transparent' }}>
-            <List size={20} color={viewMode === 'list' ? '#000' : '#666'} />
-          </button>
-          <button onClick={() => setViewMode('map')} style={{ ...toggleButtonStyle, backgroundColor: viewMode === 'map' ? '#eee' : 'transparent' }}>
-            <MapIcon size={20} color={viewMode === 'map' ? '#000' : '#666'} />
-          </button>
-        </div>
-      </div>
+                    {/* Photo or emoji */}
+                    <div style={{ width: '100%', aspectRatio: '1/1', backgroundColor: PAPER_DK, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                      {hasImg
+                        ? <img src={item.image_urls[0]} alt={item.item_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        : <span style={{ fontSize: '3rem' }}>{emoji}</span>
+                      }
+                    </div>
 
-      {/* CONTENT GRID */}
-      {loading ? (
-        <div className="fi-grid" style={gridStyle}>{[...Array(6)].map((_, i) => <div key={i} style={skeletonStyle} />)}</div>
-      ) : viewMode === 'map' ? (
-        <MapView items={filteredItems} onSelectItem={handleOpenItem} />
-      ) : (
-        <div className={viewMode === 'grid' ? 'fi-grid' : ''} style={viewMode === 'grid' ? undefined : listContainerStyle}>
-          {viewMode === 'list' && filteredItems.length > 0 && (
-            <div style={listHeaderStyle}>
-              <div style={{ width: '50px' }} />
-              <div>Item</div>
-              <div>Description</div>
-              <div>Category</div>
-              <div>Location</div>
-              <div>Owner</div>
-              <div>Terms</div>
-            </div>
-          )}
-          {filteredItems.map(item => (
-            <div key={item.id} onClick={() => handleOpenItem(item)} style={{ cursor: 'pointer' }}>
-              {viewMode === 'grid' ? <CardView item={item} /> : <ListView item={item} />}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* 1. THE ITEM DETAIL POPUP (Stage 1) */}
-      {selectedItem && (
-        <div style={modalOverlayStyle} onClick={handleCloseModal}>
-          <div style={modalContentStyle} onClick={e => e.stopPropagation()}>
-            <button onClick={handleCloseModal} style={closeButtonStyle}><X size={24} /></button>
-            
-            <div style={{ marginBottom: '20px', borderRadius: '12px', overflow: 'hidden', width: '100%', aspectRatio: '1 / 1' }}>
-              <ImageSlider images={selectedItem.image_urls} />
-            </div>
-
-            <h2 style={{ margin: '0 0 5px 0', color: '#111', fontSize: '24px' }}>{selectedItem.item_name}</h2>
-            <p style={categoryLabelStyle}>{selectedItem.category} • {selectedItem.condition}</p>
-            
-            <div style={{ margin: '20px 0', padding: '15px', backgroundColor: '#f9f9f9', borderRadius: '10px', fontSize: '15px', color: '#444', lineHeight: '1.6' }}>
-              {selectedItem.description || "No description provided by the owner."}
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', padding: '0 5px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#777', fontSize: '14px' }}>
-                <MapPin size={16} />
-                {[selectedItem.locations?.city, selectedItem.locations?.state].filter(Boolean).join(', ') || 'Location N/A'}
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#777', fontSize: '14px' }}>
-                <User size={16} />
-                {selectedItem.profiles?.username ? (
-                  <Link href={`/profile/${selectedItem.profiles.username}`} onClick={e => e.stopPropagation()} style={{ color: '#00aacc', textDecoration: 'none', fontWeight: '500' }}>
-                    {selectedItem.profiles?.preferred_name || 'Member'}
-                  </Link>
-                ) : (selectedItem.profiles?.preferred_name || 'Member')}
-              </div>
-            </div>
-
-            {(selectedItem.return_by || selectedItem.return_terms || selectedItem.damage_price || selectedItem.loss_price) && (
-              <div style={{ marginBottom: '20px', padding: '14px', backgroundColor: '#fdf3ec', borderRadius: '12px', fontSize: '13px', border: '1px solid #f0d8c8' }}>
-                <div style={{ fontWeight: '700', color: '#C08261', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase' as const, letterSpacing: '0.08em' }}>Borrowing Terms</div>
-                {selectedItem.return_by && (
-                  <div style={{ display: 'flex', gap: '20px', marginBottom: '6px', color: '#555' }}>
-                    <span>Return by: <strong>{new Date(selectedItem.return_by).toLocaleDateString()}</strong></span>
+                    {/* Caption below photo */}
+                    <span style={{ display: 'block', textAlign: 'center', fontFamily: "'Fraunces', serif", fontSize: '0.65rem', fontStyle: 'italic', color: INK_MID, marginTop: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {item.item_name}
+                    </span>
                   </div>
-                )}
-                {(selectedItem.damage_price || selectedItem.loss_price) && (
-                  <div style={{ display: 'flex', gap: '20px', marginBottom: '6px', color: '#555' }}>
-                    {selectedItem.damage_price && <span>Damage agreement: <strong>${selectedItem.damage_price}</strong></span>}
-                    {selectedItem.loss_price && <span>Loss agreement: <strong>${selectedItem.loss_price}</strong></span>}
+
+                  {/* Card body */}
+                  <div style={{ padding: '12px 14px 14px' }}>
+                    <div style={{ fontFamily: "'Fraunces', serif", fontSize: '0.95rem', fontWeight: 700, color: INK, marginBottom: '4px', lineHeight: 1.2 }}>
+                      {item.item_name}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: INK_LITE, display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '8px' }}>
+                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: TEAL, display: 'inline-block', flexShrink: 0 }} />
+                      <span>{owner}{location ? ` · ${location}` : ''}</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' as const }}>
+                      <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.52rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '2px 7px', border: `1px solid ${isKeep ? RUST : TEAL}`, color: isKeep ? RUST : TEAL, background: isKeep ? RUST_LT : TEAL_LT }}>
+                        {isKeep ? 'Keep' : 'Borrow'}
+                      </span>
+                      {item.category && (
+                        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.52rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '2px 7px', border: `1px solid rgba(28,22,16,0.15)`, color: INK_LITE }}>
+                          {item.category.split(' ')[0]}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                )}
-                {selectedItem.return_terms && (
-                  <div style={{ color: '#666', fontStyle: 'italic' }}>"{selectedItem.return_terms}"</div>
-                )}
-              </div>
-            )}
-
-            {userId ? (
-              <button onClick={() => setShowRequestForm(true)} style={primaryButtonStyle}>
-                Request to {selectedItem.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}
-              </button>
-            ) : (
-              <a href="/login" style={{ ...primaryButtonStyle, display: 'block', textAlign: 'center' as const, textDecoration: 'none' }}>
-                Log In to Request
-              </a>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* 2. THE REQUEST MESSAGE FORM (Stage 2) */}
-      {showRequestForm && selectedItem && (
-        <RequestModal 
-          item={selectedItem} 
-          onClose={() => setShowRequestForm(false)} 
-        />
-      )}
-    </div>
-  );
-}
-
-// --- SUB-COMPONENTS ---
-
-function CardView({ item }: { item: any }) {
-  const ownerName = item.profiles?.preferred_name || 'Member';
-  const locationDisplay = item.locations
-    ? [item.locations.city, item.locations.state].filter(Boolean).join(', ')
-    : 'N/A';
-  const hasTerms = item.return_by || item.return_terms;
-
-  return (
-    <div style={cardStyle}>
-      <div style={imageWrapperStyle}>
-        <div style={{ borderRadius: '8px', overflow: 'hidden', width: '100%', aspectRatio: '1 / 1' }}>
-          <ImageSlider images={item.image_urls} />
-        </div>
-        <div style={badgeStyle}>{item.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}</div>
-      </div>
-      <div style={cardContentStyle}>
-        <h3 style={itemTitleStyle}>{item.item_name}</h3>
-        <p style={categoryLabelStyle}>{item.category} • {item.condition}</p>
-        <div style={metaRowStyle}>
-          <span style={metaItemStyle}><MapPin size={12} /> {locationDisplay}</span>
-          {item.profiles?.username ? (
-            <Link href={`/profile/${item.profiles.username}`} onClick={e => e.stopPropagation()} style={{ ...metaItemStyle, color: '#00aacc', textDecoration: 'none' }}>
-              <User size={12} /> {ownerName}
-            </Link>
-          ) : (
-            <span style={metaItemStyle}><User size={12} /> {ownerName}</span>
-          )}
-        </div>
-        {hasTerms && (
-          <div style={{ fontSize: '12px', color: '#888', borderTop: '1px solid #f5f5f5', paddingTop: '8px', marginTop: '6px', display: 'flex', gap: '8px', flexWrap: 'wrap' as const }}>
-            {item.return_by && <span>Return by {new Date(item.return_by).toLocaleDateString()}</span>}
-            {item.return_terms && !item.return_by && <span>Has terms</span>}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
-    </div>
-  );
-}
 
-function ListView({ item }: { item: any }) {
-  const ownerName = item.profiles?.preferred_name || 'Member';
-  const locationDisplay = item.locations
-    ? [item.locations.city, item.locations.state].filter(Boolean).join(', ')
-    : '—';
-  const termsSummary = [
-    item.return_by ? `Return by ${new Date(item.return_by).toLocaleDateString()}` : null,
-    item.damage_price ? `Damage agr. $${item.damage_price}` : null,
-    item.loss_price ? `Loss agr. $${item.loss_price}` : null,
-    item.return_terms ? 'Custom terms' : null,
-  ].filter(Boolean).join(' · ');
+      {/* ── ITEM DETAIL MODAL (centered) ───────────────────────────────── */}
+      {selectedItem && (
+        <div
+          onClick={handleCloseModal}
+          style={{
+            position: 'fixed', inset: 0, backgroundColor: 'rgba(28,22,16,0.6)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 1000, padding: '20px', backdropFilter: 'blur(3px)',
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              backgroundColor: PAPER_LT, padding: '0',
+              width: '100%', maxWidth: '520px', position: 'relative',
+              border: `2px solid ${INK}`, boxShadow: `6px 6px 0 ${INK}`,
+              maxHeight: '92vh', overflowY: 'auto' as const,
+            }}
+          >
+            {/* Close */}
+            <button
+              onClick={handleCloseModal}
+              style={{
+                position: 'sticky', top: 0, float: 'right', zIndex: 10,
+                background: PAPER_DK, border: 'none', cursor: 'pointer',
+                padding: '10px 14px', color: INK_LITE,
+                borderBottom: `1px solid rgba(28,22,16,0.12)`,
+                borderLeft: `1px solid rgba(28,22,16,0.12)`,
+                fontFamily: "'Space Mono', monospace", fontSize: '0.6rem',
+                fontWeight: 700, letterSpacing: '0.06em',
+                display: 'flex', alignItems: 'center', gap: '5px',
+              }}
+            >
+              <X size={12} /> CLOSE
+            </button>
 
-  return (
-    <div style={listStyle}>
-      <div style={listImageStyle}>
-        {item.image_urls?.[0]
-          ? <img src={item.image_urls[0]} alt="" style={imgCover} />
-          : <div style={noImgSmall}><Package size={16} /></div>}
-      </div>
-      <div style={listColName}>
-        <div style={{ fontWeight: '600', color: '#111', fontSize: '14px' }}>{item.item_name}</div>
-        <div style={{ fontSize: '10px', color: '#3ABFD4', fontWeight: 'bold', textTransform: 'uppercase' as const, marginTop: '2px' }}>
-          {item.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}
+            {/* Photo */}
+            <div style={{ width: '100%', aspectRatio: '4/3', overflow: 'hidden', borderBottom: `1.5px solid rgba(28,22,16,0.12)` }}>
+              {Array.isArray(selectedItem.image_urls) && selectedItem.image_urls.length > 0
+                ? <ImageSlider images={selectedItem.image_urls} />
+                : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: PAPER_DK, fontSize: '5rem' }}>
+                    {CATEGORY_EMOJI[selectedItem.category] || '📦'}
+                  </div>
+              }
+            </div>
+
+            <div style={{ padding: '24px 28px 28px' }}>
+              {/* Title + meta */}
+              <h2 style={{ fontFamily: "'Fraunces', serif", fontSize: '1.5rem', fontWeight: 900, color: INK, margin: '0 0 6px', lineHeight: 1.1 }}>
+                {selectedItem.item_name}
+              </h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', fontSize: '0.82rem', color: INK_MID }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: TEAL, display: 'inline-block' }} />
+                {selectedItem.profiles?.username ? (
+                  <Link href={`/profile/${selectedItem.profiles.username}`} onClick={e => e.stopPropagation()} style={{ color: TEAL, textDecoration: 'none', fontWeight: 600 }}>
+                    {selectedItem.profiles?.preferred_name || selectedItem.profiles.username}
+                  </Link>
+                ) : (selectedItem.profiles?.preferred_name || 'Member')}
+                {selectedItem.locations && (
+                  <><span style={{ color: INK_LITE }}>·</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '3px', color: INK_LITE }}>
+                    <MapPin size={12} />
+                    {[selectedItem.locations.city, selectedItem.locations.state].filter(Boolean).join(', ')}
+                  </span></>
+                )}
+              </div>
+
+              <hr style={{ border: 'none', borderTop: `1px solid rgba(28,22,16,0.1)`, margin: '0 0 16px' }} />
+
+              {/* Description */}
+              {selectedItem.description && (
+                <div style={{ marginBottom: '16px' }}>
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: INK_LITE, marginBottom: '6px' }}>Description</div>
+                  <p style={{ fontSize: '0.88rem', color: INK_MID, lineHeight: 1.6, margin: 0 }}>{selectedItem.description}</p>
+                </div>
+              )}
+
+              {/* Terms */}
+              {(selectedItem.return_by || selectedItem.return_terms || selectedItem.damage_price || selectedItem.loss_price) && (
+                <div style={{ marginBottom: '16px', padding: '14px', backgroundColor: PAPER_DK, border: `1px solid rgba(28,22,16,0.12)` }}>
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: INK_LITE, marginBottom: '10px' }}>Borrowing Terms</div>
+                  {selectedItem.return_by && (
+                    <div style={{ fontSize: '0.84rem', color: INK_MID, marginBottom: '5px' }}>Return by: <strong style={{ color: INK }}>{new Date(selectedItem.return_by).toLocaleDateString()}</strong></div>
+                  )}
+                  {selectedItem.damage_price && (
+                    <div style={{ fontSize: '0.84rem', color: INK_MID, marginBottom: '5px' }}>If damaged: <strong style={{ color: INK }}>${selectedItem.damage_price}</strong></div>
+                  )}
+                  {selectedItem.loss_price && (
+                    <div style={{ fontSize: '0.84rem', color: INK_MID, marginBottom: '5px' }}>If not returned: <strong style={{ color: INK }}>${selectedItem.loss_price}</strong></div>
+                  )}
+                  {selectedItem.return_terms && (
+                    <div style={{ fontSize: '0.84rem', color: INK_MID, fontStyle: 'italic', borderTop: `1px solid rgba(28,22,16,0.08)`, marginTop: '8px', paddingTop: '8px' }}>
+                      "{selectedItem.return_terms}"
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* CTA */}
+              {userId ? (
+                <button
+                  onClick={() => setShowRequestForm(true)}
+                  style={{
+                    width: '100%', padding: '14px',
+                    backgroundColor: TEAL, color: '#fff',
+                    border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,
+                    fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer',
+                    fontFamily: 'Outfit, sans-serif', transition: 'transform 0.1s, box-shadow 0.1s',
+                  }}
+                >
+                  Request to {selectedItem.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'} →
+                </button>
+              ) : (
+                <a
+                  href="/login"
+                  style={{
+                    display: 'block', width: '100%', padding: '14px', textAlign: 'center' as const,
+                    backgroundColor: TEAL, color: '#fff',
+                    border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,
+                    fontWeight: 700, fontSize: '0.95rem', textDecoration: 'none',
+                    fontFamily: 'Outfit, sans-serif',
+                  }}
+                >
+                  Log In to Request →
+                </a>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
-      <div style={listColDesc}>{item.description || '—'}</div>
-      <div style={listColMeta}>{item.category}</div>
-      <div style={listColMeta}><MapPin size={11} style={{ marginRight: '3px', flexShrink: 0 }} />{locationDisplay}</div>
-      <div style={listColMeta}>
-        {item.profiles?.username ? (
-          <Link href={`/profile/${item.profiles.username}`} onClick={e => e.stopPropagation()} style={{ color: '#00aacc', textDecoration: 'none' }}>
-            {ownerName}
-          </Link>
-        ) : ownerName}
-      </div>
-      <div style={{ ...listColMeta, fontSize: '11px', color: '#888' }}>{termsSummary || '—'}</div>
+      )}
+
+      {/* Request message form */}
+      {showRequestForm && selectedItem && (
+        <RequestModal item={selectedItem} onClose={() => setShowRequestForm(false)} />
+      )}
     </div>
   );
 }
-
-// --- STYLES ---
-
-const containerStyle: React.CSSProperties = { padding: '20px', maxWidth: '1200px', margin: '0 auto', backgroundColor: '#fff', minHeight: '100vh' };
-const topBarStyle: React.CSSProperties = { display: 'flex', gap: '15px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'center' };
-const searchWrapperStyle: React.CSSProperties = { position: 'relative', flex: '0 1 200px' };
-const filterLabelStyle: React.CSSProperties = { fontSize: '0.78rem', fontWeight: '600', color: '#555', whiteSpace: 'nowrap' as const };
-const searchIconStyle: React.CSSProperties = { position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#999' };
-const searchInputStyle: React.CSSProperties = { width: '100%', padding: '8px 10px 8px 40px', backgroundColor: '#f9f9f9', border: '1px solid #eee', borderRadius: '8px', color: '#111', outline: 'none', fontSize: '0.82rem', lineHeight: '1.4' };
-const toggleGroupStyle: React.CSSProperties = { display: 'flex', backgroundColor: '#f5f5f5', borderRadius: '8px', padding: '4px', border: '1px solid #eee' };
-const toggleButtonStyle: React.CSSProperties = { border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold' };
-const filterRowStyle: React.CSSProperties = { marginBottom: '30px' };
-const chipContainerStyle: React.CSSProperties = { display: 'flex', gap: '8px', flexWrap: 'wrap' };
-const chipStyle: React.CSSProperties = { padding: '6px 14px', borderRadius: '20px', border: '1px solid', fontSize: '13px', cursor: 'pointer', fontWeight: '500', display: 'flex', alignItems: 'center' };
-const gridStyle: React.CSSProperties = { display: 'grid', gap: '20px' };
-const listContainerStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: '2px' };
-const cardStyle: React.CSSProperties = { backgroundColor: '#fff', border: '1px solid #eee', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', overflow: 'hidden' };
-const imageWrapperStyle: React.CSSProperties = { position: 'relative' as const, width: '100%' };
-const badgeStyle: React.CSSProperties = { position: 'absolute', top: '10px', left: '10px', backgroundColor: '#3ABFD4', color: '#000', padding: '3px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', zIndex: 5 };
-const cardContentStyle: React.CSSProperties = { padding: '15px' };
-const itemTitleStyle: React.CSSProperties = { margin: 0, color: '#111', fontSize: '16px', fontWeight: '600' };
-const categoryLabelStyle: React.CSSProperties = { color: '#3ABFD4', fontSize: '11px', margin: '4px 0 12px 0', textTransform: 'uppercase', fontWeight: 'bold' };
-const metaRowStyle: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', color: '#777', fontSize: '12px', borderTop: '1px solid #f5f5f5', paddingTop: '10px' };
-const metaItemStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '4px' };
-const LIST_COLS = '50px 160px 1fr 140px 120px 110px 1fr';
-const listHeaderStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: LIST_COLS, gap: '10px', padding: '8px 12px', fontSize: '10px', fontWeight: '700', color: '#aaa', textTransform: 'uppercase' as const, letterSpacing: '0.06em', borderBottom: '2px solid #eee' };
-const listStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: LIST_COLS, gap: '10px', alignItems: 'center', padding: '10px 12px', backgroundColor: '#fff', borderBottom: '1px solid #f5f5f5' };
-const listColName: React.CSSProperties = { overflow: 'hidden' };
-const listColDesc: React.CSSProperties = { fontSize: '12px', color: '#666', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const };
-const listColMeta: React.CSSProperties = { fontSize: '12px', color: '#666', display: 'flex', alignItems: 'center', overflow: 'hidden', whiteSpace: 'nowrap' as const };
-const listImageStyle: React.CSSProperties = { width: '50px', height: '50px', borderRadius: '6px', overflow: 'hidden', backgroundColor: '#000', flexShrink: 0 };
-const imgCover: React.CSSProperties = { width: '100%', height: '100%', objectFit: 'contain' as const };
-const noImgSmall: React.CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#ccc' };
-const skeletonStyle: React.CSSProperties = { height: '280px', backgroundColor: '#f5f5f5', borderRadius: '12px' };
-
-const modalOverlayStyle: React.CSSProperties = { 
-  position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', 
-  backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', 
-  alignItems: 'center', zIndex: 1000, padding: '20px', backdropFilter: 'blur(4px)'
-};
-
-const modalContentStyle: React.CSSProperties = { 
-  backgroundColor: '#fff', padding: '30px', borderRadius: '24px', 
-  width: '100%', maxWidth: '500px', position: 'relative', 
-  boxShadow: '0 20px 60px rgba(0,0,0,0.15)', maxHeight: '95vh', overflowY: 'auto' 
-};
-
-const closeButtonStyle: React.CSSProperties = {
-  position: 'absolute', top: '20px', right: '20px', background: '#f5f5f5',
-  border: 'none', cursor: 'pointer', color: '#666', borderRadius: '50%',
-  width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-  zIndex: 10,
-};
-
-const primaryButtonStyle: React.CSSProperties = {
-  width: '100%', padding: '18px', backgroundColor: '#5ECFDF', color: '#000', 
-  border: 'none', borderRadius: '14px', fontWeight: 'bold', fontSize: '16px', 
-  cursor: 'pointer', boxShadow: 'none'
-};

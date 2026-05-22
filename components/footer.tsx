@@ -3,48 +3,48 @@
 import Link from 'next/link';
 import { Instagram } from 'lucide-react';
 
+const INK      = '#1C1610'
+const INK_LITE = '#9A8878'
+const PAPER    = '#F6F1E8'
+const LIME     = '#B8CC2A'
+
 export default function Footer() {
   return (
-    <footer className="border-t border-[#A66D51] py-4" style={{ backgroundColor: '#E8834A' }}>
-      <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-3">
+    <footer style={{ backgroundColor: INK, borderTop: `3px solid ${LIME}`, padding: '20px 40px' }}>
+      <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
 
-        {/* Left: Branding */}
-        <div className="flex flex-col items-center md:items-start flex-1">
-          <h2 className="text-xl font-black text-[#2D241E] tracking-tighter uppercase leading-none">
-            THE PLAYA PROVIDES<span style={{ textDecoration: 'underline' }}>{'\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0'}</span>
-          </h2>
-          <p className="text-[10px] text-[#2D241E] opacity-70 font-bold uppercase tracking-widest mt-1">
+        {/* Branding */}
+        <div>
+          <div style={{ fontFamily: "'Fraunces', serif", fontSize: '1rem', fontWeight: 700, color: PAPER, letterSpacing: '-0.01em' }}>
+            The Playa <em style={{ fontStyle: 'italic', color: LIME }}>Provides</em>
+          </div>
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.6rem', color: INK_LITE, marginTop: '4px', letterSpacing: '0.06em' }}>
             © {new Date().getFullYear()} — All Rights Reserved
-          </p>
+          </div>
         </div>
 
-        {/* Center: Nav + BM disclaimer stacked */}
-        <div className="flex-1 flex flex-col items-center gap-1">
-          <nav className="flex gap-8 text-sm font-bold text-[#2D241E]">
-            <Link href="/about" className="hover:text-white transition-colors whitespace-nowrap">About</Link>
-            <Link href="/terms" className="hover:text-white transition-colors whitespace-nowrap">Terms & Conditions</Link>
-            <Link href="/privacy" className="hover:text-white transition-colors whitespace-nowrap">Privacy Policy</Link>
-          </nav>
-          <p className="text-[10px] text-[#2D241E] opacity-70 font-medium text-center">
-            This app is not affiliated, endorsed, or verified by Burning Man Project.
-          </p>
-        </div>
-
-        {/* Right: Instagram + Credit */}
-        <div className="flex-1 flex flex-col items-center md:items-end gap-1">
+        {/* Nav */}
+        <nav style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+          <Link href="/about"   style={{ fontSize: '0.78rem', color: INK_LITE, textDecoration: 'none', fontWeight: 500 }}>About</Link>
+          <Link href="/terms"   style={{ fontSize: '0.78rem', color: INK_LITE, textDecoration: 'none', fontWeight: 500 }}>Terms</Link>
+          <Link href="/privacy" style={{ fontSize: '0.78rem', color: INK_LITE, textDecoration: 'none', fontWeight: 500 }}>Privacy</Link>
+          <span style={{ color: '#333', fontSize: '0.75rem' }}>|</span>
           <a
             href="https://www.instagram.com/theplayaprovides_/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-[#2D241E] hover:text-white transition-colors text-sm font-bold"
+            target="_blank" rel="noopener noreferrer"
+            style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.78rem', color: INK_LITE, textDecoration: 'none', fontWeight: 500 }}
           >
-            <Instagram size={16} />
+            <Instagram size={13} />
             @theplayaprovides_
           </a>
-          <p className="text-[11px] text-[#2D241E] font-medium italic leading-tight text-center md:text-right">
-            Built with Claude Code;<br />
-            ideated with human brains.
-          </p>
+        </nav>
+
+        {/* Disclaimer */}
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', color: '#333', lineHeight: 1.5 }}>
+            Not affiliated with or endorsed by Burning Man Project.<br />
+            Built with Claude Code; ideated with human brains.
+          </div>
         </div>
 
       </div>

@@ -5,249 +5,152 @@ import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
+const INK      = '#1C1610'
+const INK_LITE = '#9A8878'
+const PAPER    = '#F6F1E8'
+const PAPER_LT = '#FDFAF4'
+const PAPER_DK = '#EDE5D0'
+const TEAL     = '#1E8A82'
+
 export default function SignUpPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [username, setUsername] = useState('');
-  const [preferredName, setPreferredName] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-  const [usernameError, setUsernameError] = useState('');
-  // New state for the waiver
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [email,          setEmail]          = useState('');
+  const [password,       setPassword]       = useState('');
+  const [username,       setUsername]       = useState('');
+  const [preferredName,  setPreferredName]  = useState('');
+  const [fullName,       setFullName]       = useState('');
+  const [loading,        setLoading]        = useState(false);
+  const [message,        setMessage]        = useState('');
+  const [usernameError,  setUsernameError]  = useState('');
+  const [acceptedTerms,  setAcceptedTerms]  = useState(false);
 
   const handleGoogleSignIn = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/settings?setup=true`,
-      },
-    })
-    if (error) setMessage(`Error: ${error.message}`)
-  }
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=/settings?setup=true` },
+    });
+    if (error) setMessage(`Error: ${error.message}`);
+  };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Safety check in case the button's disabled state is bypassed
-    if (!acceptedTerms) {
-      setMessage('Error: You must accept the terms to continue.');
-      return;
-    }
+    if (!acceptedTerms) { setMessage('Error: You must accept the terms to continue.'); return; }
+    setLoading(true); setMessage(''); setUsernameError('');
 
-    setLoading(true);
-    setMessage('');
-    setUsernameError('');
-
-    // Check username availability
-    const { data: existing } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('username', username.toLowerCase().trim())
-      .maybeSingle();
-
-    if (existing) {
-      setUsernameError('This username is already taken.');
-      setLoading(false);
-      return;
-    }
+    const { data: existing } = await supabase.from('profiles').select('id').eq('username', username.toLowerCase().trim()).maybeSingle();
+    if (existing) { setUsernameError('This username is already taken.'); setLoading(false); return; }
 
     const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          username: username.toLowerCase().trim(),
-          preferred_name: preferredName,
-          full_name: fullName.trim(),
-          email: email,
-        },
-      },
+      email, password,
+      options: { data: { username: username.toLowerCase().trim(), preferred_name: preferredName, full_name: fullName.trim(), email } },
     });
 
-    if (error) {
-      setMessage(`Error: ${error.message}`);
-      setLoading(false);
-    } else {
-      setMessage('Account created! Redirecting...');
-      setTimeout(() => {
-        window.location.href = '/profile/' + username.toLowerCase().trim();
-      }, 1500);
-    }
-  };
-
-  // Dynamic button style based on acceptance
-  const activeButtonStyle = {
-    ...buttonStyle,
-    cursor: acceptedTerms ? 'pointer' : 'not-allowed',
-    opacity: acceptedTerms ? 1 : 0.3,
+    if (error) { setMessage(`Error: ${error.message}`); setLoading(false); }
+    else { setMessage('Account created! Redirecting…'); setTimeout(() => { window.location.href = '/profile/' + username.toLowerCase().trim(); }, 1500); }
   };
 
   return (
-    <div style={containerStyle}>
-      <form onSubmit={handleSignUp} style={formStyle}>
-        <h1 style={{ color: '#2D241E', marginBottom: '10px', fontSize: '1.5rem', fontWeight: 'bold' }}>Create Account</h1>
-        <p style={{ color: '#888', marginBottom: '24px', fontSize: '0.875rem' }}>Join the community to start sharing gear.</p>
+    <div style={{ backgroundColor: PAPER, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px' }}>
+      <div style={{ width: '100%', maxWidth: '520px', backgroundColor: PAPER_LT, border: `2px solid ${INK}`, boxShadow: `5px 5px 0 ${INK}`, padding: '32px' }}>
+
+        <div style={eyebrowStyle}>Join the community</div>
+        <h1 style={h1Style}>Create <em style={{ fontStyle: 'italic', color: TEAL }}>Account.</em></h1>
 
         {message && (
-          <div style={{
-            padding: '12px',
-            borderRadius: '8px',
-            backgroundColor: message.includes('Error') ? '#fef2f2' : '#f0fdf4',
-            color: message.includes('Error') ? '#ef4444' : '#16a34a',
-            marginBottom: '20px',
-            fontSize: '0.875rem',
-            textAlign: 'center' as const,
-          }}>
+          <div style={{ padding: '12px 14px', marginBottom: '20px', fontSize: '0.84rem', fontWeight: 500, backgroundColor: message.includes('Error') ? '#fef2f2' : '#f0fdf4', color: message.includes('Error') ? '#ef4444' : '#16a34a', border: `1px solid ${message.includes('Error') ? '#fca5a5' : '#86efac'}` }}>
             {message}
           </div>
         )}
 
-        {/* GOOGLE BUTTON */}
-        <button onClick={handleGoogleSignIn} style={googleButtonStyle}>
-          <GoogleIcon />
-          Continue with Google
+        {/* Google */}
+        <button onClick={handleGoogleSignIn} style={googleBtnStyle}>
+          <GoogleIcon /> Continue with Google
         </button>
-        <p style={{ fontSize: '11px', color: '#aaa', textAlign: 'center' as const, margin: '6px 0 16px' }}>
-          By continuing, you agree to our community terms.
+        <p style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', color: INK_LITE, textAlign: 'center' as const, margin: '6px 0 18px', letterSpacing: '0.04em' }}>
+          by continuing you agree to our community terms
         </p>
 
-        {/* DIVIDER */}
-        <div style={{ position: 'relative' as const, margin: '0 0 20px' }}>
-          <div style={{ position: 'absolute' as const, inset: 0, display: 'flex', alignItems: 'center' }}>
-            <span style={{ width: '100%', borderTop: '1px solid #e5e5e5' }} />
-          </div>
-          <div style={{ position: 'relative' as const, display: 'flex', justifyContent: 'center' }}>
-            <span style={{ backgroundColor: '#fff', padding: '0 10px', fontSize: '0.7rem', textTransform: 'uppercase' as const, color: '#aaa', letterSpacing: '0.08em' }}>
-              Or create account with email
-            </span>
-          </div>
+        {/* Divider */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+          <div style={{ flex: 1, borderTop: `1px solid rgba(28,22,16,0.12)` }} />
+          <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', color: INK_LITE, textTransform: 'uppercase' as const, letterSpacing: '0.08em' }}>or email</span>
+          <div style={{ flex: 1, borderTop: `1px solid rgba(28,22,16,0.12)` }} />
         </div>
 
-        <div style={{ display: 'grid', gap: '15px' }}>
+        <form onSubmit={handleSignUp} style={{ display: 'grid', gap: '14px' }}>
           <div>
             <label style={labelStyle}>Email</label>
-            <input
-              type="email"
-              style={inputStyle}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="you@example.com"
-            />
+            <input type="email" style={inputStyle} value={email} onChange={e => setEmail(e.target.value)} required placeholder="you@example.com" />
           </div>
-
           <div>
             <label style={labelStyle}>Password</label>
-            <input
-              type="password"
-              style={inputStyle}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="••••••••"
-            />
+            <input type="password" style={inputStyle} value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••" />
           </div>
-
           <div>
             <label style={labelStyle}>
               Full Name
-              <span style={{ fontWeight: 'normal', textTransform: 'none' as const, letterSpacing: 0, color: '#bbb', marginLeft: '6px', fontSize: '0.7rem' }}>Kept private and never displayed publicly.</span>
+              <span style={{ fontWeight: 'normal', textTransform: 'none' as const, letterSpacing: 0, color: '#bbb', marginLeft: '6px', fontSize: '0.65rem' }}>Private — never shown publicly</span>
             </label>
-            <input
-              type="text"
-              style={inputStyle}
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              required
-              placeholder="e.g. Jane Smith"
-            />
+            <input type="text" style={inputStyle} value={fullName} onChange={e => setFullName(e.target.value)} required placeholder="e.g. Jane Smith" />
           </div>
 
-          <div style={{ borderTop: '1px solid #e5e5e5', margin: '4px 0' }} />
+          <hr style={{ border: 'none', borderTop: `1px solid rgba(28,22,16,0.1)`, margin: '2px 0' }} />
 
           <div>
-            <label style={labelStyle}>Preferred Name (Publicly Visible)</label>
-            <input
-              type="text"
-              style={inputStyle}
-              value={preferredName}
-              onChange={(e) => setPreferredName(e.target.value)}
-              required
-              placeholder="e.g. Dusty Star"
-            />
+            <label style={labelStyle}>Preferred Name <span style={{ fontWeight: 'normal', textTransform: 'none' as const, letterSpacing: 0, color: '#bbb', marginLeft: '6px', fontSize: '0.65rem' }}>Publicly visible</span></label>
+            <input type="text" style={inputStyle} value={preferredName} onChange={e => setPreferredName(e.target.value)} required placeholder="e.g. Dusty Star" />
           </div>
-
           <div>
             <label style={labelStyle}>Username</label>
             <input
               type="text"
-              style={{ ...inputStyle, borderColor: usernameError ? '#ef4444' : '#ddd' }}
+              style={{ ...inputStyle, borderColor: usernameError ? '#ef4444' : 'rgba(28,22,16,0.25)' }}
               value={username}
-              onChange={(e) => { setUsername(e.target.value.toLowerCase().replace(/\s/g, '')); setUsernameError(''); }}
+              onChange={e => { setUsername(e.target.value.toLowerCase().replace(/\s/g, '')); setUsernameError(''); }}
               required
               placeholder="unique_handle"
             />
-            {usernameError && (
-              <p style={{ margin: '5px 0 0', fontSize: '0.75rem', color: '#ef4444' }}>{usernameError}</p>
-            )}
+            {usernameError && <p style={{ margin: '5px 0 0', fontSize: '0.75rem', color: '#ef4444' }}>{usernameError}</p>}
           </div>
 
-          {/* Mandatory Waiver Box */}
-          <div style={{
-            backgroundColor: '#f9f9f9',
-            padding: '15px',
-            borderRadius: '10px',
-            border: '1px solid #e5e5e5',
-            display: 'flex',
-            gap: '12px',
-            marginTop: '4px',
-          }}>
-            <input
-              type="checkbox"
-              id="terms"
-              checked={acceptedTerms}
-              onChange={(e) => setAcceptedTerms(e.target.checked)}
-              style={{ marginTop: '3px', cursor: 'pointer' }}
-            />
-            <label htmlFor="terms" style={{ color: '#666', fontSize: '12px', lineHeight: '1.5' }}>
-              I acknowledge that <strong style={{ color: '#2D241E' }}>The Playa Provides</strong> is a community tool.
+          {/* Terms waiver */}
+          <div style={{ backgroundColor: PAPER_DK, padding: '14px', border: `1px solid rgba(28,22,16,0.12)`, display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+            <input type="checkbox" id="terms" checked={acceptedTerms} onChange={e => setAcceptedTerms(e.target.checked)} style={{ marginTop: '3px', cursor: 'pointer', accentColor: TEAL }} />
+            <label htmlFor="terms" style={{ color: INK_LITE, fontSize: '0.78rem', lineHeight: 1.55, cursor: 'pointer' }}>
+              I acknowledge that <strong style={{ color: INK }}>The Playa Provides</strong> is a community tool.
               I agree the platform is not responsible for transactions or gear condition.
               Lend and borrow at my own risk.
             </label>
           </div>
 
-          <button type="submit" disabled={loading || !acceptedTerms} style={activeButtonStyle}>
-            {loading ? 'Creating Account...' : 'Sign Up'}
+          <button
+            type="submit"
+            disabled={loading || !acceptedTerms}
+            style={{ ...ctaStyle, opacity: loading || !acceptedTerms ? 0.4 : 1, cursor: loading || !acceptedTerms ? 'not-allowed' : 'pointer' }}
+          >
+            {loading ? 'Creating Account…' : 'Sign Up →'}
           </button>
-        </div>
+        </form>
 
-        <p style={{ marginTop: '25px', color: '#888', fontSize: '0.875rem', textAlign: 'center' as const }}>
-          Already have an account? <Link href="/login" style={{ color: '#00aacc', textDecoration: 'none', fontWeight: 'bold' }}>Log In</Link>
+        <p style={{ marginTop: '20px', color: INK_LITE, fontSize: '0.84rem', textAlign: 'center' as const }}>
+          Already have an account?{' '}
+          <Link href="/login" style={{ color: TEAL, textDecoration: 'none', fontWeight: 700 }}>Log In →</Link>
         </p>
-      </form>
+      </div>
     </div>
   );
 }
 
-// --- STYLES ---
-const containerStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '90vh', padding: '20px' };
-const formStyle: React.CSSProperties = { backgroundColor: '#fff', padding: '28px', borderRadius: '14px', border: '1px solid #e5e5e5', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', width: '100%', maxWidth: '520px' };
-const labelStyle: React.CSSProperties = { display: 'block', color: '#888', fontSize: '0.75rem', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 'bold' };
-const inputStyle: React.CSSProperties = { width: '100%', padding: '12px', backgroundColor: '#fff', border: '1px solid #ddd', color: '#2D241E', borderRadius: '8px', outline: 'none', fontSize: '1rem', boxSizing: 'border-box' };
-const buttonStyle: React.CSSProperties = { width: '100%', padding: '13px', backgroundColor: '#5ECFDF', color: '#000', fontWeight: 600, border: 'none', borderRadius: '8px', fontSize: '1rem', marginTop: '10px' };
-
-const googleButtonStyle: React.CSSProperties = {
-  width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-  border: '1px solid #ddd', backgroundColor: '#fff', color: '#2D241E',
-  padding: '13px', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', fontSize: '1rem',
-};
+const eyebrowStyle: React.CSSProperties = { fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: INK_LITE, marginBottom: '8px' }
+const h1Style: React.CSSProperties = { fontFamily: "'Fraunces', serif", fontSize: '1.8rem', fontWeight: 900, color: INK, margin: '0 0 24px', lineHeight: 1.1 }
+const labelStyle: React.CSSProperties = { display: 'block', fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: '#9A8878', marginBottom: '7px' }
+const inputStyle: React.CSSProperties = { width: '100%', padding: '11px 13px', backgroundColor: '#FDFAF4', border: '1.5px solid rgba(28,22,16,0.25)', color: '#1C1610', outline: 'none', boxSizing: 'border-box' as const, fontSize: '0.95rem', fontFamily: 'inherit' }
+const ctaStyle: React.CSSProperties = { width: '100%', backgroundColor: '#1E8A82', color: '#fff', padding: '13px', fontWeight: 700, border: '2px solid #1C1610', boxShadow: '3px 3px 0 #1C1610', fontSize: '0.95rem', fontFamily: 'inherit' }
+const googleBtnStyle: React.CSSProperties = { width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', border: '1.5px solid rgba(28,22,16,0.2)', backgroundColor: '#FDFAF4', color: '#1C1610', padding: '12px', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem', fontFamily: 'inherit' }
 
 function GoogleIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" style={{ marginRight: '10px', flexShrink: 0 }}>
+    <svg width="17" height="17" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
       <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>

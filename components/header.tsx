@@ -3,17 +3,145 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
-
 import { Bell, Menu, X } from 'lucide-react'
 
-export default function Header() {
-  const [user, setUser] = useState<any>(null)
-  const [username, setUsername] = useState<string | null>(null)
-  const [unreadCount, setUnreadCount] = useState(0)
-  const [notifications, setNotifications] = useState<any[]>([])
-  const [bellOpen, setBellOpen] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
+// ── Design tokens ────────────────────────────────────────────────────────────
+const INK      = '#1C1610'
+const INK_MID  = '#4A3828'
+const INK_LITE = '#9A8878'
+const PAPER    = '#F6F1E8'
+const PAPER_LT = '#FDFAF4'
+const LIME     = '#B8CC2A'
+const TEAL     = '#1E8A82'
 
+// ── Shared style objects ─────────────────────────────────────────────────────
+const headerStyle: React.CSSProperties = {
+  backgroundColor: INK,
+  borderBottom: `3px solid ${LIME}`,
+  position: 'sticky',
+  top: 0,
+  zIndex: 50,
+  width: '100%',
+}
+
+const innerStyle: React.CSSProperties = {
+  maxWidth: '1400px',
+  margin: '0 auto',
+  padding: '0 40px',
+  height: '52px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+}
+
+const logoStyle: React.CSSProperties = {
+  fontFamily: "'Fraunces', serif",
+  fontSize: '1.1rem',
+  fontWeight: 700,
+  color: PAPER,
+  textDecoration: 'none',
+  letterSpacing: '-0.01em',
+  lineHeight: 1,
+}
+
+const navStyle: React.CSSProperties = {
+  display: 'flex',
+  gap: '20px',
+  alignItems: 'center',
+}
+
+const linkStyle: React.CSSProperties = {
+  fontSize: '0.78rem',
+  color: '#aaa',
+  textDecoration: 'none',
+  fontWeight: 500,
+  letterSpacing: '0.03em',
+  whiteSpace: 'nowrap' as const,
+}
+
+const offerLinkStyle: React.CSSProperties = {
+  ...linkStyle,
+  color: LIME,
+  fontWeight: 700,
+}
+
+const pipeStyle: React.CSSProperties = {
+  color: '#444',
+  fontSize: '0.75rem',
+  userSelect: 'none' as const,
+}
+
+const logoutBtnStyle: React.CSSProperties = {
+  fontSize: '0.75rem',
+  color: INK_LITE,
+  background: 'none',
+  border: 'none',
+  cursor: 'pointer',
+  padding: 0,
+  fontFamily: 'inherit',
+  fontWeight: 500,
+  letterSpacing: '0.03em',
+}
+
+const loginLinkStyle: React.CSSProperties = {
+  fontSize: '0.78rem',
+  color: INK,
+  textDecoration: 'none',
+  fontWeight: 700,
+  backgroundColor: LIME,
+  padding: '6px 14px',
+  letterSpacing: '0.02em',
+  whiteSpace: 'nowrap' as const,
+}
+
+// Notification dropdown — white card, keeps existing behaviour
+const dropdownStyle: React.CSSProperties = {
+  position: 'absolute' as const,
+  right: 0,
+  top: '36px',
+  backgroundColor: PAPER_LT,
+  border: `1.5px solid ${INK}`,
+  boxShadow: `4px 4px 0 ${INK}`,
+  width: '320px',
+  zIndex: 50,
+  maxHeight: '400px',
+  overflowY: 'auto' as const,
+}
+
+const dropdownHeaderStyle: React.CSSProperties = {
+  padding: '10px 16px',
+  borderBottom: `1px solid rgba(28,22,16,0.12)`,
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+}
+
+// Mobile menu dropdown
+const mobileMenuStyle: React.CSSProperties = {
+  position: 'absolute' as const,
+  right: 0,
+  top: '52px',
+  minWidth: '220px',
+  backgroundColor: INK,
+  borderTop: `1px solid rgba(184,204,42,0.3)`,
+  borderLeft: `1.5px solid ${LIME}`,
+  borderBottom: `1.5px solid ${LIME}`,
+  padding: '16px 24px',
+  display: 'flex',
+  flexDirection: 'column' as const,
+  gap: '16px',
+  zIndex: 50,
+  textAlign: 'right' as const,
+}
+
+// ── Component ────────────────────────────────────────────────────────────────
+export default function Header() {
+  const [user, setUser]                   = useState<any>(null)
+  const [username, setUsername]           = useState<string | null>(null)
+  const [unreadCount, setUnreadCount]     = useState(0)
+  const [notifications, setNotifications] = useState<any[]>([])
+  const [bellOpen, setBellOpen]           = useState(false)
+  const [menuOpen, setMenuOpen]           = useState(false)
 
   useEffect(() => {
     let pollInterval: ReturnType<typeof setInterval> | undefined
@@ -45,9 +173,7 @@ export default function Header() {
           if (profile) setUsername(profile.username)
 
           fetchUnread()
-          if (!pollInterval) {
-            pollInterval = setInterval(fetchUnread, 30000)
-          }
+          if (!pollInterval) pollInterval = setInterval(fetchUnread, 30000)
         }
       } catch (err) {
         console.error('Header auth error:', err)
@@ -59,7 +185,6 @@ export default function Header() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       const currentUser = session?.user ?? null
       setUser(currentUser)
-
       if (!currentUser) {
         setUsername(null)
       } else if (event !== 'INITIAL_SESSION') {
@@ -74,11 +199,7 @@ export default function Header() {
   }, [])
 
   const handleSignOut = async () => {
-    try {
-      await supabase.auth.signOut()
-    } catch (err) {
-      console.error('signOut error:', err)
-    }
+    try { await supabase.auth.signOut() } catch (err) { console.error('signOut error:', err) }
     window.location.href = '/login'
   }
 
@@ -111,9 +232,7 @@ export default function Header() {
       if (error) throw error
       setUnreadCount(0)
       setNotifications(prev => prev.map(n => ({ ...n, read: true })))
-    } catch (err) {
-      console.error('markAllRead error:', err)
-    }
+    } catch (err) { console.error('markAllRead error:', err) }
   }
 
   const handleNotificationClick = async (notificationId: string) => {
@@ -122,271 +241,162 @@ export default function Header() {
       if (error) throw error
       setNotifications(prev => prev.map(n => n.id === notificationId ? { ...n, read: true } : n))
       setUnreadCount(prev => Math.max(0, prev - 1))
-    } catch (err) {
-      console.error('notificationClick error:', err)
-    }
+    } catch (err) { console.error('notificationClick error:', err) }
     setBellOpen(false)
   }
 
-  const headerBg = { backgroundColor: '#E8834A' }
-  const mainTextColor = 'text-[#2D241E]'
-  const hoverEffect = 'hover:text-[#3ABFD4]'
-
-  const navLinks = user ? (
+  // ── Bell dropdown (shared desktop + mobile) ───────────────────────────────
+  const BellDropdown = () => (
     <>
-      <Link href="/resources" onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>On-Playa Resources</Link>
-      <Link href="/find-items" onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>Find Items</Link>
-      <Link href="/list-item" onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition whitespace-nowrap`}>Offer Items</Link>
-      <Link href="/inventory" onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>My Inventory</Link>
-      {username && (
-        <Link href={`/profile/${username}`} onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>My Profile</Link>
-      )}
-      <Link href="/settings" onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>Settings</Link>
-      <button
-        onClick={() => { setMenuOpen(false); handleSignOut() }}
-        className="text-sm font-bold text-red-800 hover:text-red-600 transition cursor-pointer text-left"
-      >
-        Logout
-      </button>
-    </>
-  ) : (
-    <>
-      <Link href="/resources" onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>On-Playa Resources</Link>
-      <Link href="/find-items" onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>Find Items</Link>
-      <Link href="/list-item" onClick={() => setMenuOpen(false)} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition whitespace-nowrap`}>Offer Items</Link>
-      <Link
-        href="/login"
-        onClick={() => setMenuOpen(false)}
-        className="bg-[#2D241E] text-[#E8834A] px-4 py-2 rounded-lg text-sm font-bold hover:bg-black transition"
-      >
-        Login
-      </Link>
+      <div onClick={() => setBellOpen(false)} style={{ position: 'fixed' as const, inset: 0, zIndex: 49 }} />
+      <div style={dropdownStyle}>
+        <div style={dropdownHeaderStyle}>
+          <span style={{ fontWeight: 700, color: INK, fontSize: '0.88rem', fontFamily: "'Fraunces', serif" }}>
+            Notifications
+          </span>
+          {unreadCount > 0 && (
+            <button onClick={handleMarkAllRead} style={{ background: 'none', border: 'none', color: TEAL, cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600, fontFamily: 'inherit' }}>
+              Mark all read
+            </button>
+          )}
+        </div>
+        {notifications.length === 0 ? (
+          <div style={{ padding: '24px 16px', color: INK_LITE, fontSize: '0.85rem', textAlign: 'center' as const, fontStyle: 'italic' }}>
+            No notifications yet
+          </div>
+        ) : (
+          notifications.map(n => {
+            const actorName = (n.actor as any)?.preferred_name || (n.actor as any)?.username || 'Someone'
+            const itemName  = (n.item as any)?.item_name || 'an item'
+            const campName  = (n.camp as any)?.display_name || 'a camp'
+            const campSlug  = (n.camp as any)?.slug || ''
+            const timeAgo   = formatTimeAgo(n.created_at)
+            const { text, href } = (() => {
+              switch (n.type) {
+                case 'new_item':              return { text: `posted a new item: ${itemName}`,              href: `/find-items/${n.item_id}` }
+                case 'new_follower':          return { text: 'started following you',                       href: `/profile/${(n.actor as any)?.username}` }
+                case 'transfer_accepted':     return { text: `accepted your transfer of ${itemName}`,       href: '/inventory' }
+                case 'transfer_declined':     return { text: `declined your transfer of ${itemName}`,       href: '/inventory' }
+                case 'loan_accepted':         return { text: `accepted your borrow request for ${itemName}`,href: '/inventory' }
+                case 'loan_declined':         return { text: `declined your borrow request for ${itemName}`,href: '/inventory' }
+                case 'item_request':          return { text: `requested your ${itemName}`,                  href: '/inventory' }
+                case 'camp_join':             return { text: `joined ${campName}`,                          href: `/camps/${campSlug}` }
+                case 'camp_claim_approved':   return { text: `Your claim for ${campName} was approved!`,    href: `/camps/${campSlug}` }
+                case 'camp_claim_denied':     return { text: `Your claim for ${campName} was not approved`, href: `/camps/${campSlug}` }
+                case 'loan_return_confirmed': return { text: `confirmed return of ${itemName}`,             href: '/inventory' }
+                case 'camp_member_removed':   return { text: `You have been removed from ${campName}`,      href: '/' }
+                case 'wish_list_match': {
+                  const items     = (n.meta as any)?.items
+                  const formatted = Array.isArray(items)
+                    ? items.map((i: string) => i.replace('(borrow)', '(to borrow)').replace('(keep)', '(to keep)')).join(', ')
+                    : 'something on your wish list'
+                  return { text: `says they have: ${formatted}`, href: `/profile/${(n.actor as any)?.username}` }
+                }
+                default: return { text: 'sent you a notification', href: '/inventory' }
+              }
+            })()
+            return (
+              <a
+                key={n.id}
+                href={href}
+                onClick={() => handleNotificationClick(n.id)}
+                style={{
+                  display: 'block', padding: '12px 16px',
+                  borderBottom: '1px solid rgba(28,22,16,0.08)',
+                  backgroundColor: n.read ? PAPER_LT : '#EDF7F0',
+                  textDecoration: 'none', color: INK,
+                }}
+              >
+                <div style={{ fontSize: '0.84rem', lineHeight: 1.45, color: INK_MID }}>
+                  <strong style={{ color: INK }}>{actorName}</strong> {text}
+                </div>
+                <div style={{ fontSize: '0.72rem', color: INK_LITE, marginTop: '3px', fontFamily: "'Space Mono', monospace" }}>{timeAgo}</div>
+              </a>
+            )
+          })
+        )}
+      </div>
     </>
   )
 
+  // ── Mobile nav link helpers ───────────────────────────────────────────────
+  const mobileLinkStyle: React.CSSProperties = { ...linkStyle, color: '#ccc' }
+  const mobileOfferStyle: React.CSSProperties = { ...mobileLinkStyle, color: LIME, fontWeight: 700 }
+  const mobileLogoutStyle: React.CSSProperties = { ...logoutBtnStyle, color: '#888', textAlign: 'right' as const }
+
   return (
-    <header className="w-full border-b border-[#A66D51] sticky top-0 z-50 shadow-sm" style={headerBg}>
-      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+    <header style={headerStyle}>
+      <div style={innerStyle}>
 
         {/* Logo */}
-        <Link href="/" className="hover:opacity-80 transition flex flex-col leading-tight">
-          <span className={`font-black text-xl uppercase tracking-tighter ${mainTextColor}`}>
-            The Playa Provides<span style={{ textDecoration: 'underline' }}>{'\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0'}</span>
-          </span>
+        <Link href="/" style={logoStyle}>
+          The Playa <em style={{ fontStyle: 'italic', color: LIME }}>Provides</em>
         </Link>
 
-        {/* Desktop nav */}
-        <nav className="hidden lg:flex gap-6 items-center">
-          <Link href="/resources" className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>On-Playa Resources</Link>
-          <span style={{ color: '#2D241E', opacity: 0.35, fontSize: '14px', userSelect: 'none' as const }}>|</span>
-          <Link href="/find-items" className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>Find Items</Link>
-          <Link href="/list-item" className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition whitespace-nowrap`}>Offer Items</Link>
+        {/* Desktop nav — hidden below lg */}
+        <nav style={navStyle} className="hidden lg:flex">
+          <Link href="/resources" style={linkStyle} className="hover-nav-link">On-Playa Resources</Link>
+          <span style={pipeStyle}>|</span>
+          <Link href="/find-items" style={linkStyle} className="hover-nav-link">Find Items</Link>
+          <Link href="/list-item" style={offerLinkStyle}>Offer Items</Link>
 
           {user ? (
             <>
-              <Link href="/inventory" className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>My Inventory</Link>
+              <Link href="/inventory" style={linkStyle} className="hover-nav-link">My Inventory</Link>
               {username && (
-                <Link href={`/profile/${username}`} className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>My Profile</Link>
+                <Link href={`/profile/${username}`} style={linkStyle} className="hover-nav-link">My Profile</Link>
               )}
-              <Link href="/settings" className={`text-sm font-bold ${mainTextColor} ${hoverEffect} transition`}>Settings</Link>
+              <Link href="/settings" style={linkStyle} className="hover-nav-link">Settings</Link>
 
               {/* Bell */}
               <div style={{ position: 'relative' as const }}>
                 <button
-                  onClick={() => {
-                    const willOpen = !bellOpen
-                    setBellOpen(willOpen)
-                    if (willOpen) fetchNotifications()
-                  }}
+                  onClick={() => { const will = !bellOpen; setBellOpen(will); if (will) fetchNotifications(); }}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative' as const, padding: '4px', display: 'flex', alignItems: 'center' }}
                 >
-                  <Bell size={20} color="#2D241E" />
+                  <Bell size={18} color="#aaa" />
                   {unreadCount > 0 && (
                     <span style={{
                       position: 'absolute' as const, top: '-4px', right: '-4px',
                       backgroundColor: '#dc2626', color: '#fff', borderRadius: '50%',
-                      width: '16px', height: '16px', fontSize: '10px', fontWeight: 'bold',
+                      width: '15px', height: '15px', fontSize: '9px', fontWeight: 'bold',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                   )}
                 </button>
-
-                {bellOpen && (
-                  <>
-                    <div onClick={() => setBellOpen(false)} style={{ position: 'fixed' as const, inset: 0, zIndex: 49 }} />
-                    <div style={{
-                      position: 'absolute' as const, right: 0, top: '36px',
-                      backgroundColor: '#fff', border: '1px solid #eee', borderRadius: '12px',
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.12)', width: '320px', zIndex: 50,
-                      maxHeight: '400px', overflowY: 'auto' as const,
-                    }}>
-                      <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontWeight: 700, color: '#2D241E', fontSize: '0.9rem' }}>Notifications</span>
-                        {unreadCount > 0 && (
-                          <button onClick={handleMarkAllRead} style={{ background: 'none', border: 'none', color: '#00aacc', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}>
-                            Mark all read
-                          </button>
-                        )}
-                      </div>
-                      {notifications.length === 0 ? (
-                        <div style={{ padding: '24px 16px', color: '#aaa', fontSize: '0.85rem', textAlign: 'center' as const }}>No notifications yet</div>
-                      ) : (
-                        notifications.map(n => {
-                          const actorName = (n.actor as any)?.preferred_name || (n.actor as any)?.username || 'Someone'
-                          const itemName = (n.item as any)?.item_name || 'an item'
-                          const campName = (n.camp as any)?.display_name || 'a camp'
-                          const campSlug = (n.camp as any)?.slug || ''
-                          const timeAgo = formatTimeAgo(n.created_at)
-                          const { text, href } = (() => {
-                            switch (n.type) {
-                              case 'new_item': return { text: `posted a new item: ${itemName}`, href: `/find-items/${n.item_id}` }
-                              case 'new_follower': return { text: 'started following you', href: `/profile/${(n.actor as any)?.username}` }
-                              case 'transfer_accepted': return { text: `accepted your transfer of ${itemName}`, href: '/inventory' }
-                              case 'transfer_declined': return { text: `declined your transfer of ${itemName}`, href: '/inventory' }
-                              case 'loan_accepted': return { text: `accepted your borrow request for ${itemName}`, href: '/inventory' }
-                              case 'loan_declined': return { text: `declined your borrow request for ${itemName}`, href: '/inventory' }
-                              case 'item_request': return { text: `requested your ${itemName}`, href: '/inventory' }
-                              case 'camp_join': return { text: `joined ${campName}`, href: `/camps/${campSlug}` }
-                              case 'camp_claim_approved': return { text: `Your claim for ${campName} was approved!`, href: `/camps/${campSlug}` }
-                              case 'camp_claim_denied': return { text: `Your claim for ${campName} was not approved`, href: `/camps/${campSlug}` }
-                              case 'loan_return_confirmed': return { text: `confirmed return of ${itemName}`, href: '/inventory' }
-                              case 'camp_member_removed': return { text: `You have been removed from ${campName}`, href: '/' }
-                              case 'wish_list_match': { const items = (n.meta as any)?.items; const formatted = Array.isArray(items) ? items.map((i: string) => i.replace('(borrow)', '(to borrow)').replace('(keep)', '(to keep)')).join(', ') : 'something on your wish list'; return { text: `says they have: ${formatted}`, href: `/profile/${(n.actor as any)?.username}` } }
-                              default: return { text: 'sent you a notification', href: '/inventory' }
-                            }
-                          })()
-                          return (
-                            <a
-                              key={n.id}
-                              href={href}
-                              onClick={() => handleNotificationClick(n.id)}
-                              style={{
-                                display: 'block', padding: '12px 16px', borderBottom: '1px solid #f5f5f5',
-                                backgroundColor: n.read ? '#fff' : '#f0fdf4',
-                                textDecoration: 'none', color: '#2D241E',
-                              }}
-                            >
-                              <div style={{ fontSize: '0.85rem', lineHeight: 1.4 }}>
-                                <strong>{actorName}</strong> {text}
-                              </div>
-                              <div style={{ fontSize: '0.75rem', color: '#aaa', marginTop: '3px' }}>{timeAgo}</div>
-                            </a>
-                          )
-                        })
-                      )}
-                    </div>
-                  </>
-                )}
+                {bellOpen && <BellDropdown />}
               </div>
 
-              <button
-                onClick={handleSignOut}
-                className="text-sm font-bold text-red-800 hover:text-red-600 transition cursor-pointer"
-              >
-                Logout
-              </button>
+              <button onClick={handleSignOut} style={logoutBtnStyle}>Logout</button>
             </>
           ) : (
-            <Link href="/login" className="bg-[#2D241E] text-[#E8834A] px-4 py-2 rounded-lg text-sm font-bold hover:bg-black transition">
-              Login
-            </Link>
+            <Link href="/login" style={loginLinkStyle}>Login</Link>
           )}
         </nav>
 
-        {/* Mobile: bell (if logged in) + hamburger */}
-        <div className="flex lg:hidden items-center gap-3">
+        {/* Mobile: bell + hamburger */}
+        <div className="flex lg:hidden items-center" style={{ gap: '12px' }}>
           {user && (
             <div style={{ position: 'relative' as const }}>
               <button
-                onClick={() => {
-                  const willOpen = !bellOpen
-                  setBellOpen(willOpen)
-                  if (willOpen) fetchNotifications()
-                  setMenuOpen(false)
-                }}
+                onClick={() => { const will = !bellOpen; setBellOpen(will); if (will) fetchNotifications(); setMenuOpen(false); }}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative' as const, padding: '4px', display: 'flex', alignItems: 'center' }}
               >
-                <Bell size={20} color="#2D241E" />
+                <Bell size={18} color="#aaa" />
                 {unreadCount > 0 && (
                   <span style={{
                     position: 'absolute' as const, top: '-4px', right: '-4px',
                     backgroundColor: '#dc2626', color: '#fff', borderRadius: '50%',
-                    width: '16px', height: '16px', fontSize: '10px', fontWeight: 'bold',
+                    width: '15px', height: '15px', fontSize: '9px', fontWeight: 'bold',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
               </button>
-
-              {bellOpen && (
-                <>
-                  <div onClick={() => setBellOpen(false)} style={{ position: 'fixed' as const, inset: 0, zIndex: 49 }} />
-                  <div style={{
-                    position: 'absolute' as const, right: 0, top: '36px',
-                    backgroundColor: '#fff', border: '1px solid #eee', borderRadius: '12px',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.12)', width: '290px', zIndex: 50,
-                    maxHeight: '400px', overflowY: 'auto' as const,
-                  }}>
-                    <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 700, color: '#2D241E', fontSize: '0.9rem' }}>Notifications</span>
-                      {unreadCount > 0 && (
-                        <button onClick={handleMarkAllRead} style={{ background: 'none', border: 'none', color: '#00aacc', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}>
-                          Mark all read
-                        </button>
-                      )}
-                    </div>
-                    {notifications.length === 0 ? (
-                      <div style={{ padding: '24px 16px', color: '#aaa', fontSize: '0.85rem', textAlign: 'center' as const }}>No notifications yet</div>
-                    ) : (
-                      notifications.map(n => {
-                        const actorName = (n.actor as any)?.preferred_name || (n.actor as any)?.username || 'Someone'
-                        const itemName = (n.item as any)?.item_name || 'an item'
-                        const campName = (n.camp as any)?.display_name || 'a camp'
-                        const campSlug = (n.camp as any)?.slug || ''
-                        const timeAgo = formatTimeAgo(n.created_at)
-                        const { text, href } = (() => {
-                          switch (n.type) {
-                            case 'new_item': return { text: `posted a new item: ${itemName}`, href: `/find-items/${n.item_id}` }
-                            case 'new_follower': return { text: 'started following you', href: `/profile/${(n.actor as any)?.username}` }
-                            case 'transfer_accepted': return { text: `accepted your transfer of ${itemName}`, href: '/inventory' }
-                            case 'transfer_declined': return { text: `declined your transfer of ${itemName}`, href: '/inventory' }
-                            case 'loan_accepted': return { text: `accepted your borrow request for ${itemName}`, href: '/inventory' }
-                            case 'loan_declined': return { text: `declined your borrow request for ${itemName}`, href: '/inventory' }
-                            case 'item_request': return { text: `requested your ${itemName}`, href: '/inventory' }
-                            case 'camp_join': return { text: `joined ${campName}`, href: `/camps/${campSlug}` }
-                            case 'camp_claim_approved': return { text: `Your claim for ${campName} was approved!`, href: `/camps/${campSlug}` }
-                            case 'camp_claim_denied': return { text: `Your claim for ${campName} was not approved`, href: `/camps/${campSlug}` }
-                            case 'loan_return_confirmed': return { text: `confirmed return of ${itemName}`, href: '/inventory' }
-                            case 'camp_member_removed': return { text: `You have been removed from ${campName}`, href: '/' }
-                            case 'wish_list_match': { const items = (n.meta as any)?.items; const formatted = Array.isArray(items) ? items.map((i: string) => i.replace('(borrow)', '(to borrow)').replace('(keep)', '(to keep)')).join(', ') : 'something on your wish list'; return { text: `says they have: ${formatted}`, href: `/profile/${(n.actor as any)?.username}` } }
-                            default: return { text: 'sent you a notification', href: '/inventory' }
-                          }
-                        })()
-                        return (
-                          <a
-                            key={n.id}
-                            href={href}
-                            onClick={() => handleNotificationClick(n.id)}
-                            style={{
-                              display: 'block', padding: '12px 16px', borderBottom: '1px solid #f5f5f5',
-                              backgroundColor: n.read ? '#fff' : '#f0fdf4',
-                              textDecoration: 'none', color: '#2D241E',
-                            }}
-                          >
-                            <div style={{ fontSize: '0.85rem', lineHeight: 1.4 }}>
-                              <strong>{actorName}</strong> {text}
-                            </div>
-                            <div style={{ fontSize: '0.75rem', color: '#aaa', marginTop: '3px' }}>{timeAgo}</div>
-                          </a>
-                        )
-                      })
-                    )}
-                  </div>
-                </>
-              )}
+              {bellOpen && <BellDropdown />}
             </div>
           )}
 
@@ -394,32 +404,29 @@ export default function Header() {
             onClick={() => { setMenuOpen(!menuOpen); setBellOpen(false); }}
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }}
           >
-            {menuOpen ? <X size={24} color="#2D241E" /> : <Menu size={24} color="#2D241E" />}
+            {menuOpen ? <X size={22} color={LIME} /> : <Menu size={22} color="#aaa" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile dropdown menu */}
+      {/* Mobile dropdown */}
       {menuOpen && (
         <>
-          <div
-            onClick={() => setMenuOpen(false)}
-            style={{ position: 'fixed' as const, inset: 0, zIndex: 49 }}
-            className="lg:hidden"
-          />
-          <div
-            style={{
-              position: 'absolute' as const, right: '0', top: '64px',
-              width: 'auto', minWidth: '220px',
-              backgroundColor: '#E8834A',
-              borderTop: '1px solid #A66D51',
-              padding: '16px 20px',
-              display: 'flex', flexDirection: 'column' as const, gap: '16px',
-              zIndex: 50,
-              textAlign: 'right' as const,
-            }}
-          >
-            {navLinks}
+          <div onClick={() => setMenuOpen(false)} style={{ position: 'fixed' as const, inset: 0, zIndex: 49 }} className="lg:hidden" />
+          <div style={mobileMenuStyle} className="lg:hidden">
+            <Link href="/resources"   onClick={() => setMenuOpen(false)} style={mobileLinkStyle}>On-Playa Resources</Link>
+            <Link href="/find-items"  onClick={() => setMenuOpen(false)} style={mobileLinkStyle}>Find Items</Link>
+            <Link href="/list-item"   onClick={() => setMenuOpen(false)} style={mobileOfferStyle}>Offer Items</Link>
+            {user ? (
+              <>
+                <Link href="/inventory"               onClick={() => setMenuOpen(false)} style={mobileLinkStyle}>My Inventory</Link>
+                {username && <Link href={`/profile/${username}`} onClick={() => setMenuOpen(false)} style={mobileLinkStyle}>My Profile</Link>}
+                <Link href="/settings"                onClick={() => setMenuOpen(false)} style={mobileLinkStyle}>Settings</Link>
+                <button onClick={() => { setMenuOpen(false); handleSignOut(); }} style={mobileLogoutStyle}>Logout</button>
+              </>
+            ) : (
+              <Link href="/login" onClick={() => setMenuOpen(false)} style={{ ...loginLinkStyle, display: 'inline-block', textAlign: 'center' as const }}>Login</Link>
+            )}
           </div>
         </>
       )}

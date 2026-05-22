@@ -215,12 +215,16 @@ export default function SettingsPage() {
   const isOAuthUser = user?.app_metadata?.provider === 'google';
 
   return (
-    <div style={{ backgroundColor: 'white', minHeight: '100vh', width: '100%', color: '#111' }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px 20px 0 20px', fontFamily: 'Outfit, sans-serif' }}>
-        <style>{`.title-break { display: none; } @media (max-width: 430px) { .title-break { display: block; } }`}</style>
-        <h1 style={{ margin: '0', fontSize: '28px', fontWeight: 'bold', color: '#2D241E' }}>The Playa Provides<span className="title-break" /><span style={{ textDecoration: 'underline' }}> Account Settings{'\u00a0'}</span></h1>
+    <div style={{ backgroundColor: '#F6F1E8', minHeight: '100vh', width: '100%', color: '#1C1610' }}>
+      <div style={{ backgroundColor: '#FDFAF4', borderBottom: '2px solid #1C1610', padding: '28px 40px' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: '#9A8878', marginBottom: '8px' }}>Account</div>
+          <h1 style={{ fontFamily: "'Fraunces', serif", fontSize: '1.9rem', fontWeight: 900, color: '#1C1610', margin: 0, lineHeight: 1.05 }}>
+            Account <em style={{ fontStyle: 'italic', color: '#1E8A82' }}>Settings.</em>
+          </h1>
+        </div>
       </div>
-      <div style={{ padding: '20px', maxWidth: '520px', margin: '0 auto', fontFamily: 'Outfit, sans-serif' }}>
+      <div style={{ padding: '28px 20px 64px', maxWidth: '520px', margin: '0 auto', fontFamily: 'Outfit, sans-serif' }}>
 
         {showSetupBanner && (
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', backgroundColor: '#fffbeb', border: '1px solid #fcd34d', borderRadius: '10px', padding: '14px 16px', marginBottom: '8px' }}>
@@ -390,7 +394,7 @@ export default function SettingsPage() {
                 type="checkbox"
                 checked={profile.notify_new_items_email || false}
                 onChange={e => setProfile({ ...profile, notify_new_items_email: e.target.checked })}
-                style={{ marginTop: '2px', accentColor: '#5ECFDF', cursor: 'pointer', width: '16px', height: '16px' }}
+                style={{ marginTop: '2px', accentColor: '#1E8A82', cursor: 'pointer', width: '16px', height: '16px' }}
               />
               <div>
                 <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#111' }}>
@@ -566,16 +570,16 @@ export default function SettingsPage() {
   );
 }
 
-const sectionStyle = { border: '1px solid #eee', padding: '14px', borderRadius: '12px', backgroundColor: '#fcfcfc' };
-const sectionHeaderStyle = { margin: '0 0 12px 0', fontSize: '16px', fontWeight: 'bold' as const };
-const subHeaderStyle = { margin: '0 0 8px', fontSize: '14px', fontWeight: '600' as const, color: '#333' };
-const labelStyle = { display: 'block', fontSize: '12px', color: '#333', fontWeight: '600' as const, marginBottom: '3px' };
-const fieldNoteStyle = { color: '#999', fontSize: '11px', margin: '0 0 4px', lineHeight: '1.4' as const };
-const errorStyle = { display: 'block', color: '#dc2626', fontSize: '11px', marginTop: '3px' } as const;
-const oauthNoteStyle = { color: '#888', fontSize: '13px', margin: '0' };
-const successMsgStyle = { color: '#16a34a', fontSize: '12px', marginTop: '8px', marginBottom: '0' };
-const inputStyle = { width: '100%', padding: '8px 10px', backgroundColor: '#fff', border: '1px solid #ddd', borderRadius: '8px', color: '#111', outline: 'none', boxSizing: 'border-box' as const, fontSize: '0.9rem' };
-const buttonStyle = { padding: '14px', backgroundColor: '#5ECFDF', color: 'black', fontWeight: 'bold' as const, border: 'none', borderRadius: '8px', cursor: 'pointer', width: '100%' };
-const smallButtonStyle = { width: '100%', padding: '10px', backgroundColor: '#eee', color: '#333', border: '1px solid #ccc', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem' };
-const addressCardStyle = { backgroundColor: '#f8f8f8', border: '1px solid #e0e0e0', borderRadius: '10px', padding: '12px', marginBottom: '10px' };
-const deleteButtonStyle = { padding: '10px 24px', backgroundColor: '#fff0f0', color: '#cc0000', border: '1px solid #ffaaaa', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' as const, fontSize: '0.9rem' };
+const sectionStyle = { border: '1.5px solid rgba(28,22,16,0.15)', padding: '16px', backgroundColor: '#FDFAF4', boxShadow: '2px 2px 0 rgba(28,22,16,0.06)' };
+const sectionHeaderStyle = { margin: '0 0 14px 0', fontFamily: "'Fraunces', serif", fontSize: '1rem', fontWeight: 700 as const, color: '#1C1610' };
+const subHeaderStyle = { margin: '0 0 8px', fontFamily: "'Fraunces', serif", fontSize: '0.9rem', fontWeight: 700 as const, color: '#1C1610' };
+const labelStyle = { display: 'block', fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: '700' as const, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: '#9A8878', marginBottom: '5px' };
+const fieldNoteStyle = { color: '#9A8878', fontSize: '0.68rem', margin: '0 0 5px', lineHeight: '1.4' as const };
+const errorStyle = { display: 'block', color: '#dc2626', fontSize: '0.72rem', marginTop: '3px' } as const;
+const oauthNoteStyle = { color: '#9A8878', fontSize: '0.84rem', margin: '0' };
+const successMsgStyle = { color: '#16a34a', fontSize: '0.78rem', marginTop: '8px', marginBottom: '0' };
+const inputStyle = { width: '100%', padding: '9px 11px', backgroundColor: '#FDFAF4', border: '1.5px solid rgba(28,22,16,0.25)', color: '#1C1610', outline: 'none', boxSizing: 'border-box' as const, fontSize: '0.9rem', fontFamily: 'inherit' };
+const buttonStyle = { padding: '13px', backgroundColor: '#1E8A82', color: '#fff', fontWeight: 'bold' as const, border: '2px solid #1C1610', boxShadow: '3px 3px 0 #1C1610', cursor: 'pointer', width: '100%', fontFamily: 'inherit', fontSize: '0.9rem' };
+const smallButtonStyle = { width: '100%', padding: '10px', backgroundColor: '#EDE5D0', color: '#1C1610', border: '1.5px solid rgba(28,22,16,0.2)', cursor: 'pointer', fontSize: '0.84rem', fontFamily: 'inherit' };
+const addressCardStyle = { backgroundColor: '#EDE5D0', border: '1px solid rgba(28,22,16,0.12)', padding: '12px', marginBottom: '10px' };
+const deleteButtonStyle = { padding: '10px 24px', backgroundColor: '#fff0f0', color: '#cc0000', border: '1px solid #ffaaaa', cursor: 'pointer', fontWeight: '600' as const, fontSize: '0.9rem', fontFamily: 'inherit' };

@@ -21,7 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-white text-[#2D241E]" style={{ backgroundColor: '#fff' }}>
+      <body style={{ backgroundColor: 'var(--paper)', color: 'var(--ink)', margin: 0 }}>
         {/* Google Analytics - Next.js Optimized Tracking */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-513K8Z20B4"
@@ -39,7 +39,7 @@ export default function RootLayout({
 
         <Header />
 
-        <main className="min-h-screen w-full" style={{ backgroundColor: '#fff' }}>
+        <main style={{ minHeight: '100vh', width: '100%' }}>
           {children}
           {modal}
         </main>
