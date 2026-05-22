@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-05-18 (session 26)_
+_Last updated: 2026-05-22 (session 28)_
 
 ---
 
@@ -42,6 +42,9 @@ _Last updated: 2026-05-18 (session 26)_
 ---
 
 ## 🎨 Design & Brand
+- [ ] **Re-integrate map view into new find-items design** — Remote had `feat: map view on find-items with zip-based geocoding` and `fix: invalidateSize` commits. During the visual overhaul rebase, the map view UI was dropped (kept only lat/lng in locations query). Need to add map toggle back to the new polaroid-grid design.
+- [ ] **Font swap** — Fraunces serif was chosen pragmatically to finish the overhaul. If it feels too "AI", swap to a different serif as a one-line CSS change in globals.css. Defer until after the overhaul is live-tested.
+- [ ] **Copy/headline pass** — Page-level copy and eyebrow labels can be tightened after the visual overhaul is confirmed. Defer.
 
 ---
 
@@ -255,3 +258,4 @@ _(nothing queued)_
 - [x] Content: About page — full copy overhaul with new accordion sections (Why? / How? / Who? / Can I Help?); Bop It audio easter egg
 - [x] Content: TPP How-To Guide — fully updated Word doc reflecting all recent changes
 - [x] Fix: Campmates Only visibility option grayed out — `user_camp_affiliations` rows with null `camp_id` (open camping / returning-status rows) poisoned the PostgREST `.in()` filter with a 400 Bad Request, silently zeroing out campMateIds; fixed with `.not('camp_id', 'is', null)` at DB query level in `list-item/page.tsx`, `inventory/page.tsx`, `AddItemModal.tsx`, and `find-items/page.tsx`; also switched `getUser()` → `getSession()` on list-item to prevent lock contention silently skipping the fetch
+- [x] Design: Full visual overhaul — "Playful Field Guide" design system shipped across all 15 pages/components: Fraunces serif headlines, Space Mono labels, warm ink/paper palette (#1C1610 / #F6F1E8), offset-shadow buttons, ink borders, no border-radius, grain texture. Header (dark ink + lime accent), footer, homepage (polaroid marquee + Frogger easter egg + field notes grid), find-items (5-col polaroid grid, centered modal, category chips), login, signup, about (accordion), resources, settings, inventory, list-item, profile. Teal #1E8A82 replaces old #3ABFD4/#5ECFDF throughout.
