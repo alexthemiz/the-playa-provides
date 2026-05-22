@@ -1,11 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { supabase } from '@/lib/supabaseClient';
 import ImageSlider from '@/components/ImageSlider';
-import { Search, MapPin, User, Package, X } from 'lucide-react';
+import { Search, MapPin, User, Package, X, LayoutGrid, List, Map } from 'lucide-react';
 import Link from 'next/link';
 import RequestModal from '@/components/RequestModal';
+
+const MapView = dynamic(() => import('@/components/MapView'), { ssr: false });
 
 // ── Design tokens ────────────────────────────────────────────────────────────
 const INK      = '#1C1610'
@@ -54,6 +57,7 @@ export default function FindItemsPage() {
 
   const [selectedItem,     setSelectedItem]     = useState<any>(null);
   const [showRequestForm,  setShowRequestForm]  = useState(false);
+  const [viewMode,         setViewMode]         = useState<'cards' | 'list' | 'map'>('cards');
 
   const categories = [
     'All', 'Bikes & Transport', 'Clothing & Fun', 'Kitchen & Water',
@@ -227,16 +231,13 @@ export default function FindItemsPage() {
       <div style={{ backgroundColor: PAPER_LT, borderBottom: `2px solid ${INK}`, padding: '28px 40px 0' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
 
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: INK_LITE, marginBottom: '8px' }}>
-            Browse
-          </div>
           <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.9rem', fontWeight: 900, lineHeight: 1.05, color: INK, margin: '0 0 18px' }}>
             Find what you <em style={{ fontStyle: 'italic', color: TEAL }}>need.</em>
           </h1>
 
           {/* Search row */}
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', border: `2px solid ${INK}`, background: PAPER_LT, padding: '0 14px', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'stretch', marginBottom: '16px', flexWrap: 'wrap' as const }}>
+            <div style={{ flex: '0 0 45%', minWidth: '200px', display: 'flex', alignItems: 'center', border: `2px solid ${INK}`, background: PAPER_LT, padding: '0 14px', gap: '10px' }}>
               <Search size={16} color={INK_LITE} style={{ flexShrink: 0 }} />
               <input
                 type="text"
@@ -246,15 +247,18 @@ export default function FindItemsPage() {
                 style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontFamily: 'Outfit, sans-serif', fontSize: '0.92rem', color: INK, padding: '11px 0' }}
               />
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', border: `2px solid ${INK}`, background: PAPER_LT, padding: '0 14px', gap: '8px', width: '140px' }}>
-              <MapPin size={14} color={INK_LITE} style={{ flexShrink: 0 }} />
-              <input
-                type="text"
-                placeholder="ZIP"
-                value={zipQuery}
-                onChange={e => setZipQuery(e.target.value)}
-                style={{ width: '100%', border: 'none', background: 'transparent', outline: 'none', fontFamily: 'Outfit, sans-serif', fontSize: '0.92rem', color: INK, padding: '11px 0' }}
-              />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: INK_LITE, whiteSpace: 'nowrap' as const }}>Search by Location:</span>
+              <div style={{ display: 'flex', alignItems: 'center', border: `2px solid ${INK}`, background: PAPER_LT, padding: '0 14px', gap: '8px', width: '120px' }}>
+                <MapPin size={14} color={INK_LITE} style={{ flexShrink: 0 }} />
+                <input
+                  type="text"
+                  placeholder="ZIP"
+                  value={zipQuery}
+                  onChange={e => setZipQuery(e.target.value)}
+                  style={{ width: '100%', border: 'none', background: 'transparent', outline: 'none', fontFamily: 'Outfit, sans-serif', fontSize: '0.92rem', color: INK, padding: '11px 0' }}
+                />
+              </div>
             </div>
           </div>
 
@@ -262,36 +266,40 @@ export default function FindItemsPage() {
           <style>{`
             .fi-filters { display: flex; align-items: center; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 12px; flex-wrap: wrap; }
             .fi-filters::-webkit-scrollbar { display: none; }
-            .fi-pipe { color: #ccc; font-size: 0.75rem; flex-shrink: 0; }
+            .fi-filter-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
             .fi-label { font-family: 'Space Mono', monospace; font-size: 0.55rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: ${INK_LITE}; white-space: nowrap; flex-shrink: 0; }
           `}</style>
 
           <div className="fi-filters">
-            <span className="fi-label">Category</span>
-            {categories.map(cat => (
-              <button key={cat} onClick={() => toggleCategory(cat)}
-                style={chipStyle(categoryFilters.includes(cat), cat !== 'All' ? CAT_ACCENTS[cat] : undefined)}>
-                {cat}
-              </button>
-            ))}
+            <div className="fi-filter-group">
+              <span className="fi-label">Category</span>
+              {categories.map(cat => (
+                <button key={cat} onClick={() => toggleCategory(cat)}
+                  style={chipStyle(categoryFilters.includes(cat), cat !== 'All' ? CAT_ACCENTS[cat] : undefined)}>
+                  {cat}
+                </button>
+              ))}
+            </div>
 
-            <span className="fi-pipe">|</span>
-            <span className="fi-label">Show from</span>
-            {['Everyone', 'Following', 'Followers', 'My Campmates'].map(opt => (
-              <button key={opt} onClick={() => toggleRelationship(opt)}
-                style={chipStyle(relationshipFilters.includes(opt))}>
-                {opt}
-              </button>
-            ))}
+            <div className="fi-filter-group">
+              <span className="fi-label">Show from</span>
+              {['Everyone', 'Following', 'Followers', 'My Campmates'].map(opt => (
+                <button key={opt} onClick={() => toggleRelationship(opt)}
+                  style={chipStyle(relationshipFilters.includes(opt))}>
+                  {opt}
+                </button>
+              ))}
+            </div>
 
-            <span className="fi-pipe">|</span>
-            <span className="fi-label">Available to</span>
-            {['Borrow', 'Keep'].map(opt => (
-              <button key={opt} onClick={() => toggleAvailability(opt)}
-                style={chipStyle(availabilityFilters.includes(opt), opt === 'Borrow' ? TEAL : RUST)}>
-                {opt}
-              </button>
-            ))}
+            <div className="fi-filter-group">
+              <span className="fi-label">Available to</span>
+              {['Borrow', 'Keep'].map(opt => (
+                <button key={opt} onClick={() => toggleAvailability(opt)}
+                  style={chipStyle(availabilityFilters.includes(opt), opt === 'Borrow' ? TEAL : RUST)}>
+                  {opt}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -301,9 +309,95 @@ export default function FindItemsPage() {
         <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.68rem', color: INK_LITE, fontWeight: 700, letterSpacing: '0.06em' }}>
           {loading ? 'Loading…' : <><strong style={{ color: INK }}>{filteredItems.length}</strong> items available</>}
         </div>
+        {/* View toggle */}
+        <div style={{ display: 'flex', border: `2px solid ${INK}`, overflow: 'hidden' }}>
+          {([
+            { mode: 'cards', icon: <LayoutGrid size={15} />, label: 'Cards' },
+            { mode: 'list',  icon: <List size={15} />,        label: 'List'  },
+            { mode: 'map',   icon: <Map size={15} />,         label: 'Map'   },
+          ] as const).map(({ mode, icon, label }) => (
+            <button
+              key={mode}
+              onClick={() => setViewMode(mode)}
+              title={label}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '5px',
+                padding: '6px 12px',
+                border: 'none',
+                borderRight: mode !== 'map' ? `1px solid ${INK}` : 'none',
+                background: viewMode === mode ? INK : PAPER_LT,
+                color:      viewMode === mode ? PAPER : INK_LITE,
+                cursor: 'pointer',
+                fontFamily: "'Space Mono', monospace",
+                fontSize: '0.6rem',
+                fontWeight: 700,
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase' as const,
+              }}
+            >
+              {icon}{label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* ── GRID ───────────────────────────────────────────────────────── */}
+      {/* ── MAP VIEW ───────────────────────────────────────────────────── */}
+      {viewMode === 'map' && (
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '20px 40px 64px' }}>
+          <MapView items={filteredItems} onSelectItem={handleOpenItem} />
+        </div>
+      )}
+
+      {/* ── LIST VIEW ──────────────────────────────────────────────────── */}
+      {viewMode === 'list' && !loading && (
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '20px 40px 64px' }}>
+          {filteredItems.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '80px 20px' }}>
+              <div style={{ fontSize: '3.5rem', marginBottom: '16px' }}>🏜️</div>
+              <h3 style={{ fontFamily: "'Arvo', serif", fontSize: '1.3rem', fontWeight: 700, fontStyle: 'italic', marginBottom: '8px', color: INK }}>Nothing out there right now.</h3>
+              <p style={{ color: INK_MID, fontSize: '0.9rem' }}>Try adjusting your filters, or check back after someone lists something.</p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '2px' }}>
+              {filteredItems.map((item) => {
+                const emoji    = CATEGORY_EMOJI[item.category] || '📦';
+                const hasImg   = Array.isArray(item.image_urls) && item.image_urls.length > 0;
+                const isKeep   = item.availability_status === 'Available to Keep';
+                const owner    = item.profiles?.preferred_name || item.profiles?.username || 'Member';
+                const location = item.locations ? [item.locations.city, item.locations.state].filter(Boolean).join(', ') : null;
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => handleOpenItem(item)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '12px 16px', backgroundColor: PAPER_LT, border: `1.5px solid rgba(28,22,16,0.12)`, cursor: 'pointer', transition: 'box-shadow 0.12s' }}
+                    onMouseEnter={e => (e.currentTarget.style.boxShadow = `3px 3px 0 ${INK}`)}
+                    onMouseLeave={e => (e.currentTarget.style.boxShadow = 'none')}
+                  >
+                    <div style={{ width: '48px', height: '48px', flexShrink: 0, backgroundColor: PAPER_DK, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                      {hasImg
+                        ? <img src={item.image_urls[0]} alt={item.item_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        : <span style={{ fontSize: '1.4rem' }}>{emoji}</span>
+                      }
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontFamily: "'Arvo', serif", fontSize: '0.95rem', fontWeight: 700, color: INK }}>{item.item_name}</div>
+                      <div style={{ fontSize: '0.75rem', color: INK_LITE, marginTop: '2px' }}>{owner}{location ? ` · ${location}` : ''}</div>
+                    </div>
+                    <div style={{ flexShrink: 0 }}>
+                      <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.52rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '3px 8px', border: `1px solid ${isKeep ? RUST : TEAL}`, color: isKeep ? RUST : TEAL, background: isKeep ? RUST_LT : TEAL_LT }}>
+                        {isKeep ? 'Keep' : 'Borrow'}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── CARDS GRID ─────────────────────────────────────────────────── */}
+      {(viewMode === 'cards' || loading) && (
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '20px 40px 64px' }}>
         <style>{`
           .fi-grid {
@@ -406,6 +500,7 @@ export default function FindItemsPage() {
           </div>
         )}
       </div>
+      )}
 
       {/* ── ITEM DETAIL MODAL (centered) ───────────────────────────────── */}
       {selectedItem && (

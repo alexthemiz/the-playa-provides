@@ -483,13 +483,158 @@ export default function PublicProfilePage() {
   return (
     <div style={{ backgroundColor: '#F6F1E8', minHeight: '100vh' }}>
 
-      {/* Page header band */}
+      {/* Page header band — contains the full profile identity block */}
       <div style={{ backgroundColor: '#FDFAF4', borderBottom: '2px solid #1C1610', padding: '28px 40px' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: '#9A8878', marginBottom: '8px' }}>Community</div>
-          <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.9rem', fontWeight: 900, color: '#1C1610', margin: 0, lineHeight: 1.05 }}>
-            {isOwner ? <>Your <em style={{ fontStyle: 'italic', color: '#1E8A82' }}>Profile.</em></> : <><em style={{ fontStyle: 'italic', color: '#1E8A82' }}>A</em> Profile.</>}
-          </h1>
+          {/* Avatar + name row */}
+          <div className="profile-header-row" style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+            {/* Avatar */}
+            {isEditing ? (
+              <AvatarUpload url={profile.avatar_url} onUpload={(url) => setProfile({ ...profile, avatar_url: url })} />
+            ) : (
+              <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: '#f0f0f0', backgroundImage: profile.avatar_url ? `url(${profile.avatar_url})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center', border: '3px solid #C08261', flexShrink: 0 }}>
+                {!profile.avatar_url && (
+                  <span style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', fontSize: '1.8rem', color: '#C08261' }}>
+                    {profile.preferred_name?.charAt(0)}
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* Identity */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {isEditing ? (
+                <input
+                  style={{ backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', fontSize: '1.5rem', width: '100%', padding: '5px' }}
+                  value={profile.preferred_name || ''}
+                  onChange={e => setProfile({ ...profile, preferred_name: e.target.value })}
+                />
+              ) : (
+                <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.9rem', fontWeight: 900, color: '#1C1610', margin: '0 0 4px', lineHeight: 1.05 }}>
+                  {profile.preferred_name || profile.username || username}
+                </h1>
+              )}
+
+              {/* @username / pronouns / location */}
+              <div className="profile-username-row" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' as const, gap: '6px', fontSize: '0.82rem', color: '#9A8878', marginBottom: '8px' }}>
+                <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.7rem' }}>@{profile?.username || username}</span>
+                {profile.pronouns && <><span style={{ color: '#ccc' }}>·</span><span>{profile.pronouns}</span></>}
+                {locationStr && <><span style={{ color: '#ccc' }}>·</span><span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><MapPin size={12} />{locationStr}</span></>}
+              </div>
+
+              {/* Social links */}
+              {isEditing ? (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginTop: '8px', maxWidth: '480px' }}>
+                  {[
+                    { key: 'facebook',  label: 'Facebook' },
+                    { key: 'instagram', label: 'Instagram' },
+                    { key: 'bluesky',   label: 'Bluesky' },
+                    { key: 'linkedin',  label: 'LinkedIn' },
+                    { key: 'eplaya',    label: 'ePlaya Profile' },
+                    { key: 'website',   label: 'Personal Website' },
+                  ].map(({ key, label }) => (
+                    <div key={key}>
+                      <label style={{ fontSize: '10px', color: '#aaa', display: 'block', marginBottom: '2px', textTransform: 'uppercase' as const, letterSpacing: '0.05em' }}>{label}</label>
+                      <input
+                        type="url"
+                        placeholder="https://..."
+                        value={(profile.social_links || {})[key] || ''}
+                        onChange={e => setProfile({ ...profile, social_links: { ...(profile.social_links || {}), [key]: e.target.value } })}
+                        style={{ width: '100%', backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', padding: '6px 8px', fontSize: '12px', boxSizing: 'border-box' as const, outline: 'none' }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (() => {
+                const links = profile.social_links || {};
+                const SOCIAL = [
+                  { key: 'facebook',  label: 'Facebook',  icon: <Facebook size={13} />,  color: '#1877F2' },
+                  { key: 'instagram', label: 'Instagram', icon: <Instagram size={13} />, color: '#E4405F' },
+                  { key: 'bluesky',   label: 'Bluesky',   icon: null,                    color: '#0085FF' },
+                  { key: 'linkedin',  label: 'LinkedIn',  icon: <Linkedin size={13} />,  color: '#0A66C2' },
+                  { key: 'eplaya',    label: 'ePlaya',    icon: null,                    color: '#8B4513' },
+                  { key: 'website',   label: 'Website',   icon: <Globe size={13} />,     color: '#1E8A82' },
+                ].filter(s => (links as any)[s.key]);
+                if (SOCIAL.length === 0) return null;
+                return (
+                  <div className="profile-social-links" style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '6px', marginBottom: '10px' }}>
+                    {SOCIAL.map(s => (
+                      <a key={s.key} href={/^https?:\/\//i.test((links as any)[s.key]) ? (links as any)[s.key] : `https://${(links as any)[s.key]}`} target="_blank" rel="noopener noreferrer"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 10px', backgroundColor: '#f5f5f5', border: '1px solid #e5e5e5', textDecoration: 'none', fontSize: '11px', fontWeight: 600, color: s.color }}>
+                        {s.icon}{s.label}
+                      </a>
+                    ))}
+                  </div>
+                );
+              })()}
+
+              {/* Followers / Following + action buttons */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' as const }}>
+                <div className="profile-follower-row" style={{ display: 'flex', gap: '16px' }}>
+                  <span style={{ fontSize: '0.8rem', color: '#4A3828' }}><strong style={{ fontFamily: "'Arvo', serif" }}>{followerCount}</strong> <span style={{ color: '#9A8878' }}>followers</span></span>
+                  <span style={{ fontSize: '0.8rem', color: '#4A3828' }}><strong style={{ fontFamily: "'Arvo', serif" }}>{followingCount}</strong> <span style={{ color: '#9A8878' }}>following</span></span>
+                </div>
+
+                {isOwner ? (
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' as const }}>
+                    {isEditing ? (
+                      <>
+                        <button onClick={handleSave}
+                          style={{ padding: '6px 16px', backgroundColor: '#1E8A82', color: '#fff', border: '2px solid #1C1610', boxShadow: '2px 2px 0 #1C1610', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', fontFamily: 'inherit' }}>
+                          Save Profile
+                        </button>
+                        <button onClick={() => setIsEditing(false)}
+                          style={{ padding: '6px 14px', background: 'none', border: '2px solid #1C1610', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', fontFamily: 'inherit', color: '#1C1610' }}>
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          const aff2026 = affiliations.find((a: any) => a.year === 2026);
+                          setDraft2026({
+                            status: aff2026?.returning_status ?? null,
+                            campInput: (aff2026?.camps as any)?.display_name || '',
+                            campId: aff2026?.camp_id || null,
+                            isOpenCamping: aff2026?.is_open_camping || false,
+                            searchResults: [],
+                            showDropdown: false,
+                          });
+                          setDraftAffiliations(
+                            affiliations
+                              .filter((a: any) => a.year !== 2026)
+                              .map((a: any) => ({
+                                tempId: a.id,
+                                year: a.year,
+                                is_open_camping: a.is_open_camping,
+                                campInput: (a.camps as any)?.display_name || '',
+                                campId: a.camp_id || null,
+                                searchResults: [],
+                                showDropdown: false,
+                              }))
+                          );
+                          setIsEditing(true);
+                        }}
+                        className="profile-action-btn"
+                        style={{ padding: '6px 16px', background: 'none', border: '2px solid #1C1610', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', fontFamily: 'inherit', color: '#1C1610' }}>
+                        Edit Profile
+                      </button>
+                    )}
+                  </div>
+                ) : currentUserId ? (
+                  <button
+                    onClick={handleFollowToggle}
+                    disabled={followLoading}
+                    className="profile-action-btn"
+                    style={{ padding: '6px 16px', backgroundColor: isFollowing ? '#EDE5D0' : '#1E8A82', color: isFollowing ? '#4A3828' : '#fff', border: '2px solid #1C1610', boxShadow: isFollowing ? 'none' : '2px 2px 0 #1C1610', fontWeight: 700, fontSize: '0.8rem', cursor: followLoading ? 'default' as const : 'pointer', fontFamily: 'inherit', opacity: followLoading ? 0.6 : 1 }}
+                  >
+                    {followLoading ? '...' : isFollowing ? 'Following' : 'Follow'}
+                  </button>
+                ) : null}
+                {followError && <span style={{ color: '#C24820', fontSize: '0.78rem' }}>{followError}</span>}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -542,10 +687,9 @@ export default function PublicProfilePage() {
       `}</style>
 
 
-      {/* PROFILE HEADER */}
-      <header style={{ borderBottom: '1.5px solid rgba(28,22,16,0.12)', paddingBottom: '30px' }}>
-
-        {/* ROW 1: Avatar + Name / @username / Location / Social Links + Followers/Edit (right) */}
+      {/* OLD PROFILE HEADER — ROW 1 (duplicate identity) removed; now in page band above */}
+      <div style={{ display: 'none' }}>
+        {/* ROW 1 REMOVED */}
         <div className="profile-header-row" style={{ display: 'flex', gap: '25px', alignItems: 'flex-start' }}>
           {isEditing ? (
             <AvatarUpload url={profile.avatar_url} onUpload={(url) => setProfile({ ...profile, avatar_url: url })} />
@@ -716,9 +860,10 @@ export default function PublicProfilePage() {
             )}
           </div>
         </div>
+      </div>{/* end hidden ROW 1 */}
 
-        {/* FOLLOWERS / FOLLOWING MODAL */}
-        {isOwner && openList && (
+      {/* FOLLOWERS / FOLLOWING MODAL */}
+      {isOwner && openList && (
           <>
             {/* Backdrop */}
             <div
@@ -730,7 +875,7 @@ export default function PublicProfilePage() {
               {/* Modal header */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>
                 <span style={{ fontWeight: 700, fontSize: '14px', color: '#2D241E', textTransform: 'capitalize' as const }}>{openList}</span>
-                <button onClick={() => setOpenList(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: '18px', lineHeight: 1, padding: '2px 6px' }}>Ã—</button>
+                <button onClick={() => setOpenList(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: '18px', lineHeight: 1, padding: '2px 6px' }}>{'×'}</button>
               </div>
 
               {/* Column headers */}
@@ -786,8 +931,9 @@ export default function PublicProfilePage() {
           </>
         )}
 
-        {/* ROW 2: Bio | Wish List */}
-        <div className="profile-bio-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginTop: '25px' }}>
+      {/* Bio | Wish List */}
+      <div style={{ borderTop: '1.5px solid rgba(28,22,16,0.12)', paddingTop: '28px', marginTop: '12px' }}>
+        <div className="profile-bio-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
           <div className="profile-bio">
             <h4 style={subheadStyle}>Bio</h4>
             {isEditing ? (
@@ -806,18 +952,18 @@ export default function PublicProfilePage() {
                 <span style={{ color: '#aaa', fontStyle: 'italic' as const, fontSize: '0.9rem' }}>No wishlist yet.</span>
               )}
               {wishTags.map(tag => (
-                <span key={tag} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 14px', borderRadius: '20px', border: '1px solid #1E8A82', backgroundColor: '#D4EDEB', color: '#1E8A82', fontSize: '0.85rem', fontWeight: 500 }}>
+                <span key={tag} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', border: '1.5px solid #1E8A82', backgroundColor: '#D4EDEB', color: '#1E8A82', fontSize: '0.82rem', fontWeight: 600, fontFamily: "'Space Mono', monospace" }}>
                   {tag}
                   {isOwner && (
-                    <button onClick={() => removeTag(tag)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '0', lineHeight: 1, color: '#005566', fontSize: '14px', fontWeight: 'bold' }} aria-label={`Remove ${tag}`}>Ã—</button>
+                    <button onClick={() => removeTag(tag)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '0', lineHeight: 1, color: '#005566', fontSize: '14px', fontWeight: 'bold' }} aria-label={`Remove ${tag}`}>{'×'}</button>
                   )}
                 </span>
               ))}
             </div>
             {isOwner && (
               <div style={{ display: 'flex', gap: '8px' }}>
-                <input type="text" value={tagInput} placeholder="Add an item..." onChange={e => setTagInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }} disabled={tagSaving} style={{ flex: 1, backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', padding: '6px 10px', borderRadius: '6px', fontSize: '13px', outline: 'none', opacity: tagSaving ? 0.5 : 1 }} />
-                <button onClick={addTag} disabled={tagSaving} style={{ backgroundColor: '#1E8A82', color: '#fff', border: '1.5px solid #1C1610', padding: '6px 14px', fontWeight: 600, fontSize: '13px', cursor: tagSaving ? 'default' as const : 'pointer' as const, opacity: tagSaving ? 0.5 : 1 }}>Add</button>
+                <input type="text" value={tagInput} placeholder="Add an item..." onChange={e => setTagInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }} disabled={tagSaving} style={{ flex: 1, backgroundColor: '#FDFAF4', color: '#1C1610', border: '2px solid #1C1610', padding: '7px 10px', fontSize: '0.85rem', outline: 'none', fontFamily: 'inherit', opacity: tagSaving ? 0.5 : 1 }} />
+                <button onClick={addTag} disabled={tagSaving} style={{ backgroundColor: '#1E8A82', color: '#fff', border: '2px solid #1C1610', boxShadow: '2px 2px 0 #1C1610', padding: '7px 16px', fontWeight: 700, fontSize: '0.82rem', cursor: tagSaving ? 'default' as const : 'pointer' as const, fontFamily: 'inherit', opacity: tagSaving ? 0.5 : 1 }}>Add</button>
               </div>
             )}
             {!isOwner && currentUserId && wishTags.length > 0 && (
@@ -825,7 +971,7 @@ export default function PublicProfilePage() {
                 <p style={{ margin: '0 0 6px', fontSize: '0.78rem', color: '#aaa' }}>Got something they're looking for?</p>
                 <button
                   onClick={() => setShowWishMatchModal(true)}
-                  style={{ padding: '7px 14px', backgroundColor: '#f5f5f5', color: '#2D241E', border: '1px solid #ddd', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}
+                  style={{ padding: '7px 14px', backgroundColor: '#FDFAF4', color: '#1C1610', border: '2px solid #1C1610', boxShadow: '2px 2px 0 #1C1610', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
                 >
                   I have one of these
                 </button>
@@ -954,7 +1100,7 @@ export default function PublicProfilePage() {
                       )}
                     </div>
                   )}
-                  <button onClick={() => removeDraftEntry(draft.tempId)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ccc', fontSize: '1.2rem', lineHeight: 1, flexShrink: 0, padding: '4px', paddingTop: '6px' }} aria-label="Remove">Ã—</button>
+                  <button onClick={() => removeDraftEntry(draft.tempId)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ccc', fontSize: '1.2rem', lineHeight: 1, flexShrink: 0, padding: '4px', paddingTop: '6px' }} aria-label="Remove">{'×'}</button>
                 </div>
               ))}
               <button onClick={addDraftEntry} style={{ marginTop: '4px', fontSize: '0.8rem', color: '#1E8A82', background: 'none', border: '1px dashed #1E8A82', borderRadius: '6px', padding: '5px 14px', cursor: 'pointer' }}>
@@ -963,21 +1109,21 @@ export default function PublicProfilePage() {
 
             </div>
           ) : affiliations.length > 0 ? (
-            <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '8px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '6px' }}>
               {affiliations.map((aff: any) => {
                 const campName = (aff.camps as any)?.display_name ?? null;
                 const campSlug = (aff.camps as any)?.slug ?? null;
                 return (
-                  <div key={aff.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#fafafa', border: '1px solid #eee', borderRadius: '20px', padding: '3px 10px 3px 4px' }}>
-                    <span style={{ backgroundColor: '#fdf3ec', padding: '2px 8px', borderRadius: '20px', color: '#C08261', border: '1px solid #f0d8c8', fontSize: '0.8rem', fontWeight: 'bold', flexShrink: 0 }}>
+                  <div key={aff.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#EDE5D0', border: '1.5px solid rgba(28,22,16,0.2)', padding: '3px 10px 3px 4px' }}>
+                    <span style={{ backgroundColor: '#D4A020', padding: '2px 8px', color: '#fff', fontSize: '0.72rem', fontWeight: 700, fontFamily: "'Space Mono', monospace", flexShrink: 0, letterSpacing: '0.04em' }}>
                       {aff.year}
                     </span>
                     {aff.is_open_camping ? (
-                      <span style={{ fontSize: '0.82rem', color: '#aaa', fontStyle: 'italic' as const }}>Open Camping</span>
+                      <span style={{ fontSize: '0.8rem', color: '#9A8878', fontStyle: 'italic' as const }}>Open Camping</span>
                     ) : campSlug ? (
-                      <a href={`/camps/${campSlug}`} style={{ fontSize: '0.82rem', color: '#1E8A82', textDecoration: 'none', fontWeight: 500 }}>{campName}</a>
+                      <a href={`/camps/${campSlug}`} style={{ fontSize: '0.8rem', color: '#1E8A82', textDecoration: 'none', fontWeight: 600 }}>{campName}</a>
                     ) : campName ? (
-                      <span style={{ fontSize: '0.82rem', color: '#555' }}>{campName}</span>
+                      <span style={{ fontSize: '0.8rem', color: '#4A3828' }}>{campName}</span>
                     ) : null}
                     {aff.returning_status && returningBadge(aff.returning_status)}
                   </div>
@@ -1007,22 +1153,22 @@ export default function PublicProfilePage() {
 
         </div>{/* end playa history + story section */}
 
-      </header>
+      </div>{/* end bio/wishlist/playa section */}
 
       {/* AVAILABLE ITEMS */}
       <section style={{ marginTop: '40px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-          <h2 style={{ color: '#2D241E', fontSize: '20px', margin: 0 }}>Available Items</h2>
+          <h2 style={{ fontFamily: "'Arvo', serif", fontSize: '1.3rem', fontWeight: 700, color: '#1C1610', margin: 0 }}>Available Items</h2>
           {isOwner && (
             <div style={{ display: 'flex', gap: '8px' }}>
-              <Link href="/inventory" style={{ backgroundColor: '#d896ff', color: '#000', borderRadius: 6, padding: '6px 14px', fontSize: '0.8rem', fontWeight: 600, border: 'none', textDecoration: 'none', display: 'inline-block' }}>
+              <Link href="/inventory" style={{ backgroundColor: '#1E8A82', color: '#fff', padding: '6px 14px', fontSize: '0.8rem', fontWeight: 700, border: '2px solid #1C1610', boxShadow: '2px 2px 0 #1C1610', textDecoration: 'none', display: 'inline-block', fontFamily: 'inherit' }}>
                 Manage Inventory
               </Link>
               <button
                 onClick={() => setShowAddItem(true)}
-                style={{ backgroundColor: '#1E8A82', color: '#fff', padding: '6px 14px', fontSize: '0.8rem', fontWeight: 600, border: '1.5px solid #1C1610', cursor: 'pointer' }}
+                style={{ backgroundColor: 'transparent', color: '#1C1610', padding: '6px 14px', fontSize: '0.8rem', fontWeight: 600, border: '2px solid #1C1610', cursor: 'pointer', fontFamily: 'inherit' }}
               >
-                Add New Item
+                + Add Item
               </button>
             </div>
           )}

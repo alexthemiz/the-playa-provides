@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { supabase } from '../lib/supabaseClient'
 import { Bell, Menu, X } from 'lucide-react'
 
@@ -136,6 +137,14 @@ const mobileMenuStyle: React.CSSProperties = {
 
 // ── Component ────────────────────────────────────────────────────────────────
 export default function Header() {
+  const pathname = usePathname()
+
+  // Returns link style with active (lime) highlight when the path matches
+  const navLinkStyle = (href: string): React.CSSProperties => {
+    const isActive = pathname === href || (href !== '/' && pathname.startsWith(href))
+    return isActive ? offerLinkStyle : linkStyle
+  }
+
   const [user, setUser]                   = useState<any>(null)
   const [username, setUsername]           = useState<string | null>(null)
   const [unreadCount, setUnreadCount]     = useState(0)
@@ -321,8 +330,11 @@ export default function Header() {
 
   // ── Mobile nav link helpers ───────────────────────────────────────────────
   const mobileLinkStyle: React.CSSProperties = { ...linkStyle, color: '#ccc' }
-  const mobileOfferStyle: React.CSSProperties = { ...mobileLinkStyle, color: LIME, fontWeight: 700 }
   const mobileLogoutStyle: React.CSSProperties = { ...logoutBtnStyle, color: '#888', textAlign: 'right' as const }
+  const mobileNavLinkStyle = (href: string): React.CSSProperties => {
+    const isActive = pathname === href || (href !== '/' && pathname.startsWith(href))
+    return isActive ? { ...mobileLinkStyle, color: LIME, fontWeight: 700 } : mobileLinkStyle
+  }
 
   return (
     <header style={headerStyle}>
@@ -335,20 +347,20 @@ export default function Header() {
 
         {/* Desktop nav — hidden below lg */}
         <nav style={navStyle} className="hidden lg:flex">
-          <Link href="/about" style={linkStyle} className="hover-nav-link">About</Link>
+          <Link href="/about" style={navLinkStyle('/about')} className="hover-nav-link">About</Link>
           <span style={pipeStyle}>|</span>
-          <Link href="/resources" style={linkStyle} className="hover-nav-link">On-Playa Resources</Link>
+          <Link href="/resources" style={navLinkStyle('/resources')} className="hover-nav-link">On-Playa Resources</Link>
           <span style={pipeStyle}>|</span>
-          <Link href="/find-items" style={linkStyle} className="hover-nav-link">Find Items</Link>
-          <Link href="/list-item" style={offerLinkStyle}>Offer Items</Link>
+          <Link href="/find-items" style={navLinkStyle('/find-items')} className="hover-nav-link">Find Items</Link>
+          <Link href="/list-item" style={navLinkStyle('/list-item')}>Offer Items</Link>
 
           {user ? (
             <>
-              <Link href="/inventory" style={linkStyle} className="hover-nav-link">My Inventory</Link>
+              <Link href="/inventory" style={navLinkStyle('/inventory')} className="hover-nav-link">My Inventory</Link>
               {username && (
-                <Link href={`/profile/${username}`} style={linkStyle} className="hover-nav-link">My Profile</Link>
+                <Link href={`/profile/${username}`} style={navLinkStyle(`/profile/${username}`)} className="hover-nav-link">My Profile</Link>
               )}
-              <Link href="/settings" style={linkStyle} className="hover-nav-link">Settings</Link>
+              <Link href="/settings" style={navLinkStyle('/settings')} className="hover-nav-link">Settings</Link>
 
               {/* Bell */}
               <div style={{ position: 'relative' as const }}>
@@ -416,15 +428,15 @@ export default function Header() {
         <>
           <div onClick={() => setMenuOpen(false)} style={{ position: 'fixed' as const, inset: 0, zIndex: 49 }} className="lg:hidden" />
           <div style={mobileMenuStyle} className="lg:hidden">
-            <Link href="/about"       onClick={() => setMenuOpen(false)} style={mobileLinkStyle}>About</Link>
-            <Link href="/resources"   onClick={() => setMenuOpen(false)} style={mobileLinkStyle}>On-Playa Resources</Link>
-            <Link href="/find-items"  onClick={() => setMenuOpen(false)} style={mobileLinkStyle}>Find Items</Link>
-            <Link href="/list-item"   onClick={() => setMenuOpen(false)} style={mobileOfferStyle}>Offer Items</Link>
+            <Link href="/about"       onClick={() => setMenuOpen(false)} style={mobileNavLinkStyle('/about')}>About</Link>
+            <Link href="/resources"   onClick={() => setMenuOpen(false)} style={mobileNavLinkStyle('/resources')}>On-Playa Resources</Link>
+            <Link href="/find-items"  onClick={() => setMenuOpen(false)} style={mobileNavLinkStyle('/find-items')}>Find Items</Link>
+            <Link href="/list-item"   onClick={() => setMenuOpen(false)} style={mobileNavLinkStyle('/list-item')}>Offer Items</Link>
             {user ? (
               <>
-                <Link href="/inventory"               onClick={() => setMenuOpen(false)} style={mobileLinkStyle}>My Inventory</Link>
-                {username && <Link href={`/profile/${username}`} onClick={() => setMenuOpen(false)} style={mobileLinkStyle}>My Profile</Link>}
-                <Link href="/settings"                onClick={() => setMenuOpen(false)} style={mobileLinkStyle}>Settings</Link>
+                <Link href="/inventory"               onClick={() => setMenuOpen(false)} style={mobileNavLinkStyle('/inventory')}>My Inventory</Link>
+                {username && <Link href={`/profile/${username}`} onClick={() => setMenuOpen(false)} style={mobileNavLinkStyle(`/profile/${username}`)}>My Profile</Link>}
+                <Link href="/settings"                onClick={() => setMenuOpen(false)} style={mobileNavLinkStyle('/settings')}>Settings</Link>
                 <button onClick={() => { setMenuOpen(false); handleSignOut(); }} style={mobileLogoutStyle}>Logout</button>
               </>
             ) : (

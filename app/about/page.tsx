@@ -101,7 +101,6 @@ export default function AboutPage() {
       {/* Page header band */}
       <div style={{ backgroundColor: PAPER_LT, borderBottom: `2px solid ${INK}`, padding: '28px 40px' }}>
         <div style={{ maxWidth: '760px', margin: '0 auto' }}>
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: INK_LITE, marginBottom: '8px' }}>About</div>
           <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '2rem', fontWeight: 900, color: INK, margin: 0, lineHeight: 1.05 }}>
             An <em style={{ fontStyle: 'italic', color: TEAL }}>About</em> Page.
           </h1>
