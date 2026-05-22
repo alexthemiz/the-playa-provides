@@ -371,42 +371,45 @@ export default function HomePage() {
 
         {/* Left */}
         <div style={{
-          padding: '52px 48px 48px',
+          padding: '52px 32px 48px',
           borderRight: `2px solid ${INK}`,
-          display: 'flex', flexDirection: 'column', justifyContent: 'center',
+          display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
           backgroundColor: PAPER_LT,
         }}>
-          <h1 style={{
-            fontFamily: "'Arvo', serif",
-            fontSize: 'clamp(2.4rem, 4vw, 3.8rem)',
-            fontWeight: 900, lineHeight: 1.02, letterSpacing: '-0.02em',
-            color: INK, margin: '0 0 18px',
-          }}>
-            Gear sharing<br />for the{' '}
-            <em style={{ fontStyle: 'italic', color: RUST }}>Burning<br />Man</em>{' '}
-            <span style={{ textDecoration: 'underline', textDecorationColor: LIME, textDecorationThickness: '3px', textUnderlineOffset: '5px' }}>community.</span>
-          </h1>
-
-          <p style={{ fontSize: '1rem', color: INK_MID, lineHeight: 1.65, maxWidth: '380px', margin: '0 0 32px', fontWeight: 500 }}>
-            Borrow what you need. Lend what you've got. Keep stuff out of landfills and off Amazon.{' '}
-            <span style={{ fontSize: '0.85rem', color: INK_LITE, fontStyle: 'italic' }}>(It's free. Because of course it is.)</span>
-          </p>
-
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            <Link href="/find-items" style={{
-              padding: '13px 28px', backgroundColor: TEAL, color: '#fff',
-              fontWeight: 700, fontSize: '0.95rem', textDecoration: 'none',
-              border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,
+          {/* Content block — centered in panel, text stays left-aligned */}
+          <div style={{ width: '100%', maxWidth: '520px' }}>
+            <h1 style={{
+              fontFamily: "'Arvo', serif",
+              fontSize: 'clamp(1.9rem, 3.2vw, 2.9rem)',
+              fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.02em',
+              color: INK, margin: '0 0 18px',
             }}>
-              Browse Gear →
-            </Link>
-            <Link href="/list-item" style={{
-              padding: '13px 28px', backgroundColor: 'transparent', color: INK,
-              fontWeight: 700, fontSize: '0.95rem', textDecoration: 'none',
-              border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,
-            }}>
-              List Your Stuff
-            </Link>
+              Gear sharing<br />for the{' '}
+              <em style={{ fontStyle: 'italic', color: RUST }}>Burning<br />Man</em>{' '}
+              <span style={{ textDecoration: 'underline', textDecorationColor: LIME, textDecorationThickness: '3px', textUnderlineOffset: '5px' }}>community.</span>
+            </h1>
+
+            <p style={{ fontSize: '1rem', color: INK_MID, lineHeight: 1.65, margin: '0 0 32px', fontWeight: 500 }}>
+              Borrow what you need. Lend what you've got. Keep stuff out of landfills and off Amazon.{' '}
+              <span style={{ fontSize: '0.85rem', color: INK_LITE, fontStyle: 'italic' }}>(It's free. Because of course it is.)</span>
+            </p>
+
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <Link href="/find-items" style={{
+                padding: '13px 28px', backgroundColor: TEAL, color: '#fff',
+                fontWeight: 700, fontSize: '0.95rem', textDecoration: 'none',
+                border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,
+              }}>
+                Browse Gear →
+              </Link>
+              <Link href="/list-item" style={{
+                padding: '13px 28px', backgroundColor: 'transparent', color: INK,
+                fontWeight: 700, fontSize: '0.95rem', textDecoration: 'none',
+                border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,
+              }}>
+                List Your Stuff
+              </Link>
+            </div>
           </div>
 
         </div>
