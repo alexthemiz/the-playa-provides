@@ -568,8 +568,7 @@ export default function HomePage() {
       <section style={{ backgroundColor: PAPER_LT, padding: '52px 40px', borderBottom: `2px solid ${INK}` }}>
         <div style={{ maxWidth: '960px', margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '24px' }}>
-            <span style={{ fontFamily: "'Fraunces', serif", fontSize: '1.3rem', fontWeight: 700, color: INK }}>Field Notes</span>
-            <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.62rem', color: INK_LITE }}>— in case you need convincing</span>
+            <span style={{ fontFamily: "'Fraunces', serif", fontSize: '1.3rem', fontWeight: 700, color: INK }}>The playa can only provide because people provide.</span>
           </div>
           <div style={{
             display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)',

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Font Preview — The Playa Provides</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;0,900;1,600;1,700;1,900&family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=DM+Serif+Display:ital@0;1&family=Instrument+Serif:ital@0;1&family=Lora:ital,wght@0,700;1,700&family=EB+Garamond:ital,wght@0,700;0,800;1,700;1,800&family=Spectral:ital,wght@0,700;0,800;1,700;1,800&family=Libre+Baskerville:ital,wght@0,700;1,400&family=Vollkorn:ital,wght@0,700;0,900;1,700;1,900&family=Cardo:ital,wght@0,400;1,400&family=Space+Mono:wght@700&display=swap" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #F6F1E8;
+      color: #1C1610;
+      font-family: sans-serif;
+      padding: 48px 40px 80px;
+    }
+    .page-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #9A8878;
+      margin-bottom: 40px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+      gap: 2px;
+      border: 2px solid #1C1610;
+    }
+    .card {
+      background: #FDFAF4;
+      padding: 32px 32px 28px;
+      border: 1px solid rgba(28,22,16,0.15);
+      position: relative;
+    }
+    .card:hover {
+      background: #EDE5D0;
+    }
+    .font-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #9A8878;
+      margin-bottom: 14px;
+    }
+    .headline {
+      font-size: clamp(1.9rem, 3.5vw, 2.8rem);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: #1C1610;
+      margin-bottom: 12px;
+    }
+    .headline em {
+      font-style: italic;
+      color: #C24820;
+    }
+    .headline .underline {
+      text-decoration: underline;
+      text-decoration-color: #B8CC2A;
+      text-decoration-thickness: 3px;
+      text-underline-offset: 5px;
+    }
+    .subhead {
+      font-size: 0.88rem;
+      color: #4A3828;
+      line-height: 1.65;
+      margin-bottom: 16px;
+    }
+    .logo-preview {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #F6F1E8;
+      background: #1C1610;
+      display: inline-block;
+      padding: 6px 14px;
+      letter-spacing: -0.01em;
+      margin-bottom: 20px;
+    }
+    .logo-preview em {
+      font-style: italic;
+      color: #B8CC2A;
+    }
+    .section-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1C1610;
+      border-top: 1.5px solid rgba(28,22,16,0.15);
+      padding-top: 14px;
+      margin-top: 4px;
+    }
+
+    /* Per-font assignments */
+    .f-cormorant  { font-family: 'Cormorant Garamond', serif; }
+    .f-playfair   { font-family: 'Playfair Display', serif; }
+    .f-dm         { font-family: 'DM Serif Display', serif; }
+    .f-instrument { font-family: 'Instrument Serif', serif; }
+    .f-lora       { font-family: 'Lora', serif; }
+    .f-ebgaramond { font-family: 'EB Garamond', serif; }
+    .f-spectral   { font-family: 'Spectral', serif; }
+    .f-baskerville{ font-family: 'Libre Baskerville', serif; }
+    .f-vollkorn   { font-family: 'Vollkorn', serif; }
+    .f-cardo      { font-family: 'Cardo', serif; }
+  </style>
+</head>
+<body>
+
+  <div class="page-title">Font Preview — The Playa Provides · 10 Options</div>
+
+  <div class="grid">
+
+    <!-- 1. Cormorant Garamond -->
+    <div class="card">
+      <div class="font-label">01 — Cormorant Garamond</div>
+      <div class="logo-preview f-cormorant">The Playa <em>Provides</em></div>
+      <h2 class="headline f-cormorant">
+        Gear sharing<br>for the <em>Burning<br>Man</em> <span class="underline">community.</span>
+      </h2>
+      <p class="subhead" style="font-family: sans-serif;">Borrow what you need. Lend what you've got. Keep stuff out of landfills and off Amazon.</p>
+      <div class="section-title f-cormorant">The playa can only provide because people provide.</div>
+    </div>
+
+    <!-- 2. Playfair Display -->
+    <div class="card">
+      <div class="font-label">02 — Playfair Display</div>
+      <div class="logo-preview f-playfair">The Playa <em>Provides</em></div>
+      <h2 class="headline f-playfair">
+        Gear sharing<br>for the <em>Burning<br>Man</em> <span class="underline">community.</span>
+      </h2>
+      <p class="subhead" style="font-family: sans-serif;">Borrow what you need. Lend what you've got. Keep stuff out of landfills and off Amazon.</p>
+      <div class="section-title f-playfair">The playa can only provide because people provide.</div>
+    </div>
+
+    <!-- 3. DM Serif Display -->
+    <div class="card">
+      <div class="font-label">03 — DM Serif Display</div>
+      <div class="logo-preview f-dm">The Playa <em>Provides</em></div>
+      <h2 class="headline f-dm">
+        Gear sharing<br>for the <em>Burning<br>Man</em> <span class="underline">community.</span>
+      </h2>
+      <p class="subhead" style="font-family: sans-serif;">Borrow what you need. Lend what you've got. Keep stuff out of landfills and off Amazon.</p>
+      <div class="section-title f-dm">The playa can only provide because people provide.</div>
+    </div>
+
+    <!-- 4. Instrument Serif -->
+    <div class="card">
+      <div class="font-label">04 — Instrument Serif</div>
+      <div class="logo-preview f-instrument">The Playa <em>Provides</em></div>
+      <h2 class="headline f-instrument">
+        Gear sharing<br>for the <em>Burning<br>Man</em> <span class="underline">community.</span>
+      </h2>
+      <p class="subhead" style="font-family: sans-serif;">Borrow what you need. Lend what you've got. Keep stuff out of landfills and off Amazon.</p>
+      <div class="section-title f-instrument">The playa can only provide because people provide.</div>
+    </div>
+
+    <!-- 5. Lora -->
+    <div class="card">
+      <div class="font-label">05 — Lora</div>
+      <div class="logo-preview f-lora">The Playa <em>Provides</em></div>
+      <h2 class="headline f-lora">
+        Gear sharing<br>for the <em>Burning<br>Man</em> <span class="underline">community.</span>
+      </h2>
+      <p class="subhead" style="font-family: sans-serif;">Borrow what you need. Lend what you've got. Keep stuff out of landfills and off Amazon.</p>
+      <div class="section-title f-lora">The playa can only provide because people provide.</div>
+    </div>
+
+    <!-- 6. EB Garamond -->
+    <div class="card">
+      <div class="font-label">06 — EB Garamond</div>
+      <div class="logo-preview f-ebgaramond">The Playa <em>Provides</em></div>
+      <h2 class="headline f-ebgaramond">
+        Gear sharing<br>for the <em>Burning<br>Man</em> <span class="underline">community.</span>
+      </h2>
+      <p class="subhead" style="font-family: sans-serif;">Borrow what you need. Lend what you've got. Keep stuff out of landfills and off Amazon.</p>
+      <div class="section-title f-ebgaramond">The playa can only provide because people provide.</div>
+    </div>
+
+    <!-- 7. Spectral -->
+    <div class="card">
+      <div class="font-label">07 — Spectral</div>
+      <div class="logo-preview f-spectral">The Playa <em>Provides</em></div>
+      <h2 class="headline f-spectral">
+        Gear sharing<br>for the <em>Burning<br>Man</em> <span class="underline">community.</span>
+      </h2>
+      <p class="subhead" style="font-family: sans-serif;">Borrow what you need. Lend what you've got. Keep stuff out of landfills and off Amazon.</p>
+      <div class="section-title f-spectral">The playa can only provide because people provide.</div>
+    </div>
+
+    <!-- 8. Libre Baskerville -->
+    <div class="card">
+      <div class="font-label">08 — Libre Baskerville</div>
+      <div class="logo-preview f-baskerville">The Playa <em>Provides</em></div>
+      <h2 class="headline f-baskerville" style="font-size: clamp(1.6rem, 2.8vw, 2.3rem);">
+        Gear sharing<br>for the <em>Burning<br>Man</em> <span class="underline">community.</span>
+      </h2>
+      <p class="subhead" style="font-family: sans-serif;">Borrow what you need. Lend what you've got. Keep stuff out of landfills and off Amazon.</p>
+      <div class="section-title f-baskerville">The playa can only provide because people provide.</div>
+    </div>
+
+    <!-- 9. Vollkorn -->
+    <div class="card">
+      <div class="font-label">09 — Vollkorn</div>
+      <div class="logo-preview f-vollkorn">The Playa <em>Provides</em></div>
+      <h2 class="headline f-vollkorn">
+        Gear sharing<br>for the <em>Burning<br>Man</em> <span class="underline">community.</span>
+      </h2>
+      <p class="subhead" style="font-family: sans-serif;">Borrow what you need. Lend what you've got. Keep stuff out of landfills and off Amazon.</p>
+      <div class="section-title f-vollkorn">The playa can only provide because people provide.</div>
+    </div>
+
+    <!-- 10. Cardo -->
+    <div class="card">
+      <div class="font-label">10 — Cardo</div>
+      <div class="logo-preview f-cardo">The Playa <em>Provides</em></div>
+      <h2 class="headline f-cardo">
+        Gear sharing<br>for the <em>Burning<br>Man</em> <span class="underline">community.</span>
+      </h2>
+      <p class="subhead" style="font-family: sans-serif;">Borrow what you need. Lend what you've got. Keep stuff out of landfills and off Amazon.</p>
+      <div class="section-title f-cardo">The playa can only provide because people provide.</div>
+    </div>
+
+  </div>
+
+</body>
+</html>
