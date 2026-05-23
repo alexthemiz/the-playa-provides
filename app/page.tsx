@@ -66,6 +66,7 @@ export default function HomePage() {
   const [photoHovered,    setPhotoHovered]    = useState(false)
   const [gameRunning,     setGameRunning]     = useState(false)
   const [showDeletedBanner, setShowDeletedBanner] = useState(false)
+  const [featureTab,      setFeatureTab]      = useState<'how' | 'why'>('how')
 
   // ── Game refs ──────────────────────────────────────────────────────────────
   const heroRightRef = useRef<HTMLDivElement>(null)
@@ -607,34 +608,86 @@ export default function HomePage() {
       {/* ── SECTION RULE ─────────────────────────────────────────────────── */}
       <hr style={{ border: 'none', borderTop: `1.5px solid ${INK}`, margin: 0 }} />
 
-      {/* ── FIELD NOTES ──────────────────────────────────────────────────── */}
+      {/* ── FEATURES / WHY ───────────────────────────────────────────────── */}
       <section style={{ backgroundColor: PAPER_LT, padding: '52px 40px', borderBottom: `2px solid ${INK}` }}>
         <div style={{ maxWidth: '960px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '24px' }}>
-            <span style={{ fontFamily: "'Arvo', serif", fontSize: '1.3rem', fontWeight: 700, color: INK }}>The playa can only provide because people provide.</span>
+
+          {/* Header row */}
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '24px', gap: '20px' }}>
+            <div>
+              <h2 style={{ fontFamily: "'Arvo', serif", fontSize: '1.3rem', fontWeight: 700, fontStyle: 'italic', color: INK, marginBottom: '4px' }}>
+                The playa can only provide because people provide.
+              </h2>
+            </div>
+            {/* Toggle */}
+            <div style={{ display: 'flex', border: `2px solid ${INK}`, flexShrink: 0 }}>
+              {(['how', 'why'] as const).map((tab, i) => (
+                <button
+                  key={tab}
+                  onClick={() => setFeatureTab(tab)}
+                  style={{
+                    padding: '6px 16px',
+                    fontFamily: "'Space Mono', monospace", fontSize: '0.62rem', fontWeight: 700,
+                    letterSpacing: '0.06em', cursor: 'pointer', border: 'none',
+                    borderLeft: i === 1 ? `1px solid ${INK}` : 'none',
+                    backgroundColor: featureTab === tab ? INK : 'transparent',
+                    color: featureTab === tab ? LIME : INK,
+                  }}
+                >
+                  {tab === 'how' ? 'How it works' : 'Why it matters'}
+                </button>
+              ))}
+            </div>
           </div>
-          <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)',
-            border: `2px solid ${INK}`,
-          }}>
-            {[
-              { n: 'I',   title: 'Radical Interdependence',        body: 'Others may have what you need. You may have what others need. Turns out that\'s enough.' },
-              { n: 'II',  title: 'Decommodification, Actually',    body: 'Make it a year-round thing. Every shared item is one less Amazon order. Do the math.' },
-              { n: 'III', title: 'Lending is a Type of Gifting',   body: 'You don\'t even have to give it away. Let someone borrow it. That counts.' },
-              { n: 'IV',  title: 'Not Going This Year?',           body: 'Your gear still can. Let it earn its keep while it collects dust in your garage.' },
-            ].map(({ n, title, body }, i) => (
-              <div key={i} style={{
-                padding: '20px 22px', position: 'relative',
-                borderRight:  i % 2 === 0 ? `1px solid ${INK}` : 'none',
-                borderBottom: i < 2       ? `1px solid ${INK}` : 'none',
-                backgroundColor: ['#FDFAF4','#F8F4E8','#F4F8EC','#F8F2EE'][i],
-              }}>
-                <span style={{ position: 'absolute', top: '10px', right: '12px', fontFamily: "'Arvo', serif", fontSize: '2.6rem', fontWeight: 900, fontStyle: 'italic', opacity: 0.07, userSelect: 'none' as const }}>{n}</span>
-                <h3 style={{ fontFamily: "'Arvo', serif", fontSize: '1.02rem', fontWeight: 700, color: INK, marginBottom: '7px', paddingRight: '30px', lineHeight: 1.25, margin: '0 0 7px' }}>{title}</h3>
-                <p style={{ fontSize: '0.86rem', color: INK_MID, lineHeight: 1.65, margin: 0 }}>{body}</p>
-              </div>
-            ))}
-          </div>
+
+          {/* ── HOW IT WORKS ── */}
+          {featureTab === 'how' && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', border: `2px solid ${INK}` }}>
+              {[
+                { n: '01', ey: 'Feature 01', title: 'Connect with your Campmates',       body: <><Link href="/profile" style={{ color: TEAL, fontWeight: 700 }}>Complete your profile</Link> to see if past or current campmates have what you're looking for — or need something you have.</> },
+                { n: '02', ey: 'Feature 02', title: 'Decide How Wide to Provide',        body: 'Choose who can see your listings: campmates, followers, everyone — or no one.' },
+                { n: '03', ey: 'Feature 03', title: 'Reduce the Stress of Generosity',   body: 'Set your terms at the start — return date, replacement cost, what happens if something breaks. Say it once, up front.' },
+                { n: '04', ey: 'Feature 04', title: 'Maintain an Easy Inventory',        body: 'Add an item once and it stays logged for as long as you want. Your gear list is there when you need it.' },
+              ].map(({ n, ey, title, body }, i) => (
+                <div key={i} style={{
+                  padding: '28px 26px', position: 'relative',
+                  borderRight:  i % 2 === 0 ? `1px solid ${INK}` : 'none',
+                  borderBottom: i < 2       ? `1px solid ${INK}` : 'none',
+                  backgroundColor: ['#FDFAF4','#F8F4E8','#F4F8EC','#F8F2EE'][i],
+                }}>
+                  <span style={{ position: 'absolute', top: '12px', right: '14px', fontFamily: "'Arvo', serif", fontSize: '3rem', fontWeight: 900, fontStyle: 'italic', opacity: 0.07, userSelect: 'none' as const }}>{n}</span>
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: INK_LITE, marginBottom: '9px' }}>{ey}</div>
+                  <h3 style={{ fontFamily: "'Arvo', serif", fontSize: '1.02rem', fontWeight: 700, color: INK, marginBottom: '8px', paddingRight: '30px', lineHeight: 1.25 }}>{title}</h3>
+                  <p style={{ fontSize: '0.86rem', color: INK_MID, lineHeight: 1.65, margin: 0 }}>{body}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* ── WHY IT MATTERS ── */}
+          {featureTab === 'why' && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', border: `2px solid ${INK}` }}>
+              {[
+                { n: 'I',   ey: 'Field Note 01', title: 'Radical Interdependence',      body: 'Others may have what you need. You may have what others need. Turns out that\'s enough.' },
+                { n: 'II',  ey: 'Field Note 02', title: 'Decommodification, Actually',  body: 'Make it a year-round thing. Every shared item is one less Amazon order. Do the math.' },
+                { n: 'III', ey: 'Field Note 03', title: 'Lending is a Type of Gifting', body: 'You don\'t even have to give it away. Let someone borrow it. That counts.' },
+                { n: 'IV',  ey: 'Field Note 04', title: 'Not Going This Year?',         body: 'Your gear still can. Let it earn its keep while it collects dust in your garage.' },
+              ].map(({ n, ey, title, body }, i) => (
+                <div key={i} style={{
+                  padding: '28px 26px', position: 'relative',
+                  borderRight:  i % 2 === 0 ? `1px solid ${INK}` : 'none',
+                  borderBottom: i < 2       ? `1px solid ${INK}` : 'none',
+                  backgroundColor: ['#FDFAF4','#F8F4E8','#F4F8EC','#F8F2EE'][i],
+                }}>
+                  <span style={{ position: 'absolute', top: '12px', right: '14px', fontFamily: "'Arvo', serif", fontSize: '3rem', fontWeight: 900, fontStyle: 'italic', opacity: 0.07, userSelect: 'none' as const }}>{n}</span>
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' as const, color: INK_LITE, marginBottom: '9px' }}>{ey}</div>
+                  <h3 style={{ fontFamily: "'Arvo', serif", fontSize: '1.02rem', fontWeight: 700, color: INK, marginBottom: '8px', paddingRight: '30px', lineHeight: 1.25 }}>{title}</h3>
+                  <p style={{ fontSize: '0.86rem', color: INK_MID, lineHeight: 1.65, margin: 0 }}>{body}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
         </div>
       </section>
 
