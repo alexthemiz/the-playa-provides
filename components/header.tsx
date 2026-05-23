@@ -330,17 +330,19 @@ export default function Header() {
 
   const BellButton = ({ onOpen }: { onOpen?: () => void }) => (
     <div style={{ position: 'relative' as const }}>
-      <button
-        onClick={() => { const will = !bellOpen; setBellOpen(will); if (will) { fetchNotifications(); onOpen?.(); } }}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative' as const, padding: '4px', display: 'flex', alignItems: 'center' }}
-      >
-        <Bell size={18} color="#aaa" />
-        {unreadCount > 0 && (
-          <span style={{ position: 'absolute' as const, top: '-4px', right: '-4px', backgroundColor: '#dc2626', color: '#fff', borderRadius: '50%', width: '15px', height: '15px', fontSize: '9px', fontWeight: 'bold' as const, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {unreadCount > 9 ? '9+' : unreadCount}
-          </span>
-        )}
-      </button>
+      {!bellOpen && (
+        <button
+          onClick={() => { setBellOpen(true); fetchNotifications(); onOpen?.(); }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative' as const, padding: '4px', display: 'flex', alignItems: 'center' }}
+        >
+          <Bell size={18} color="#aaa" />
+          {unreadCount > 0 && (
+            <span style={{ position: 'absolute' as const, top: '-4px', right: '-4px', backgroundColor: '#dc2626', color: '#fff', borderRadius: '50%', width: '15px', height: '15px', fontSize: '9px', fontWeight: 'bold' as const, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+        </button>
+      )}
       {bellOpen && <BellDropdown />}
     </div>
   )
