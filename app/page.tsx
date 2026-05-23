@@ -384,7 +384,7 @@ export default function HomePage() {
               fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.02em',
               color: INK, margin: '0 0 18px',
             }}>
-              Why let your stuff collect{' '}
+              Why let your stuff collect<br />
               <em style={{ fontStyle: 'italic', color: RUST }}>dust in storage</em>{' '}
               when it could be{' '}
               <span style={{ textDecoration: 'underline', textDecorationColor: LIME, textDecorationThickness: '3px', textUnderlineOffset: '5px' }}>earning it on playa?</span>
