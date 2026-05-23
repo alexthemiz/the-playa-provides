@@ -471,8 +471,8 @@ export default function InventoryPage() {
     <div style={{ backgroundColor: '#F6F1E8', minHeight: '100vh' }}>
 
       {/* Page header band */}
-      <div style={{ backgroundColor: '#FDFAF4', borderBottom: '2px solid #1C1610', padding: '28px 40px' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+      <div style={{ backgroundColor: '#FDFAF4', borderBottom: '2px solid #1C1610', padding: '28px 0' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 40px' }}>
           <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.9rem', fontWeight: 900, color: '#1C1610', margin: '0 0 12px', lineHeight: 1.05 }}>
             Your <em style={{ fontStyle: 'italic', color: '#1E8A82' }}>Inventory.</em>
           </h1>

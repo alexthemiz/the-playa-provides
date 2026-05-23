@@ -235,8 +235,8 @@ export default function FindItemsPage() {
     <div style={{ backgroundColor: PAPER, minHeight: '100vh', color: INK }}>
 
       {/* ── PAGE HEADER BAND ───────────────────────────────────────────── */}
-      <div style={{ backgroundColor: PAPER_LT, borderBottom: `2px solid ${INK}`, padding: '28px 40px 0' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+      <div style={{ backgroundColor: PAPER_LT, borderBottom: `2px solid ${INK}`, padding: '28px 0 0' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 40px' }}>
 
           <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.9rem', fontWeight: 900, lineHeight: 1.05, color: INK, margin: '0 0 18px' }}>
             Find what you <em style={{ fontStyle: 'italic', color: TEAL }}>need.</em>
