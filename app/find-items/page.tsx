@@ -361,30 +361,52 @@ export default function FindItemsPage() {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '2px' }}>
               {filteredItems.map((item) => {
-                const emoji    = CATEGORY_EMOJI[item.category] || '📦';
-                const hasImg   = Array.isArray(item.image_urls) && item.image_urls.length > 0;
-                const isKeep   = item.availability_status === 'Available to Keep';
-                const owner    = item.profiles?.preferred_name || item.profiles?.username || 'Member';
-                const location = item.locations ? [item.locations.city, item.locations.state].filter(Boolean).join(', ') : null;
+                const emoji       = CATEGORY_EMOJI[item.category] || '📦';
+                const hasImg      = Array.isArray(item.image_urls) && item.image_urls.length > 0;
+                const isKeep      = item.availability_status === 'Available to Keep';
+                const owner       = item.profiles?.preferred_name || item.profiles?.username || 'Member';
+                const location    = item.locations ? [item.locations.city, item.locations.state].filter(Boolean).join(', ') : null;
+                const description = item.description?.trim() || null;
+                const terms       = !isKeep && item.return_terms?.trim() ? item.return_terms.trim() : null;
                 return (
                   <div
                     key={item.id}
                     onClick={() => handleOpenItem(item)}
-                    style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '12px 16px', backgroundColor: PAPER_LT, border: `1.5px solid rgba(28,22,16,0.12)`, cursor: 'pointer', transition: 'box-shadow 0.12s' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 16px', backgroundColor: PAPER_LT, border: `1.5px solid rgba(28,22,16,0.12)`, cursor: 'pointer', transition: 'box-shadow 0.12s' }}
                     onMouseEnter={e => (e.currentTarget.style.boxShadow = `3px 3px 0 ${INK}`)}
                     onMouseLeave={e => (e.currentTarget.style.boxShadow = 'none')}
                   >
+                    {/* Thumbnail */}
                     <div style={{ width: '48px', height: '48px', flexShrink: 0, backgroundColor: PAPER_DK, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                       {hasImg
                         ? <img src={item.image_urls[0]} alt={item.item_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         : <span style={{ fontSize: '1.4rem' }}>{emoji}</span>
                       }
                     </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontFamily: "'Arvo', serif", fontSize: '0.95rem', fontWeight: 700, color: INK }}>{item.item_name}</div>
-                      <div style={{ fontSize: '0.75rem', color: INK_LITE, marginTop: '2px' }}>{owner}{location ? ` · ${location}` : ''}</div>
+                    {/* Item name + description — takes up remaining space */}
+                    <div style={{ flex: '1 1 0', minWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap' as const }}>
+                      <span style={{ fontFamily: "'Arvo', serif", fontSize: '0.92rem', fontWeight: 700, color: INK }}>{item.item_name}</span>
+                      {description && (
+                        <span style={{ fontSize: '0.8rem', color: INK_LITE, marginLeft: '8px' }}>· {description}</span>
+                      )}
                     </div>
-                    <div style={{ flexShrink: 0 }}>
+                    {/* Owner · location */}
+                    <div style={{ flexShrink: 0, width: '160px', overflow: 'hidden', whiteSpace: 'nowrap' as const, textOverflow: 'ellipsis', fontSize: '0.75rem', color: INK_LITE, textAlign: 'right' as const }}>
+                      {owner}{location ? ` · ${location}` : ''}
+                    </div>
+                    {/* Return terms (borrow only) */}
+                    <div style={{ flexShrink: 0, width: '120px', textAlign: 'right' as const }}>
+                      {terms && (
+                        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: INK_LITE, letterSpacing: '0.04em', overflow: 'hidden', whiteSpace: 'nowrap' as const, display: 'block', textOverflow: 'ellipsis' }}>{terms}</span>
+                      )}
+                    </div>
+                    {/* Category + Keep/Borrow chips */}
+                    <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      {item.category && item.category !== 'Miscellaneous' && (
+                        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '2px 6px', border: `1px solid rgba(28,22,16,0.2)`, color: INK_LITE, background: PAPER_DK }}>
+                          {emoji} {item.category}
+                        </span>
+                      )}
                       <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.52rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '3px 8px', border: `1px solid ${isKeep ? RUST : TEAL}`, color: isKeep ? RUST : TEAL, background: isKeep ? RUST_LT : TEAL_LT }}>
                         {isKeep ? 'Keep' : 'Borrow'}
                       </span>
