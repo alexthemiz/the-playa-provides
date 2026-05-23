@@ -517,11 +517,79 @@ export default function PublicProfilePage() {
                 </h1>
               )}
 
-              {/* @username / pronouns / location */}
-              <div className="profile-username-row" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' as const, gap: '6px', fontSize: '0.82rem', color: '#9A8878', marginBottom: '8px' }}>
-                <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.7rem' }}>@{profile?.username || username}</span>
-                {profile.pronouns && <><span style={{ color: '#ccc' }}>·</span><span>{profile.pronouns}</span></>}
-                {locationStr && <><span style={{ color: '#ccc' }}>·</span><span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><MapPin size={12} />{locationStr}</span></>}
+              {/* @username / pronouns / location + followers + action button — one row */}
+              <div className="profile-username-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' as const, gap: '8px', fontSize: '0.82rem', color: '#9A8878', marginBottom: '8px' }}>
+                {/* Left: identity meta */}
+                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' as const, gap: '6px' }}>
+                  <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.7rem' }}>@{profile?.username || username}</span>
+                  {profile.pronouns && <><span style={{ color: '#ccc' }}>·</span><span>{profile.pronouns}</span></>}
+                  {locationStr && <><span style={{ color: '#ccc' }}>·</span><span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><MapPin size={12} />{locationStr}</span></>}
+                </div>
+                {/* Right: counts + action button */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' as const }}>
+                  <div className="profile-follower-row" style={{ display: 'flex', gap: '12px' }}>
+                    <span style={{ fontSize: '0.8rem', color: '#4A3828' }}><strong style={{ fontFamily: "'Arvo', serif" }}>{followerCount}</strong> <span style={{ color: '#9A8878' }}>followers</span></span>
+                    <span style={{ fontSize: '0.8rem', color: '#4A3828' }}><strong style={{ fontFamily: "'Arvo', serif" }}>{followingCount}</strong> <span style={{ color: '#9A8878' }}>following</span></span>
+                  </div>
+                  {isOwner ? (
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' as const }}>
+                      {isEditing ? (
+                        <>
+                          <button onClick={handleSave}
+                            style={{ padding: '6px 16px', backgroundColor: '#1E8A82', color: '#fff', border: '2px solid #1C1610', boxShadow: '2px 2px 0 #1C1610', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', fontFamily: 'inherit' }}>
+                            Save Profile
+                          </button>
+                          <button onClick={() => setIsEditing(false)}
+                            style={{ padding: '6px 14px', background: 'none', border: '2px solid #1C1610', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', fontFamily: 'inherit', color: '#1C1610' }}>
+                            Cancel
+                          </button>
+                          {saveError && <span style={{ color: '#C24820', fontSize: '0.75rem', alignSelf: 'center' }}>{saveError}</span>}
+                        </>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            const aff2026 = affiliations.find((a: any) => a.year === 2026);
+                            setDraft2026({
+                              status: aff2026?.returning_status ?? null,
+                              campInput: (aff2026?.camps as any)?.display_name || '',
+                              campId: aff2026?.camp_id || null,
+                              isOpenCamping: aff2026?.is_open_camping || false,
+                              searchResults: [],
+                              showDropdown: false,
+                            });
+                            setDraftAffiliations(
+                              affiliations
+                                .filter((a: any) => a.year !== 2026)
+                                .map((a: any) => ({
+                                  tempId: a.id,
+                                  year: a.year,
+                                  is_open_camping: a.is_open_camping,
+                                  campInput: (a.camps as any)?.display_name || '',
+                                  campId: a.camp_id || null,
+                                  searchResults: [],
+                                  showDropdown: false,
+                                }))
+                            );
+                            setIsEditing(true);
+                          }}
+                          className="profile-action-btn"
+                          style={{ padding: '6px 16px', background: 'none', border: '2px solid #1C1610', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', fontFamily: 'inherit', color: '#1C1610' }}>
+                          Edit Profile
+                        </button>
+                      )}
+                    </div>
+                  ) : currentUserId ? (
+                    <button
+                      onClick={handleFollowToggle}
+                      disabled={followLoading}
+                      className="profile-action-btn"
+                      style={{ padding: '6px 16px', backgroundColor: isFollowing ? '#EDE5D0' : '#1E8A82', color: isFollowing ? '#4A3828' : '#fff', border: '2px solid #1C1610', boxShadow: isFollowing ? 'none' : '2px 2px 0 #1C1610', fontWeight: 700, fontSize: '0.8rem', cursor: followLoading ? 'default' as const : 'pointer', fontFamily: 'inherit', opacity: followLoading ? 0.6 : 1 }}
+                    >
+                      {followLoading ? '...' : isFollowing ? 'Following' : 'Follow'}
+                    </button>
+                  ) : null}
+                  {followError && <span style={{ color: '#C24820', fontSize: '0.78rem' }}>{followError}</span>}
+                </div>
               </div>
 
               {/* Social links */}
@@ -570,72 +638,6 @@ export default function PublicProfilePage() {
                 );
               })()}
 
-              {/* Followers / Following + action buttons */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' as const }}>
-                <div className="profile-follower-row" style={{ display: 'flex', gap: '16px' }}>
-                  <span style={{ fontSize: '0.8rem', color: '#4A3828' }}><strong style={{ fontFamily: "'Arvo', serif" }}>{followerCount}</strong> <span style={{ color: '#9A8878' }}>followers</span></span>
-                  <span style={{ fontSize: '0.8rem', color: '#4A3828' }}><strong style={{ fontFamily: "'Arvo', serif" }}>{followingCount}</strong> <span style={{ color: '#9A8878' }}>following</span></span>
-                </div>
-
-                {isOwner ? (
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' as const }}>
-                    {isEditing ? (
-                      <>
-                        <button onClick={handleSave}
-                          style={{ padding: '6px 16px', backgroundColor: '#1E8A82', color: '#fff', border: '2px solid #1C1610', boxShadow: '2px 2px 0 #1C1610', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', fontFamily: 'inherit' }}>
-                          Save Profile
-                        </button>
-                        <button onClick={() => setIsEditing(false)}
-                          style={{ padding: '6px 14px', background: 'none', border: '2px solid #1C1610', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', fontFamily: 'inherit', color: '#1C1610' }}>
-                          Cancel
-                        </button>
-                        {saveError && <span style={{ color: '#C24820', fontSize: '0.75rem', alignSelf: 'center' }}>{saveError}</span>}
-                      </>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          const aff2026 = affiliations.find((a: any) => a.year === 2026);
-                          setDraft2026({
-                            status: aff2026?.returning_status ?? null,
-                            campInput: (aff2026?.camps as any)?.display_name || '',
-                            campId: aff2026?.camp_id || null,
-                            isOpenCamping: aff2026?.is_open_camping || false,
-                            searchResults: [],
-                            showDropdown: false,
-                          });
-                          setDraftAffiliations(
-                            affiliations
-                              .filter((a: any) => a.year !== 2026)
-                              .map((a: any) => ({
-                                tempId: a.id,
-                                year: a.year,
-                                is_open_camping: a.is_open_camping,
-                                campInput: (a.camps as any)?.display_name || '',
-                                campId: a.camp_id || null,
-                                searchResults: [],
-                                showDropdown: false,
-                              }))
-                          );
-                          setIsEditing(true);
-                        }}
-                        className="profile-action-btn"
-                        style={{ padding: '6px 16px', background: 'none', border: '2px solid #1C1610', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', fontFamily: 'inherit', color: '#1C1610' }}>
-                        Edit Profile
-                      </button>
-                    )}
-                  </div>
-                ) : currentUserId ? (
-                  <button
-                    onClick={handleFollowToggle}
-                    disabled={followLoading}
-                    className="profile-action-btn"
-                    style={{ padding: '6px 16px', backgroundColor: isFollowing ? '#EDE5D0' : '#1E8A82', color: isFollowing ? '#4A3828' : '#fff', border: '2px solid #1C1610', boxShadow: isFollowing ? 'none' : '2px 2px 0 #1C1610', fontWeight: 700, fontSize: '0.8rem', cursor: followLoading ? 'default' as const : 'pointer', fontFamily: 'inherit', opacity: followLoading ? 0.6 : 1 }}
-                  >
-                    {followLoading ? '...' : isFollowing ? 'Following' : 'Follow'}
-                  </button>
-                ) : null}
-                {followError && <span style={{ color: '#C24820', fontSize: '0.78rem' }}>{followError}</span>}
-              </div>
             </div>
           </div>
         </div>
@@ -762,7 +764,7 @@ export default function PublicProfilePage() {
         )}
 
       {/* Bio | Wish List */}
-      <div style={{ borderTop: '1.5px solid rgba(28,22,16,0.12)', paddingTop: '28px', marginTop: '12px' }}>
+      <div style={{ paddingTop: '20px' }}>
         <div className="profile-bio-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
           <div className="profile-bio">
             <h4 style={subheadStyle}>Bio</h4>
