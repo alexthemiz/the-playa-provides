@@ -338,6 +338,14 @@ export default function Header() {
 
   return (
     <header style={headerStyle}>
+      <style>{`
+        .header-desktop-nav { display: none; }
+        .header-mobile-controls { display: flex; }
+        @media (min-width: 1024px) {
+          .header-desktop-nav { display: flex; }
+          .header-mobile-controls { display: none; }
+        }
+      `}</style>
       <div style={innerStyle}>
 
         {/* Logo */}
@@ -345,8 +353,8 @@ export default function Header() {
           The Playa <em style={{ fontStyle: 'italic', color: LIME }}>Provides</em>
         </Link>
 
-        {/* Desktop nav — hidden below lg */}
-        <nav style={navStyle} className="hidden lg:flex">
+        {/* Desktop nav — hidden below 1024px */}
+        <nav style={navStyle} className="header-desktop-nav">
           <Link href="/about" style={navLinkStyle('/about')} className="hover-nav-link">About</Link>
           <span style={pipeStyle}>|</span>
           <Link href="/resources" style={navLinkStyle('/resources')} className="hover-nav-link">On-Playa Resources</Link>
@@ -391,7 +399,7 @@ export default function Header() {
         </nav>
 
         {/* Mobile: bell + hamburger */}
-        <div className="flex lg:hidden items-center" style={{ gap: '12px' }}>
+        <div className="header-mobile-controls" style={{ gap: '12px', alignItems: 'center' }}>
           {user && (
             <div style={{ position: 'relative' as const }}>
               <button
@@ -426,8 +434,8 @@ export default function Header() {
       {/* Mobile dropdown */}
       {menuOpen && (
         <>
-          <div onClick={() => setMenuOpen(false)} style={{ position: 'fixed' as const, inset: 0, zIndex: 49 }} className="lg:hidden" />
-          <div style={mobileMenuStyle} className="lg:hidden">
+          <div onClick={() => setMenuOpen(false)} style={{ position: 'fixed' as const, inset: 0, zIndex: 49 }} />
+          <div style={mobileMenuStyle}>
             <Link href="/about"       onClick={() => setMenuOpen(false)} style={mobileNavLinkStyle('/about')}>About</Link>
             <Link href="/resources"   onClick={() => setMenuOpen(false)} style={mobileNavLinkStyle('/resources')}>On-Playa Resources</Link>
             <Link href="/find-items"  onClick={() => setMenuOpen(false)} style={mobileNavLinkStyle('/find-items')}>Find Items</Link>
