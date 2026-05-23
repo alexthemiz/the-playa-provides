@@ -359,7 +359,28 @@ export default function FindItemsPage() {
               <p style={{ color: INK_MID, fontSize: '0.9rem' }}>Try adjusting your filters, or check back after someone lists something.</p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '2px' }}>
+            <div>
+              <style>{`
+                .list-table { display: grid; grid-template-columns: 48px 1fr 180px 150px 190px; align-items: center; gap: 0 16px; }
+                .list-header { padding: 0 16px 6px; }
+                .list-header .list-table { }
+                .list-col-label { font-family: 'Space Mono', monospace; font-size: 0.52rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: ${INK_LITE}; }
+                .list-row-wrap { border: 1.5px solid rgba(28,22,16,0.12); margin-bottom: 2px; cursor: pointer; transition: box-shadow 0.12s; background: ${PAPER_LT}; }
+                .list-row-wrap:hover { box-shadow: 3px 3px 0 ${INK}; }
+                .list-row { padding: 8px 16px; }
+              `}</style>
+
+              {/* Header */}
+              <div className="list-header">
+                <div className="list-table">
+                  <div />
+                  <div className="list-col-label">Item</div>
+                  <div className="list-col-label">From</div>
+                  <div className="list-col-label">Terms</div>
+                  <div className="list-col-label">Category</div>
+                </div>
+              </div>
+
               {filteredItems.map((item) => {
                 const emoji       = CATEGORY_EMOJI[item.category] || '📦';
                 const hasImg      = Array.isArray(item.image_urls) && item.image_urls.length > 0;
@@ -371,45 +392,43 @@ export default function FindItemsPage() {
                 return (
                   <div
                     key={item.id}
+                    className="list-row-wrap"
                     onClick={() => handleOpenItem(item)}
-                    style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 16px', backgroundColor: PAPER_LT, border: `1.5px solid rgba(28,22,16,0.12)`, cursor: 'pointer', transition: 'box-shadow 0.12s' }}
-                    onMouseEnter={e => (e.currentTarget.style.boxShadow = `3px 3px 0 ${INK}`)}
-                    onMouseLeave={e => (e.currentTarget.style.boxShadow = 'none')}
                   >
-                    {/* Thumbnail */}
-                    <div style={{ width: '48px', height: '48px', flexShrink: 0, backgroundColor: PAPER_DK, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                      {hasImg
-                        ? <img src={item.image_urls[0]} alt={item.item_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        : <span style={{ fontSize: '1.4rem' }}>{emoji}</span>
-                      }
-                    </div>
-                    {/* Item name + description — takes up remaining space */}
-                    <div style={{ flex: '1 1 0', minWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap' as const }}>
-                      <span style={{ fontFamily: "'Arvo', serif", fontSize: '0.92rem', fontWeight: 700, color: INK }}>{item.item_name}</span>
-                      {description && (
-                        <span style={{ fontSize: '0.8rem', color: INK_LITE, marginLeft: '8px' }}>· {description}</span>
-                      )}
-                    </div>
-                    {/* Owner · location */}
-                    <div style={{ flexShrink: 0, width: '160px', overflow: 'hidden', whiteSpace: 'nowrap' as const, textOverflow: 'ellipsis', fontSize: '0.75rem', color: INK_LITE, textAlign: 'right' as const }}>
-                      {owner}{location ? ` · ${location}` : ''}
-                    </div>
-                    {/* Return terms (borrow only) */}
-                    <div style={{ flexShrink: 0, width: '120px', textAlign: 'right' as const }}>
-                      {terms && (
-                        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: INK_LITE, letterSpacing: '0.04em', overflow: 'hidden', whiteSpace: 'nowrap' as const, display: 'block', textOverflow: 'ellipsis' }}>{terms}</span>
-                      )}
-                    </div>
-                    {/* Category + Keep/Borrow chips */}
-                    <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      {item.category && item.category !== 'Miscellaneous' && (
-                        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '2px 6px', border: `1px solid rgba(28,22,16,0.2)`, color: INK_LITE, background: PAPER_DK }}>
-                          {emoji} {item.category}
+                    <div className="list-table list-row">
+                      {/* Thumbnail */}
+                      <div style={{ width: '48px', height: '48px', backgroundColor: PAPER_DK, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                        {hasImg
+                          ? <img src={item.image_urls[0]} alt={item.item_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : <span style={{ fontSize: '1.4rem' }}>{emoji}</span>
+                        }
+                      </div>
+                      {/* Item name + description */}
+                      <div style={{ minWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap' as const }}>
+                        <span style={{ fontFamily: "'Arvo', serif", fontSize: '0.92rem', fontWeight: 700, color: INK }}>{item.item_name}</span>
+                        {description && (
+                          <span style={{ fontSize: '0.8rem', color: INK_LITE, marginLeft: '8px' }}>· {description}</span>
+                        )}
+                      </div>
+                      {/* From */}
+                      <div style={{ overflow: 'hidden', whiteSpace: 'nowrap' as const, textOverflow: 'ellipsis', fontSize: '0.75rem', color: INK_LITE }}>
+                        {owner}{location ? ` · ${location}` : ''}
+                      </div>
+                      {/* Terms */}
+                      <div style={{ overflow: 'hidden', whiteSpace: 'nowrap' as const, textOverflow: 'ellipsis', fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: INK_LITE, letterSpacing: '0.04em' }}>
+                        {terms || '—'}
+                      </div>
+                      {/* Category + type chips */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {item.category && (
+                          <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '2px 6px', border: `1px solid rgba(28,22,16,0.2)`, color: INK_LITE, background: PAPER_DK, overflow: 'hidden', whiteSpace: 'nowrap' as const }}>
+                            {emoji} {item.category}
+                          </span>
+                        )}
+                        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.52rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '3px 8px', border: `1px solid ${isKeep ? RUST : TEAL}`, color: isKeep ? RUST : TEAL, background: isKeep ? RUST_LT : TEAL_LT, whiteSpace: 'nowrap' as const }}>
+                          {isKeep ? 'Keep' : 'Borrow'}
                         </span>
-                      )}
-                      <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.52rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '3px 8px', border: `1px solid ${isKeep ? RUST : TEAL}`, color: isKeep ? RUST : TEAL, background: isKeep ? RUST_LT : TEAL_LT }}>
-                        {isKeep ? 'Keep' : 'Borrow'}
-                      </span>
+                      </div>
                     </div>
                   </div>
                 );
