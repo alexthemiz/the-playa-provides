@@ -18,6 +18,7 @@ export default function PublicProfilePage() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [isOwner, setIsOwner] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isFollowing, setIsFollowing] = useState(false);
@@ -38,7 +39,7 @@ export default function PublicProfilePage() {
   const [showAddItem, setShowAddItem] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
 
-  // 2026 returning status â€” managed separately from regular year drafts
+  // 2026 returning status — managed separately from regular year drafts
   const [draft2026, setDraft2026] = useState<{
     status: 'yes' | 'maybe' | 'no' | null;
     campInput: string;
@@ -306,7 +307,8 @@ export default function PublicProfilePage() {
       playa_story: profile.playa_story || null,
     }).eq('id', profile.id);
 
-    if (error) { alert('Error updating profile'); return; }
+    if (error) { setSaveError('Error saving profile. Please try again.'); return; }
+    setSaveError(null);
 
     // Delete and reinsert all affiliations
     await supabase.from('user_camp_affiliations').delete().eq('user_id', profile.id);
@@ -468,9 +470,9 @@ export default function PublicProfilePage() {
   const returningBadge = (status: string | null) => {
     if (!status) return null;
     const cfg = {
-      yes:   { label: 'âœ“ Returning',     bg: '#dcfce7', color: '#16a34a', border: '#86efac' },
+      yes:   { label: '✓ Returning',     bg: '#dcfce7', color: '#16a34a', border: '#86efac' },
       maybe: { label: '? Maybe',          bg: '#fef9c3', color: '#92400e', border: '#fde68a' },
-      no:    { label: 'âœ— Not returning',  bg: '#fee2e2', color: '#dc2626', border: '#fca5a5' },
+      no:    { label: '✗ Not returning',  bg: '#fee2e2', color: '#dc2626', border: '#fca5a5' },
     }[status as 'yes' | 'maybe' | 'no'];
     if (!cfg) return null;
     return (
@@ -587,6 +589,7 @@ export default function PublicProfilePage() {
                           style={{ padding: '6px 14px', background: 'none', border: '2px solid #1C1610', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', fontFamily: 'inherit', color: '#1C1610' }}>
                           Cancel
                         </button>
+                        {saveError && <span style={{ color: '#C24820', fontSize: '0.75rem', alignSelf: 'center' }}>{saveError}</span>}
                       </>
                     ) : (
                       <button
@@ -687,180 +690,7 @@ export default function PublicProfilePage() {
       `}</style>
 
 
-      {/* OLD PROFILE HEADER — ROW 1 (duplicate identity) removed; now in page band above */}
-      <div style={{ display: 'none' }}>
-        {/* ROW 1 REMOVED */}
-        <div className="profile-header-row" style={{ display: 'flex', gap: '25px', alignItems: 'flex-start' }}>
-          {isEditing ? (
-            <AvatarUpload url={profile.avatar_url} onUpload={(url) => setProfile({ ...profile, avatar_url: url })} />
-          ) : (
-            <div style={{ width: '90px', height: '90px', borderRadius: '50%', backgroundColor: '#f0f0f0', backgroundImage: profile.avatar_url ? `url(${profile.avatar_url})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center', border: '4px solid #C08261', flexShrink: 0 }}>
-              {!profile.avatar_url && (
-                <span style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', fontSize: '2rem', color: '#C08261' }}>
-                  {profile.preferred_name?.charAt(0)}
-                </span>
-              )}
-            </div>
-          )}
 
-          <div className="profile-info-col" style={{ flex: 1 }}>
-            {isEditing ? (
-              <input
-                style={{ backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', fontSize: '1.5rem', width: '100%', padding: '5px', borderRadius: '6px' }}
-                value={profile.preferred_name || ''}
-                onChange={e => setProfile({ ...profile, preferred_name: e.target.value })}
-              />
-            ) : (
-              <h1 style={{ fontSize: '2.2rem', margin: 0, color: '#2D241E' }}>{profile.preferred_name || profile.username || username}</h1>
-            )}
-            <div className="profile-username-row" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' as const, marginTop: '5px', fontSize: '0.9rem', color: '#888' }}>
-              <span>@{profile?.username || username}</span>
-              {profile.pronouns && <><span style={{ margin: '0 7px', color: '#ccc' }}>|</span><span>{profile.pronouns}</span></>}
-              {locationStr && <><span style={{ margin: '0 7px', color: '#ccc' }}>|</span><span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}><MapPin size={13} />{locationStr}</span></>}
-            </div>
-
-            {/* Social links */}
-            {isEditing ? (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginTop: '12px' }}>
-                {[
-                  { key: 'facebook',  label: 'Facebook' },
-                  { key: 'instagram', label: 'Instagram' },
-                  { key: 'bluesky',   label: 'Bluesky' },
-                  { key: 'linkedin',  label: 'LinkedIn' },
-                  { key: 'eplaya',    label: 'ePlaya Profile' },
-                  { key: 'website',   label: 'Personal Website' },
-                ].map(({ key, label }) => (
-                  <div key={key}>
-                    <label style={{ fontSize: '10px', color: '#aaa', display: 'block', marginBottom: '2px', textTransform: 'uppercase' as const, letterSpacing: '0.05em' }}>{label}</label>
-                    <input
-                      type="url"
-                      placeholder="https://..."
-                      value={(profile.social_links || {})[key] || ''}
-                      onChange={e => setProfile({ ...profile, social_links: { ...(profile.social_links || {}), [key]: e.target.value } })}
-                      style={{ width: '100%', backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', padding: '6px 8px', borderRadius: '6px', fontSize: '12px', boxSizing: 'border-box' as const, outline: 'none' }}
-                    />
-                  </div>
-                ))}
-              </div>
-            ) : (() => {
-              const links = profile.social_links || {};
-              const SOCIAL = [
-                { key: 'facebook',  label: 'Facebook',  icon: <Facebook size={14} />,  color: '#1877F2' },
-                { key: 'instagram', label: 'Instagram', icon: <Instagram size={14} />, color: '#E4405F' },
-                { key: 'bluesky',   label: 'Bluesky',   icon: null,                    color: '#0085FF' },
-                { key: 'linkedin',  label: 'LinkedIn',  icon: <Linkedin size={14} />,  color: '#0A66C2' },
-                { key: 'eplaya',    label: 'ePlaya',    icon: null,                    color: '#8B4513' },
-                { key: 'website',   label: 'Website',   icon: <Globe size={14} />,     color: '#1E8A82' },
-              ].filter(s => links[s.key]);
-              if (SOCIAL.length === 0) return null;
-              return (
-                <div className="profile-social-links" style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '6px', marginTop: '10px' }}>
-                  {SOCIAL.map(s => (
-                    <a key={s.key} href={/^https?:\/\//i.test(links[s.key]) ? links[s.key] : `https://${links[s.key]}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 11px', borderRadius: '99px', backgroundColor: '#f5f5f5', border: '1px solid #e5e5e5', textDecoration: 'none', fontSize: '12px', fontWeight: 600, color: s.color }}>
-                      {s.icon}{s.label}
-                    </a>
-                  ))}
-                </div>
-              );
-            })()}
-          </div>
-
-          {/* Right: Followers/Following + Edit/Follow button */}
-          <div className="profile-right-col" style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'flex-end', gap: '10px', flexShrink: 0 }}>
-            {isOwner ? (
-              <div className="profile-follower-row" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
-                <button
-                  onClick={() => {
-                    const next = openList === 'followers' ? null : 'followers' as const;
-                    setOpenList(next);
-                    if (next === 'followers') fetchList('followers');
-                  }}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: openList === 'followers' ? '#1E8A82' : '#9A8878', fontWeight: openList === 'followers' ? 600 : 400, fontSize: '0.85rem' }}
-                >
-                  {followerCount} {followerCount === 1 ? 'follower' : 'followers'}
-                </button>
-                <span style={{ color: '#ccc' }}>Â·</span>
-                <button
-                  onClick={() => {
-                    const next = openList === 'following' ? null : 'following' as const;
-                    setOpenList(next);
-                    if (next === 'following') fetchList('following');
-                  }}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: openList === 'following' ? '#1E8A82' : '#9A8878', fontWeight: openList === 'following' ? 600 : 400, fontSize: '0.85rem' }}
-                >
-                  {followingCount} following
-                </button>
-              </div>
-            ) : (
-              followerCount > 0 && (
-                <span style={{ fontSize: '0.85rem', color: '#888' }}>
-                  {followerCount} {followerCount === 1 ? 'follower' : 'followers'}
-                </span>
-              )
-            )}
-            {isOwner ? (
-              <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '8px', alignItems: 'flex-end' }}>
-                <button
-                  onClick={() => {
-                    if (isEditing) {
-                      handleSave();
-                    } else {
-                      const aff2026 = affiliations.find(a => a.year === 2026);
-                      setDraft2026({
-                        status: aff2026?.returning_status ?? null,
-                        campInput: (aff2026?.camps as any)?.display_name || '',
-                        campId: aff2026?.camp_id || null,
-                        isOpenCamping: aff2026?.is_open_camping || false,
-                        searchResults: [],
-                        showDropdown: false,
-                      });
-                      setDraftAffiliations(
-                        affiliations
-                          .filter(a => a.year !== 2026)
-                          .map(a => ({
-                            tempId: a.id,
-                            year: a.year,
-                            is_open_camping: a.is_open_camping,
-                            campInput: (a.camps as any)?.display_name || '',
-                            campId: a.camp_id || null,
-                            searchResults: [],
-                            showDropdown: false,
-                          }))
-                      );
-                      setIsEditing(true);
-                    }
-                  }}
-                  className="profile-action-btn"
-                  style={{ padding: '8px 20px', backgroundColor: isEditing ? '#16a34a' : '#1E8A82', color: '#fff', border: '2px solid #1C1610', boxShadow: '2px 2px 0 #1C1610', cursor: 'pointer', fontWeight: 'bold' }}
-                >
-                  {isEditing ? 'Save Profile' : 'Edit Profile'}
-                </button>
-                {isEditing && (
-                  <button
-                    onClick={() => setIsEditing(false)}
-                    className="profile-action-btn"
-                    style={{ padding: '9px 18px', backgroundColor: 'transparent', color: '#4A3828', border: '1.5px solid rgba(28,22,16,0.2)', fontWeight: 600, fontSize: '0.875rem', cursor: 'pointer' }}
-                  >
-                    Cancel
-                  </button>
-                )}
-              </div>
-            ) : currentUserId ? (
-              <button
-                onClick={handleFollowToggle}
-                disabled={followLoading}
-                className="profile-action-btn"
-                style={{ padding: '8px 20px', backgroundColor: isFollowing ? '#EDE5D0' : '#1E8A82', color: isFollowing ? '#4A3828' : '#fff', border: isFollowing ? '1.5px solid rgba(28,22,16,0.2)' : '2px solid #1C1610', boxShadow: isFollowing ? 'none' : '2px 2px 0 #1C1610', cursor: followLoading ? 'default' : 'pointer', fontWeight: 'bold', opacity: followLoading ? 0.6 : 1 }}
-              >
-                {followLoading ? '...' : isFollowing ? 'Following' : 'Follow'}
-              </button>
-            ) : null}
-            {followError && (
-              <p style={{ fontSize: '0.8rem', color: '#dc2626', margin: 0 }}>{followError}</p>
-            )}
-          </div>
-        </div>
-      </div>{/* end hidden ROW 1 */}
 
       {/* FOLLOWERS / FOLLOWING MODAL */}
       {isOwner && openList && (
@@ -871,7 +701,7 @@ export default function PublicProfilePage() {
               onClick={() => setOpenList(null)}
             />
             {/* Modal */}
-            <div style={{ position: 'fixed', top: '140px', right: '24px', zIndex: 201, backgroundColor: '#fff', border: '1px solid #e5e5e5', borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,0.14)', minWidth: '460px', maxWidth: '560px', overflow: 'hidden' as const }}>
+            <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 201, backgroundColor: '#fff', border: '2px solid #1C1610', boxShadow: '4px 4px 0 #1C1610', minWidth: '460px', maxWidth: '560px', overflow: 'hidden' as const }}>
               {/* Modal header */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>
                 <span style={{ fontWeight: 700, fontSize: '14px', color: '#2D241E', textTransform: 'capitalize' as const }}>{openList}</span>
@@ -1190,13 +1020,13 @@ export default function PublicProfilePage() {
             {items.map(item => {
               const loc = item.locations
                 ? [item.locations.city, item.locations.state].filter(Boolean).join(', ')
-                : 'â€”';
+                : '—';
               const termsSummary = [
                 item.return_by ? `Return by ${new Date(item.return_by).toLocaleDateString()}` : null,
                 item.damage_price ? `Damage agr. $${item.damage_price}` : null,
                 item.loss_price ? `Loss agr. $${item.loss_price}` : null,
                 item.return_terms ? item.return_terms : null,
-              ].filter(Boolean).join(' Â· ');
+              ].filter(Boolean).join(' · ');
               const visPills = (() => {
                 const v = item.visibility;
                 if (v === 'followers') return [{ label: 'Followers', bg: '#f0effe', color: '#6D28D9', border: '#ddd6fe' }];

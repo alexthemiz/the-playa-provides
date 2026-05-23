@@ -350,7 +350,6 @@ export default function HomePage() {
         @keyframes g-pop   { 0%{transform:scale(1)} 50%{transform:scale(1.6) rotate(-10deg)} 100%{transform:scale(1)} }
         .g-dead { animation: g-shake 0.3s ease; }
         .g-won  { animation: g-pop   0.4s ease; }
-        .hover-nav-link:hover { color: #fff !important; }
       `}</style>
 
       {/* Deleted account banner */}

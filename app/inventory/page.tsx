@@ -62,7 +62,8 @@ export default function InventoryPage() {
   async function fetchMyInventory() {
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user ?? null;
       if (user) {
         setUserId(user.id);
         const { data: profileData } = await supabase.from('profiles').select('preferred_name, has_seen_welcome').eq('id', user.id).maybeSingle();
@@ -120,7 +121,7 @@ export default function InventoryPage() {
           .from('item_loans')
           .select('id, item_id, status, owner_confirmed_pickup, borrower_confirmed_pickup, borrower_confirmed_return, return_by, picked_up_at, borrower_location_id, owner:profiles!item_loans_owner_id_fkey(preferred_name, username), gear_items(item_name, category)')
           .eq('borrower_id', user.id)
-          .in('status', ['pending_handover', 'active']);
+          .in('status', ['pending_handover', 'active', 'return_pending']);
         setInboundLoans(inboundLoanData || []);
 
         // User's saved locations (for borrower location dropdown)
@@ -1052,7 +1053,6 @@ const locationOptionStyle: React.CSSProperties = { display: 'flex', alignItems: 
 // Action buttons
 const lendButtonStyle: React.CSSProperties = { height: '30px', padding: '0 14px', fontSize: '0.75rem', backgroundColor: '#1E8A82', color: '#fff', border: '1.5px solid #1C1610', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' as const };
 const transferButtonStyle: React.CSSProperties = { height: '30px', padding: '0 14px', fontSize: '0.75rem', backgroundColor: '#D4A020', color: '#fff', border: '1.5px solid #1C1610', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' as const };
-const makeAvailableButtonStyle: React.CSSProperties = { height: '30px', padding: '0 14px', fontSize: '0.75rem', backgroundColor: '#EDE5D0', color: '#4A3828', border: '1px solid rgba(28,22,16,0.2)', cursor: 'pointer', fontWeight: 'normal', whiteSpace: 'nowrap' as const };
 const pendingBadgeStyle: React.CSSProperties = { display: 'inline-block', padding: '2px 8px', backgroundColor: '#F5F0D0', color: '#92400e', fontSize: '0.7rem', fontWeight: 700 };
 const handsOverButtonStyle: React.CSSProperties = { height: '28px', padding: '0 10px', fontSize: '0.7rem', backgroundColor: '#16a34a', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' as const };
 const reminderButtonStyle: React.CSSProperties = { height: '24px', padding: '0 8px', fontSize: '0.7rem', backgroundColor: '#EDE5D0', color: '#4A3828', border: '1px solid rgba(28,22,16,0.2)', cursor: 'pointer', whiteSpace: 'nowrap' as const };

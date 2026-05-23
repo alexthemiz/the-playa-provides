@@ -75,7 +75,7 @@ export default function FindItemsPage() {
       const pathParts = window.location.pathname.split('/');
       const idFromUrl = pathParts[pathParts.length - 1];
       if (idFromUrl && idFromUrl !== 'find-items' && items.length > 0) {
-        const item = items.find(i => i.id === idFromUrl);
+        const item = items.find(i => String(i.id) === idFromUrl);
         if (item) setSelectedItem(item);
       } else {
         setSelectedItem(null);
@@ -179,6 +179,7 @@ export default function FindItemsPage() {
   };
 
   const filteredItems = items.filter(item => {
+    if (item.visibility === 'private') return false;
     if (item.availability_status === 'Not Available') return false;
     if (!item.item_name?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     if (zipQuery && !item.locations?.zip_code?.includes(zipQuery)) return false;

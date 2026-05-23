@@ -254,7 +254,7 @@ export default function Header() {
     setBellOpen(false)
   }
 
-  // ── Bell dropdown (shared desktop + mobile) ───────────────────────────────
+  // ── Bell UI (shared desktop + mobile) ────────────────────────────────────
   const BellDropdown = () => (
     <>
       <div onClick={() => setBellOpen(false)} style={{ position: 'fixed' as const, inset: 0, zIndex: 49 }} />
@@ -328,6 +328,23 @@ export default function Header() {
     </>
   )
 
+  const BellButton = ({ onOpen }: { onOpen?: () => void }) => (
+    <div style={{ position: 'relative' as const }}>
+      <button
+        onClick={() => { const will = !bellOpen; setBellOpen(will); if (will) { fetchNotifications(); onOpen?.(); } }}
+        style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative' as const, padding: '4px', display: 'flex', alignItems: 'center' }}
+      >
+        <Bell size={18} color="#aaa" />
+        {unreadCount > 0 && (
+          <span style={{ position: 'absolute' as const, top: '-4px', right: '-4px', backgroundColor: '#dc2626', color: '#fff', borderRadius: '50%', width: '15px', height: '15px', fontSize: '9px', fontWeight: 'bold' as const, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
+      </button>
+      {bellOpen && <BellDropdown />}
+    </div>
+  )
+
   // ── Mobile nav link helpers ───────────────────────────────────────────────
   const mobileLinkStyle: React.CSSProperties = { ...linkStyle, color: '#ccc' }
   const mobileLogoutStyle: React.CSSProperties = { ...logoutBtnStyle, color: '#888', textAlign: 'right' as const }
@@ -345,6 +362,7 @@ export default function Header() {
           .header-desktop-nav { display: flex; }
           .header-mobile-controls { display: none; }
         }
+        .hover-nav-link:hover { color: #fff !important; }
       `}</style>
       <div style={innerStyle}>
 
@@ -360,7 +378,7 @@ export default function Header() {
           <Link href="/resources" style={navLinkStyle('/resources')} className="hover-nav-link">On-Playa Resources</Link>
           <span style={pipeStyle}>|</span>
           <Link href="/find-items" style={navLinkStyle('/find-items')} className="hover-nav-link">Find Items</Link>
-          <Link href="/list-item" style={navLinkStyle('/list-item')}>Offer Items</Link>
+          <Link href="/list-item" style={navLinkStyle('/list-item')} className="hover-nav-link">Offer Items</Link>
 
           {user ? (
             <>
@@ -371,25 +389,7 @@ export default function Header() {
               <Link href="/settings" style={navLinkStyle('/settings')} className="hover-nav-link">Settings</Link>
 
               {/* Bell */}
-              <div style={{ position: 'relative' as const }}>
-                <button
-                  onClick={() => { const will = !bellOpen; setBellOpen(will); if (will) fetchNotifications(); }}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative' as const, padding: '4px', display: 'flex', alignItems: 'center' }}
-                >
-                  <Bell size={18} color="#aaa" />
-                  {unreadCount > 0 && (
-                    <span style={{
-                      position: 'absolute' as const, top: '-4px', right: '-4px',
-                      backgroundColor: '#dc2626', color: '#fff', borderRadius: '50%',
-                      width: '15px', height: '15px', fontSize: '9px', fontWeight: 'bold',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      {unreadCount > 9 ? '9+' : unreadCount}
-                    </span>
-                  )}
-                </button>
-                {bellOpen && <BellDropdown />}
-              </div>
+              <BellButton />
 
               <button onClick={handleSignOut} style={logoutBtnStyle}>Logout</button>
             </>
@@ -400,27 +400,7 @@ export default function Header() {
 
         {/* Mobile: bell + hamburger */}
         <div className="header-mobile-controls" style={{ gap: '12px', alignItems: 'center' }}>
-          {user && (
-            <div style={{ position: 'relative' as const }}>
-              <button
-                onClick={() => { const will = !bellOpen; setBellOpen(will); if (will) fetchNotifications(); setMenuOpen(false); }}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative' as const, padding: '4px', display: 'flex', alignItems: 'center' }}
-              >
-                <Bell size={18} color="#aaa" />
-                {unreadCount > 0 && (
-                  <span style={{
-                    position: 'absolute' as const, top: '-4px', right: '-4px',
-                    backgroundColor: '#dc2626', color: '#fff', borderRadius: '50%',
-                    width: '15px', height: '15px', fontSize: '9px', fontWeight: 'bold',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
-              </button>
-              {bellOpen && <BellDropdown />}
-            </div>
-          )}
+          {user && <BellButton onOpen={() => setMenuOpen(false)} />}
 
           <button
             onClick={() => { setMenuOpen(!menuOpen); setBellOpen(false); }}
