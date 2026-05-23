@@ -229,7 +229,7 @@ export default function HomePage() {
 
     function rowTopPx(row: number) {
       const LH = laneH(); const H = panelH()
-      if (row === 0) return H - PAD - ZONE_H - P_H - 2
+      if (row === 0) return H - P_H - 4
       if (row === 5) return PAD + ZONE_H + 2
       return PAD + ZONE_H + (3 - (row - 1)) * LH + Math.floor((LH - P_H) / 2)
     }
