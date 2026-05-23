@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup — Dust Storm Hero</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Arvo:ital,wght@0,400;0,700;1,400;1,700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Arvo', serif; background: #b0a898; }
+
+    .meta-label {
+      font-family: 'Space Mono', monospace; font-size: 0.62rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase; color: #fff;
+      text-align: center; padding: 10px; background: rgba(0,0,0,0.25);
+    }
+
+    /* ── OPTION SWITCHER ── */
+    .options {
+      display: flex; gap: 0; justify-content: center; padding: 16px;
+      background: rgba(0,0,0,0.15);
+    }
+    .opt-btn {
+      font-family: 'Space Mono', monospace; font-size: 0.6rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 7px 18px; border: 1.5px solid #1C1610; cursor: pointer;
+      background: #F6F1E8; color: #1C1610;
+    }
+    .opt-btn.active { background: #1C1610; color: #B8CC2A; }
+    .opt-btn:not(:last-child) { border-right: none; }
+
+    /* ── HERO ── */
+    .hero {
+      display: grid; grid-template-columns: 1fr 1fr;
+      border-bottom: 2px solid #1C1610;
+      max-width: 1100px; margin: 20px auto;
+      border: 2px solid #1C1610;
+    }
+
+    /* LEFT PANEL */
+    .hero-left {
+      position: relative; overflow: hidden;
+      padding: 48px 44px;
+      background: #F6F1E8;
+      min-height: 420px;
+      display: flex; flex-direction: column; justify-content: center; gap: 24px;
+    }
+
+    /* Canvas sits behind content */
+    .dust-canvas {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      pointer-events: none;
+    }
+
+    /* Haze overlay — tinted layer on top of canvas, under text */
+    .dust-haze {
+      position: absolute; inset: 0; pointer-events: none;
+      transition: opacity 0.4s;
+    }
+
+    .hero-left-content { position: relative; z-index: 2; }
+
+    .eyebrow {
+      font-family: 'Space Mono', monospace; font-size: 0.58rem; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase; color: #9A8878;
+      margin-bottom: 10px;
+    }
+    .hero-h1 {
+      font-family: 'Arvo', serif; font-size: 2.6rem; font-weight: 900;
+      line-height: 1.05; color: #1C1610; margin-bottom: 18px;
+    }
+    .hero-h1 em { font-style: italic; color: #1E8A82; }
+
+    .cta-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-primary {
+      display: inline-block; padding: 12px 28px;
+      background: #1E8A82; color: #fff;
+      font-family: 'Arvo', serif; font-weight: 700; font-size: 0.88rem;
+      border: 2px solid #1C1610; box-shadow: 3px 3px 0 #1C1610; cursor: pointer;
+      text-decoration: none;
+    }
+    .btn-secondary {
+      display: inline-block; padding: 12px 28px;
+      background: #FDFAF4; color: #1C1610;
+      font-family: 'Arvo', serif; font-weight: 700; font-size: 0.88rem;
+      border: 2px solid #1C1610; box-shadow: 3px 3px 0 #1C1610; cursor: pointer;
+      text-decoration: none;
+    }
+
+    /* RIGHT PANEL — stand-in for frogger/scroll */
+    .hero-right {
+      background: #EDE5D0; border-left: 2px solid #1C1610;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 420px;
+    }
+    .hero-right-placeholder {
+      font-family: 'Space Mono', monospace; font-size: 0.58rem;
+      letter-spacing: 0.1em; text-transform: uppercase; color: #9A8878;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="meta-label">Mockup — Dust Storm Hero — theplayaprovides.com</div>
+
+<div class="options">
+  <button class="opt-btn active" onclick="setMode('storm')">Storm (heavy)</button>
+  <button class="opt-btn" onclick="setMode('haze')">Haze (subtle)</button>
+  <button class="opt-btn" onclick="setMode('clear')">Clear (off)</button>
+</div>
+
+<div class="hero">
+  <div class="hero-left" id="heroLeft">
+    <canvas class="dust-canvas" id="dustCanvas"></canvas>
+    <div class="dust-haze" id="dustHaze"></div>
+    <div class="hero-left-content">
+      <div class="eyebrow">The Playa Provides</div>
+      <h1 class="hero-h1">
+        Find what you <em>need.</em><br>Give what you can.
+      </h1>
+      <div class="cta-row">
+        <a class="btn-primary" href="#">Browse Items →</a>
+        <a class="btn-secondary" href="#">List My Gear</a>
+      </div>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-right-placeholder">← frogger / scroll view lives here</div>
+  </div>
+</div>
+
+<script>
+  const canvas  = document.getElementById('dustCanvas')
+  const haze    = document.getElementById('dustHaze')
+  const heroLeft = document.getElementById('heroLeft')
+  const ctx     = canvas.getContext('2d')
+
+  let mode = 'storm'
+  let particles = []
+  let animId
+
+  const MODES = {
+    storm: { count: 320, speedMin: 1.4, speedMax: 3.2, alpha: 0.55, hazeOpacity: 0.22, hazeColor: 'rgba(180,155,110,0.5)' },
+    haze:  { count: 80,  speedMin: 0.4, speedMax: 1.1, alpha: 0.28, hazeOpacity: 0.10, hazeColor: 'rgba(180,155,110,0.25)' },
+    clear: { count: 0,   speedMin: 0,   speedMax: 0,   alpha: 0,    hazeOpacity: 0,    hazeColor: 'transparent' },
+  }
+
+  function resize() {
+    canvas.width  = heroLeft.offsetWidth
+    canvas.height = heroLeft.offsetHeight
+  }
+
+  function makeParticle(cfg, offscreen = false) {
+    const x = offscreen ? canvas.width + Math.random() * 80 : Math.random() * canvas.width
+    return {
+      x,
+      y:    Math.random() * canvas.height,
+      size: Math.random() * 2.2 + 0.4,
+      speed: cfg.speedMin + Math.random() * (cfg.speedMax - cfg.speedMin),
+      drift: (Math.random() - 0.5) * 0.35,
+      // colour varies between sandy tan and pale ochre
+      r: 185 + Math.floor(Math.random() * 30),
+      g: 155 + Math.floor(Math.random() * 25),
+      b:  95 + Math.floor(Math.random() * 30),
+      a: (0.15 + Math.random() * 0.6) * cfg.alpha,
+      // slight horizontal stretch for dust streak feel
+      stretch: 1 + Math.random() * 3,
+    }
+  }
+
+  function buildParticles() {
+    const cfg = MODES[mode]
+    particles = Array.from({ length: cfg.count }, () => makeParticle(cfg))
+  }
+
+  function tick() {
+    const cfg = MODES[mode]
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    for (const p of particles) {
+      ctx.save()
+      ctx.fillStyle = `rgba(${p.r},${p.g},${p.b},${p.a})`
+      ctx.beginPath()
+      // draw as a tiny horizontal ellipse for streak feel
+      ctx.ellipse(p.x, p.y, p.size * p.stretch, p.size * 0.7, 0, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.restore()
+
+      p.x -= p.speed
+      p.y += p.drift
+
+      // wrap off left edge → re-enter from right
+      if (p.x < -p.size * p.stretch * 2) {
+        Object.assign(p, makeParticle(cfg, true))
+      }
+      // wrap vertical
+      if (p.y < -4)              p.y = canvas.height + 4
+      if (p.y > canvas.height + 4) p.y = -4
+    }
+
+    animId = requestAnimationFrame(tick)
+  }
+
+  function setMode(m) {
+    mode = m
+    document.querySelectorAll('.opt-btn').forEach((b, i) => {
+      b.classList.toggle('active', ['storm','haze','clear'][i] === m)
+    })
+    const cfg = MODES[m]
+    haze.style.background = cfg.hazeColor
+    haze.style.opacity = cfg.hazeOpacity
+    buildParticles()
+  }
+
+  window.addEventListener('resize', () => { resize(); buildParticles() })
+  resize()
+  setMode('storm')
+  tick()
+</script>
+</body>
+</html>
