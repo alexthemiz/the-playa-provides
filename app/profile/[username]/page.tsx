@@ -486,8 +486,8 @@ export default function PublicProfilePage() {
     <div style={{ backgroundColor: '#F6F1E8', minHeight: '100vh' }}>
 
       {/* Page header band — contains the full profile identity block */}
-      <div style={{ backgroundColor: '#FDFAF4', borderBottom: '2px solid #1C1610', padding: '28px 40px' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      <div style={{ backgroundColor: '#FDFAF4', borderBottom: '2px solid #1C1610', padding: '28px 0' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 40px' }}>
           {/* Avatar + name row */}
           <div className="profile-header-row" style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
             {/* Avatar */}
