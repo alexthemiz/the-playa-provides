@@ -627,7 +627,7 @@ export default function HomePage() {
                   backgroundColor: featureTab === tab ? INK : 'transparent',
                   color: featureTab === tab ? LIME : INK,
                 }}>
-                  {tab === 'how' ? 'How it works' : 'Why it matters'}
+                  {tab === 'how' ? "What's the Deal" : "What's the Point"}
                 </button>
               ))}
             </div>
