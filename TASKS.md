@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-05-22 (session 29)_
+_Last updated: 2026-05-23 (session 30)_
 
 ---
 
@@ -13,7 +13,9 @@ _Last updated: 2026-05-22 (session 29)_
 ---
 
 ## 🎯 Next Session Priority
-- [ ] **End-to-end smoke test** — Walk through the live site: profile identity in header band, active nav highlighting, find-items (cards/list/map toggle), wish list chips, playa history badges.
+- [ ] **Smoke test session 30 changes** — Bell hide-on-open, find-items filter layout, list view table, view mode persistence, frogger levels + chirp.
+- [ ] **Deploy `send-loan-notification`** — pickup_by row removed from email HTML in session 27; needs copy-paste redeploy via Supabase Dashboard (Verify JWT off).
+- [ ] **Dust storm decision** — View `theplayaprovides.com/mockup-dust-storm.html`, decide storm / haze / skip; implement if yes.
 - [ ] **Fix OG image crop** — Resize to 1200×630px with padding/background in Canva, re-upload, re-push.
 
 ---
@@ -269,3 +271,14 @@ _(nothing queued)_
 - [x] Design: Profile "Manage Inventory" button — updated from purple (#d896ff) to teal + 2px ink border + 2px offset shadow, matching the new design system. _(session 29)_
 - [x] Design: Profile wish list — tags updated to square corners, Space Mono text, ink-bordered teal chips; input/Add button updated to new design tokens; "I have one of these" button updated to ink border + offset shadow. _(session 29)_
 - [x] Design: Profile Playa History — year badges updated to mustard background (#D4A020) + white Space Mono text; affiliation cards use paper-dk background + ink border. _(session 29)_
+- [x] Fix: Code review audit — `saveError` displayed inline on profile; ID comparison fixed (`String(i.id) === idFromUrl`) in find-items; `getSession()` swapped for `getUser()` in inventory; private item visibility guard added to find-items filteredItems; bell hover CSS moved from page.tsx to header.tsx; followers modal centering fixed; `return_pending` added to inboundLoans status filter; BellButton deduplicated (single component for desktop + mobile); unused `makeAvailableButtonStyle` constant removed. _(session 30)_
+- [x] Design: Frogger — bicycle button moved below polaroids + centered; 🐸 stacked atop 🚲 icon; arrow keys added to bottom bar right side; player spawn drops to bottom bar row (PAD=48, row 0 = H - P_H - 4); JSX fragment fix resolved Vercel build failure. _(session 30)_
+- [x] Fix: Homepage — removed green underline from "earning it on playa" span. _(session 30)_
+- [x] Design: Homepage feature section — toggle renamed to "What's the Deal / What's the Point" (was "How it works / Why it matters"); 4 feature highlight cards in What's the Deal tab; Field Notes philosophical cards in What's the Point tab; copy edits: "A Decommodification Modification", "Do the math." removed. _(session 30)_
+- [x] Fix: Bell — trigger button hides when dropdown opens; backdrop click still closes. _(session 30)_
+- [x] Design: Find Items filter layout — "Search by Keyword:" label added before keyword field (matching location); Available To chips moved to search row (right of ZIP); view toggle + item count moved to Show From row (right-aligned); separate results bar removed. _(session 30)_
+- [x] Fix: Find Items — corner tag "Free Keep" → "Keep". _(session 30)_
+- [x] Design: Find Items list view — proper CSS grid table with column headers (Item / From / Terms / Category); description snippet inline with item name; return terms column (borrow items only); category chip per row. _(session 30)_
+- [x] Feature: Find Items — view mode (cards/list/map) persisted in localStorage; survives page navigation and refresh. _(session 30)_
+- [x] Feature: Frogger — 5-level progression: speed scales +18%/level (1.0×→1.72×), items per lane 6→10; Web Audio chirp on level win; LVL display in bottom bar; final win (beat level 5) exits game with gold flash and resets to level 1. _(session 30)_
+- [x] Design: Dust storm hero mockup — `public/mockup-dust-storm.html` with canvas particle animation in 3 modes (Storm heavy / Haze subtle / Clear off); sandy-tan streaks sweeping left, warm haze overlay. Decision on whether to implement pending. _(session 30)_
