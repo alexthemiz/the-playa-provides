@@ -51,7 +51,7 @@ const TAG_STYLE: Record<string, { bg: string; border: string; color: string }> =
 
 // ── Game constants ────────────────────────────────────────────────────────────
 const ZONE_H  = 16
-const PAD     = 20
+const PAD     = 48
 const P_W     = 40
 const P_H     = 40
 const STEP_X  = 52
@@ -565,8 +565,8 @@ export default function HomePage() {
                 </span>
               </div>
 
-              {/* Exit + controls bar — bottom of game canvas */}
-              <div style={{ position: 'absolute', bottom: '10px', left: 0, right: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', zIndex: 30 }}>
+              {/* Exit + controls bar — bottom safe zone */}
+              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 16px', zIndex: 30 }}>
                 <button
                   onClick={() => setGameRunning(false)}
                   title="Back to browsing"
