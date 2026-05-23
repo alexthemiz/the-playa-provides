@@ -50,14 +50,15 @@ const TAG_STYLE: Record<string, { bg: string; border: string; color: string }> =
 }
 
 // ── Game constants ────────────────────────────────────────────────────────────
-const ZONE_H  = 16
-const PAD     = 48
-const P_W     = 40
-const P_H     = 40
-const STEP_X  = 52
-const MOVE_CD = 130
-const SHRINK  = 6
-const GAP     = 240
+const ZONE_H    = 16
+const PAD       = 48
+const P_W       = 40
+const P_H       = 40
+const STEP_X    = 52
+const MOVE_CD   = 130
+const SHRINK    = 6
+const GAP       = 240
+const MAX_LEVEL = 5   // levels 1-5; completing 5 = final win
 
 export default function HomePage() {
   const [wishlistTags,    setWishlistTags]    = useState<{ tag: string; username: string }[]>([])
@@ -80,6 +81,7 @@ export default function HomePage() {
     lastMove:   0,
     animId:     null as number | null,
     flashTimer: null as ReturnType<typeof setTimeout> | null,
+    level:      1,
   })
 
   // ── Data fetching ──────────────────────────────────────────────────────────
@@ -171,11 +173,30 @@ export default function HomePage() {
       return 78
     }
 
+    function chirp() {
+      try {
+        const ACtx = (window as any).AudioContext || (window as any).webkitAudioContext
+        if (!ACtx) return
+        const ctx  = new ACtx()
+        const osc  = ctx.createOscillator()
+        const gain = ctx.createGain()
+        osc.connect(gain); gain.connect(ctx.destination)
+        osc.type = 'sine'
+        osc.frequency.setValueAtTime(600, ctx.currentTime)
+        osc.frequency.exponentialRampToValueAtTime(1400, ctx.currentTime + 0.06)
+        osc.frequency.exponentialRampToValueAtTime(700,  ctx.currentTime + 0.14)
+        gain.gain.setValueAtTime(0.25, ctx.currentTime)
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18)
+        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.18)
+        setTimeout(() => ctx.close(), 500)
+      } catch (_) { /* audio unavailable */ }
+    }
+
     function buildObstacles() {
       gs.current.obstacles = []
       const W   = panelW()
       const LH  = laneH()
-      const CNT = 6
+      const CNT = 5 + gs.current.level  // 6 items at lvl 1, 10 at lvl 5
 
       LANE_DEFS.forEach((def, li) => {
         const laneEl = laneEls[li]
@@ -259,18 +280,36 @@ export default function HomePage() {
       }, 550)
     }
 
+    const levelDisplayEl = gameView.querySelector('#g-level-display') as HTMLElement | null
+
+    function updateLevelDisplay() {
+      if (levelDisplayEl) levelDisplayEl.textContent = `LVL ${gs.current.level}`
+    }
+
     function win() {
       const p = gs.current.player
       if (!p.alive) return
       p.alive = false
+      chirp()
+      const isFinalWin = gs.current.level >= MAX_LEVEL
       playerEl.classList.add('g-won')
-      flashEl.style.background = LIME; flashEl.style.opacity = '0.32'
+      flashEl.style.background = isFinalWin ? MUSTARD : LIME
+      flashEl.style.opacity = isFinalWin ? '0.5' : '0.32'
       if (gs.current.flashTimer) clearTimeout(gs.current.flashTimer)
       gs.current.flashTimer = setTimeout(() => {
         flashEl.style.opacity = '0'
         playerEl.classList.remove('g-won')
-        initPlayer()
-      }, 700)
+        if (isFinalWin) {
+          gs.current.level = 1
+          updateLevelDisplay()
+          setGameRunning(false)
+        } else {
+          gs.current.level++
+          updateLevelDisplay()
+          buildObstacles()
+          initPlayer()
+        }
+      }, isFinalWin ? 1200 : 700)
     }
 
     function checkCollision() {
@@ -292,8 +331,9 @@ export default function HomePage() {
     function gameTick() {
       if (!gs.current.paused) {
         const W = panelW()
+        const speedMult = 1 + (gs.current.level - 1) * 0.18
         for (const obs of gs.current.obstacles) {
-          obs.x += obs.def.speed * obs.def.dir
+          obs.x += obs.def.speed * obs.def.dir * speedMult
           if (obs.def.dir === -1 && obs.x < -obs.w - 20) {
             const maxX = Math.max(...gs.current.obstacles.filter(o => o.li === obs.li).map(o => o.x))
             obs.x = maxX + obs.w + GAP
@@ -325,9 +365,11 @@ export default function HomePage() {
       checkCollision()
     }
 
+    gs.current.level = 1
     layoutLanes()
     buildObstacles()
     initPlayer()
+    updateLevelDisplay()
     gameView.focus()
     gs.current.animId = requestAnimationFrame(gameTick)
     document.addEventListener('keydown', handleKey)
@@ -569,7 +611,7 @@ export default function HomePage() {
               {/* Exit + controls bar — bottom safe zone */}
               <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 16px', zIndex: 30 }}>
                 <button
-                  onClick={() => setGameRunning(false)}
+                  onClick={() => { gs.current.level = 1; setGameRunning(false) }}
                   title="Back to browsing"
                   style={{
                     background: 'none', border: '1.5px solid rgba(184,204,42,0.35)',
@@ -584,6 +626,7 @@ export default function HomePage() {
                     <span style={{ position: 'absolute' as const, top: '-0.7em', left: '50%', transform: 'translateX(-50%)', fontSize: '0.75em', lineHeight: 1 }}>🐸</span>
                   </span>
                 </button>
+                <span id="g-level-display" style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', color: 'rgba(184,204,42,0.6)' }}>LVL 1</span>
                 <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
                   {(['←','↑','↓','→'] as const).map(arrow => (
                     <span key={arrow} style={{
