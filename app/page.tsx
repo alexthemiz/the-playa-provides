@@ -380,7 +380,7 @@ export default function HomePage() {
           <div style={{ width: '100%', maxWidth: '520px' }}>
             <h1 style={{
               fontFamily: "'Arvo', serif",
-              fontSize: 'clamp(1.9rem, 3.2vw, 2.9rem)',
+              fontSize: 'clamp(1.6rem, 2.6vw, 2.4rem)',
               fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.02em',
               color: INK, margin: '0 0 18px',
             }}>
