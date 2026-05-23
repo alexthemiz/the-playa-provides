@@ -560,8 +560,8 @@ export default function HomePage() {
                 🐸🚲
               </div>
 
-              {/* Exit button — bottom center of game canvas */}
-              <div style={{ position: 'absolute', bottom: '10px', left: 0, right: 0, display: 'flex', justifyContent: 'center', zIndex: 30 }}>
+              {/* Exit + controls bar — bottom of game canvas */}
+              <div style={{ position: 'absolute', bottom: '10px', left: 0, right: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', zIndex: 30 }}>
                 <button
                   onClick={() => setGameRunning(false)}
                   title="Back to browsing"
@@ -575,6 +575,21 @@ export default function HomePage() {
                 >
                   🐸🚲
                 </button>
+                <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                  {(['←','↑','↓','→'] as const).map(arrow => (
+                    <span key={arrow} style={{
+                      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                      width: '22px', height: '22px',
+                      border: '1.5px solid rgba(184,204,42,0.35)',
+                      borderRadius: '3px',
+                      fontFamily: "'Space Mono', monospace", fontSize: '0.7rem', fontWeight: 700,
+                      color: 'rgba(184,204,42,0.6)',
+                      userSelect: 'none' as const,
+                    }}>
+                      {arrow}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
           )}
