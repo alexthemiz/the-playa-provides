@@ -238,15 +238,17 @@ export default function FindItemsPage() {
 
           {/* Search row */}
           <div style={{ display: 'flex', gap: '10px', alignItems: 'stretch', marginBottom: '16px', flexWrap: 'wrap' as const }}>
-            <div style={{ flex: '0 0 45%', minWidth: '200px', display: 'flex', alignItems: 'center', border: `2px solid ${INK}`, background: PAPER_LT, padding: '0 14px', gap: '10px' }}>
-              <Search size={16} color={INK_LITE} style={{ flexShrink: 0 }} />
-              <input
-                type="text"
-                placeholder="Search by keyword…"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontFamily: 'Outfit, sans-serif', fontSize: '0.92rem', color: INK, padding: '11px 0' }}
-              />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: INK_LITE, whiteSpace: 'nowrap' as const }}>Search by Keyword:</span>
+              <div style={{ display: 'flex', alignItems: 'center', border: `2px solid ${INK}`, background: PAPER_LT, padding: '0 14px', gap: '10px', width: '200px' }}>
+                <Search size={16} color={INK_LITE} style={{ flexShrink: 0 }} />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontFamily: 'Outfit, sans-serif', fontSize: '0.92rem', color: INK, padding: '11px 0' }}
+                />
+              </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
               <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: INK_LITE, whiteSpace: 'nowrap' as const }}>Search by Location:</span>
@@ -261,6 +263,15 @@ export default function FindItemsPage() {
                 />
               </div>
             </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: INK_LITE, whiteSpace: 'nowrap' as const }}>Available to</span>
+              {['Borrow', 'Keep'].map(opt => (
+                <button key={opt} onClick={() => toggleAvailability(opt)}
+                  style={chipStyle(availabilityFilters.includes(opt), opt === 'Borrow' ? TEAL : RUST)}>
+                  {opt}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Filter rows */}
@@ -271,7 +282,7 @@ export default function FindItemsPage() {
             .fi-label { font-family: 'Space Mono', monospace; font-size: 0.55rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: ${INK_LITE}; white-space: nowrap; flex-shrink: 0; }
           `}</style>
 
-          <div className="fi-filters">
+          <div className="fi-filters" style={{ marginBottom: '4px' }}>
             <div className="fi-filter-group">
               <span className="fi-label">Category</span>
               {categories.map(cat => (
@@ -281,7 +292,9 @@ export default function FindItemsPage() {
                 </button>
               ))}
             </div>
+          </div>
 
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', flexWrap: 'wrap' as const, gap: '8px' }}>
             <div className="fi-filter-group">
               <span className="fi-label">Show from</span>
               {['Everyone', 'Following', 'Followers', 'My Campmates'].map(opt => (
@@ -291,54 +304,41 @@ export default function FindItemsPage() {
                 </button>
               ))}
             </div>
-
-            <div className="fi-filter-group">
-              <span className="fi-label">Available to</span>
-              {['Borrow', 'Keep'].map(opt => (
-                <button key={opt} onClick={() => toggleAvailability(opt)}
-                  style={chipStyle(availabilityFilters.includes(opt), opt === 'Borrow' ? TEAL : RUST)}>
-                  {opt}
-                </button>
-              ))}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
+              <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.68rem', color: INK_LITE, fontWeight: 700, letterSpacing: '0.06em' }}>
+                {loading ? 'Loading…' : <><strong style={{ color: INK }}>{filteredItems.length}</strong> items available</>}
+              </div>
+              <div style={{ display: 'flex', border: `2px solid ${INK}`, overflow: 'hidden' }}>
+                {([
+                  { mode: 'cards', icon: <LayoutGrid size={15} />, label: 'Cards' },
+                  { mode: 'list',  icon: <List size={15} />,        label: 'List'  },
+                  { mode: 'map',   icon: <Map size={15} />,         label: 'Map'   },
+                ] as const).map(({ mode, icon, label }) => (
+                  <button
+                    key={mode}
+                    onClick={() => setViewMode(mode)}
+                    title={label}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '5px',
+                      padding: '6px 12px',
+                      border: 'none',
+                      borderRight: mode !== 'map' ? `1px solid ${INK}` : 'none',
+                      background: viewMode === mode ? INK : PAPER_LT,
+                      color:      viewMode === mode ? PAPER : INK_LITE,
+                      cursor: 'pointer',
+                      fontFamily: "'Space Mono', monospace",
+                      fontSize: '0.6rem',
+                      fontWeight: 700,
+                      letterSpacing: '0.06em',
+                      textTransform: 'uppercase' as const,
+                    }}
+                  >
+                    {icon}{label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* ── RESULTS BAR ────────────────────────────────────────────────── */}
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '20px 40px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.68rem', color: INK_LITE, fontWeight: 700, letterSpacing: '0.06em' }}>
-          {loading ? 'Loading…' : <><strong style={{ color: INK }}>{filteredItems.length}</strong> items available</>}
-        </div>
-        {/* View toggle */}
-        <div style={{ display: 'flex', border: `2px solid ${INK}`, overflow: 'hidden' }}>
-          {([
-            { mode: 'cards', icon: <LayoutGrid size={15} />, label: 'Cards' },
-            { mode: 'list',  icon: <List size={15} />,        label: 'List'  },
-            { mode: 'map',   icon: <Map size={15} />,         label: 'Map'   },
-          ] as const).map(({ mode, icon, label }) => (
-            <button
-              key={mode}
-              onClick={() => setViewMode(mode)}
-              title={label}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '5px',
-                padding: '6px 12px',
-                border: 'none',
-                borderRight: mode !== 'map' ? `1px solid ${INK}` : 'none',
-                background: viewMode === mode ? INK : PAPER_LT,
-                color:      viewMode === mode ? PAPER : INK_LITE,
-                cursor: 'pointer',
-                fontFamily: "'Space Mono', monospace",
-                fontSize: '0.6rem',
-                fontWeight: 700,
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase' as const,
-              }}
-            >
-              {icon}{label}
-            </button>
-          ))}
         </div>
       </div>
 
