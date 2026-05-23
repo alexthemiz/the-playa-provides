@@ -419,6 +419,7 @@ export default function HomePage() {
 
           {/* ── Scroll view (default) ── */}
           {!gameRunning && (
+            <>
             <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'center' }}>
 
               {/* Wish list row */}
@@ -531,6 +532,7 @@ export default function HomePage() {
                 🚲
               </button>
             </div>
+            </>
           )}
 
           {/* ── Game view ── */}
