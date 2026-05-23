@@ -661,7 +661,7 @@ export default function HomePage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', border: `2px solid ${INK}` }}>
               {[
                 { n: 'I',   title: 'Radical Interdependence',      body: 'Others may have what you need. You may have what others need. Turns out that\'s enough.' },
-                { n: 'II',  title: 'Decommodification, Actually',  body: 'Make it a year-round thing. Every shared item is one less Amazon order. Do the math.' },
+                { n: 'II',  title: 'A Decommodification Modification',  body: 'Make it a year-round thing. Every shared item is one less Amazon order. Do the math.' },
                 { n: 'III', title: 'Lending is a Type of Gifting', body: 'You don\'t even have to give it away. Let someone borrow it. That counts.' },
                 { n: 'IV',  title: 'Not Going This Year?',         body: 'Your gear still can. Let it earn its keep while it collects dust in your garage.' },
               ].map(({ n, title, body }, i) => (
