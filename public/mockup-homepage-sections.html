@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mockup — Homepage Section Redesign</title>
+  <title>Mockup — Homepage Feature Section</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Arvo:ital,wght@0,400;0,700;1,400;1,700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
@@ -26,25 +26,21 @@
 
     body {
       font-family: 'Arvo', serif;
-      background: #ccc;
-      padding: 40px 20px;
+      background: #b0a898;
+      padding: 0;
       color: var(--ink);
     }
 
-    .label {
+    .meta-label {
       font-family: 'Space Mono', monospace;
-      font-size: 0.65rem;
+      font-size: 0.62rem;
       font-weight: 700;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: #666;
+      color: #fff;
       text-align: center;
-      margin-bottom: 8px;
-    }
-
-    .page-width {
-      max-width: 960px;
-      margin: 0 auto;
+      padding: 10px;
+      background: rgba(0,0,0,0.25);
     }
 
     hr.rule {
@@ -53,52 +49,32 @@
       margin: 0;
     }
 
-    /* ── TOGGLE ── */
-    .toggle-bar {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      margin-bottom: 32px;
-    }
-    .toggle-btn {
-      font-family: 'Space Mono', monospace;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      padding: 8px 20px;
-      border: 2px solid var(--ink);
-      background: var(--paper-lt);
-      cursor: pointer;
-      color: var(--ink-mid);
-      transition: background 0.15s, color 0.15s;
-    }
-    .toggle-btn.active {
-      background: var(--ink);
-      color: var(--lime);
-    }
-
-    /* ── FEATURE HIGHLIGHTS ── */
+    /* ── FEATURE SECTION ── */
     .feature-section {
       background: var(--paper-lt);
       padding: 52px 40px;
       border-bottom: 2px solid var(--ink);
     }
-    .feature-header {
+    .page-width { max-width: 960px; margin: 0 auto; }
+
+    .section-header {
       margin-bottom: 28px;
     }
-    .feature-header h2 {
+    .section-header h2 {
       font-family: 'Arvo', serif;
       font-size: 1.5rem;
       font-weight: 700;
       color: var(--ink);
       margin-bottom: 6px;
+      font-style: italic;
     }
-    .feature-header p {
-      font-family: 'Space Mono', monospace;
-      font-size: 0.72rem;
-      color: var(--ink-lite);
-      letter-spacing: 0.03em;
+    .section-header p {
+      font-size: 0.9rem;
+      color: var(--ink-mid);
+      line-height: 1.55;
+      max-width: 520px;
     }
+
     .feature-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -107,17 +83,13 @@
     .feature-card {
       padding: 28px 26px;
       position: relative;
-      border-right: 1px solid var(--ink);
-      border-bottom: 1px solid var(--ink);
     }
-    .feature-card:nth-child(even)  { border-right: none; }
-    .feature-card:nth-child(n+3)   { border-bottom: none; }
-    .feature-card:nth-child(1) { background: #FDFAF4; }
-    .feature-card:nth-child(2) { background: #F8F4E8; }
-    .feature-card:nth-child(3) { background: #F4F8EC; }
+    .feature-card:nth-child(1) { background: #FDFAF4; border-right: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+    .feature-card:nth-child(2) { background: #F8F4E8; border-bottom: 1px solid var(--ink); }
+    .feature-card:nth-child(3) { background: #F4F8EC; border-right: 1px solid var(--ink); }
     .feature-card:nth-child(4) { background: #F8F2EE; }
 
-    .feature-card .step-num {
+    .card-num {
       position: absolute;
       top: 12px; right: 14px;
       font-family: 'Arvo', serif;
@@ -128,7 +100,7 @@
       user-select: none;
       line-height: 1;
     }
-    .feature-card .eyebrow {
+    .card-eyebrow {
       font-family: 'Space Mono', monospace;
       font-size: 0.58rem;
       font-weight: 700;
@@ -151,8 +123,13 @@
       color: var(--ink-mid);
       line-height: 1.65;
     }
+    .feature-card a {
+      color: var(--teal);
+      text-decoration: underline;
+      font-weight: 700;
+    }
 
-    /* ── ON-PLAYA RESOURCES ── */
+    /* ── RESOURCES ── */
     .resources-section {
       background: var(--paper-dk);
       padding: 56px 40px 64px;
@@ -160,12 +137,9 @@
     .resources-inner {
       max-width: 960px;
       margin: 0 auto;
-    }
-    .resources-top {
       text-align: center;
-      margin-bottom: 40px;
     }
-    .resources-top h2 {
+    .resources-inner h2 {
       font-family: 'Arvo', serif;
       font-size: 1.5rem;
       font-weight: 700;
@@ -173,7 +147,7 @@
       color: var(--ink);
       margin-bottom: 10px;
     }
-    .resources-top p {
+    .resources-inner p {
       color: var(--ink-mid);
       font-size: 0.92rem;
       max-width: 420px;
@@ -194,288 +168,129 @@
       cursor: pointer;
     }
 
-    /* Why grid — the old Field Notes content, repurposed */
-    .why-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      border: 2px solid var(--ink);
-      margin-top: 40px;
-    }
-    .why-card {
-      padding: 24px 22px;
-      position: relative;
-      border-right: 1px solid var(--ink);
-      border-bottom: 1px solid var(--ink);
-    }
-    .why-card:nth-child(even)  { border-right: none; }
-    .why-card:nth-child(n+3)   { border-bottom: none; }
-    .why-card:nth-child(1) { background: rgba(253,250,244,0.5); }
-    .why-card:nth-child(2) { background: rgba(248,244,232,0.5); }
-    .why-card:nth-child(3) { background: rgba(244,248,236,0.5); }
-    .why-card:nth-child(4) { background: rgba(248,242,238,0.5); }
-
-    .why-card .wn {
-      position: absolute;
-      top: 10px; right: 12px;
-      font-family: 'Arvo', serif;
-      font-size: 2.4rem;
-      font-weight: 900;
-      font-style: italic;
-      opacity: 0.06;
-      user-select: none;
-    }
-    .why-card h4 {
-      font-family: 'Arvo', serif;
-      font-size: 0.92rem;
-      font-weight: 700;
-      color: var(--ink);
-      margin-bottom: 6px;
-      padding-right: 28px;
-      line-height: 1.25;
-    }
-    .why-card p {
-      font-size: 0.82rem;
-      color: var(--ink-mid);
-      line-height: 1.6;
-    }
-    .why-section-label {
+    /* Why grid — old Field Notes absorbed here */
+    .why-label {
       font-family: 'Space Mono', monospace;
       font-size: 0.6rem;
       font-weight: 700;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--ink-lite);
-      margin-bottom: 10px;
       text-align: center;
+      margin-top: 44px;
+      margin-bottom: 12px;
     }
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      border: 2px solid var(--ink);
+      text-align: left;
+    }
+    .why-card {
+      padding: 22px 20px;
+      position: relative;
+    }
+    .why-card:nth-child(1) { background: rgba(253,250,244,0.45); border-right: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+    .why-card:nth-child(2) { background: rgba(248,244,232,0.45); border-bottom: 1px solid var(--ink); }
+    .why-card:nth-child(3) { background: rgba(244,248,236,0.45); border-right: 1px solid var(--ink); }
+    .why-card:nth-child(4) { background: rgba(248,242,238,0.45); }
+    .why-card .wn {
+      position: absolute; top: 10px; right: 12px;
+      font-family: 'Arvo', serif; font-size: 2.4rem; font-weight: 900;
+      font-style: italic; opacity: 0.06; user-select: none;
+    }
+    .why-card h4 {
+      font-family: 'Arvo', serif; font-size: 0.9rem; font-weight: 700;
+      color: var(--ink); margin-bottom: 6px; padding-right: 26px; line-height: 1.25;
+    }
+    .why-card p { font-size: 0.82rem; color: var(--ink-mid); line-height: 1.6; }
   </style>
 </head>
 <body>
 
-  <div class="label">MOCKUP — Homepage section redesign — open in browser, not live</div>
+  <div class="meta-label">Mockup — not live — theplayaprovides.com/mockup-homepage-sections.html</div>
 
-  <div class="toggle-bar">
-    <button class="toggle-btn active" onclick="show('A')">Option A — Step-by-step</button>
-    <button class="toggle-btn" onclick="show('B')">Option B — Value props</button>
-    <button class="toggle-btn" onclick="show('C')">Option C — Mixed</button>
-  </div>
+  <hr class="rule" />
 
-  <!-- ════════════════ OPTION A ════════════════ -->
-  <div id="optA">
+  <!-- ── FEATURE HIGHLIGHTS ── -->
+  <section class="feature-section">
+    <div class="page-width">
 
-    <hr class="rule" />
+      <div class="section-header">
+        <!-- HEADLINE: placeholder — edit to taste -->
+        <h2>Built for the way Burners actually share.</h2>
+        <!-- SUBHEAD: placeholder — edit to taste -->
+        <p>The playa can only provide because people provide.</p>
+      </div>
 
-    <!-- Feature highlights -->
-    <section class="feature-section">
-      <div class="page-width">
-        <div class="feature-header">
-          <h2>How it works</h2>
-          <p>Borrow, lend, or pass it on — in four moves.</p>
+      <div class="feature-grid">
+
+        <div class="feature-card">
+          <span class="card-num">01</span>
+          <div class="card-eyebrow">Feature 01</div>
+          <h3>Connect with your Campmates</h3>
+          <p><a href="#">Complete your profile</a> to see if past or current campmates have what you're looking for — or need something you have.</p>
         </div>
-        <div class="feature-grid">
-          <div class="feature-card">
-            <span class="step-num">01</span>
-            <div class="eyebrow">Step 01</div>
-            <h3>List what you've got</h3>
-            <p>Post gear you're not using. Set your own terms — lend it, gift it, or offer it to followers only.</p>
-          </div>
-          <div class="feature-card">
-            <span class="step-num">02</span>
-            <div class="eyebrow">Step 02</div>
-            <h3>Browse &amp; request</h3>
-            <p>Search by category, camp, or keyword. Send a borrow request — the owner confirms the handoff.</p>
-          </div>
-          <div class="feature-card">
-            <span class="step-num">03</span>
-            <div class="eyebrow">Step 03</div>
-            <h3>Coordinate pickup</h3>
-            <p>Agree on where and when. All logistics live in your inventory dashboard — no side-channel needed.</p>
-          </div>
-          <div class="feature-card">
-            <span class="step-num">04</span>
-            <div class="eyebrow">Step 04</div>
-            <h3>Return it (or don't)</h3>
-            <p>Mark the return when it's done. Or list it again for the next person. Keep the cycle going.</p>
-          </div>
+
+        <div class="feature-card">
+          <span class="card-num">02</span>
+          <div class="card-eyebrow">Feature 02</div>
+          <h3>Decide How Wide to Provide</h3>
+          <p>Choose who can see your listings: campmates, followers, everyone — or no one.</p>
+        </div>
+
+        <div class="feature-card">
+          <span class="card-num">03</span>
+          <div class="card-eyebrow">Feature 03</div>
+          <h3>Reduce the Stress of Generosity</h3>
+          <p>Set your terms at the start — return date, replacement cost, damage expectations. Say it once, up front.</p>
+        </div>
+
+        <div class="feature-card">
+          <span class="card-num">04</span>
+          <div class="card-eyebrow">Feature 04</div>
+          <h3>Maintain an Easy Inventory</h3>
+          <p>Add an item once and it stays logged for as long as you want. Your gear list is always there when you need it.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule" />
+
+  <!-- ── ON-PLAYA RESOURCES (old Field Notes absorbed) ── -->
+  <section class="resources-section">
+    <div class="resources-inner">
+      <h2>On-Playa Resources</h2>
+      <p>Camps providing services that make Burning Man more sustainable.</p>
+      <a class="btn" href="#">Browse the Directory →</a>
+
+      <div class="why-label">Why it matters</div>
+      <div class="why-grid">
+        <div class="why-card">
+          <span class="wn">I</span>
+          <h4>Radical Interdependence</h4>
+          <p>Others may have what you need. You may have what others need. Turns out that's enough.</p>
+        </div>
+        <div class="why-card">
+          <span class="wn">II</span>
+          <h4>Decommodification, Actually</h4>
+          <p>Make it a year-round thing. Every shared item is one less Amazon order. Do the math.</p>
+        </div>
+        <div class="why-card">
+          <span class="wn">III</span>
+          <h4>Lending is a Type of Gifting</h4>
+          <p>You don't even have to give it away. Let someone borrow it. That counts.</p>
+        </div>
+        <div class="why-card">
+          <span class="wn">IV</span>
+          <h4>Not Going This Year?</h4>
+          <p>Your gear still can. Let it earn its keep while it collects dust in your garage.</p>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <hr class="rule" />
-
-    <!-- On-playa resources, with old Field Notes grid absorbed -->
-    <section class="resources-section">
-      <div class="resources-inner">
-        <div class="resources-top">
-          <h2>On-Playa Resources</h2>
-          <p>Camps providing services that make Burning Man more sustainable.</p>
-          <a class="btn" href="#">Browse the Directory →</a>
-        </div>
-
-        <div class="why-section-label">Why it matters</div>
-        <div class="why-grid">
-          <div class="why-card">
-            <span class="wn">I</span>
-            <h4>Radical Interdependence</h4>
-            <p>Others may have what you need. You may have what others need. Turns out that's enough.</p>
-          </div>
-          <div class="why-card">
-            <span class="wn">II</span>
-            <h4>Decommodification, Actually</h4>
-            <p>Make it a year-round thing. Every shared item is one less Amazon order. Do the math.</p>
-          </div>
-          <div class="why-card">
-            <span class="wn">III</span>
-            <h4>Lending is a Type of Gifting</h4>
-            <p>You don't even have to give it away. Let someone borrow it. That counts.</p>
-          </div>
-          <div class="why-card">
-            <span class="wn">IV</span>
-            <h4>Not Going This Year?</h4>
-            <p>Your gear still can. Let it earn its keep while it collects dust in your garage.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-  </div><!-- /optA -->
-
-
-  <!-- ════════════════ OPTION B ════════════════ -->
-  <div id="optB" style="display:none">
-
-    <hr class="rule" />
-
-    <section class="feature-section">
-      <div class="page-width">
-        <div class="feature-header">
-          <h2>The playa provides — because you do.</h2>
-          <p>What this site actually does, in plain English.</p>
-        </div>
-        <div class="feature-grid">
-          <div class="feature-card">
-            <span class="step-num">I</span>
-            <div class="eyebrow">For lenders</div>
-            <h3>Your gear earns its keep</h3>
-            <p>List items you're not using. Set visibility, lending terms, and a return date. Your inventory, your rules.</p>
-          </div>
-          <div class="feature-card">
-            <span class="step-num">II</span>
-            <div class="eyebrow">For borrowers</div>
-            <h3>Get what you need without buying it</h3>
-            <p>Browse community gear. Request to borrow. Skip the Amazon order and the post-burn storage problem.</p>
-          </div>
-          <div class="feature-card">
-            <span class="step-num">III</span>
-            <div class="eyebrow">For your camp</div>
-            <h3>Share within your circle</h3>
-            <p>Restrict items to campmates or followers. Keep the sharing tight — or open it to the whole community.</p>
-          </div>
-          <div class="feature-card">
-            <span class="step-num">IV</span>
-            <div class="eyebrow">For the planet</div>
-            <h3>One less thing in a landfill</h3>
-            <p>Gear that gets shared gets used. Gear that gets used doesn't get thrown away. It's really that simple.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <hr class="rule" />
-
-    <section class="resources-section">
-      <div class="resources-inner">
-        <div class="resources-top">
-          <h2>On-Playa Resources</h2>
-          <p>Camps providing services that make Burning Man more sustainable.</p>
-          <a class="btn" href="#">Browse the Directory →</a>
-        </div>
-
-        <div class="why-section-label">Why it matters</div>
-        <div class="why-grid">
-          <div class="why-card"><span class="wn">I</span><h4>Radical Interdependence</h4><p>Others may have what you need. You may have what others need. Turns out that's enough.</p></div>
-          <div class="why-card"><span class="wn">II</span><h4>Decommodification, Actually</h4><p>Make it a year-round thing. Every shared item is one less Amazon order. Do the math.</p></div>
-          <div class="why-card"><span class="wn">III</span><h4>Lending is a Type of Gifting</h4><p>You don't even have to give it away. Let someone borrow it. That counts.</p></div>
-          <div class="why-card"><span class="wn">IV</span><h4>Not Going This Year?</h4><p>Your gear still can. Let it earn its keep while it collects dust in your garage.</p></div>
-        </div>
-      </div>
-    </section>
-
-  </div><!-- /optB -->
-
-
-  <!-- ════════════════ OPTION C ════════════════ -->
-  <div id="optC" style="display:none">
-
-    <hr class="rule" />
-
-    <section class="feature-section">
-      <div class="page-width">
-        <div class="feature-header">
-          <h2>Gear sharing for Burners, by Burners.</h2>
-          <p>The playa can only provide because people provide.</p>
-        </div>
-        <div class="feature-grid">
-          <div class="feature-card">
-            <span class="step-num">01</span>
-            <div class="eyebrow">List</div>
-            <h3>Post what you're not using</h3>
-            <p>Set your terms — lend it, gift it, or keep it visible to your camp only. You're in control.</p>
-          </div>
-          <div class="feature-card">
-            <span class="step-num">02</span>
-            <div class="eyebrow">Borrow</div>
-            <h3>Find what you need</h3>
-            <p>Browse by category or keyword. Request to borrow. No money changes hands — ever.</p>
-          </div>
-          <div class="feature-card">
-            <span class="step-num">03</span>
-            <div class="eyebrow">Share</div>
-            <h3>Keep it in the community</h3>
-            <p>Follow people whose gear you trust. Let campmates access your stuff first. Build your sharing circle.</p>
-          </div>
-          <div class="feature-card">
-            <span class="step-num">04</span>
-            <div class="eyebrow">Repeat</div>
-            <h3>One less Amazon order</h3>
-            <p>Every shared item is gear that didn't get bought, shipped, or thrown away. Do the math.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <hr class="rule" />
-
-    <section class="resources-section">
-      <div class="resources-inner">
-        <div class="resources-top">
-          <h2>On-Playa Resources</h2>
-          <p>Camps providing services that make Burning Man more sustainable.</p>
-          <a class="btn" href="#">Browse the Directory →</a>
-        </div>
-
-        <div class="why-section-label">The philosophy</div>
-        <div class="why-grid">
-          <div class="why-card"><span class="wn">I</span><h4>Radical Interdependence</h4><p>Others may have what you need. You may have what others need. Turns out that's enough.</p></div>
-          <div class="why-card"><span class="wn">II</span><h4>Decommodification, Actually</h4><p>Make it a year-round thing. Every shared item is one less Amazon order. Do the math.</p></div>
-          <div class="why-card"><span class="wn">III</span><h4>Lending is a Type of Gifting</h4><p>You don't even have to give it away. Let someone borrow it. That counts.</p></div>
-          <div class="why-card"><span class="wn">IV</span><h4>Not Going This Year?</h4><p>Your gear still can. Let it earn its keep while it collects dust in your garage.</p></div>
-        </div>
-      </div>
-    </section>
-
-  </div><!-- /optC -->
-
-
-  <script>
-    function show(opt) {
-      ['A','B','C'].forEach(o => {
-        document.getElementById('opt' + o).style.display = o === opt ? 'block' : 'none';
-        document.querySelectorAll('.toggle-btn').forEach((btn, i) => {
-          btn.classList.toggle('active', ['A','B','C'][i] === opt);
-        });
-      });
-    }
-  </script>
 </body>
 </html>
