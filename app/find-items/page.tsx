@@ -57,7 +57,9 @@ export default function FindItemsPage() {
 
   const [selectedItem,     setSelectedItem]     = useState<any>(null);
   const [showRequestForm,  setShowRequestForm]  = useState(false);
-  const [viewMode,         setViewMode]         = useState<'cards' | 'list' | 'map'>('cards');
+  const [viewMode,         setViewMode]         = useState<'cards' | 'list' | 'map'>(
+    () => (typeof window !== 'undefined' ? (localStorage.getItem('findItemsView') as 'cards' | 'list' | 'map') || 'cards' : 'cards')
+  );
 
   const categories = [
     'All', 'Bikes & Transport', 'Clothing & Fun', 'Kitchen & Water',
@@ -69,6 +71,10 @@ export default function FindItemsPage() {
     fetchItems();
     fetchRelationships();
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('findItemsView', viewMode);
+  }, [viewMode]);
 
   useEffect(() => {
     const syncModalWithUrl = () => {
