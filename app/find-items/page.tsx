@@ -458,7 +458,7 @@ export default function FindItemsPage() {
                       letterSpacing: '0.06em', padding: '3px 8px',
                       boxShadow: `1px 1px 0 rgba(28,22,16,0.2)`,
                     }}>
-                      {isKeep ? 'Free Keep' : 'Borrow'}
+                      {isKeep ? 'Keep' : 'Borrow'}
                     </div>
 
                     {/* Photo or emoji */}
