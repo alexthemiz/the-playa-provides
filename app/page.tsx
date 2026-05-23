@@ -416,22 +416,6 @@ export default function HomePage() {
         {/* Right panel */}
         <div ref={heroRightRef} style={{ backgroundColor: PAPER_DK, position: 'relative', display: 'flex', flexDirection: 'column', padding: gameRunning ? '0' : '20px 0', overflow: 'hidden' }}>
 
-          {/* Frogger toggle — subtle easter egg */}
-          <button
-            onClick={() => setGameRunning(r => !r)}
-            title={gameRunning ? 'Back to browsing' : 'Play a game'}
-            style={{
-              position: 'absolute', top: '10px', right: '12px', zIndex: 30,
-              background: gameRunning ? LIME : 'none',
-              border: `1.5px solid ${gameRunning ? LIME_DK : 'rgba(28,22,16,0.18)'}`,
-              borderRadius: '4px', padding: '4px 8px', cursor: 'pointer',
-              fontFamily: "'Space Mono', monospace", fontSize: '0.6rem', fontWeight: 700,
-              letterSpacing: '0.06em', color: gameRunning ? INK : INK_LITE,
-              display: 'flex', alignItems: 'center', gap: '5px',
-            }}
-          >
-            🚲
-          </button>
 
           {/* ── Scroll view (default) ── */}
           {!gameRunning && (
@@ -530,6 +514,23 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
+
+            {/* Frogger trigger — below polaroids, centered */}
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 4px' }}>
+              <button
+                onClick={() => setGameRunning(true)}
+                title="Play a game"
+                style={{
+                  background: 'none', border: '1.5px solid rgba(28,22,16,0.18)',
+                  borderRadius: '4px', padding: '5px 10px', cursor: 'pointer',
+                  fontFamily: "'Space Mono', monospace", fontSize: '0.65rem', fontWeight: 700,
+                  letterSpacing: '0.06em', color: INK_LITE,
+                  display: 'flex', alignItems: 'center', gap: '4px',
+                }}
+              >
+                🚲
+              </button>
+            </div>
           )}
 
           {/* ── Game view ── */}
@@ -556,7 +557,24 @@ export default function HomePage() {
                   transition: 'left 0.07s, top 0.09s',
                 }}
               >
-                🚲
+                🐸🚲
+              </div>
+
+              {/* Exit button — bottom center of game canvas */}
+              <div style={{ position: 'absolute', bottom: '10px', left: 0, right: 0, display: 'flex', justifyContent: 'center', zIndex: 30 }}>
+                <button
+                  onClick={() => setGameRunning(false)}
+                  title="Back to browsing"
+                  style={{
+                    background: 'none', border: '1.5px solid rgba(184,204,42,0.35)',
+                    borderRadius: '4px', padding: '5px 10px', cursor: 'pointer',
+                    fontFamily: "'Space Mono', monospace", fontSize: '0.65rem', fontWeight: 700,
+                    letterSpacing: '0.06em', color: 'rgba(184,204,42,0.7)',
+                    display: 'flex', alignItems: 'center', gap: '4px',
+                  }}
+                >
+                  🐸🚲
+                </button>
               </div>
             </div>
           )}
