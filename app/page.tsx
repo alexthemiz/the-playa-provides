@@ -559,7 +559,10 @@ export default function HomePage() {
                   transition: 'left 0.07s, top 0.09s',
                 }}
               >
-                🐸🚲
+                <span style={{ position: 'relative' as const, display: 'inline-block' }}>
+                  🚲
+                  <span style={{ position: 'absolute' as const, top: '-0.7em', left: '50%', transform: 'translateX(-50%)', fontSize: '0.75em', lineHeight: 1 }}>🐸</span>
+                </span>
               </div>
 
               {/* Exit + controls bar — bottom of game canvas */}
@@ -575,7 +578,10 @@ export default function HomePage() {
                     display: 'flex', alignItems: 'center', gap: '4px',
                   }}
                 >
-                  🐸🚲
+                  <span style={{ position: 'relative' as const, display: 'inline-block' }}>
+                    🚲
+                    <span style={{ position: 'absolute' as const, top: '-0.7em', left: '50%', transform: 'translateX(-50%)', fontSize: '0.75em', lineHeight: 1 }}>🐸</span>
+                  </span>
                 </button>
                 <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
                   {(['←','↑','↓','→'] as const).map(arrow => (
