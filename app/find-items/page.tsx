@@ -236,14 +236,14 @@ export default function FindItemsPage() {
 
       {/* ── PAGE HEADER BAND ───────────────────────────────────────────── */}
       <div style={{ backgroundColor: PAPER_LT, borderBottom: `2px solid ${INK}`, padding: '28px 0 0' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 40px' }}>
+        <div className="rsp-px" style={{ maxWidth: '1280px', margin: '0 auto' }}>
 
           <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.9rem', fontWeight: 900, lineHeight: 1.05, color: INK, margin: '0 0 18px' }}>
             Find what you <em style={{ fontStyle: 'italic', color: TEAL }}>need.</em>
           </h1>
 
           {/* Search row */}
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'stretch', marginBottom: '16px', flexWrap: 'wrap' as const }}>
+          <div className="fi-search-row" style={{ display: 'flex', gap: '10px', alignItems: 'stretch', marginBottom: '16px', flexWrap: 'wrap' as const }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
               <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: INK_LITE, whiteSpace: 'nowrap' as const }}>Search by Keyword:</span>
               <div style={{ display: 'flex', alignItems: 'center', border: `2px solid ${INK}`, background: PAPER_LT, padding: '0 14px', gap: '10px', width: '200px' }}>
@@ -286,6 +286,10 @@ export default function FindItemsPage() {
             .fi-filters::-webkit-scrollbar { display: none; }
             .fi-filter-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
             .fi-label { font-family: 'Space Mono', monospace; font-size: 0.55rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: ${INK_LITE}; white-space: nowrap; flex-shrink: 0; }
+            @media (max-width: 640px) {
+              .fi-search-row { flex-direction: column !important; align-items: stretch !important; gap: 8px !important; }
+              .fi-search-row > div { flex-shrink: 1 !important; width: 100%; }
+            }
           `}</style>
 
           <div className="fi-filters" style={{ marginBottom: '4px' }}>
@@ -350,14 +354,14 @@ export default function FindItemsPage() {
 
       {/* ── MAP VIEW ───────────────────────────────────────────────────── */}
       {viewMode === 'map' && (
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '20px 40px 64px' }}>
+        <div className="rsp-px" style={{ maxWidth: '1280px', margin: '0 auto', paddingTop: '20px', paddingBottom: '64px' }}>
           <MapView items={filteredItems} onSelectItem={handleOpenItem} />
         </div>
       )}
 
       {/* ── LIST VIEW ──────────────────────────────────────────────────── */}
       {viewMode === 'list' && !loading && (
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '20px 40px 64px' }}>
+        <div className="rsp-px" style={{ maxWidth: '1280px', margin: '0 auto', paddingTop: '20px', paddingBottom: '64px' }}>
           {filteredItems.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '80px 20px' }}>
               <div style={{ fontSize: '3.5rem', marginBottom: '16px' }}>🏜️</div>

@@ -393,6 +393,13 @@ export default function HomePage() {
         @keyframes g-pop   { 0%{transform:scale(1)} 50%{transform:scale(1.6) rotate(-10deg)} 100%{transform:scale(1)} }
         .g-dead { animation: g-shake 0.3s ease; }
         .g-won  { animation: g-pop   0.4s ease; }
+        @media (max-width: 640px) {
+          .home-hero { grid-template-columns: 1fr !important; min-height: unset !important; }
+          .home-hero-left { border-right: none !important; border-bottom: 2px solid #1C1610; padding: 32px 16px !important; }
+          .home-hero-right { min-height: 260px; }
+          .home-feature-grid { grid-template-columns: 1fr !important; }
+          .home-tab-row { flex-direction: column !important; align-items: flex-start !important; }
+        }
       `}</style>
 
       {/* Deleted account banner */}
@@ -404,7 +411,7 @@ export default function HomePage() {
       )}
 
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
-      <section style={{
+      <section className="home-hero" style={{
         display: 'grid',
         gridTemplateColumns: '60% 40%',
         borderBottom: `2px solid ${INK}`,
@@ -412,7 +419,7 @@ export default function HomePage() {
       }}>
 
         {/* Left */}
-        <div style={{
+        <div className="home-hero-left" style={{
           padding: '52px 32px 48px',
           borderRight: `2px solid ${INK}`,
           display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
@@ -457,7 +464,7 @@ export default function HomePage() {
         </div>
 
         {/* Right panel */}
-        <div ref={heroRightRef} style={{ backgroundColor: PAPER_DK, position: 'relative', display: 'flex', flexDirection: 'column', padding: gameRunning ? '0' : '20px 0', overflow: 'hidden' }}>
+        <div ref={heroRightRef} className="home-hero-right" style={{ backgroundColor: PAPER_DK, position: 'relative', display: 'flex', flexDirection: 'column', padding: gameRunning ? '0' : '20px 0', overflow: 'hidden' }}>
 
 
           {/* ── Scroll view (default) ── */}
@@ -652,11 +659,11 @@ export default function HomePage() {
       <hr style={{ border: 'none', borderTop: `1.5px solid ${INK}`, margin: 0 }} />
 
       {/* ── FEATURES / WHY ───────────────────────────────────────────────── */}
-      <section style={{ backgroundColor: PAPER_LT, padding: '52px 40px', borderBottom: `2px solid ${INK}` }}>
+      <section className="rsp-px" style={{ backgroundColor: PAPER_LT, paddingTop: '52px', paddingBottom: '52px', borderBottom: `2px solid ${INK}` }}>
         <div style={{ maxWidth: '960px', margin: '0 auto' }}>
 
           {/* Header row */}
-          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '24px', gap: '20px' }}>
+          <div className="home-tab-row" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '24px', gap: '20px' }}>
             <h2 style={{ fontFamily: "'Arvo', serif", fontSize: '1.3rem', fontWeight: 700, fontStyle: 'italic', color: INK }}>
               The playa can only provide because people provide.
             </h2>
@@ -678,7 +685,7 @@ export default function HomePage() {
 
           {/* ── HOW IT WORKS ── */}
           {featureTab === 'how' && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', border: `2px solid ${INK}` }}>
+            <div className="home-feature-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', border: `2px solid ${INK}` }}>
               {[
                 { n: '01', title: 'Connect with your Campmates',      body: <><Link href="/profile" style={{ color: TEAL, fontWeight: 700 }}>Complete your profile</Link> to see if past or current campmates have what you're looking for — or need something you have.</> },
                 { n: '02', title: 'Decide How Wide to Provide',       body: 'Choose who can see your listings: campmates, followers, everyone — or no one.' },
@@ -701,7 +708,7 @@ export default function HomePage() {
 
           {/* ── WHY IT MATTERS ── */}
           {featureTab === 'why' && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', border: `2px solid ${INK}` }}>
+            <div className="home-feature-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', border: `2px solid ${INK}` }}>
               {[
                 { n: 'I',   title: 'Radical Interdependence',      body: 'Others may have what you need. You may have what others need. Turns out that\'s enough.' },
                 { n: 'II',  title: 'A Decommodification Modification',  body: 'Make it a year-round thing. Every shared item is one less Amazon order.' },
@@ -729,7 +736,7 @@ export default function HomePage() {
       <hr style={{ border: 'none', borderTop: `1.5px solid ${INK}`, margin: 0 }} />
 
       {/* ── RESOURCES ────────────────────────────────────────────────────── */}
-      <section style={{ backgroundColor: PAPER_DK, textAlign: 'center', padding: '56px 40px 64px' }}>
+      <section className="rsp-px" style={{ backgroundColor: PAPER_DK, textAlign: 'center', paddingTop: '56px', paddingBottom: '64px' }}>
         <h2 style={{ fontFamily: "'Arvo', serif", fontSize: '1.5rem', fontWeight: 700, fontStyle: 'italic', color: INK, marginBottom: '10px' }}>
           On-Playa Resources
         </h2>

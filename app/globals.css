@@ -39,11 +39,22 @@
   }
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   background: var(--paper);
   color: var(--ink);
   font-family: 'Outfit', sans-serif;
   margin: 0;
+}
+
+/* Responsive horizontal padding — drop horizontal padding from inline styles
+   and use this class so @media can override it on mobile */
+.rsp-px { padding-left: 40px; padding-right: 40px; }
+@media (max-width: 640px) {
+  .rsp-px { padding-left: 16px; padding-right: 16px; }
 }
 
 /* Subtle grain overlay — applied once at the root level */

@@ -100,7 +100,7 @@ export default function AboutPage() {
 
       {/* Page header band */}
       <div style={{ backgroundColor: PAPER_LT, borderBottom: `2px solid ${INK}`, padding: '28px 0' }}>
-        <div style={{ maxWidth: '760px', margin: '0 auto', padding: '0 40px' }}>
+        <div className="rsp-px" style={{ maxWidth: '760px', margin: '0 auto' }}>
           <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '2rem', fontWeight: 900, color: INK, margin: 0, lineHeight: 1.05 }}>
             An <em style={{ fontStyle: 'italic', color: TEAL }}>About</em> Page.
           </h1>
@@ -108,7 +108,7 @@ export default function AboutPage() {
       </div>
 
       {/* Accordion */}
-      <div style={{ maxWidth: '760px', margin: '0 auto', padding: '0 40px 64px' }}>
+      <div className="rsp-px" style={{ maxWidth: '760px', margin: '0 auto', paddingBottom: '64px' }}>
         {SECTIONS.map((section, i) => {
           const isOpen = openSections.has(i);
           return (

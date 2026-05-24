@@ -472,7 +472,7 @@ export default function InventoryPage() {
 
       {/* Page header band */}
       <div style={{ backgroundColor: '#FDFAF4', borderBottom: '2px solid #1C1610', padding: '28px 0' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 40px' }}>
+        <div className="rsp-px" style={{ maxWidth: '1400px', margin: '0 auto' }}>
           <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.9rem', fontWeight: 900, color: '#1C1610', margin: '0 0 12px', lineHeight: 1.05 }}>
             Your <em style={{ fontStyle: 'italic', color: '#1E8A82' }}>Inventory.</em>
           </h1>
@@ -482,11 +482,18 @@ export default function InventoryPage() {
         </div>
       </div>
 
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '24px 40px 0' }}>
-        <style>{`.title-break { display: none; } @media (max-width: 430px) { .title-break { display: block; } }`}</style>
+      <div className="rsp-px" style={{ maxWidth: '1400px', margin: '0 auto', paddingTop: '24px' }}>
+        <style>{`
+          .title-break { display: none; }
+          @media (max-width: 430px) { .title-break { display: block; } }
+          @media (max-width: 640px) {
+            .inv-filter-bar { flex-direction: column !important; }
+            .inv-filter-bar > div { width: 100% !important; min-width: unset !important; flex: unset !important; }
+          }
+        `}</style>
 
         {/* FILTERS + ADD BUTTON */}
-        <div style={filterBarStyle}>
+        <div className="inv-filter-bar" style={filterBarStyle}>
         {/* Search */}
         <div style={{ flex: 3 }}>
           <label style={labelStyle}>Search Your List</label>
@@ -569,7 +576,7 @@ export default function InventoryPage() {
         </div>
         </div>
       </div>
-    <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 40px 64px' }}>
+    <div className="rsp-px" style={{ maxWidth: '1400px', margin: '0 auto', paddingBottom: '64px' }}>
 
       {/* TABLE */}
       {loading ? (

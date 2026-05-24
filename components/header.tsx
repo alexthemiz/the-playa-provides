@@ -28,7 +28,6 @@ const headerStyle: React.CSSProperties = {
 const innerStyle: React.CSSProperties = {
   maxWidth: '1400px',
   margin: '0 auto',
-  padding: '0 40px',
   height: '52px',
   display: 'flex',
   alignItems: 'center',
@@ -365,8 +364,10 @@ export default function Header() {
           .header-mobile-controls { display: none; }
         }
         .hover-nav-link:hover { color: #fff !important; }
+        .header-inner { padding: 0 40px; }
+        @media (max-width: 640px) { .header-inner { padding: 0 16px; } }
       `}</style>
-      <div style={innerStyle}>
+      <div className="header-inner" style={innerStyle}>
 
         {/* Logo */}
         <Link href="/" style={logoStyle}>

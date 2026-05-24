@@ -487,7 +487,7 @@ export default function PublicProfilePage() {
 
       {/* Page header band — contains the full profile identity block */}
       <div style={{ backgroundColor: '#FDFAF4', borderBottom: '2px solid #1C1610', padding: '28px 0' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 40px' }}>
+        <div className="rsp-px" style={{ maxWidth: '1200px', margin: '0 auto' }}>
           {/* Avatar + name row */}
           <div className="profile-header-row" style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
             {/* Avatar */}
@@ -643,7 +643,7 @@ export default function PublicProfilePage() {
         </div>
       </div>
 
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px 40px', color: '#1C1610' }}>
+      <div className="rsp-px" style={{ maxWidth: '1200px', margin: '0 auto', paddingTop: '20px', paddingBottom: '20px', color: '#1C1610' }}>
       <style>{`
         @media (max-width: 640px) {
           .profile-header-row {

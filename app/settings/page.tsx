@@ -216,7 +216,7 @@ export default function SettingsPage() {
 
   return (
     <div style={{ backgroundColor: '#F6F1E8', minHeight: '100vh', width: '100%', color: '#1C1610' }}>
-      <div style={{ backgroundColor: '#FDFAF4', borderBottom: '2px solid #1C1610', padding: '28px 40px' }}>
+      <div className="rsp-px" style={{ backgroundColor: '#FDFAF4', borderBottom: '2px solid #1C1610', paddingTop: '28px', paddingBottom: '28px' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: '#9A8878', marginBottom: '8px' }}>Account</div>
           <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.9rem', fontWeight: 900, color: '#1C1610', margin: 0, lineHeight: 1.05 }}>
