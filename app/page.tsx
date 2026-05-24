@@ -422,9 +422,9 @@ export default function HomePage() {
         .g-dead { animation: g-shake 0.3s ease; }
         .g-won  { animation: g-pop   0.4s ease; }
         @media (max-width: 640px) {
-          .home-hero { grid-template-columns: 1fr !important; min-height: unset !important; }
-          .home-hero-left { border-right: none !important; border-bottom: 2px solid #1C1610; padding: 32px 16px !important; }
-          .home-hero-right { min-height: 260px; }
+          .home-hero { display: block !important; }
+          .home-hero-left { padding: 32px 16px !important; border-right: none !important; }
+          .home-hero-right { display: none !important; }
           .home-feature-grid { grid-template-columns: 1fr !important; }
           .home-tab-row { flex-direction: column !important; align-items: flex-start !important; }
         }

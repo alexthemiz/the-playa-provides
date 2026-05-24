@@ -45,7 +45,6 @@ const logoStyle: React.CSSProperties = {
 }
 
 const navStyle: React.CSSProperties = {
-  display: 'flex',
   gap: '20px',
   alignItems: 'center',
 }
