@@ -348,22 +348,44 @@ export default function HomePage() {
       gs.current.animId = requestAnimationFrame(gameTick)
     }
 
-    function handleKey(e: KeyboardEvent) {
-      if (!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) return
-      e.preventDefault()
+    function movePlayer(dir: 'up' | 'down' | 'left' | 'right') {
       const p = gs.current.player
       if (!p.alive) return
       const now = Date.now()
       if (now - gs.current.lastMove < MOVE_CD) return
       gs.current.lastMove = now
-      if (e.key === 'ArrowUp'    && p.row < 5) p.row++
-      if (e.key === 'ArrowDown'  && p.row > 0) p.row--
-      if (e.key === 'ArrowLeft'  ) p.x = Math.max(0, p.x - STEP_X)
-      if (e.key === 'ArrowRight' ) p.x = Math.min(panelW() - P_W, p.x + STEP_X)
+      if (dir === 'up'    && p.row < 5) p.row++
+      if (dir === 'down'  && p.row > 0) p.row--
+      if (dir === 'left'  ) p.x = Math.max(0, p.x - STEP_X)
+      if (dir === 'right' ) p.x = Math.min(panelW() - P_W, p.x + STEP_X)
       renderPlayer()
       if (p.row === 5) { win(); return }
       checkCollision()
     }
+
+    function handleKey(e: KeyboardEvent) {
+      if (!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) return
+      e.preventDefault()
+      const map: Record<string, 'up'|'down'|'left'|'right'> = {
+        ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
+      }
+      movePlayer(map[e.key])
+    }
+
+    let touchX = 0, touchY = 0
+    function handleTouchStart(e: TouchEvent) {
+      touchX = e.changedTouches[0].clientX
+      touchY = e.changedTouches[0].clientY
+    }
+    function handleTouchEnd(e: TouchEvent) {
+      const dx = e.changedTouches[0].clientX - touchX
+      const dy = e.changedTouches[0].clientY - touchY
+      const ax = Math.abs(dx), ay = Math.abs(dy)
+      if (Math.max(ax, ay) < 10) return
+      if (ax > ay) movePlayer(dx > 0 ? 'right' : 'left')
+      else         movePlayer(dy > 0 ? 'down'  : 'up')
+    }
+    function handleTouchMove(e: TouchEvent) { e.preventDefault() }
 
     gs.current.level = 1
     layoutLanes()
@@ -373,11 +395,17 @@ export default function HomePage() {
     gameView.focus()
     gs.current.animId = requestAnimationFrame(gameTick)
     document.addEventListener('keydown', handleKey)
+    gameView.addEventListener('touchstart', handleTouchStart, { passive: true })
+    gameView.addEventListener('touchend',   handleTouchEnd)
+    gameView.addEventListener('touchmove',  handleTouchMove, { passive: false })
 
     return () => {
       if (gs.current.animId !== null) cancelAnimationFrame(gs.current.animId)
       if (gs.current.flashTimer !== null) clearTimeout(gs.current.flashTimer)
       document.removeEventListener('keydown', handleKey)
+      gameView.removeEventListener('touchstart', handleTouchStart)
+      gameView.removeEventListener('touchend',   handleTouchEnd)
+      gameView.removeEventListener('touchmove',  handleTouchMove)
     }
   }, [gameRunning]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -590,7 +618,7 @@ export default function HomePage() {
             <div
               ref={gameViewRef}
               tabIndex={0}
-              style={{ position: 'absolute', inset: 0, overflow: 'hidden', outline: 'none' }}
+              style={{ position: 'absolute', inset: 0, overflow: 'hidden', outline: 'none', touchAction: 'none' }}
             >
               <div ref={flashRef} style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 50, opacity: 0, transition: 'opacity 0.08s' }} />
               <div id="g-zone-win"   style={{ position: 'absolute', left: 0, right: 0, borderBottom: `1px dashed rgba(184,204,42,0.4)` }} />
