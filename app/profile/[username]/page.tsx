@@ -330,7 +330,7 @@ export default function PublicProfilePage() {
       });
     }
 
-    // 2026 returning row â€” handled separately
+    // 2026 returning row â€" handled separately
     if (draft2026.status) {
       const row: Record<string, any> = {
         user_id: profile.id,
@@ -977,7 +977,7 @@ export default function PublicProfilePage() {
           <div style={{ border: '1.5px solid rgba(28,22,16,0.15)', backgroundColor: '#FDFAF4', padding: '16px' }}>
             <h4 style={subheadStyle}>Got a good &quot;playa provides&quot; story?</h4>
             {isEditing ? (
-              <textarea style={editTextareaStyle} value={profile.playa_story || ''} onChange={e => setProfile({ ...profile, playa_story: e.target.value })} placeholder=”Share a time the playa provided...” />
+              <textarea style={editTextareaStyle} value={profile.playa_story || ''} onChange={e => setProfile({ ...profile, playa_story: e.target.value })} placeholder="Share a time the playa provided..." />
             ) : (
               <p style={{ fontSize: '1rem', color: '#444', margin: 0, lineHeight: '1.6' }}>
                 {profile.playa_story || <span style={{ color: '#aaa', fontStyle: 'italic' as const }}>No story yet.</span>}
@@ -1057,12 +1057,12 @@ export default function PublicProfilePage() {
                         {item.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}
                       </div>
                     </div>
-                    <div style={{ ...listColStyle, whiteSpace: 'normal', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{item.description || 'â€”'}</div>
+                    <div style={{ ...listColStyle, whiteSpace: 'normal', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{item.description || 'â€"'}</div>
                     <div style={listColStyle}>{item.category}</div>
                     <div style={{ ...listColStyle, display: 'flex', alignItems: 'center', gap: '3px' }}>
                       <MapPin size={11} style={{ flexShrink: 0 }} />{loc}
                     </div>
-                    <div style={{ ...listColStyle, fontSize: '11px', color: '#888', whiteSpace: 'normal', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{termsSummary || 'â€”'}</div>
+                    <div style={{ ...listColStyle, fontSize: '11px', color: '#888', whiteSpace: 'normal', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const }}>{termsSummary || 'â€"'}</div>
                     {isOwner && (
                       <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '3px', alignSelf: 'center' }}>
                         {visPills.map(p => (
