@@ -684,6 +684,9 @@ export default function PublicProfilePage() {
           .profile-bio-grid {
             grid-template-columns: 1fr !important;
           }
+          .profile-bio-story {
+            grid-template-columns: 1fr !important;
+          }
           .profile-wishlist {
             order: -1;
           }
@@ -771,17 +774,156 @@ export default function PublicProfilePage() {
           </>
         )}
 
-      {/* Bio | Wish List */}
+      {/* Playa History | Wish List */}
       <div style={{ paddingTop: '20px' }}>
         <div className="profile-bio-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
           <div className="profile-bio">
-            <h4 style={subheadStyle}>Bio</h4>
+            <h4 style={subheadStyle}>Playa History</h4>
             {isEditing ? (
-              <textarea style={editTextareaStyle} value={profile.bio || ''} onChange={e => setProfile({ ...profile, bio: e.target.value })} />
+              <div>
+                {/* 2026 Returning section */}
+                <div style={{ marginBottom: '16px', padding: '12px 14px', backgroundColor: '#f8f8f8', borderRadius: '8px', border: '1px solid #eee' }}>
+                  <p style={{ margin: '0 0 8px', fontSize: '0.8rem', fontWeight: 700, color: '#555', textTransform: 'uppercase' as const, letterSpacing: '0.04em' }}>Returning in 2026?</p>
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                    {(['yes', 'maybe', 'no'] as const).map(s => {
+                      const cfg = { yes: { label: 'Yes', bg: '#dcfce7', col: '#16a34a', brd: '#86efac' }, maybe: { label: 'Maybe', bg: '#fef9c3', col: '#92400e', brd: '#fde68a' }, no: { label: 'No', bg: '#fee2e2', col: '#dc2626', brd: '#fca5a5' } }[s];
+                      const active = draft2026.status === s;
+                      return (
+                        <button
+                          key={s}
+                          onClick={() => setDraft2026(prev => ({ ...prev, status: prev.status === s ? null : s }))}
+                          style={{ padding: '5px 18px', borderRadius: '20px', border: `1px solid ${active ? cfg.brd : '#ddd'}`, fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', backgroundColor: active ? cfg.bg : '#fff', color: active ? cfg.col : '#888' }}
+                        >
+                          {cfg.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {(draft2026.status === 'yes' || draft2026.status === 'maybe') && (
+                    <div>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: '#555', marginBottom: '6px', cursor: 'pointer', width: 'fit-content' as const }}>
+                        <input
+                          type="checkbox"
+                          checked={draft2026.isOpenCamping}
+                          onChange={e => setDraft2026(prev => ({ ...prev, isOpenCamping: e.target.checked, campInput: '', campId: null }))}
+                        />
+                        Open Camping
+                      </label>
+                      {!draft2026.isOpenCamping && (
+                        <div style={{ position: 'relative' as const }}>
+                          <input
+                            type="text"
+                            placeholder="Camp name..."
+                            value={draft2026.campInput}
+                            onChange={e => handle2026CampInputChange(e.target.value)}
+                            onFocus={() => { if (draft2026.campInput.trim()) setDraft2026(prev => ({ ...prev, showDropdown: true })); }}
+                            onBlur={() => setTimeout(() => setDraft2026(prev => ({ ...prev, showDropdown: false })), 150)}
+                            style={{ width: '100%', padding: '6px 8px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', backgroundColor: '#fff', color: '#2D241E', boxSizing: 'border-box' as const, outline: 'none' }}
+                          />
+                          {draft2026.showDropdown && (draft2026.searchResults.length > 0 || draft2026.campInput.trim()) && (
+                            <div style={{ position: 'absolute' as const, top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #ddd', borderRadius: '6px', zIndex: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', overflow: 'hidden' as const }}>
+                              {draft2026.searchResults.map((camp: any) => (
+                                <div key={camp.id} onMouseDown={() => setDraft2026(prev => ({ ...prev, campInput: camp.display_name, campId: camp.id, searchResults: [], showDropdown: false }))} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '0.875rem', color: '#2D241E' }}>
+                                  {camp.display_name}
+                                </div>
+                              ))}
+                              {draft2026.campInput.trim() && !draft2026.searchResults.some((c: any) => c.display_name.toLowerCase() === draft2026.campInput.trim().toLowerCase()) && (
+                                <div onMouseDown={() => setDraft2026(prev => ({ ...prev, showDropdown: false }))} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '0.875rem', color: '#1E8A82', borderTop: draft2026.searchResults.length > 0 ? '1px solid #f0f0f0' : undefined }}>
+                                  Add &quot;{draft2026.campInput}&quot; as a new camp
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {draft2026.status === 'no' && (
+                    <input disabled value="" placeholder="Camp name..." style={{ width: '100%', padding: '6px 8px', border: '1px solid #eee', borderRadius: '6px', fontSize: '13px', backgroundColor: '#f5f5f5', color: '#ccc', boxSizing: 'border-box' as const }} />
+                  )}
+                </div>
+                <p style={{ fontSize: '0.8rem', color: '#999', margin: '0 0 10px' }}>
+                  Add each year you attended with your camp, or tick Open Camping.
+                </p>
+                {draftAffiliations.map(draft => (
+                  <div key={draft.tempId} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginBottom: '8px' }}>
+                    <select
+                      value={draft.year}
+                      onChange={e => updateDraft(draft.tempId, { year: parseInt(e.target.value) })}
+                      style={{ padding: '6px 8px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', backgroundColor: '#fff', color: '#2D241E', flexShrink: 0, width: '90px' }}
+                    >
+                      {YEAR_OPTIONS.map(y => <option key={y} value={y}>{y}</option>)}
+                    </select>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', color: '#555', whiteSpace: 'nowrap' as const, flexShrink: 0, paddingTop: '7px' }}>
+                      <input
+                        type="checkbox"
+                        checked={draft.is_open_camping}
+                        onChange={e => updateDraft(draft.tempId, { is_open_camping: e.target.checked, campInput: '', campId: null })}
+                      />
+                      Open Camping
+                    </label>
+                    {!draft.is_open_camping && (
+                      <div style={{ flex: 1, position: 'relative' as const }}>
+                        <input
+                          type="text"
+                          placeholder="Camp name..."
+                          value={draft.campInput}
+                          onChange={e => handleCampInputChange(draft.tempId, e.target.value)}
+                          onFocus={() => { if (draft.campInput.trim()) updateDraft(draft.tempId, { showDropdown: true }); }}
+                          onBlur={() => setTimeout(() => updateDraft(draft.tempId, { showDropdown: false }), 150)}
+                          style={{ width: '100%', padding: '6px 8px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', backgroundColor: '#fff', color: '#2D241E', boxSizing: 'border-box' as const, outline: 'none' }}
+                        />
+                        {draft.showDropdown && (draft.searchResults.length > 0 || draft.campInput.trim()) && (
+                          <div style={{ position: 'absolute' as const, top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #ddd', borderRadius: '6px', zIndex: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', overflow: 'hidden' as const }}>
+                            {draft.searchResults.map((camp: any) => (
+                              <div key={camp.id} onMouseDown={() => selectCamp(draft.tempId, camp)} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '0.875rem', color: '#2D241E' }}>
+                                {camp.display_name}
+                              </div>
+                            ))}
+                            {draft.campInput.trim() && !draft.searchResults.some((c: any) => c.display_name.toLowerCase() === draft.campInput.trim().toLowerCase()) && (
+                              <div onMouseDown={() => updateDraft(draft.tempId, { showDropdown: false })} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '0.875rem', color: '#1E8A82', borderTop: draft.searchResults.length > 0 ? '1px solid #f0f0f0' : undefined }}>
+                                Add &quot;{draft.campInput}&quot; as a new camp
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <button onClick={() => removeDraftEntry(draft.tempId)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ccc', fontSize: '1.2rem', lineHeight: 1, flexShrink: 0, padding: '4px', paddingTop: '6px' }} aria-label="Remove">{'×'}</button>
+                  </div>
+                ))}
+                <button onClick={addDraftEntry} style={{ marginTop: '4px', fontSize: '0.8rem', color: '#1E8A82', background: 'none', border: '1px dashed #1E8A82', borderRadius: '6px', padding: '5px 14px', cursor: 'pointer' }}>
+                  Add Year
+                </button>
+              </div>
+            ) : affiliations.length > 0 ? (
+              <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '6px' }}>
+                {affiliations.map((aff: any) => {
+                  const campName = (aff.camps as any)?.display_name ?? null;
+                  const campSlug = (aff.camps as any)?.slug ?? null;
+                  return (
+                    <div key={aff.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#EDE5D0', border: '1.5px solid rgba(28,22,16,0.2)', padding: '3px 10px 3px 4px' }}>
+                      <span style={{ backgroundColor: '#D4A020', padding: '2px 8px', color: '#fff', fontSize: '0.72rem', fontWeight: 700, fontFamily: "'Space Mono', monospace", flexShrink: 0, letterSpacing: '0.04em' }}>
+                        {aff.year}
+                      </span>
+                      {aff.is_open_camping ? (
+                        <span style={{ fontSize: '0.8rem', color: '#9A8878', fontStyle: 'italic' as const }}>Open Camping</span>
+                      ) : campSlug ? (
+                        <a href={`/camps/${campSlug}`} style={{ fontSize: '0.8rem', color: '#1E8A82', textDecoration: 'none', fontWeight: 600 }}>{campName}</a>
+                      ) : campName ? (
+                        <span style={{ fontSize: '0.8rem', color: '#4A3828' }}>{campName}</span>
+                      ) : null}
+                      {aff.returning_status && returningBadge(aff.returning_status)}
+                    </div>
+                  );
+                })}
+              </div>
             ) : (
-              <p style={{ fontSize: '1rem', color: '#444', margin: 0, lineHeight: '1.6' }}>
-                {profile.bio || <span style={{ color: '#aaa', fontStyle: 'italic' as const }}>No bio yet.</span>}
-              </p>
+              <>
+                {affiliations.length === 0 && !draft2026.status && (
+                  <span style={{ color: '#aaa', fontStyle: 'italic' as const, fontSize: '0.9rem' }}>No years listed yet.</span>
+                )}
+              </>
             )}
           </div>
 
@@ -820,178 +962,29 @@ export default function PublicProfilePage() {
           </div>
         </div>
 
-        {/* PLAYA HISTORY */}
-        <div style={{ marginTop: '25px' }}>
-
-        {/* PLAYA HISTORY */}
-        <div>
-          <h4 style={subheadStyle}>Playa History</h4>
-          {isEditing ? (
-            <div>
-              {/* 2026 Returning section */}
-              <div style={{ marginBottom: '16px', padding: '12px 14px', backgroundColor: '#f8f8f8', borderRadius: '8px', border: '1px solid #eee' }}>
-                <p style={{ margin: '0 0 8px', fontSize: '0.8rem', fontWeight: 700, color: '#555', textTransform: 'uppercase' as const, letterSpacing: '0.04em' }}>Returning in 2026?</p>
-                <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
-                  {(['yes', 'maybe', 'no'] as const).map(s => {
-                    const cfg = { yes: { label: 'Yes', bg: '#dcfce7', col: '#16a34a', brd: '#86efac' }, maybe: { label: 'Maybe', bg: '#fef9c3', col: '#92400e', brd: '#fde68a' }, no: { label: 'No', bg: '#fee2e2', col: '#dc2626', brd: '#fca5a5' } }[s];
-                    const active = draft2026.status === s;
-                    return (
-                      <button
-                        key={s}
-                        onClick={() => setDraft2026(prev => ({ ...prev, status: prev.status === s ? null : s }))}
-                        style={{ padding: '5px 18px', borderRadius: '20px', border: `1px solid ${active ? cfg.brd : '#ddd'}`, fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', backgroundColor: active ? cfg.bg : '#fff', color: active ? cfg.col : '#888' }}
-                      >
-                        {cfg.label}
-                      </button>
-                    );
-                  })}
-                </div>
-                {/* Camp field â€” shown when Yes or Maybe */}
-                {(draft2026.status === 'yes' || draft2026.status === 'maybe') && (
-                  <div>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: '#555', marginBottom: '6px', cursor: 'pointer', width: 'fit-content' as const }}>
-                      <input
-                        type="checkbox"
-                        checked={draft2026.isOpenCamping}
-                        onChange={e => setDraft2026(prev => ({ ...prev, isOpenCamping: e.target.checked, campInput: '', campId: null }))}
-                      />
-                      Open Camping
-                    </label>
-                    {!draft2026.isOpenCamping && (
-                      <div style={{ position: 'relative' as const }}>
-                        <input
-                          type="text"
-                          placeholder="Camp name..."
-                          value={draft2026.campInput}
-                          onChange={e => handle2026CampInputChange(e.target.value)}
-                          onFocus={() => { if (draft2026.campInput.trim()) setDraft2026(prev => ({ ...prev, showDropdown: true })); }}
-                          onBlur={() => setTimeout(() => setDraft2026(prev => ({ ...prev, showDropdown: false })), 150)}
-                          style={{ width: '100%', padding: '6px 8px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', backgroundColor: '#fff', color: '#2D241E', boxSizing: 'border-box' as const, outline: 'none' }}
-                        />
-                        {draft2026.showDropdown && (draft2026.searchResults.length > 0 || draft2026.campInput.trim()) && (
-                          <div style={{ position: 'absolute' as const, top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #ddd', borderRadius: '6px', zIndex: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', overflow: 'hidden' as const }}>
-                            {draft2026.searchResults.map((camp: any) => (
-                              <div key={camp.id} onMouseDown={() => setDraft2026(prev => ({ ...prev, campInput: camp.display_name, campId: camp.id, searchResults: [], showDropdown: false }))} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '0.875rem', color: '#2D241E' }}>
-                                {camp.display_name}
-                              </div>
-                            ))}
-                            {draft2026.campInput.trim() && !draft2026.searchResults.some((c: any) => c.display_name.toLowerCase() === draft2026.campInput.trim().toLowerCase()) && (
-                              <div onMouseDown={() => setDraft2026(prev => ({ ...prev, showDropdown: false }))} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '0.875rem', color: '#1E8A82', borderTop: draft2026.searchResults.length > 0 ? '1px solid #f0f0f0' : undefined }}>
-                                Add "{draft2026.campInput}" as a new camp
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-                {/* Grayed out when No */}
-                {draft2026.status === 'no' && (
-                  <input disabled value="" placeholder="Camp name..." style={{ width: '100%', padding: '6px 8px', border: '1px solid #eee', borderRadius: '6px', fontSize: '13px', backgroundColor: '#f5f5f5', color: '#ccc', boxSizing: 'border-box' as const }} />
-                )}
-              </div>
-
-              {/* Regular year entries (capped at 2025) */}
-              <p style={{ fontSize: '0.8rem', color: '#999', margin: '0 0 10px' }}>
-                Add each year you attended with your camp, or tick Open Camping.
+        {/* BIO + PLAYA STORY */}
+        <div className=”profile-bio-story” style={{ marginTop: '24px', display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '24px' }}>
+          <div style={{ border: '1.5px solid rgba(28,22,16,0.15)', backgroundColor: '#FDFAF4', padding: '16px' }}>
+            <h4 style={subheadStyle}>Bio</h4>
+            {isEditing ? (
+              <textarea style={editTextareaStyle} value={profile.bio || ''} onChange={e => setProfile({ ...profile, bio: e.target.value })} />
+            ) : (
+              <p style={{ fontSize: '1rem', color: '#444', margin: 0, lineHeight: '1.6' }}>
+                {profile.bio || <span style={{ color: '#aaa', fontStyle: 'italic' as const }}>No bio yet.</span>}
               </p>
-              {draftAffiliations.map(draft => (
-                <div key={draft.tempId} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginBottom: '8px' }}>
-                  <select
-                    value={draft.year}
-                    onChange={e => updateDraft(draft.tempId, { year: parseInt(e.target.value) })}
-                    style={{ padding: '6px 8px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', backgroundColor: '#fff', color: '#2D241E', flexShrink: 0, width: '90px' }}
-                  >
-                    {YEAR_OPTIONS.map(y => <option key={y} value={y}>{y}</option>)}
-                  </select>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', color: '#555', whiteSpace: 'nowrap' as const, flexShrink: 0, paddingTop: '7px' }}>
-                    <input
-                      type="checkbox"
-                      checked={draft.is_open_camping}
-                      onChange={e => updateDraft(draft.tempId, { is_open_camping: e.target.checked, campInput: '', campId: null })}
-                    />
-                    Open Camping
-                  </label>
-                  {!draft.is_open_camping && (
-                    <div style={{ flex: 1, position: 'relative' as const }}>
-                      <input
-                        type="text"
-                        placeholder="Camp name..."
-                        value={draft.campInput}
-                        onChange={e => handleCampInputChange(draft.tempId, e.target.value)}
-                        onFocus={() => { if (draft.campInput.trim()) updateDraft(draft.tempId, { showDropdown: true }); }}
-                        onBlur={() => setTimeout(() => updateDraft(draft.tempId, { showDropdown: false }), 150)}
-                        style={{ width: '100%', padding: '6px 8px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', backgroundColor: '#fff', color: '#2D241E', boxSizing: 'border-box' as const, outline: 'none' }}
-                      />
-                      {draft.showDropdown && (draft.searchResults.length > 0 || draft.campInput.trim()) && (
-                        <div style={{ position: 'absolute' as const, top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #ddd', borderRadius: '6px', zIndex: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', overflow: 'hidden' as const }}>
-                          {draft.searchResults.map((camp: any) => (
-                            <div key={camp.id} onMouseDown={() => selectCamp(draft.tempId, camp)} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '0.875rem', color: '#2D241E' }}>
-                              {camp.display_name}
-                            </div>
-                          ))}
-                          {draft.campInput.trim() && !draft.searchResults.some((c: any) => c.display_name.toLowerCase() === draft.campInput.trim().toLowerCase()) && (
-                            <div onMouseDown={() => updateDraft(draft.tempId, { showDropdown: false })} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '0.875rem', color: '#1E8A82', borderTop: draft.searchResults.length > 0 ? '1px solid #f0f0f0' : undefined }}>
-                              Add "{draft.campInput}" as a new camp
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  <button onClick={() => removeDraftEntry(draft.tempId)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ccc', fontSize: '1.2rem', lineHeight: 1, flexShrink: 0, padding: '4px', paddingTop: '6px' }} aria-label="Remove">{'×'}</button>
-                </div>
-              ))}
-              <button onClick={addDraftEntry} style={{ marginTop: '4px', fontSize: '0.8rem', color: '#1E8A82', background: 'none', border: '1px dashed #1E8A82', borderRadius: '6px', padding: '5px 14px', cursor: 'pointer' }}>
-                Add Year
-              </button>
-
-            </div>
-          ) : affiliations.length > 0 ? (
-            <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '6px' }}>
-              {affiliations.map((aff: any) => {
-                const campName = (aff.camps as any)?.display_name ?? null;
-                const campSlug = (aff.camps as any)?.slug ?? null;
-                return (
-                  <div key={aff.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#EDE5D0', border: '1.5px solid rgba(28,22,16,0.2)', padding: '3px 10px 3px 4px' }}>
-                    <span style={{ backgroundColor: '#D4A020', padding: '2px 8px', color: '#fff', fontSize: '0.72rem', fontWeight: 700, fontFamily: "'Space Mono', monospace", flexShrink: 0, letterSpacing: '0.04em' }}>
-                      {aff.year}
-                    </span>
-                    {aff.is_open_camping ? (
-                      <span style={{ fontSize: '0.8rem', color: '#9A8878', fontStyle: 'italic' as const }}>Open Camping</span>
-                    ) : campSlug ? (
-                      <a href={`/camps/${campSlug}`} style={{ fontSize: '0.8rem', color: '#1E8A82', textDecoration: 'none', fontWeight: 600 }}>{campName}</a>
-                    ) : campName ? (
-                      <span style={{ fontSize: '0.8rem', color: '#4A3828' }}>{campName}</span>
-                    ) : null}
-                    {aff.returning_status && returningBadge(aff.returning_status)}
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <>
-              {affiliations.length === 0 && !draft2026.status && (
-                <span style={{ color: '#aaa', fontStyle: 'italic' as const, fontSize: '0.9rem' }}>No years listed yet.</span>
-              )}
-            </>
-          )}
-        </div>{/* end playa history */}
-
-        {/* PLAYA STORY â€” full width below playa history */}
-        <div style={{ marginTop: '20px' }}>
-          <h4 style={subheadStyle}>Got a good &quot;playa provides&quot; story?</h4>
-          {isEditing ? (
-            <textarea style={editTextareaStyle} value={profile.playa_story || ''} onChange={e => setProfile({ ...profile, playa_story: e.target.value })} placeholder="Share a time the playa provided..." />
-          ) : (
-            <p style={{ fontSize: '1rem', color: '#444', margin: 0, lineHeight: '1.6' }}>
-              {profile.playa_story || <span style={{ color: '#aaa', fontStyle: 'italic' as const }}>No story yet.</span>}
-            </p>
-          )}
+            )}
+          </div>
+          <div style={{ border: '1.5px solid rgba(28,22,16,0.15)', backgroundColor: '#FDFAF4', padding: '16px' }}>
+            <h4 style={subheadStyle}>Got a good &quot;playa provides&quot; story?</h4>
+            {isEditing ? (
+              <textarea style={editTextareaStyle} value={profile.playa_story || ''} onChange={e => setProfile({ ...profile, playa_story: e.target.value })} placeholder=”Share a time the playa provided...” />
+            ) : (
+              <p style={{ fontSize: '1rem', color: '#444', margin: 0, lineHeight: '1.6' }}>
+                {profile.playa_story || <span style={{ color: '#aaa', fontStyle: 'italic' as const }}>No story yet.</span>}
+              </p>
+            )}
+          </div>
         </div>
-
-        </div>{/* end playa history + story section */}
 
       </div>{/* end bio/wishlist/playa section */}
 
@@ -1001,12 +994,12 @@ export default function PublicProfilePage() {
           <h2 style={{ fontFamily: "'Arvo', serif", fontSize: '1.3rem', fontWeight: 700, color: '#1C1610', margin: 0 }}>Available Items</h2>
           {isOwner && (
             <div style={{ display: 'flex', gap: '8px' }}>
-              <Link href="/inventory" style={{ backgroundColor: '#1E8A82', color: '#fff', padding: '6px 14px', fontSize: '0.8rem', fontWeight: 700, border: '2px solid #1C1610', boxShadow: '2px 2px 0 #1C1610', textDecoration: 'none', display: 'inline-block', fontFamily: 'inherit' }}>
+              <Link href="/inventory" style={{ backgroundColor: 'transparent', color: '#1C1610', padding: '6px 14px', fontSize: '0.8rem', fontWeight: 600, border: '2px solid #1C1610', textDecoration: 'none', display: 'inline-block', fontFamily: 'inherit' }}>
                 Manage Inventory
               </Link>
               <button
                 onClick={() => setShowAddItem(true)}
-                style={{ backgroundColor: 'transparent', color: '#1C1610', padding: '6px 14px', fontSize: '0.8rem', fontWeight: 600, border: '2px solid #1C1610', cursor: 'pointer', fontFamily: 'inherit' }}
+                style={{ backgroundColor: '#1E8A82', color: '#fff', padding: '6px 14px', fontSize: '0.8rem', fontWeight: 700, border: '2px solid #1C1610', boxShadow: '2px 2px 0 #1C1610', cursor: 'pointer', fontFamily: 'inherit' }}
               >
                 + Add Item
               </button>

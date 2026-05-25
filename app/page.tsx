@@ -70,6 +70,7 @@ export default function HomePage() {
   const [showDeletedBanner, setShowDeletedBanner] = useState(false)
   const [featureTab,      setFeatureTab]      = useState<'how' | 'why'>('how')
   const [submitCampOpen,  setSubmitCampOpen]  = useState(false)
+  const [currentUsername, setCurrentUsername] = useState<string | null>(null)
 
   // ── Game refs ──────────────────────────────────────────────────────────────
   const heroRightRef = useRef<HTMLDivElement>(null)
@@ -95,6 +96,16 @@ export default function HomePage() {
       url.searchParams.delete('deleted')
       window.history.replaceState({}, '', url.toString())
     }
+  }, [])
+
+  useEffect(() => {
+    async function fetchCurrentUser() {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.user) return
+      const { data } = await supabase.from('profiles').select('username').eq('id', session.user.id).single()
+      if (data?.username) setCurrentUsername(data.username)
+    }
+    fetchCurrentUser()
   }, [])
 
   useEffect(() => {
@@ -505,9 +516,13 @@ export default function HomePage() {
 
               {/* Wish list row */}
               <div style={{ padding: '16px 0', overflow: 'hidden', borderBottom: `1.5px solid rgba(28,22,16,0.14)` }}>
-                <div style={{ padding: '0 24px 10px', display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                  <span style={{ fontFamily: "'Arvo', serif", fontSize: '0.95rem', fontWeight: 700, color: INK }}>The Wish List</span>
-                  <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', color: INK_LITE }}>— hover to pause</span>
+                <div style={{ padding: '0 24px 10px' }}>
+                  <span style={{ fontFamily: "'Arvo', serif", fontSize: '0.95rem', fontWeight: 700, color: INK }}>Wish List Items</span>
+                  <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.78rem', color: INK_MID, display: 'block', marginTop: '2px' }}>
+                    Click if you can help.{' '}
+                    <a href={currentUsername ? `/profile/${currentUsername}` : '/login'} style={{ color: TEAL, fontWeight: 600, textDecoration: 'underline' }}>Visit your profile</a>
+                    {' '}to make your own list.
+                  </span>
                 </div>
                 <div style={{ overflow: 'hidden' }}>
                   <div
@@ -543,9 +558,11 @@ export default function HomePage() {
 
               {/* Available items row */}
               <div style={{ padding: '16px 0', overflow: 'hidden' }}>
-                <div style={{ padding: '0 24px 10px', display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                <div style={{ padding: '0 24px 10px' }}>
                   <span style={{ fontFamily: "'Arvo', serif", fontSize: '0.95rem', fontWeight: 700, color: INK }}>Available Now</span>
-                  <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', color: INK_LITE }}>— from the community</span>
+                  <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.78rem', color: INK_MID, display: 'block', marginTop: '2px' }}>
+                    See something you can use? Click on the item to see the details and make the request.
+                  </span>
                 </div>
                 <div style={{ overflow: 'hidden' }}>
                   <div

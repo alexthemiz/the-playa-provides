@@ -712,27 +712,29 @@ export default function InventoryPage() {
       )}
 
       {/* ITEMS OUT ON LOAN */}
-      {activeLoans.filter(l => ['active', 'return_pending'].includes(l.status)).length > 0 && (
-        <div style={{ marginTop: '40px' }}>
-          <h2 style={{ color: '#2D241E', fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
-            Items Out on Loan
-          </h2>
-          <div style={tableContainerStyle}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const }}>
-              <thead>
-                <tr style={headerRowStyle}>
-                  <th style={thStyle}>Item</th>
-                  <th style={thStyle}>Borrower</th>
-                  <th style={thStyle}>Picked Up On</th>
-                  <th style={thStyle}>Return By</th>
-                  <th style={thStyle}>Status</th>
-                  <th style={thStyle}>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {activeLoans
-                  .filter(l => ['active', 'return_pending'].includes(l.status))
-                  .map(loan => {
+      <div style={{ marginTop: '40px' }}>
+        <h2 style={{ color: '#2D241E', fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
+          Items Out on Loan
+        </h2>
+        <div style={tableContainerStyle}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const }}>
+            <thead>
+              <tr style={headerRowStyle}>
+                <th style={thStyle}>Item</th>
+                <th style={thStyle}>Borrower</th>
+                <th style={thStyle}>Picked Up On</th>
+                <th style={thStyle}>Return By</th>
+                <th style={thStyle}>Status</th>
+                <th style={thStyle}>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {activeLoans.filter(l => ['active', 'return_pending'].includes(l.status)).length === 0 && (
+                <tr><td colSpan={6} style={{ ...tdStyle, color: '#9A8878', fontStyle: 'italic' as const }}>You don&apos;t have any items out on loan at this time.</td></tr>
+              )}
+              {activeLoans
+                .filter(l => ['active', 'return_pending'].includes(l.status))
+                .map(loan => {
                     const borrowerName = loan.borrower?.preferred_name || loan.borrower?.username || '—';
                     const borrowerUsername = loan.borrower?.username;
                     const returnBy = loan.return_by ? new Date(loan.return_by).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
@@ -767,18 +769,16 @@ export default function InventoryPage() {
                       </tr>
                     );
                   })}
-              </tbody>
-            </table>
-          </div>
+            </tbody>
+          </table>
         </div>
-      )}
+      </div>
 
       {/* ITEMS BEING TRANSFERRED TO ME */}
-      {inboundTransfers.length > 0 && (
-        <div style={{ marginTop: '40px' }}>
-          <h2 style={{ color: '#2D241E', fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
-            Items Being Transferred to Me
-          </h2>
+      <div style={{ marginTop: '40px' }}>
+        <h2 style={{ color: '#2D241E', fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
+          Items Being Transferred to Me
+        </h2>
           <div style={tableContainerStyle}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const }}>
               <thead>
@@ -790,6 +790,9 @@ export default function InventoryPage() {
                 </tr>
               </thead>
               <tbody>
+                {inboundTransfers.length === 0 && (
+                  <tr><td colSpan={4} style={{ ...tdStyle, color: '#9A8878', fontStyle: 'italic' as const }}>No items are being transferred to you at this time.</td></tr>
+                )}
                 {inboundTransfers.map(transfer => {
                   const ownerName = transfer.owner?.preferred_name || transfer.owner?.username || '—';
                   const itemName = transfer.gear_items?.item_name || '—';
@@ -821,14 +824,12 @@ export default function InventoryPage() {
             </table>
           </div>
         </div>
-      )}
 
       {/* ITEMS I'M BORROWING */}
-      {inboundLoans.length > 0 && (
-        <div style={{ marginTop: '40px' }}>
-          <h2 style={{ color: '#2D241E', fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
-            Items I'm Borrowing
-          </h2>
+      <div style={{ marginTop: '40px' }}>
+        <h2 style={{ color: '#2D241E', fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
+          Items I&apos;m Borrowing
+        </h2>
           <div style={tableContainerStyle}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const }}>
               <thead>
@@ -844,6 +845,9 @@ export default function InventoryPage() {
                 </tr>
               </thead>
               <tbody>
+                {inboundLoans.length === 0 && (
+                  <tr><td colSpan={8} style={{ ...tdStyle, color: '#9A8878', fontStyle: 'italic' as const }}>You&apos;re not borrowing anything at this time.</td></tr>
+                )}
                 {inboundLoans.map(loan => {
                   const ownerName = loan.owner?.preferred_name || loan.owner?.username || '—';
                   const ownerUsername = loan.owner?.username;
@@ -921,7 +925,6 @@ export default function InventoryPage() {
             </table>
           </div>
         </div>
-      )}
 
       {/* CSV DOWNLOAD */}
       <div style={{ marginTop: '20px', textAlign: 'right' as const }}>

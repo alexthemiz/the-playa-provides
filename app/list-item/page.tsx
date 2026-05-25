@@ -222,10 +222,12 @@ function ListItemPageInner() {
       {/* Page header band */}
       <div className="rsp-px" style={{ backgroundColor: '#FDFAF4', borderBottom: '2px solid #1C1610', paddingTop: '28px', paddingBottom: '28px' }}>
         <div style={{ maxWidth: '520px', margin: '0 auto' }}>
-          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: '#9A8878', marginBottom: '8px' }}>Add to Inventory</div>
           <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.9rem', fontWeight: 900, color: '#1C1610', margin: 0, lineHeight: 1.05 }}>
-            List <em style={{ fontStyle: 'italic', color: '#1E8A82' }}>This Item.</em>
+            List <em style={{ fontStyle: 'italic', color: '#1E8A82' }}>an Item.</em>
           </h1>
+          <p style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.68rem', color: '#4A3828', margin: '8px 0 0', lineHeight: 1.5 }}>
+            Make it available to borrow, give it away, or keep it hidden on your private inventory.
+          </p>
         </div>
       </div>
 
@@ -471,7 +473,7 @@ const containerStyle: React.CSSProperties = { padding: '20px 20px 60px', maxWidt
 const formStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column' as const, gap: '12px', marginTop: '16px' };
 const formBoxStyle: React.CSSProperties = { backgroundColor: '#EDE5D0', padding: '12px 20px 20px', display: 'flex', flexDirection: 'column' as const, gap: '14px', border: '1.5px solid rgba(28,22,16,0.1)' };
 const sectionStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column' as const, gap: '3px' };
-const labelStyle: React.CSSProperties = { fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: '#9A8878' };
+const labelStyle: React.CSSProperties = { fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: '#4A3828' };
 const hintStyle: React.CSSProperties = { fontSize: '12px', color: '#9A8878', margin: '0', lineHeight: '1.5' };
 const inputStyle: React.CSSProperties = { padding: '9px 12px', border: '1.5px solid rgba(28,22,16,0.25)', backgroundColor: '#FDFAF4', color: '#1C1610', fontSize: '14px', outline: 'none', width: '100%', boxSizing: 'border-box' as const };
 const radioGroupStyle: React.CSSProperties = { display: 'flex', flexDirection: 'row' as const, gap: '8px' };

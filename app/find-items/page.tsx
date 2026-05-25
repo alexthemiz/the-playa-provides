@@ -270,10 +270,10 @@ export default function FindItemsPage() {
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: INK_LITE, whiteSpace: 'nowrap' as const }}>Available to</span>
-              {['Borrow', 'Keep'].map(opt => (
-                <button key={opt} onClick={() => toggleAvailability(opt)}
-                  style={chipStyle(availabilityFilters.includes(opt), opt === 'Borrow' ? TEAL : RUST)}>
+              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: INK_LITE, whiteSpace: 'nowrap' as const }}>Show from</span>
+              {['Everyone', 'Following', 'Followers', 'My Campmates'].map(opt => (
+                <button key={opt} onClick={() => toggleRelationship(opt)}
+                  style={chipStyle(relationshipFilters.includes(opt))}>
                   {opt}
                 </button>
               ))}
@@ -306,10 +306,10 @@ export default function FindItemsPage() {
 
           <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '12px', flexWrap: 'wrap' as const, gap: '8px' }}>
             <div className="fi-filter-group">
-              <span className="fi-label">Show from</span>
-              {['Everyone', 'Following', 'Followers', 'My Campmates'].map(opt => (
-                <button key={opt} onClick={() => toggleRelationship(opt)}
-                  style={chipStyle(relationshipFilters.includes(opt))}>
+              <span className="fi-label">Available to</span>
+              {['Borrow', 'Keep'].map(opt => (
+                <button key={opt} onClick={() => toggleAvailability(opt)}
+                  style={chipStyle(availabilityFilters.includes(opt), opt === 'Borrow' ? TEAL : RUST)}>
                   {opt}
                 </button>
               ))}
