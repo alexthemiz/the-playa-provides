@@ -764,21 +764,25 @@ export default function HomePage() {
       <hr style={{ border: 'none', borderTop: `1.5px solid ${INK}`, margin: 0 }} />
 
       {/* ── RESOURCES ────────────────────────────────────────────────────── */}
-      <section className="rsp-px" style={{ backgroundColor: PAPER_DK, textAlign: 'center', paddingTop: '56px', paddingBottom: '64px' }}>
-        <h2 style={{ fontFamily: "'Arvo', serif", fontSize: '1.5rem', fontWeight: 700, fontStyle: 'italic', color: INK, marginBottom: '10px' }}>
-          On-Playa Resources
-        </h2>
-        <p style={{ color: INK_MID, fontSize: '0.92rem', marginBottom: '28px', maxWidth: '420px', marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>
-          Camps providing services that make Burning Man more sustainable.
-        </p>
-        <Link href="/resources" style={{
-          padding: '13px 34px', backgroundColor: PAPER_LT, color: INK,
-          fontWeight: 700, fontSize: '0.88rem', textDecoration: 'none',
-          border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,
-          display: 'inline-block',
-        }}>
-          Browse the Directory →
-        </Link>
+      <section className="rsp-px" style={{ backgroundColor: PAPER_DK, paddingTop: '56px', paddingBottom: '64px' }}>
+        <div style={{ maxWidth: '780px', margin: '0 auto' }}>
+          <h2 style={{ fontFamily: "'Arvo', serif", fontSize: '1.5rem', fontWeight: 700, fontStyle: 'italic', color: INK, marginBottom: '18px', textAlign: 'center' as const }}>
+            On-Playa Resources
+          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '32px' }}>
+            <p style={{ color: INK_MID, fontSize: '0.92rem', margin: 0, lineHeight: 1.6, flex: '1 1 auto' }}>
+              Camps providing services that make Burning Man more sustainable.
+            </p>
+            <Link href="/resources" style={{
+              padding: '13px 34px', backgroundColor: PAPER_LT, color: INK,
+              fontWeight: 700, fontSize: '0.88rem', textDecoration: 'none',
+              border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,
+              display: 'inline-block', whiteSpace: 'nowrap' as const, flexShrink: 0,
+            }}>
+              Browse the Directory →
+            </Link>
+          </div>
+        </div>
       </section>
     </div>
   )
