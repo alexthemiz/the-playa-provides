@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
+import SubmitCampModal from '@/components/SubmitCampModal'
 
 // ── Design tokens ────────────────────────────────────────────────────────────
 const INK      = '#1C1610'
@@ -68,6 +69,7 @@ export default function HomePage() {
   const [gameRunning,     setGameRunning]     = useState(false)
   const [showDeletedBanner, setShowDeletedBanner] = useState(false)
   const [featureTab,      setFeatureTab]      = useState<'how' | 'why'>('how')
+  const [submitCampOpen,  setSubmitCampOpen]  = useState(false)
 
   // ── Game refs ──────────────────────────────────────────────────────────────
   const heroRightRef = useRef<HTMLDivElement>(null)
@@ -766,35 +768,57 @@ export default function HomePage() {
 
       {/* ── RESOURCES ────────────────────────────────────────────────────── */}
       <section className="rsp-px" style={{ backgroundColor: PAPER_DK, paddingTop: '56px', paddingBottom: '64px' }}>
-        <div style={{ maxWidth: '580px', margin: '0 auto' }}>
-          <h2 style={{ fontFamily: "'Arvo', serif", fontSize: '1.5rem', fontWeight: 700, fontStyle: 'italic', color: INK, marginBottom: '18px', textAlign: 'center' as const }}>
+        <style>{`
+          .resources-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 2px solid ${INK}; }
+          .resources-col { padding: 28px 32px; }
+          .resources-col:first-child { border-right: 1px solid ${INK}; }
+          @media (max-width: 640px) {
+            .resources-grid { grid-template-columns: 1fr; }
+            .resources-col:first-child { border-right: none; border-bottom: 1px solid ${INK}; }
+            .resources-col { padding: 24px 20px; }
+          }
+        `}</style>
+        <div style={{ maxWidth: '780px', margin: '0 auto' }}>
+          <h2 style={{ fontFamily: "'Arvo', serif", fontSize: '1.5rem', fontWeight: 700, fontStyle: 'italic', color: INK, marginBottom: '20px', textAlign: 'center' as const }}>
             On-Playa Resources
           </h2>
-          <div className="resources-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-            <p style={{ color: INK_MID, fontSize: '0.92rem', margin: 0, lineHeight: 1.6, maxWidth: '240px' }}>
-              Camps providing services that make Burning Man more sustainable.
-            </p>
-            <div style={{ display: 'flex', gap: '10px', flexShrink: 0, flexWrap: 'wrap' as const }}>
+          <div className="resources-grid">
+            {/* Left: browse */}
+            <div className="resources-col">
+              <p style={{ color: INK_MID, fontSize: '0.92rem', margin: '0 0 20px', lineHeight: 1.6 }}>
+                Camps providing services that make Burning Man more sustainable.
+              </p>
               <Link href="/resources" style={{
-                padding: '13px 24px', backgroundColor: PAPER_LT, color: INK,
+                padding: '11px 22px', backgroundColor: PAPER_LT, color: INK,
                 fontWeight: 700, fontSize: '0.88rem', textDecoration: 'none',
                 border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,
-                display: 'inline-block', whiteSpace: 'nowrap' as const,
+                display: 'inline-block',
               }}>
                 Browse the Directory →
               </Link>
-              <Link href="/resources" style={{
-                padding: '13px 24px', backgroundColor: TEAL, color: '#fff',
-                fontWeight: 700, fontSize: '0.88rem', textDecoration: 'none',
-                border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,
-                display: 'inline-block', whiteSpace: 'nowrap' as const,
-              }}>
+            </div>
+            {/* Right: submit */}
+            <div className="resources-col">
+              <p style={{ color: INK_MID, fontSize: '0.92rem', margin: '0 0 20px', lineHeight: 1.6 }}>
+                Collecting compost, fixing bikes, accepting donations, or providing another service at the 2026 Burn?
+              </p>
+              <button
+                onClick={() => setSubmitCampOpen(true)}
+                style={{
+                  padding: '11px 22px', backgroundColor: TEAL, color: '#fff',
+                  fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer',
+                  border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,
+                  fontFamily: 'inherit',
+                }}
+              >
                 Submit Your Camp →
-              </Link>
+              </button>
             </div>
           </div>
         </div>
       </section>
+
+      {submitCampOpen && <SubmitCampModal onClose={() => setSubmitCampOpen(false)} />}
     </div>
   )
 }
