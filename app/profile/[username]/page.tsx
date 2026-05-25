@@ -963,7 +963,7 @@ export default function PublicProfilePage() {
         </div>
 
         {/* BIO + PLAYA STORY */}
-        <div className=”profile-bio-story” style={{ marginTop: '24px', display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '24px' }}>
+        <div className="profile-bio-story" style={{ marginTop: '24px', display: 'grid', gridTemplateColumns: '3fr 1fr', gap: '24px' }}>
           <div style={{ border: '1.5px solid rgba(28,22,16,0.15)', backgroundColor: '#FDFAF4', padding: '16px' }}>
             <h4 style={subheadStyle}>Bio</h4>
             {isEditing ? (
