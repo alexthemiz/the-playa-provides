@@ -765,12 +765,12 @@ export default function HomePage() {
 
       {/* ── RESOURCES ────────────────────────────────────────────────────── */}
       <section className="rsp-px" style={{ backgroundColor: PAPER_DK, paddingTop: '56px', paddingBottom: '64px' }}>
-        <div style={{ maxWidth: '780px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '580px', margin: '0 auto' }}>
           <h2 style={{ fontFamily: "'Arvo', serif", fontSize: '1.5rem', fontWeight: 700, fontStyle: 'italic', color: INK, marginBottom: '18px', textAlign: 'center' as const }}>
             On-Playa Resources
           </h2>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '32px' }}>
-            <p style={{ color: INK_MID, fontSize: '0.92rem', margin: 0, lineHeight: 1.6, flex: '1 1 auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '20px' }}>
+            <p style={{ color: INK_MID, fontSize: '0.92rem', margin: 0, lineHeight: 1.6, maxWidth: '240px' }}>
               Camps providing services that make Burning Man more sustainable.
             </p>
             <Link href="/resources" style={{
