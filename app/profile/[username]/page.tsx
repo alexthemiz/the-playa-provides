@@ -484,6 +484,14 @@ export default function PublicProfilePage() {
 
   return (
     <div style={{ backgroundColor: '#F6F1E8', minHeight: '100vh' }}>
+      <style>{`
+        @media (max-width: 640px) {
+          .profile-header-row { gap: 12px !important; }
+          .profile-username-row { flex-direction: column !important; align-items: flex-start !important; gap: 6px !important; }
+          .profile-username-row > div:last-child { width: 100%; justify-content: space-between !important; }
+          .profile-follower-row { gap: 16px !important; }
+        }
+      `}</style>
 
       {/* Page header band — contains the full profile identity block */}
       <div style={{ backgroundColor: '#FDFAF4', borderBottom: '2px solid #1C1610', padding: '28px 0' }}>

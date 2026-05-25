@@ -427,6 +427,7 @@ export default function HomePage() {
           .home-hero-right { display: none !important; }
           .home-feature-grid { grid-template-columns: 1fr !important; }
           .home-tab-row { flex-direction: column !important; align-items: flex-start !important; }
+          .resources-row { flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }
         }
       `}</style>
 
@@ -769,7 +770,7 @@ export default function HomePage() {
           <h2 style={{ fontFamily: "'Arvo', serif", fontSize: '1.5rem', fontWeight: 700, fontStyle: 'italic', color: INK, marginBottom: '18px', textAlign: 'center' as const }}>
             On-Playa Resources
           </h2>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+          <div className="resources-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
             <p style={{ color: INK_MID, fontSize: '0.92rem', margin: 0, lineHeight: 1.6, maxWidth: '240px' }}>
               Camps providing services that make Burning Man more sustainable.
             </p>

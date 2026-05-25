@@ -304,7 +304,7 @@ export default function FindItemsPage() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', flexWrap: 'wrap' as const, gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '12px', flexWrap: 'wrap' as const, gap: '8px' }}>
             <div className="fi-filter-group">
               <span className="fi-label">Show from</span>
               {['Everyone', 'Following', 'Followers', 'My Campmates'].map(opt => (
@@ -314,7 +314,7 @@ export default function FindItemsPage() {
                 </button>
               ))}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
+            <div className="fi-view-controls" style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0, marginLeft: 'auto' }}>
               <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.68rem', color: INK_LITE, fontWeight: 700, letterSpacing: '0.06em' }}>
                 {loading ? 'Loading…' : <><strong style={{ color: INK }}>{filteredItems.length}</strong> items available</>}
               </div>
@@ -373,11 +373,14 @@ export default function FindItemsPage() {
               <style>{`
                 .list-table { display: grid; grid-template-columns: 48px 1fr 180px 150px 190px; align-items: center; gap: 0 16px; }
                 .list-header { padding: 0 16px 6px; }
-                .list-header .list-table { }
                 .list-col-label { font-family: 'Space Mono', monospace; font-size: 0.52rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: ${INK_LITE}; }
                 .list-row-wrap { border: 1.5px solid rgba(28,22,16,0.12); margin-bottom: 2px; cursor: pointer; transition: box-shadow 0.12s; background: ${PAPER_LT}; }
                 .list-row-wrap:hover { box-shadow: 3px 3px 0 ${INK}; }
                 .list-row { padding: 8px 16px; }
+                @media (max-width: 640px) {
+                  .list-table { grid-template-columns: 48px 1fr 90px; }
+                  .list-col-terms, .list-col-cat { display: none; }
+                }
               `}</style>
 
               {/* Header */}
@@ -386,8 +389,8 @@ export default function FindItemsPage() {
                   <div />
                   <div className="list-col-label">Item</div>
                   <div className="list-col-label">From</div>
-                  <div className="list-col-label">Terms</div>
-                  <div className="list-col-label">Category</div>
+                  <div className="list-col-label list-col-terms">Terms</div>
+                  <div className="list-col-label list-col-cat">Category</div>
                 </div>
               </div>
 
@@ -425,11 +428,11 @@ export default function FindItemsPage() {
                         {owner}{location ? ` · ${location}` : ''}
                       </div>
                       {/* Terms */}
-                      <div style={{ overflow: 'hidden', whiteSpace: 'nowrap' as const, textOverflow: 'ellipsis', fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: INK_LITE, letterSpacing: '0.04em' }}>
+                      <div className="list-col-terms" style={{ overflow: 'hidden', whiteSpace: 'nowrap' as const, textOverflow: 'ellipsis', fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: INK_LITE, letterSpacing: '0.04em' }}>
                         {terms || '—'}
                       </div>
                       {/* Category + type chips */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <div className="list-col-cat" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         {item.category && (
                           <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '2px 6px', border: `1px solid rgba(28,22,16,0.2)`, color: INK_LITE, background: PAPER_DK, overflow: 'hidden', whiteSpace: 'nowrap' as const }}>
                             {emoji} {item.category}
@@ -450,7 +453,7 @@ export default function FindItemsPage() {
 
       {/* ── CARDS GRID ─────────────────────────────────────────────────── */}
       {(viewMode === 'cards' || loading) && (
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '20px 40px 64px' }}>
+      <div className="rsp-px" style={{ maxWidth: '1280px', margin: '0 auto', paddingTop: '20px', paddingBottom: '64px' }}>
         <style>{`
           .fi-grid {
             display: grid;

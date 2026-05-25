@@ -489,6 +489,8 @@ export default function InventoryPage() {
           @media (max-width: 640px) {
             .inv-filter-bar { flex-direction: column !important; }
             .inv-filter-bar > div { width: 100% !important; min-width: unset !important; flex: unset !important; }
+            .inv-btn-group { justify-content: stretch !important; }
+            .inv-btn-group > button { flex: 1 !important; }
           }
         `}</style>
 
@@ -560,7 +562,7 @@ export default function InventoryPage() {
         </div>
 
         {/* Add + Import buttons */}
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
+        <div className="inv-btn-group" style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
           <button
             onClick={() => setShowImport(true)}
             style={importButtonStyle}
