@@ -59,7 +59,8 @@ export default function FeedbackWidget() {
       });
       if (dbError) throw new Error(dbError.message);
 
-      const res = await fetch(
+      // Fire-and-forget — DB insert already saved the feedback; don't block success on email
+      fetch(
         `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-feedback-notification`,
         {
           method: 'POST',
@@ -75,8 +76,7 @@ export default function FeedbackWidget() {
             user_id: session.user.id,
           }),
         }
-      );
-      if (!res.ok) throw new Error('Email send failed');
+      ).catch(() => {/* email notification is best-effort */});
 
       setSuccess(true);
       setTimeout(() => {
