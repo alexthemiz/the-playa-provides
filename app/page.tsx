@@ -769,7 +769,7 @@ export default function HomePage() {
           <h2 style={{ fontFamily: "'Arvo', serif", fontSize: '1.5rem', fontWeight: 700, fontStyle: 'italic', color: INK, marginBottom: '18px', textAlign: 'center' as const }}>
             On-Playa Resources
           </h2>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
             <p style={{ color: INK_MID, fontSize: '0.92rem', margin: 0, lineHeight: 1.6, maxWidth: '240px' }}>
               Camps providing services that make Burning Man more sustainable.
             </p>
