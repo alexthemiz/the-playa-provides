@@ -438,9 +438,15 @@ export default function HomePage() {
           .home-hero { display: block !important; }
           .home-hero-left { padding: 32px 16px !important; border-right: none !important; }
           .home-hero-right { display: none !important; }
+          .home-hero-right.game-active { display: block !important; min-height: 420px; }
           .home-feature-grid { grid-template-columns: 1fr !important; }
           .home-tab-row { flex-direction: column !important; align-items: flex-start !important; }
           .resources-row { flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }
+          .frogger-mobile-btn { display: flex !important; }
+          .frogger-desktop-only { display: none !important; }
+        }
+        @media (min-width: 641px) {
+          .frogger-mobile-btn { display: none !important; }
         }
       `}</style>
 
@@ -501,12 +507,29 @@ export default function HomePage() {
                 List Your Stuff
               </Link>
             </div>
+
+            {/* Frogger trigger — mobile only (desktop version lives in right panel) */}
+            {!gameRunning && <button
+              className="frogger-mobile-btn"
+              onClick={() => setGameRunning(true)}
+              title="Play a game"
+              style={{
+                marginTop: '20px', background: 'none',
+                border: '1.5px solid rgba(28,22,16,0.18)',
+                borderRadius: '4px', padding: '6px 12px', cursor: 'pointer',
+                fontFamily: "'Space Mono', monospace", fontSize: '0.65rem', fontWeight: 700,
+                letterSpacing: '0.06em', color: INK_LITE,
+                alignItems: 'center', gap: '4px',
+              }}
+            >
+              🚲 <span style={{ marginLeft: '4px' }}>play</span>
+            </button>}
           </div>
 
         </div>
 
         {/* Right panel */}
-        <div ref={heroRightRef} className="home-hero-right" style={{ backgroundColor: PAPER_DK, position: 'relative', display: 'flex', flexDirection: 'column', padding: gameRunning ? '0' : '20px 0', overflow: 'hidden' }}>
+        <div ref={heroRightRef} className={`home-hero-right${gameRunning ? ' game-active' : ''}`} style={{ backgroundColor: PAPER_DK, position: 'relative', display: 'flex', flexDirection: 'column', padding: gameRunning ? '0' : '20px 0', overflow: 'hidden' }}>
 
 
           {/* ── Scroll view (default) ── */}
@@ -735,9 +758,9 @@ export default function HomePage() {
           {featureTab === 'how' && (
             <div className="home-feature-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', border: `2px solid ${INK}` }}>
               {[
-                { n: '01', title: 'Connect with your Campmates',      body: <><Link href="/profile" style={{ color: TEAL, fontWeight: 700 }}>Complete your profile</Link> to see if past or current campmates have what you're looking for — or need something you have.</> },
+                { n: '01', title: 'Connect with your Campmates',      body: <><Link href="/profile" style={{ color: TEAL, fontWeight: 700 }}>Complete your profile</Link> to see if past or current campmates have what you&apos;re looking for, or are looking for something you have.</> },
                 { n: '02', title: 'Decide How Wide to Provide',       body: 'Choose who can see your listings: campmates, followers, everyone — or no one.' },
-                { n: '03', title: 'Reduce the Stress of Generosity',  body: 'Set your terms at the start — return date, replacement cost, what happens if something breaks. Say it once, up front.' },
+                { n: '03', title: 'Reduce the Stress of Generosity',  body: 'Set your terms right at the start: return-by date, replacement cost, what happens if something breaks.' },
                 { n: '04', title: 'Maintain an Easy Inventory',       body: 'Add an item once and it stays logged for as long as you want. Your gear list is there when you need it.' },
               ].map(({ n, title, body }, i) => (
                 <div key={i} style={{
@@ -760,8 +783,8 @@ export default function HomePage() {
               {[
                 { n: 'I',   title: 'Radical Interdependence',      body: 'Others may have what you need. You may have what others need. Turns out that\'s enough.' },
                 { n: 'II',  title: 'A Decommodification Modification',  body: 'Make it a year-round thing. Every shared item is one less Amazon order.' },
-                { n: 'III', title: 'Lending is a Type of Gifting', body: 'You don\'t even have to give it away. Let someone borrow it. That counts.' },
-                { n: 'IV',  title: 'Not Going This Year?',         body: 'Your gear still can. Let it earn its keep while it collects dust in your garage.' },
+                { n: 'III', title: 'Lending is a Type of Gifting', body: 'You don\'t have to give it away. Let someone borrow it, and get it back after.' },
+                { n: 'IV',  title: 'Not Going This Year?',         body: 'Your gear still can. It\'s not meant to sit around in storage, let it be put to good use.' },
               ].map(({ n, title, body }, i) => (
                 <div key={i} style={{
                   padding: '28px 26px', position: 'relative',
@@ -788,7 +811,7 @@ export default function HomePage() {
         <style>{`
           .resources-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
           .resources-col { display: flex; flex-direction: column; }
-          .resources-btn { padding: 11px 22px; font-weight: 700; font-size: 0.88rem; border: 2px solid ${INK}; box-shadow: 3px 3px 0 ${INK}; white-space: nowrap; margin-top: auto; align-self: flex-start; }
+          .resources-btn { padding: 11px 22px; font-weight: 700; font-size: 0.88rem; border: 2px solid ${INK}; box-shadow: 3px 3px 0 ${INK}; white-space: nowrap; margin-top: auto; display: block; text-align: center; }
           @media (max-width: 640px) {
             .resources-grid { grid-template-columns: 1fr; gap: 28px; }
           }
