@@ -793,7 +793,7 @@ export default function HomePage() {
             </div>
             <div className="resources-col">
               <p style={{ color: INK_MID, fontSize: '0.92rem', margin: '0 0 16px', lineHeight: 1.6 }}>
-                Are you going to be collecting compost or cans, accepting donations, fixing up bikes, or providing some other service at the 2026 Burn?
+                Are you providing some form of community service (such as collecting compost or cans, accepting donations or fixing bikes) at the 2026 Burn?
               </p>
               <button onClick={() => setSubmitCampOpen(true)} className="resources-btn" style={{
                 backgroundColor: TEAL, color: '#fff', cursor: 'pointer', fontFamily: 'inherit',
