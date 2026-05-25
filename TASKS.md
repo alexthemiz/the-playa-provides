@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-05-25 (session 31)_
+_Last updated: 2026-05-25 (session 32)_
 
 ---
 
@@ -18,6 +18,7 @@ _Last updated: 2026-05-25 (session 31)_
 - [ ] **Dust storm decision** — View `theplayaprovides.com/mockup-dust-storm.html`, decide storm / haze / skip; implement if yes.
 - [ ] **Fix OG image crop** — Resize to 1200×630px with padding/background in Canva, re-upload, re-push.
 - [ ] **Wire Submit Your Camp href** — Homepage "Submit Your Camp →" button currently opens the modal directly (correct), but `/resources` page Submit button also exists. Decide if both flows should stay or consolidate.
+- [ ] **Header color consider** — "Provides" is currently lime green; consider making the whole logo one color (all green or all white). Also consider other places the lime accent could land. Nav links are currently `#aaa` gray — consider making white.
 
 ---
 
@@ -103,6 +104,15 @@ _(nothing queued)_
 - [ ] **FAQ page** — TBD whether it replaces /about or sits alongside it. Content TBD. Should cover: how borrowing/lending works, what happens if something is damaged, how camps work, how visibility settings work, how to get listed on the resources directory.
 
 ---
+
+## ✅ Done (session 32 — 2026-05-25)
+- [x] Design: List Item — removed "Add to Inventory" eyebrow; title changed to "List an Item."; subhead added: "Make it available to borrow, give it away, or keep it hidden on your private inventory."; field `labelStyle` color darkened from `#9A8878` to `#4A3828`
+- [x] Design: Settings — removed "Account" eyebrow above h1; `labelStyle` color darkened to match list-item
+- [x] Copy: Homepage — Wish List row label updated to "Wish List Items" with subtext linking to the viewer's own profile; Available Now row updated with "See something you can use? Click on the item…" subtext; added `currentUsername` session fetch to power the profile link
+- [x] Design: Find Items — swapped "Available to" and "Show from" filter row positions (Available to now lives with view toggle + count; Show from moves up to search row)
+- [x] Design: Profile — Playa History moved to top grid (left col, alongside Wish List); Bio and Playa Story moved below as side-by-side bordered boxes (3fr / 1fr); mobile collapses both grids to single column
+- [x] Design: Profile — "Manage Inventory" button swapped to outlined/secondary; "+ Add Item" button swapped to teal/primary with offset shadow
+- [x] Feature: Inventory — Items Out on Loan, Items Being Transferred to Me, Items I'm Borrowing always render (no longer hidden when empty); empty-state rows shown with italic message
 
 ## ✅ Done (session 31 — 2026-05-25)
 - [x] Design: Profile page — @username / pronouns / location merged onto same row as follower counts + Edit Profile / Follow button; gray separator line above Bio/Wish List removed
