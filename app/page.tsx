@@ -769,48 +769,35 @@ export default function HomePage() {
       {/* ── RESOURCES ────────────────────────────────────────────────────── */}
       <section className="rsp-px" style={{ backgroundColor: PAPER_DK, paddingTop: '56px', paddingBottom: '64px' }}>
         <style>{`
-          .resources-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 2px solid ${INK}; }
-          .resources-col { padding: 28px 32px; }
-          .resources-col:first-child { border-right: 1px solid ${INK}; }
+          .resources-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+          .resources-col { display: flex; flex-direction: column; }
+          .resources-btn { padding: 11px 22px; font-weight: 700; font-size: 0.88rem; border: 2px solid ${INK}; box-shadow: 3px 3px 0 ${INK}; white-space: nowrap; margin-top: auto; align-self: flex-start; }
           @media (max-width: 640px) {
-            .resources-grid { grid-template-columns: 1fr; }
-            .resources-col:first-child { border-right: none; border-bottom: 1px solid ${INK}; }
-            .resources-col { padding: 24px 20px; }
+            .resources-grid { grid-template-columns: 1fr; gap: 28px; }
           }
         `}</style>
-        <div style={{ maxWidth: '780px', margin: '0 auto' }}>
-          <h2 style={{ fontFamily: "'Arvo', serif", fontSize: '1.5rem', fontWeight: 700, fontStyle: 'italic', color: INK, marginBottom: '20px', textAlign: 'center' as const }}>
+        <div style={{ maxWidth: '680px', margin: '0 auto' }}>
+          <h2 style={{ fontFamily: "'Arvo', serif", fontSize: '1.5rem', fontWeight: 700, fontStyle: 'italic', color: INK, marginBottom: '24px', textAlign: 'center' as const }}>
             On-Playa Resources
           </h2>
           <div className="resources-grid">
-            {/* Left: browse */}
             <div className="resources-col">
-              <p style={{ color: INK_MID, fontSize: '0.92rem', margin: '0 0 20px', lineHeight: 1.6 }}>
+              <p style={{ color: INK_MID, fontSize: '0.92rem', margin: '0 0 16px', lineHeight: 1.6 }}>
                 Camps providing services that make Burning Man more sustainable.
               </p>
-              <Link href="/resources" style={{
-                padding: '11px 22px', backgroundColor: PAPER_LT, color: INK,
-                fontWeight: 700, fontSize: '0.88rem', textDecoration: 'none',
-                border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,
-                display: 'inline-block',
+              <Link href="/resources" className="resources-btn" style={{
+                backgroundColor: PAPER_LT, color: INK, textDecoration: 'none', display: 'inline-block',
               }}>
                 Browse the Directory →
               </Link>
             </div>
-            {/* Right: submit */}
             <div className="resources-col">
-              <p style={{ color: INK_MID, fontSize: '0.92rem', margin: '0 0 20px', lineHeight: 1.6 }}>
-                Collecting compost, fixing bikes, accepting donations, or providing another service at the 2026 Burn?
+              <p style={{ color: INK_MID, fontSize: '0.92rem', margin: '0 0 16px', lineHeight: 1.6 }}>
+                Providing a service at the 2026 Burn? Get listed.
               </p>
-              <button
-                onClick={() => setSubmitCampOpen(true)}
-                style={{
-                  padding: '11px 22px', backgroundColor: TEAL, color: '#fff',
-                  fontWeight: 700, fontSize: '0.88rem', cursor: 'pointer',
-                  border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,
-                  fontFamily: 'inherit',
-                }}
-              >
+              <button onClick={() => setSubmitCampOpen(true)} className="resources-btn" style={{
+                backgroundColor: TEAL, color: '#fff', cursor: 'pointer', fontFamily: 'inherit',
+              }}>
                 Submit Your Camp →
               </button>
             </div>
