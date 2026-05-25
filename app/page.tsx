@@ -774,14 +774,24 @@ export default function HomePage() {
             <p style={{ color: INK_MID, fontSize: '0.92rem', margin: 0, lineHeight: 1.6, maxWidth: '240px' }}>
               Camps providing services that make Burning Man more sustainable.
             </p>
-            <Link href="/resources" style={{
-              padding: '13px 34px', backgroundColor: PAPER_LT, color: INK,
-              fontWeight: 700, fontSize: '0.88rem', textDecoration: 'none',
-              border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,
-              display: 'inline-block', whiteSpace: 'nowrap' as const, flexShrink: 0,
-            }}>
-              Browse the Directory →
-            </Link>
+            <div style={{ display: 'flex', gap: '10px', flexShrink: 0, flexWrap: 'wrap' as const }}>
+              <Link href="/resources" style={{
+                padding: '13px 24px', backgroundColor: PAPER_LT, color: INK,
+                fontWeight: 700, fontSize: '0.88rem', textDecoration: 'none',
+                border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,
+                display: 'inline-block', whiteSpace: 'nowrap' as const,
+              }}>
+                Browse the Directory →
+              </Link>
+              <Link href="/resources" style={{
+                padding: '13px 24px', backgroundColor: TEAL, color: '#fff',
+                fontWeight: 700, fontSize: '0.88rem', textDecoration: 'none',
+                border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,
+                display: 'inline-block', whiteSpace: 'nowrap' as const,
+              }}>
+                Submit Your Camp →
+              </Link>
+            </div>
           </div>
         </div>
       </section>
