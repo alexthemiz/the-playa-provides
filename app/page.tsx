@@ -776,7 +776,7 @@ export default function HomePage() {
             .resources-grid { grid-template-columns: 1fr; gap: 28px; }
           }
         `}</style>
-        <div style={{ maxWidth: '680px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '780px', margin: '0 auto' }}>
           <h2 style={{ fontFamily: "'Arvo', serif", fontSize: '1.5rem', fontWeight: 700, fontStyle: 'italic', color: INK, marginBottom: '24px', textAlign: 'center' as const }}>
             On-Playa Resources
           </h2>
@@ -793,7 +793,7 @@ export default function HomePage() {
             </div>
             <div className="resources-col">
               <p style={{ color: INK_MID, fontSize: '0.92rem', margin: '0 0 16px', lineHeight: 1.6 }}>
-                Providing a service at the 2026 Burn? Get listed.
+                Are you going to be collecting compost or cans, accepting donations, fixing up bikes, or providing some other service at the 2026 Burn?
               </p>
               <button onClick={() => setSubmitCampOpen(true)} className="resources-btn" style={{
                 backgroundColor: TEAL, color: '#fff', cursor: 'pointer', fontFamily: 'inherit',
