@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-05-23 (session 30)_
+_Last updated: 2026-05-25 (session 31)_
 
 ---
 
@@ -13,10 +13,11 @@ _Last updated: 2026-05-23 (session 30)_
 ---
 
 ## 🎯 Next Session Priority
-- [ ] **Smoke test session 30 changes** — Bell hide-on-open, find-items filter layout, list view table, view mode persistence, frogger levels + chirp.
 - [ ] **Deploy `send-loan-notification`** — pickup_by row removed from email HTML in session 27; needs copy-paste redeploy via Supabase Dashboard (Verify JWT off).
+- [ ] **Deploy `send-feedback-notification`** — file exists at `supabase/functions/send-feedback-notification/index.ts`; needs deploy via Supabase Dashboard (paste file contents, Verify JWT off). Widget currently saves to DB but email alert won't fire until this is deployed.
 - [ ] **Dust storm decision** — View `theplayaprovides.com/mockup-dust-storm.html`, decide storm / haze / skip; implement if yes.
 - [ ] **Fix OG image crop** — Resize to 1200×630px with padding/background in Canva, re-upload, re-push.
+- [ ] **Wire Submit Your Camp href** — Homepage "Submit Your Camp →" button currently opens the modal directly (correct), but `/resources` page Submit button also exists. Decide if both flows should stay or consolidate.
 
 ---
 
@@ -102,6 +103,23 @@ _(nothing queued)_
 - [ ] **FAQ page** — TBD whether it replaces /about or sits alongside it. Content TBD. Should cover: how borrowing/lending works, what happens if something is damaged, how camps work, how visibility settings work, how to get listed on the resources directory.
 
 ---
+
+## ✅ Done (session 31 — 2026-05-25)
+- [x] Design: Profile page — @username / pronouns / location merged onto same row as follower counts + Edit Profile / Follow button; gray separator line above Bio/Wish List removed
+- [x] Fix: Profile header band — Edit Profile button right edge aligned with content section below; horizontal padding moved to inner max-width div so auto-margins match across header + content
+- [x] Fix: All pages — header band left/right edges aligned with content below (inventory, find-items, resources, about, profile); fix applied by moving `padding: 0 40px` to the inner `maxWidth` container div instead of the outer band div
+- [x] Fix: Mobile — global horizontal scroll eliminated; `overflow-x: hidden` on html/body, hero right panel hidden on mobile, header inner padding reduced to 16px at ≤640px
+- [x] Feature: Frogger — swipe-to-move added for mobile (touchstart/touchend/touchmove handlers wired to movePlayer)
+- [x] Fix: Feedback form — `send-feedback-notification` edge function was never deployed; widget was throwing on missing function and blocking success. Fixed: edge function call is now fire-and-forget (feedback saved to DB regardless); edge function file committed to `supabase/functions/send-feedback-notification/index.ts` (**still needs Dashboard deploy**)
+- [x] Fix: Mobile audit — 6 fixes across 4 files:
+  - find-items cards grid: hardcoded `padding: 20px 40px` → `rsp-px` class (16px on mobile)
+  - find-items list view: Terms + Category columns hidden on mobile; grid collapses to `48px 1fr 90px`
+  - find-items Show From row: view toggle + count always flush right via `margin-left: auto`
+  - homepage resources section: text + button stacks vertically on mobile
+  - profile header: @username/counts/button row stacks on mobile; right group uses `space-between`
+  - inventory filter bar: Import + Add New Item buttons stretch full width on mobile
+- [x] Design: Homepage On-Playa Resources section — rebuilt as 2-column layout (no box): left col "Camps providing services…" + Browse the Directory button; right col submit pitch copy + Submit Your Camp button; buttons aligned to same row via `margin-top: auto`; stacks to 1 col on mobile
+- [x] Feature: Homepage — Submit Your Camp button opens `SubmitCampModal` directly (same modal as `/resources` page); no redirect needed
 
 ## ✅ Done
 - [x] Fix: Profile page visibility filtering — owner sees all available items; logged-in non-owner sees only items they have access to based on follow/campmate relationship; logged-out visitors see public items only
