@@ -783,7 +783,7 @@ export default function HomePage() {
           <div className="resources-grid">
             <div className="resources-col">
               <p style={{ color: INK_MID, fontSize: '0.92rem', margin: '0 0 16px', lineHeight: 1.6 }}>
-                Camps providing services that make Burning Man more sustainable.
+                Camps providing community services (like collecting compost, taking donations, fixing bikes, etc.) at the 2026 Burn.
               </p>
               <Link href="/resources" className="resources-btn" style={{
                 backgroundColor: PAPER_LT, color: INK, textDecoration: 'none', display: 'inline-block',
@@ -793,7 +793,7 @@ export default function HomePage() {
             </div>
             <div className="resources-col">
               <p style={{ color: INK_MID, fontSize: '0.92rem', margin: '0 0 16px', lineHeight: 1.6 }}>
-                Are you providing some form of community service (such as collecting compost or cans, accepting donations or fixing bikes) at the 2026 Burn?
+                Is that you? Are you providing some form of community service at the 2026 Burn?
               </p>
               <button onClick={() => setSubmitCampOpen(true)} className="resources-btn" style={{
                 backgroundColor: TEAL, color: '#fff', cursor: 'pointer', fontFamily: 'inherit',
