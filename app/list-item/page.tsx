@@ -222,10 +222,10 @@ function ListItemPageInner() {
       {/* Page header band */}
       <div style={{ backgroundColor: '#FDFAF4', borderBottom: '2px solid #1C1610', padding: '28px 0' }}>
         <div className="rsp-px" style={{ maxWidth: '1280px', margin: '0 auto' }}>
-          <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.9rem', fontWeight: 900, color: '#1C1610', margin: 0, lineHeight: 1.05 }}>
+          <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.9rem', fontWeight: 900, color: '#1C1610', margin: '0 0 12px', lineHeight: 1.05 }}>
             List <em style={{ fontStyle: 'italic', color: '#1E8A82' }}>an Item.</em>
           </h1>
-          <p style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.68rem', color: '#4A3828', margin: '8px 0 0', lineHeight: 1.5 }}>
+          <p style={{ fontSize: '0.9rem', color: '#4A3828', lineHeight: 1.65, maxWidth: '560px', margin: 0 }}>
             Make it available to borrow, give it away, or keep it hidden on your private inventory.
           </p>
         </div>
