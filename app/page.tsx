@@ -758,7 +758,7 @@ export default function HomePage() {
           {featureTab === 'how' && (
             <div className="home-feature-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', border: `2px solid ${INK}` }}>
               {[
-                { n: '01', title: 'Connect with your Campmates',      body: <><Link href="/profile" style={{ color: TEAL, fontWeight: 700 }}>Complete your profile</Link> to see if past or current campmates have what you&apos;re looking for, or are looking for something you have.</> },
+                { n: '01', title: 'Connect with your Campmates',      body: <><a href={currentUsername ? `/profile/${currentUsername}` : '/signup'} style={{ color: TEAL, fontWeight: 700 }}>Complete your profile</a> to see if past or current campmates have what you&apos;re looking for, or are looking for something you have.</> },
                 { n: '02', title: 'Decide How Wide to Provide',       body: 'Choose who can see your listings: campmates, followers, everyone — or no one.' },
                 { n: '03', title: 'Reduce the Stress of Generosity',  body: 'Set your terms right at the start: return-by date, replacement cost, what happens if something breaks.' },
                 { n: '04', title: 'Maintain an Easy Inventory',       body: 'Add an item once and it stays logged for as long as you want. Your gear list is there when you need it.' },
