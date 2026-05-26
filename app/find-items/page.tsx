@@ -412,7 +412,7 @@ export default function FindItemsPage() {
                       {/* Thumbnail */}
                       <div style={{ width: '48px', height: '48px', backgroundColor: PAPER_DK, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                         {hasImg
-                          ? <img src={item.image_urls[0]} alt={item.item_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          ? <img src={item.image_urls[0]} alt={item.item_name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                           : <span style={{ fontSize: '1.4rem' }}>{emoji}</span>
                         }
                       </div>
@@ -518,7 +518,7 @@ export default function FindItemsPage() {
                     {/* Photo or emoji */}
                     <div style={{ width: '100%', aspectRatio: '1/1', backgroundColor: PAPER_DK, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                       {hasImg
-                        ? <img src={item.image_urls[0]} alt={item.item_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ? <img src={item.image_urls[0]} alt={item.item_name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                         : <span style={{ fontSize: '3rem' }}>{emoji}</span>
                       }
                     </div>
