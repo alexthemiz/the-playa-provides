@@ -220,8 +220,8 @@ function ListItemPageInner() {
     <div style={pageWrapperStyle}>
 
       {/* Page header band */}
-      <div className="rsp-px" style={{ backgroundColor: '#FDFAF4', borderBottom: '2px solid #1C1610', paddingTop: '28px', paddingBottom: '28px' }}>
-        <div style={{ maxWidth: '520px', margin: '0 auto' }}>
+      <div style={{ backgroundColor: '#FDFAF4', borderBottom: '2px solid #1C1610', padding: '28px 0' }}>
+        <div className="rsp-px" style={{ maxWidth: '1280px', margin: '0 auto' }}>
           <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.9rem', fontWeight: 900, color: '#1C1610', margin: 0, lineHeight: 1.05 }}>
             List <em style={{ fontStyle: 'italic', color: '#1E8A82' }}>an Item.</em>
           </h1>
