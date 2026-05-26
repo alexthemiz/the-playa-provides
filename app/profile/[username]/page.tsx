@@ -779,6 +779,7 @@ export default function PublicProfilePage() {
         <div className="profile-bio-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
           <div className="profile-bio">
             <h4 style={subheadStyle}>Playa History</h4>
+            <p style={{ fontSize: '0.78rem', color: '#9A8878', margin: '0 0 12px', lineHeight: 1.5 }}>Add your camps to find and connect with campmates on the platform.</p>
             {isEditing ? (
               <div>
                 {/* 2026 Returning section */}
@@ -929,6 +930,7 @@ export default function PublicProfilePage() {
 
           <div className="profile-wishlist">
             <h4 style={subheadStyle}>Wish List</h4>
+            <p style={{ fontSize: '0.78rem', color: '#9A8878', margin: '0 0 12px', lineHeight: 1.5 }}>Add items you&apos;re looking for — others can reach out if they have them.</p>
             <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '8px', marginBottom: wishTags.length > 0 ? '12px' : '0' }}>
               {wishTags.length === 0 && !isOwner && (
                 <span style={{ color: '#aaa', fontStyle: 'italic' as const, fontSize: '0.9rem' }}>No wishlist yet.</span>
@@ -991,7 +993,14 @@ export default function PublicProfilePage() {
       {/* AVAILABLE ITEMS */}
       <section style={{ marginTop: '40px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-          <h2 style={{ fontFamily: "'Arvo', serif", fontSize: '1.3rem', fontWeight: 700, color: '#1C1610', margin: 0 }}>Available Items</h2>
+          <div>
+            <h2 style={{ fontFamily: "'Arvo', serif", fontSize: '1.3rem', fontWeight: 700, color: '#1C1610', margin: '0 0 2px' }}>Available Items</h2>
+            {isOwner && (
+              <p style={{ fontSize: '0.78rem', color: '#9A8878', margin: 0, lineHeight: 1.5 }}>
+                <Link href="/inventory" style={{ color: '#1E8A82', fontWeight: 600, textDecoration: 'underline' }}>Visit your inventory</Link> to see your full list, including private items.
+              </p>
+            )}
+          </div>
           {isOwner && (
             <div style={{ display: 'flex', gap: '8px' }}>
               <Link href="/inventory" style={{ backgroundColor: 'transparent', color: '#1C1610', padding: '6px 14px', fontSize: '0.8rem', fontWeight: 600, border: '2px solid #1C1610', textDecoration: 'none', display: 'inline-block', fontFamily: 'inherit' }}>
@@ -1001,7 +1010,7 @@ export default function PublicProfilePage() {
                 onClick={() => setShowAddItem(true)}
                 style={{ backgroundColor: '#1E8A82', color: '#fff', padding: '6px 14px', fontSize: '0.8rem', fontWeight: 700, border: '2px solid #1C1610', boxShadow: '2px 2px 0 #1C1610', cursor: 'pointer', fontFamily: 'inherit' }}
               >
-                + Add Item
+                Add Item
               </button>
             </div>
           )}
@@ -1110,7 +1119,7 @@ export default function PublicProfilePage() {
 // --- STYLES ---
 const LIST_COLS = '50px 160px 1fr 140px 120px 1fr 60px';
 
-const subheadStyle: React.CSSProperties = { fontFamily: "'Space Mono', monospace", color: '#9A8878', textTransform: 'uppercase' as const, fontSize: '0.6rem', fontWeight: 700, marginBottom: '10px', marginTop: 0, letterSpacing: '0.08em' };
+const subheadStyle: React.CSSProperties = { fontFamily: "'Space Mono', monospace", color: '#4A3828', textTransform: 'uppercase' as const, fontSize: '0.68rem', fontWeight: 700, marginBottom: '6px', marginTop: 0, letterSpacing: '0.08em' };
 const editTextareaStyle: React.CSSProperties = { width: '100%', backgroundColor: '#FDFAF4', color: '#1C1610', border: '1.5px solid rgba(28,22,16,0.25)', padding: '10px', height: '80px', boxSizing: 'border-box' as const, outline: 'none' };
 const listHeaderStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: LIST_COLS, gap: '10px', padding: '8px 12px', fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', fontWeight: 700, color: '#9A8878', textTransform: 'uppercase' as const, letterSpacing: '0.06em', borderBottom: '1.5px solid rgba(28,22,16,0.12)' };
 const listRowStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: LIST_COLS, gap: '10px', alignItems: 'center', padding: '10px 12px', backgroundColor: '#FDFAF4', borderBottom: '1px solid rgba(28,22,16,0.06)' };
