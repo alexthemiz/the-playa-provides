@@ -195,7 +195,7 @@ export default function FindItemsPage() {
     if (!relationshipFilters.includes('Everyone')) {
       const inFollowing  = relationshipFilters.includes('Following')   && followingIds.includes(item.user_id);
       const inFollowers  = relationshipFilters.includes('Followers')   && followerIds.includes(item.user_id);
-      const inCampmates  = relationshipFilters.includes('My Campmates') && campMateIds.includes(item.user_id);
+      const inCampmates  = relationshipFilters.includes('Campmates') && campMateIds.includes(item.user_id);
       if (!inFollowing && !inFollowers && !inCampmates) return false;
     }
     return true;
@@ -269,9 +269,9 @@ export default function FindItemsPage() {
                 />
               </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: INK_LITE, whiteSpace: 'nowrap' as const }}>Show from</span>
-              {['Everyone', 'Following', 'Followers', 'My Campmates'].map(opt => (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, marginLeft: 'auto' }}>
+              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: INK_LITE, whiteSpace: 'nowrap' as const }}>Show from:</span>
+              {['Everyone', 'Following', 'Followers', 'Campmates'].map(opt => (
                 <button key={opt} onClick={() => toggleRelationship(opt)}
                   style={chipStyle(relationshipFilters.includes(opt))}>
                   {opt}
@@ -294,7 +294,7 @@ export default function FindItemsPage() {
 
           <div className="fi-filters" style={{ marginBottom: '4px' }}>
             <div className="fi-filter-group">
-              <span className="fi-label">Category</span>
+              <span className="fi-label">Category:</span>
               {categories.map(cat => (
                 <button key={cat} onClick={() => toggleCategory(cat)}
                   style={chipStyle(categoryFilters.includes(cat), cat !== 'All' ? CAT_ACCENTS[cat] : undefined)}>
@@ -306,7 +306,7 @@ export default function FindItemsPage() {
 
           <div style={{ display: 'flex', alignItems: 'center', paddingBottom: '12px', flexWrap: 'wrap' as const, gap: '8px' }}>
             <div className="fi-filter-group">
-              <span className="fi-label">Available to</span>
+              <span className="fi-label">Available to:</span>
               {['Borrow', 'Keep'].map(opt => (
                 <button key={opt} onClick={() => toggleAvailability(opt)}
                   style={chipStyle(availabilityFilters.includes(opt), opt === 'Borrow' ? TEAL : RUST)}>
