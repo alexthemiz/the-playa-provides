@@ -1,7 +1,7 @@
 # Project: The Playa Provides
 
 ## Mission
-A peer-to-peer gear-sharing platform for the Burning Man community.
+Peer-to-peer sharing platform for the Burning Man community.
 
 ## Tech Stack
 - **Framework:** Next.js 16.1.6 (App Router)
@@ -35,7 +35,23 @@ A peer-to-peer gear-sharing platform for the Burning Man community.
 3. **Full File Deliverables:** For major page overhauls, provide the entire file content. For surgical fixes, provide the block with enough surrounding context for a quick Ctrl+F find.
 4. **Auth Vigilance:** Do not modify `middleware.ts` or `app/auth/callback/route.ts` without a specific, discussed reason. We have a history of Auth Loops.
 5. **End of Session Protocol:** After every commit and push, update `TASKS.md` — move completed items to ✅ Done, update 🏗️ In Progress, and add anything new that came up during the session.
-6. **Branching:** Commit and push directly to `master` for all changes. Do not create feature branches unless Alex explicitly asks for one on a specific task.
+6. **Supabase Table Grants:** Every migration that creates a new table in the `public` schema MUST include explicit grants. Supabase no longer auto-grants access to new tables (enforced October 30, 2026). Without these, supabase-js queries will fail silently with a `42501` error. Always append to any `CREATE TABLE` migration:
+   ```sql
+   grant select on public.your_table to anon;
+   grant select, insert, update, delete on public.your_table to authenticated;
+   grant select, insert, update, delete on public.your_table to service_role;
+   ```
+7. **Branching:** Commit and push directly to `master` for all changes. Do not create feature branches unless Alex explicitly asks for one on a specific task.
+
+## Key Patterns & Gotchas
+- **Post-auth navigation:** Always use `window.location.href` instead of `router.push()` for redirects after login/signup to avoid page flash issues
+- **Responsive layout:** Use `<style>` tag with `@media` queries only — never `useEffect` or `useState` for window width detection
+- **Edge functions:** Always deploy manually via Supabase Dashboard → Edge Functions; toggle Verify JWT off
+- **Session reads:** Use `getSession()` for UI rendering, not `getUser()`, to avoid GoTrue lock contention
+- **Test accounts:** `@alex` and `@abm`
+- **RLS silent failures:** RLS blocks return 0 rows with no error — always test visibility issues by checking RLS policies first
+- **CSS property naming:** camelCase in inline styles (`boxShadow`) won't be found by searches for `box-shadow` — use camelCase in all searches
+- **The Request to Borrow button** exists in three separate files — always confirm which file is being edited before making changes
 
 ## Tone & Style
 Alex is direct, detail-oriented, and has a touch of wit. Be a grounded, high-competency peer. Own mistakes, fix them, move on. No lecture-bot behavior.
