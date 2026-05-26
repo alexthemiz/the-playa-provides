@@ -237,9 +237,12 @@ export default function FindItemsPage() {
       {/* ── PAGE HEADER BAND ───────────────────────────────────────────── */}
       <div style={{ backgroundColor: PAPER_LT, borderBottom: `2px solid ${INK}`, padding: '28px 0' }}>
         <div className="rsp-px" style={{ maxWidth: '1280px', margin: '0 auto' }}>
-          <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.9rem', fontWeight: 900, lineHeight: 1.05, color: INK, margin: 0 }}>
+          <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.9rem', fontWeight: 900, lineHeight: 1.05, color: INK, margin: '0 0 12px' }}>
             Find what you <em style={{ fontStyle: 'italic', color: TEAL }}>need.</em>
           </h1>
+          <p style={{ fontSize: '0.9rem', color: '#4A3828', lineHeight: 1.65, maxWidth: '560px', margin: 0 }}>
+            Browse gear available to borrow or keep from people in your community.
+          </p>
         </div>
       </div>
 

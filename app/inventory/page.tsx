@@ -477,7 +477,7 @@ export default function InventoryPage() {
             Your <em style={{ fontStyle: 'italic', color: '#1E8A82' }}>Inventory.</em>
           </h1>
           <p style={{ fontSize: '0.9rem', color: '#4A3828', lineHeight: 1.65, maxWidth: '560px', margin: 0 }}>
-            Add or edit items, adjust availability, track loans and transfers. Have a spreadsheet? Click <strong>Import Inventory</strong> to add multiple items via spreadsheet.
+            Add or edit items, adjust availability, and track loans and transfers.
           </p>
         </div>
       </div>
