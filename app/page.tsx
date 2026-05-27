@@ -823,7 +823,7 @@ export default function HomePage() {
           <div className="resources-grid">
             <div className="resources-col">
               <p style={{ color: INK_MID, fontSize: '0.92rem', margin: '0 0 16px', lineHeight: 1.6 }}>
-                Camps providing community services (like collecting compost, taking donations, fixing bikes, etc.) at the 2026 Burn.
+                Camps providing services (like collecting compost, taking donations, fixing bikes, etc.) at the 2026 Burn.
               </p>
               <Link href="/resources" className="resources-btn" style={{
                 backgroundColor: PAPER_LT, color: INK, textDecoration: 'none', display: 'inline-block',
