@@ -482,9 +482,9 @@ export default function HomePage() {
               color: INK, margin: '0 0 18px',
             }}>
               Why let your stuff gather dust{' '}
-              <em style={{ fontStyle: 'italic', color: RUST }}>in storage</em>{' '}
+              <span style={{ color: RUST }}>in storage</span>{' '}
               when it could be gathering dust{' '}
-              <em style={{ fontStyle: 'italic', color: RUST }}>on playa?</em>
+              <span style={{ color: RUST }}>on playa?</span>
             </h1>
 
             <p style={{ fontSize: '1rem', color: INK_MID, lineHeight: 1.65, margin: '0 0 32px', fontWeight: 500 }}>
