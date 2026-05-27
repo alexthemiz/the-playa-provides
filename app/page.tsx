@@ -481,10 +481,10 @@ export default function HomePage() {
               fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.02em',
               color: INK, margin: '0 0 18px',
             }}>
-              Why let your stuff{' '}
-              <em style={{ fontStyle: 'italic', color: RUST }}>gather dust in storage</em>{' '}
-              when it could be{' '}
-              <em style={{ fontStyle: 'italic', color: RUST }}>gathering dust on playa?</em>
+              Why let your stuff gather dust{' '}
+              <em style={{ fontStyle: 'italic', color: RUST }}>in storage</em>{' '}
+              when it could be gathering dust{' '}
+              <em style={{ fontStyle: 'italic', color: RUST }}>on playa?</em>
             </h1>
 
             <p style={{ fontSize: '1rem', color: INK_MID, lineHeight: 1.65, margin: '0 0 32px', fontWeight: 500 }}>
