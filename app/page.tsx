@@ -481,14 +481,14 @@ export default function HomePage() {
               fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.02em',
               color: INK, margin: '0 0 18px',
             }}>
-              Why let your stuff collect<br />
-              <em style={{ fontStyle: 'italic', color: RUST }}>dust in storage</em>{' '}
+              Why let your stuff{' '}
+              <em style={{ fontStyle: 'italic', color: RUST }}>gather dust in storage</em>{' '}
               when it could be{' '}
-              <span>earning it on playa?</span>
+              <em style={{ fontStyle: 'italic', color: RUST }}>gathering dust on playa?</em>
             </h1>
 
             <p style={{ fontSize: '1rem', color: INK_MID, lineHeight: 1.65, margin: '0 0 32px', fontWeight: 500 }}>
-              Lend what you've got. Borrow what you need. Keep stuff out of landfills and your money away from Amazon.
+              Lend what you&apos;ve got, borrow what you need, and keep your money away from Amazon.
             </p>
 
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
