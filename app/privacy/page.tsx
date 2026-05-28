@@ -240,7 +240,7 @@ const liStyle: React.CSSProperties = {
 };
 
 const linkStyle: React.CSSProperties = {
-  color: '#00aacc',
+  color: '#1E8A82',
   textDecoration: 'underline',
 };
 
