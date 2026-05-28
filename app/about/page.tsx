@@ -29,8 +29,9 @@ const SECTIONS = [
     title: 'Why?',
     content: (
       <div style={{ padding: '20px 0 8px' }}>
-        <p style={pStyle}>Because why let your stuff collect dust in storage when it could be earning dust on playa? And why give Amazon or Walmart or Target your money when so much of what you need is already in a bin, a storage unit or a basement, itching to be put to use?</p>
-        <p style={pStyle}>Just because you&rsquo;re not going doesn&rsquo;t mean your stuff can&rsquo;t.</p>
+        <p style={pStyle}>Because everything you need is already in a bin or garage or storage unit somewhere. So why give Amazon or Walmart or Target your money when you can borrow from other burners?</p>
+        <p style={pStyle}>Because even though you&rsquo;re not going doesn&rsquo;t mean your stuff can&rsquo;t. So why let it gather dust in storage when it could be gathering it on playa?</p>
+        <p style={pStyle}>Because sharing is caring. So while caring can feel daring these days, who doesn&rsquo;t love a good dare?</p>
         <p style={pStyle}>While it&rsquo;s damn near-impossible to decommodify the prep for Burning Man entirely, we can engage in the pursuit of decommodification. The Playa Provides is for anyone who cares about this pursuit, tries to live more sustainably, hates buying new things from big corporations, and wants to take the circular economy for a spin. Or frankly doesn&rsquo;t have the dough to pay full retail.</p>
         <p style={{ ...pStyle, fontSize: '0.8rem', color: INK_LITE, marginBottom: 0 }}>
           <sup>*</sup><a href="https://burningman.org/about-us/10-principles/" target="_blank" rel="noopener noreferrer" style={linkStyle}>The ten official principles</a> + the one <a href="https://www.11thprincipleconsent.org/" target="_blank" rel="noopener noreferrer" style={linkStyle}>they should make official</a>
