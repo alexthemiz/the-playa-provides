@@ -16,14 +16,19 @@ const TEAL     = '#1E8A82'
 const pStyle: React.CSSProperties = { fontSize: '0.95rem', color: INK_MID, lineHeight: 1.75, marginBottom: '16px', margin: '0 0 16px' }
 const linkStyle: React.CSSProperties = { color: TEAL, textDecoration: 'underline', textDecorationColor: 'rgba(30,138,130,0.4)', textUnderlineOffset: '3px' }
 
+const INTRO_PARAS = (
+  <div style={{ paddingTop: '28px', paddingBottom: '4px' }}>
+    <p style={pStyle}>Going to Burning Man? Cool. Super cool. The coolest. Buying a lot of stuff for it? Not cool. The opposite of cool. A bummer.</p>
+    <p style={pStyle}>Sure, one of Burning Man&rsquo;s eleven principles<sup>*</sup> is decommodification. But that only applies to when you&rsquo;re there. Burning Man may be decommodified, but getting to Burning Man sure as heck isn&rsquo;t. It requires months of excessive commodification.</p>
+    <p style={{ ...pStyle, marginBottom: 0 }}>Every year brings thousands of virgin burners to the playa. And every year, thousands of veteran burners decide to sit this one out. The Playa Provides wants to make it easier for the latter to lend their gear to the former, to make a modification to decommodification.</p>
+  </div>
+)
+
 const SECTIONS = [
   {
     title: 'Why?',
     content: (
       <div style={{ padding: '20px 0 8px' }}>
-        <p style={pStyle}>Going to Burning Man? Cool. Super cool. The coolest. Buying a lot of stuff for it? Not cool. The opposite of cool. A bummer.</p>
-        <p style={pStyle}>Sure, one of Burning Man&rsquo;s eleven principles<sup>*</sup> is decommodification. But that only applies to when you&rsquo;re there. Burning Man may be decommodified, but getting to Burning Man sure as heck isn&rsquo;t. It requires months of excessive commodification.</p>
-        <p style={pStyle}>Every year brings thousands of virgin burners to the playa. And every year, thousands of veteran burners decide to sit this one out. The Playa Provides wants to make it easier for the latter to lend their gear to the former, to make a modification to decommodification.</p>
         <p style={pStyle}>Because why let your stuff collect dust in storage when it could be earning dust on playa? And why give Amazon or Walmart or Target your money when so much of what you need is already in a bin, a storage unit or a basement, itching to be put to use?</p>
         <p style={pStyle}>Just because you&rsquo;re not going doesn&rsquo;t mean your stuff can&rsquo;t.</p>
         <p style={pStyle}>While it&rsquo;s damn near-impossible to decommodify the prep for Burning Man entirely, we can engage in the pursuit of decommodification. The Playa Provides is for anyone who cares about this pursuit, tries to live more sustainably, hates buying new things from big corporations, and wants to take the circular economy for a spin. Or frankly doesn&rsquo;t have the dough to pay full retail.</p>
@@ -100,11 +105,16 @@ export default function AboutPage() {
 
       {/* Page header band */}
       <div style={{ backgroundColor: PAPER_LT, borderBottom: `2px solid ${INK}`, padding: '28px 0' }}>
-        <div className="rsp-px" style={{ maxWidth: '760px', margin: '0 auto' }}>
+        <div className="rsp-px" style={{ maxWidth: '1280px', margin: '0 auto' }}>
           <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '2rem', fontWeight: 900, color: INK, margin: 0, lineHeight: 1.05 }}>
-            An <em style={{ fontStyle: 'italic', color: TEAL }}>About</em> Page.
+            <em style={{ fontStyle: 'italic', color: TEAL }}>About</em> Page.
           </h1>
         </div>
+      </div>
+
+      {/* Intro */}
+      <div className="rsp-px" style={{ maxWidth: '760px', margin: '0 auto' }}>
+        {INTRO_PARAS}
       </div>
 
       {/* Accordion */}
@@ -122,7 +132,7 @@ export default function AboutPage() {
                   cursor: 'pointer', textAlign: 'left' as const,
                 }}
               >
-                <span style={{ fontFamily: "'Arvo', serif", fontSize: '1.1rem', fontWeight: 700, color: INK }}>{section.title}</span>
+                <h2 style={{ fontFamily: "'Arvo', serif", fontSize: '1.1rem', fontWeight: 700, color: INK, margin: 0 }}>{section.title}</h2>
                 <ChevronDown size={18} style={{ flexShrink: 0, color: INK_LITE, transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }} />
               </button>
               {isOpen && <div>{section.content}</div>}

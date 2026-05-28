@@ -60,15 +60,14 @@ export default function ResourcesPage() {
       <div style={{ backgroundColor: PAPER_LT, borderBottom: `2px solid ${INK}`, padding: '28px 0' }}>
         <div className="rsp-px" style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '24px', flexWrap: 'wrap' as const }}>
           <div>
-            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: INK_LITE, marginBottom: '8px' }}>Directory</div>
             <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.9rem', fontWeight: 900, color: INK, margin: '0 0 12px', lineHeight: 1.05 }}>
               On-Playa <em style={{ fontStyle: 'italic', color: TEAL }}>Resources.</em>
             </h1>
-            <p style={{ fontSize: '0.9rem', color: INK_MID, lineHeight: 1.65, maxWidth: '560px', margin: 0 }}>
-              Camps offering sustainability and community services at the 2026 Burn — composting, bike repair, mental health support, and more. BRC addresses added when available.
+            <p style={{ fontSize: '0.9rem', color: INK_MID, lineHeight: 1.65, maxWidth: '750px', margin: 0 }}>
+              Camps offering sustainability and community services at the 2026 Burn: composting, bike repair, mental health support, and more. BRC addresses added when available.
             </p>
-            <p style={{ fontSize: '0.85rem', color: INK_LITE, lineHeight: 1.6, maxWidth: '560px', margin: '8px 0 0' }}>
-              Part of a camp that should be listed? No site registration necessary to submit.
+            <p style={{ fontSize: '0.85rem', color: INK_LITE, lineHeight: 1.6, maxWidth: '750px', margin: '8px 0 0' }}>
+              No site registration necessary to submit your camp for inclusion.
             </p>
           </div>
           <button
