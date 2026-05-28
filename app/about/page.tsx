@@ -28,7 +28,7 @@ const SECTIONS = [
   {
     title: 'Why?',
     content: (
-      <div style={{ padding: '20px 0 8px' }}>
+      <div style={{ padding: '8px 0 8px' }}>
         <p style={pStyle}>Because everything you need is already in a bin or garage or storage unit somewhere. So why give Amazon or Walmart or Target your money when you can borrow from other burners?</p>
         <p style={pStyle}>Because even though you&rsquo;re not going doesn&rsquo;t mean your stuff can&rsquo;t. So why let it gather dust in storage when it could be gathering it on playa?</p>
         <p style={pStyle}>Because sharing is caring. So while caring can feel daring these days, who doesn&rsquo;t love a good dare?</p>
@@ -42,7 +42,7 @@ const SECTIONS = [
   {
     title: 'How?',
     content: (
-      <div style={{ padding: '20px 0 8px' }}>
+      <div style={{ padding: '8px 0 8px' }}>
         <p style={pStyle}>We know that there&rsquo;s some risk involved with lending items out&mdash;they may break, they may get lost, they may come back covered in stickers, they may come back incessantly chatting about all the craaaaazy things that happened to them at the Burn. Dude, you&rsquo;re a spork, chill out.</p>
         <p style={pStyle}>Yet what would going to Burning Man&mdash;or not going to Burning Man&mdash;be without a little risk? You&rsquo;re brave, you&rsquo;ve climbed to the top of scaffold towers and made out with strangers in the cargo holds of art cars; what&rsquo;s a little lending of gear if it means others can climb the same towers and make out with the same strangers?</p>
         <p style={pStyle}>The terms and the exchange happen directly between lender and lendee. When listing an item, you set your terms right up front: &ldquo;If item is returned broken, you agree to x; if item not returned, you agree to y.&rdquo; It&rsquo;s up to the lendee to accept your terms, or counter; this happens via email, so there&rsquo;s a written record of whatever&rsquo;s agreed upon between you.</p>
@@ -53,7 +53,7 @@ const SECTIONS = [
   {
     title: 'Who?',
     content: (
-      <div style={{ padding: '20px 0 8px' }}>
+      <div style={{ padding: '8px 0 8px' }}>
         <p style={pStyle}>Who what?</p>
         <p style={pStyle}><strong style={{ color: INK }}>Who built this site?</strong><br />Me. I&rsquo;m Alex.</p>
         <p style={pStyle}><strong style={{ color: INK }}>&ldquo;I&rsquo;m&rdquo;? Then what&rsquo;s with all that &ldquo;we&rdquo; business?</strong><br />It sounds better. Like it might make you think that this site was built by Coursera&rsquo;s finest software engineering graduates. But nope, it&rsquo;s just me. Well, me and my boy Claude here.</p>
@@ -70,7 +70,7 @@ const SECTIONS = [
   {
     title: 'Can I Help?',
     content: (
-      <div style={{ padding: '20px 0 8px' }}>
+      <div style={{ padding: '8px 0 8px' }}>
         <p style={pStyle}>Love that burnery spirit. You can help in so many ways:</p>
         <p style={pStyle}><strong style={{ color: INK }}>Use the site!</strong> Add items to your inventory, make them available for borrowing, give something away, request items from others.</p>
         <p style={pStyle}><strong style={{ color: INK }}>Share it!</strong> With your friends and campmates, in your WhatsApp groups and planning meetings, and everywhere burners gather and scheme.</p>
