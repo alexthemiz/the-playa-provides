@@ -1,3 +1,8 @@
+export const metadata = {
+  title: 'Privacy Policy | The Playa Provides',
+  description: 'Privacy policy for The Playa Provides gear sharing platform.',
+}
+
 export default function PrivacyPage() {
   return (
     <div style={pageStyle}>

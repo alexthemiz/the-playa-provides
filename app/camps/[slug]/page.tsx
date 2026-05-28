@@ -443,7 +443,7 @@ export default function CampPage() {
         <>
         {camp.banner_url && (
           <div style={{ marginTop: '24px' }}>
-            <img src={camp.banner_url} alt="" style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover' as const, borderRadius: '10px' }} />
+            <img src={camp.banner_url} alt={`${camp.display_name} banner`} style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover' as const, borderRadius: '10px' }} />
           </div>
         )}
         <div style={{
@@ -539,7 +539,7 @@ export default function CampPage() {
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', marginBottom: '12px' }}>
                 {camp.avatar_url && (
-                  <img src={camp.avatar_url} alt="" style={{ width: '56px', height: '56px', borderRadius: '50%', border: '3px solid #C08261', flexShrink: 0, objectFit: 'cover' as const }} />
+                  <img src={camp.avatar_url} alt={`${camp.display_name} logo`} style={{ width: '56px', height: '56px', borderRadius: '50%', border: '3px solid #C08261', flexShrink: 0, objectFit: 'cover' as const }} />
                 )}
                 <div>
                   {camp.description && (
@@ -585,7 +585,7 @@ export default function CampPage() {
             {/* Banner — always in right column when present; max 500px with description, 400px without */}
             {camp.banner_url && (
               <div style={{ flexShrink: 0, width: '35%', maxWidth: camp.description ? '380px' : '400px' }}>
-                <img src={camp.banner_url} alt="" style={{ width: '100%', maxHeight: '260px', objectFit: 'cover' as const, borderRadius: '10px' }} />
+                <img src={camp.banner_url} alt={`${camp.display_name} banner`} style={{ width: '100%', maxHeight: '260px', objectFit: 'cover' as const, borderRadius: '10px' }} />
               </div>
             )}
           </div>
@@ -601,7 +601,7 @@ export default function CampPage() {
           <div style={{ marginBottom: '16px' }}>
             <label style={editLabelStyle}>Cover Photo</label>
             {camp.banner_url && (
-              <img src={camp.banner_url} alt="" style={{ width: '380px', maxWidth: '100%', maxHeight: '260px', objectFit: 'cover' as const, borderRadius: '8px', marginBottom: '8px', display: 'block' }} />
+              <img src={camp.banner_url} alt={`${camp.display_name} banner`} style={{ width: '380px', maxWidth: '100%', maxHeight: '260px', objectFit: 'cover' as const, borderRadius: '8px', marginBottom: '8px', display: 'block' }} />
             )}
             <input type="file" accept="image/*" ref={bannerInputRef} onChange={handleBannerUpload} style={{ display: 'none' }} />
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' as const }}>
@@ -1005,7 +1005,7 @@ function CampListView({ item }: { item: any }) {
     <div style={{ display: 'grid', gridTemplateColumns: CAMP_LIST_COLS, gap: '10px', alignItems: 'center', padding: '10px 12px', backgroundColor: '#fff', borderBottom: '1px solid #f5f5f5' }}>
       <div style={{ width: '50px', height: '50px', borderRadius: '6px', overflow: 'hidden', backgroundColor: '#000', flexShrink: 0 }}>
         {item.image_urls?.[0]
-          ? <img src={item.image_urls[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' as const }} />
+          ? <img src={item.image_urls[0]} alt={item.item_name} style={{ width: '100%', height: '100%', objectFit: 'contain' as const }} />
           : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#ccc' }}><Package size={16} /></div>}
       </div>
       <div style={{ overflow: 'hidden' }}>

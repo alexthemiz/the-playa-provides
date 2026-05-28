@@ -1,3 +1,8 @@
+export const metadata = {
+  title: 'Terms of Service | The Playa Provides',
+  description: 'Terms of service for The Playa Provides gear sharing platform.',
+}
+
 export default function TermsPage() {
   return (
     <div className="max-w-4xl mx-auto py-12 px-6 text-sm text-gray-800">
