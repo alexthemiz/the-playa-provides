@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-05-25 (session 32)_
+_Last updated: 2026-05-29 (session 33)_
 
 ---
 
@@ -17,8 +17,9 @@ _Last updated: 2026-05-25 (session 32)_
 - [ ] **Deploy `send-feedback-notification`** — file exists at `supabase/functions/send-feedback-notification/index.ts`; needs deploy via Supabase Dashboard (paste file contents, Verify JWT off). Widget currently saves to DB but email alert won't fire until this is deployed.
 - [ ] **Dust storm decision** — View `theplayaprovides.com/mockup-dust-storm.html`, decide storm / haze / skip; implement if yes.
 - [ ] **Fix OG image crop** — Resize to 1200×630px with padding/background in Canva, re-upload, re-push.
-- [ ] **Wire Submit Your Camp href** — Homepage "Submit Your Camp →" button currently opens the modal directly (correct), but `/resources` page Submit button also exists. Decide if both flows should stay or consolidate.
-- [ ] **Header color consider** — "Provides" is currently lime green; consider making the whole logo one color (all green or all white). Also consider other places the lime accent could land. Nav links are currently `#aaa` gray — consider making white.
+- [ ] **Header color consider** — "Provides" is currently lime green; consider making the whole logo one color (all green or all white). Nav links are `#aaa` gray — consider white.
+- [ ] **Getting Started checklist — smoke test** — Log in as test account, verify checklist slides in, items check off correctly, Skip dismisses to profile collapsed bar, all 5 complete auto-dismisses.
+- [ ] **Welcome email (D from brainstorm)** — Triggered on signup via Supabase DB webhook; design and copy TBD; uses existing Resend/edge function setup.
 
 ---
 
@@ -66,7 +67,7 @@ _Last updated: 2026-05-25 (session 32)_
 - [ ] **BM API: 2026 camp placements** — In May 2026 when BM announces placement, hit the live API endpoint using the BM API key (stored in .env.local) to pull 2026 camp playa addresses and populate `playa_location` on camp pages. Also upsert any new 2026 camps not yet in the DB.
 - [ ] **BM API: 2026 archive import** — Around March 2027, run `scripts/import-bm-camps.js` updated to include the 2026 S3 archive URL once BM posts it.
 - [ ] **Camp edit page — duplicate notice** — Add a small note in the edit UI: "Think there's a duplicate of your camp page? Email camps@theplayaprovides.com"
-- [ ] **New user onboarding overhaul** — build out full onboarding flow including: welcome modal sequence, guided tour of key features, and persistent onboarding checklist. Needs full scoping session before building. Key questions: what triggers "new user" state, what completion looks like, where checklist lives.
+- [ ] **New user onboarding — welcome email** — D from the session 33 brainstorm; triggered on signup; copy TBD.
 - [ ] **Camp page: member chat** — real-time or async chat window on camp hub pages, visible to camp members only. Needs scoping (real-time vs. threaded, moderation, notifications).
 - [ ] **SEO / noindex for restricted items** — Public items indexable by search engines; campmates-only and followers-only items should have noindex meta tag.
 - [ ] **Incomplete profile nudge** — Some users have NULL full_name (and potentially other required fields) from before required field validation was added. Options: (A) Soft banner at top of /settings page if required fields are missing — non-blocking, just a nudge; (B) One-time modal after login prompting user to complete their profile, dismissible and non-blocking; (C) Validate only on save — no proactive warning, error only appears when user next visits /settings and tries to save. Option B is most user-friendly at scale.
@@ -104,6 +105,51 @@ _(nothing queued)_
 - [ ] **FAQ page** — TBD whether it replaces /about or sits alongside it. Content TBD. Should cover: how borrowing/lending works, what happens if something is damaged, how camps work, how visibility settings work, how to get listed on the resources directory.
 
 ---
+
+## ✅ Done (session 33 — 2026-05-29)
+
+### Cowork SEO audit & fixes
+- [x] Audited all Cowork SEO commit changes — found 6 uncommitted server/client splits, 3 broken imports, Tailwind in terms page, stale brand color in privacy
+- [x] Fix: `app/terms/page.tsx` — rewrote from Tailwind utility classes to inline CSS, matching design system (Arvo, Space Mono, ink/paper tokens)
+- [x] Fix: `app/privacy/page.tsx` — link color `#00aacc` → `#1E8A82`
+- [x] Fix: `app/camps/[slug]/page.tsx` — `@/utils/supabase/server` import didn't exist; replaced with inline `@supabase/ssr` createServerClient
+- [x] Fix: Committed missing server/client shell files — `app/inventory/page.tsx`, `app/settings/page.tsx`, `app/camps/[slug]/page.tsx`, `app/list-item/page.tsx`, `app/find-items/[id]/page.tsx`, `app/profile/[username]/page.tsx` — all had been split by Cowork locally but never pushed; Vercel was serving old monolithic components
+- [x] Fix: Committed `utils/supabase/server.ts` helper and remaining client files — `app/list-item/client-page.tsx`, `app/find-items/[id]/client-page.tsx`
+
+### Getting Started checklist (feature)
+- [x] DB migration: `checklist_dismissed` + `has_browsed` boolean columns added to `profiles` table
+- [x] Feature: `components/ChecklistBox.tsx` — animated white box, 5 items with title + description + destination label, progress bar, auto-dismiss on completion, Skip button
+- [x] Feature: Checklist wired into homepage hero right panel — slides in from behind header after 1s delay, overlays scrolling content; logged-out users always see scrolling content; fetches real completion state from 5 parallel Supabase queries
+- [x] Feature: `/find-items` marks `has_browsed = true` on first visit (fire-and-forget)
+- [x] Feature: Collapsed progress bar on profile page — shows for owner when checklist was dismissed but not complete; click toggles expand
+- [x] Mockup: `public/mockup-checklist-hero.html` — shows slide-in animation with replay button, 3 color variants
+
+### Odds & ends
+- [x] Copy: Homepage — "See something you can use?..." → "Click on an item to see the details and make the request."
+- [x] Design: Homepage resources buttons — size matched to hero Browse Gear / List Your Stuff buttons (13px 28px, 0.9rem)
+- [x] Design: Inventory — `thStyle` + `labelStyle` header colors darkened `#9A8878` → `#4A3828`; Action column gets 32px left padding + `width: 1%` to push it right of Availability
+- [x] Design: Settings — section box background `#FDFAF4` → `#EDE5D0` to match list-item form boxes; removed subtle box-shadow; fixed loading bg
+- [x] Copy: Various — "My Campmates" → "Campmates" on find-items; Show from / Category / Available to labels get colons; "+" removed from Add Item button on profile; "if applicable" removed from checklist; "Returning in 2026?" → "Attending in 2026?" on profile
+- [x] Design: Profile section headers — darkened `#9A8878` → `#4A3828`, bumped `0.6rem` → `0.68rem`; subheads added under Playa History and Wish List; Available Items gets owner subhead linking to inventory
+- [x] Design: Find Items — Show From chips right-aligned (`marginLeft: auto`); Category/Show from/Available to labels get colons; objectFit `cover` → `contain` on card + list view photos
+- [x] Design: List Item page — title left-aligned (rsp-px moved to inner div); subhead font/size matches inventory; h1 margin `0` → `0 0 12px`
+- [x] Design: Find Items — black line moved between title and filters (matches inventory pattern); subhead added: "Browse gear available to borrow or keep from people in your community."
+- [x] Design: Inventory — spreadsheet hint restored to subhead: "Click Import Inventory to add multiple items via spreadsheet."; `maxWidth` removed from subhead; `page.tsx` shell committed (was the uncommitted Cowork split)
+- [x] Copy: About page — title "An About Page." → "About Page."; first 3 Why paragraphs moved outside accordion as static intro; Why accordion starts at "Because everything you need..."; 3 new "Because..." paragraphs; accordion gap tightened 20px → 8px
+- [x] Copy: Resources page — "Directory" eyebrow removed; "Burn — composting" → "Burn: composting"; text box widened 560px → 750px; submit line rewritten
+- [x] Copy: Homepage — hero title updated to "Why let your stuff gather dust in storage when it could be gathering dust on playa?" with "in storage" and "on playa?" in orange (non-italic); subhead tightened; "Camps providing community services" → "Camps providing services"; various tab copy updates
+- [x] Copy: Profile — "Attending in 2026?" label (was "Returning")
+- [x] SEO: CLAUDE.md updated with Supabase table grants protocol (rule #6)
+
+### Camp pages redesign
+- [x] Design: Camp pages full overhaul — header band pattern, all old `#2D241E`/`#C08261`/`borderRadius`/`#5ECFDF` replaced with design system tokens
+- [x] Design: Camp title — "The Playa Provides" prefix removed; underline removed; last word in lime (#B8CC2A) italic
+- [x] Design: Claim This Page flow — moved to header band right side; compact inline pill; claim form collapses into band
+- [x] Design: Edit Camp button — matches Edit Profile style (transparent bg, ink border, offset shadow)
+- [x] Design: Wish list tags in members table — now match profile page (teal chips, Space Mono)
+- [x] Design: Year badges — mustard + white Space Mono (matches profile)
+- [x] Design: Members table + camp items list — inventory-style container (FDFAF4 bg, ink border, EDE5D0 header row, Space Mono uppercase headers)
+- [x] Design: Header band height — padding `28px 0 52px` to match other pages without subhead
 
 ## ✅ Done (session 32 — 2026-05-25)
 - [x] Design: List Item — removed "Add to Inventory" eyebrow; title changed to "List an Item."; subhead added: "Make it available to borrow, give it away, or keep it hidden on your private inventory."; field `labelStyle` color darkened from `#9A8878` to `#4A3828`
