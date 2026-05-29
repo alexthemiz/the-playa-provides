@@ -422,15 +422,10 @@ export default function CampPage() {
         <div className="rsp-px" style={{ maxWidth: '1280px', margin: '0 auto' }}>
           <div className="camp-title-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
             <div>
-              <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.9rem', fontWeight: 900, color: '#1C1610', margin: '0 0 12px', lineHeight: 1.05 }}>
+              <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.9rem', fontWeight: 900, color: '#1C1610', margin: 0, lineHeight: 1.05 }}>
                 {titleFirst && <>{titleFirst}{' '}</>}
                 <em style={{ fontStyle: 'italic', color: '#B8CC2A' }}>{titleLast}</em>
               </h1>
-              <p style={{ fontSize: '0.9rem', color: '#4A3828', lineHeight: 1.65, maxWidth: '560px', margin: 0 }}>
-                {camp.description
-                  ? camp.description.length > 120 ? camp.description.slice(0, 120) + '…' : camp.description
-                  : 'Burning Man camp hub.'}
-              </p>
             </div>
 
             {/* Right side: Edit Camp (owners) or Claim (unclaimed) */}
