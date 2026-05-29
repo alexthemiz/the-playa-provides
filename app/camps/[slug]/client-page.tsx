@@ -418,7 +418,7 @@ export default function CampPage() {
       `}</style>
 
       {/* PAGE HEADER BAND */}
-      <div style={{ backgroundColor: '#FDFAF4', borderBottom: '2px solid #1C1610', padding: '28px 0' }}>
+      <div style={{ backgroundColor: '#FDFAF4', borderBottom: '2px solid #1C1610', padding: '28px 0 52px' }}>
         <div className="rsp-px" style={{ maxWidth: '1280px', margin: '0 auto' }}>
           <div className="camp-title-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
             <div>
