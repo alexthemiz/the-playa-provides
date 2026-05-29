@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
 import SubmitCampModal from '@/components/SubmitCampModal'
+import ChecklistBox, { type ChecklistState } from '@/components/ChecklistBox'
 
 // ── Design tokens ────────────────────────────────────────────────────────────
 const INK      = '#1C1610'
@@ -71,6 +72,9 @@ export default function HomePage() {
   const [featureTab,      setFeatureTab]      = useState<'how' | 'why'>('how')
   const [submitCampOpen,  setSubmitCampOpen]  = useState(false)
   const [currentUsername, setCurrentUsername] = useState<string | null>(null)
+  const [checklistState,     setChecklistState]     = useState<ChecklistState | null>(null)
+  const [checklistDismissed, setChecklistDismissed] = useState<boolean>(false)
+  const [checklistLoading,   setChecklistLoading]   = useState(true)
 
   // ── Game refs ──────────────────────────────────────────────────────────────
   const heroRightRef = useRef<HTMLDivElement>(null)
@@ -101,9 +105,36 @@ export default function HomePage() {
   useEffect(() => {
     async function fetchCurrentUser() {
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.user) return
-      const { data } = await supabase.from('profiles').select('username').eq('id', session.user.id).single()
-      if (data?.username) setCurrentUsername(data.username)
+      if (!session?.user) { setChecklistLoading(false); return }
+      const uid = session.user.id
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('username, checklist_dismissed, wish_list, has_browsed')
+        .eq('id', uid)
+        .single()
+
+      if (!profile) { setChecklistLoading(false); return }
+      setCurrentUsername(profile.username)
+      setChecklistDismissed(profile.checklist_dismissed ?? false)
+
+      if (profile.checklist_dismissed) { setChecklistLoading(false); return }
+
+      const [campsRes, locsRes, gearRes] = await Promise.all([
+        supabase.from('user_camp_affiliations').select('id', { count: 'exact', head: true }).eq('user_id', uid),
+        supabase.from('locations').select('id', { count: 'exact', head: true }).eq('user_id', uid),
+        supabase.from('gear_items').select('id', { count: 'exact', head: true }).eq('user_id', uid),
+      ])
+
+      const state: ChecklistState = {
+        playaHistory: (campsRes.count ?? 0) > 0,
+        wishList:     Array.isArray(profile.wish_list) && profile.wish_list.length > 0,
+        locations:    (locsRes.count ?? 0) > 0,
+        listedItem:   (gearRes.count ?? 0) > 0,
+        browsed:      profile.has_browsed ?? false,
+      }
+      setChecklistState(state)
+      setChecklistLoading(false)
     }
     fetchCurrentUser()
   }, [])
@@ -422,9 +453,20 @@ export default function HomePage() {
     }
   }, [gameRunning]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── Checklist dismiss handler ──────────────────────────────────────────────
+  const handleChecklistDismiss = async () => {
+    setChecklistDismissed(true)
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.user) return
+    await supabase.from('profiles').update({ checklist_dismissed: true }).eq('id', session.user.id)
+  }
+
   // ── Scroll view data ───────────────────────────────────────────────────────
   const displayTags  = wishlistTags.length > 0  ? wishlistTags  : FALLBACK_TAGS.map(t => ({ tag: t, username: '' }))
   const displayItems = marqueeItems.length  > 0 ? marqueeItems  : null
+
+  const allComplete   = checklistState ? Object.values(checklistState).every(Boolean) : false
+  const showChecklist = !checklistLoading && checklistState !== null && !checklistDismissed && !allComplete
 
   return (
     <div style={{ backgroundColor: PAPER, minHeight: '100vh', color: INK }}>
@@ -449,6 +491,24 @@ export default function HomePage() {
           .frogger-mobile-btn { display: none !important; }
         }
       `}</style>
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            name: 'The Playa Provides',
+            url: 'https://theplayaprovides.com',
+            description: 'Peer-to-peer gear sharing for the Burning Man community.',
+            potentialAction: {
+              '@type': 'SearchAction',
+              target: 'https://theplayaprovides.com/find-items?q={search_term_string}',
+              'query-input': 'required name=search_term_string',
+            },
+          }),
+        }}
+      />
 
       {/* Deleted account banner */}
       {showDeletedBanner && (
@@ -653,6 +713,13 @@ export default function HomePage() {
                 🚲
               </button>
             </div>
+            {showChecklist && (
+              <ChecklistBox
+                state={checklistState!}
+                username={currentUsername}
+                onDismiss={handleChecklistDismiss}
+              />
+            )}
             </>
           )}
 
