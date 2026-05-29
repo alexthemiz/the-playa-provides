@@ -421,105 +421,91 @@ export default function CampPage() {
       <div style={{ backgroundColor: '#FDFAF4', borderBottom: '2px solid #1C1610', padding: '28px 0' }}>
         <div className="rsp-px" style={{ maxWidth: '1280px', margin: '0 auto' }}>
           <div className="camp-title-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
-            <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.9rem', fontWeight: 900, color: '#1C1610', margin: 0, lineHeight: 1.05 }}>
-              {titleFirst && <>{titleFirst}{' '}</>}
-              <em style={{ fontStyle: 'italic', color: '#B8CC2A' }}>{titleLast}</em>
-            </h1>
-            {isPageOwner && (
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
-                {editMode && (
-                  <button onClick={cancelEdit} style={{ padding: '8px 20px', backgroundColor: 'transparent', color: '#1C1610', border: '2px solid #1C1610', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit' }}>
-                    Cancel
+            <div>
+              <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.9rem', fontWeight: 900, color: '#1C1610', margin: '0 0 12px', lineHeight: 1.05 }}>
+                {titleFirst && <>{titleFirst}{' '}</>}
+                <em style={{ fontStyle: 'italic', color: '#B8CC2A' }}>{titleLast}</em>
+              </h1>
+              <p style={{ fontSize: '0.9rem', color: '#4A3828', lineHeight: 1.65, maxWidth: '560px', margin: 0 }}>
+                {camp.description
+                  ? camp.description.length > 120 ? camp.description.slice(0, 120) + '…' : camp.description
+                  : 'Burning Man camp hub.'}
+              </p>
+            </div>
+
+            {/* Right side: Edit Camp (owners) or Claim (unclaimed) */}
+            <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column' as const, alignItems: 'flex-end', gap: '8px' }}>
+              {isPageOwner && (
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  {editMode && (
+                    <button onClick={cancelEdit} style={{ padding: '6px 16px', background: 'none', border: '2px solid #1C1610', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer', fontFamily: 'inherit', color: '#1C1610' }}>
+                      Cancel
+                    </button>
+                  )}
+                  <button
+                    onClick={editMode ? handleSaveEdit : enterEditMode}
+                    disabled={editMode && editSaving}
+                    style={{ padding: '6px 16px', backgroundColor: editMode ? '#1E8A82' : 'transparent', color: editMode ? '#fff' : '#1C1610', border: '2px solid #1C1610', boxShadow: editMode ? 'none' : '2px 2px 0 #1C1610', cursor: 'pointer', fontWeight: 600, fontSize: '0.8rem', fontFamily: 'inherit' }}
+                  >
+                    {editMode ? (editSaving ? 'Saving…' : 'Save Changes') : 'Edit Camp'}
                   </button>
-                )}
-                <button
-                  onClick={editMode ? handleSaveEdit : enterEditMode}
-                  disabled={editMode && editSaving}
-                  style={{ padding: '8px 20px', minWidth: '140px', textAlign: 'center' as const, backgroundColor: editMode ? '#1E8A82' : '#1C1610', color: '#fff', border: '2px solid #1C1610', boxShadow: '3px 3px 0 #9A8878', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit' }}
-                >
-                  {editMode ? (editSaving ? 'Saving…' : 'Save Changes') : 'Edit Camp'}
-                </button>
-              </div>
-            )}
+                </div>
+              )}
+
+              {!camp.is_claimed && !isPageOwner && (
+                existingClaim === 'pending' || claimSuccess ? (
+                  <p style={{ margin: 0, fontSize: '0.78rem', color: '#9A8878', fontStyle: 'italic' as const }}>Claim request pending review.</p>
+                ) : existingClaim === 'denied' ? (
+                  <p style={{ margin: 0, fontSize: '0.78rem', color: '#9A8878' }}>Claim denied. <a href="mailto:support@theplayaprovides.com" style={{ color: '#1E8A82' }}>Contact us</a>.</p>
+                ) : !showClaimForm ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: '#F5F0D0', border: '1.5px solid rgba(212,160,32,0.4)', padding: '8px 14px' }}>
+                    <span style={{ fontSize: '0.8rem', color: '#7a4a2a', whiteSpace: 'nowrap' as const }}>Member of this camp?</span>
+                    <button
+                      onClick={() => currentUserId ? setShowClaimForm(true) : window.location.href = '/login'}
+                      style={{ padding: '6px 14px', backgroundColor: '#1E8A82', color: '#fff', border: '2px solid #1C1610', boxShadow: '2px 2px 0 #1C1610', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer', whiteSpace: 'nowrap' as const, fontFamily: 'inherit' }}
+                    >
+                      Claim This Page
+                    </button>
+                  </div>
+                ) : null
+              )}
+            </div>
           </div>
+
+          {/* Claim form — inline in header band */}
+          {!camp.is_claimed && showClaimForm && (
+            <div style={{ marginTop: '16px', backgroundColor: '#F5F0D0', border: '1.5px solid rgba(212,160,32,0.4)', padding: '16px 20px' }}>
+              <form onSubmit={handleClaimSubmit}>
+                <p style={{ margin: '0 0 12px', fontSize: '0.9rem', color: '#7a4a2a', fontWeight: 600 }}>Claim {camp.display_name}</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+                  <div>
+                    <label style={claimLabelStyle}>Your role <span style={{ color: '#9A8878', fontWeight: 400 }}>(optional)</span></label>
+                    <input type="text" value={claimRole} onChange={e => setClaimRole(e.target.value)} placeholder="e.g. Founder, Lead, Member…" style={claimInputStyle} />
+                  </div>
+                  <div>
+                    <label style={claimLabelStyle}>Years involved <span style={{ color: '#9A8878', fontWeight: 400 }}>(optional)</span></label>
+                    <input type="text" value={claimYears} onChange={e => setClaimYears(e.target.value)} placeholder="e.g. 2019–present" style={claimInputStyle} />
+                  </div>
+                </div>
+                {claimError && <p style={{ margin: '0 0 8px', fontSize: '0.8rem', color: '#cc0000' }}>{claimError}</p>}
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <button type="submit" disabled={claimSubmitting} style={claimSubmitBtnStyle}>{claimSubmitting ? 'Submitting…' : 'Submit Claim'}</button>
+                  <button type="button" onClick={() => { setShowClaimForm(false); setClaimError(''); }} style={claimCancelBtnStyle}>Cancel</button>
+                </div>
+              </form>
+            </div>
+          )}
         </div>
       </div>
 
       {/* PAGE CONTENT */}
       <div className="rsp-px" style={{ maxWidth: '1280px', margin: '0 auto', paddingTop: '28px', paddingBottom: '64px' }}>
 
-      {/* Unclaimed banner */}
-      {!camp.is_claimed && (
-        <>
-        {camp.banner_url && (
-          <div style={{ marginTop: '0' }}>
-            <img src={camp.banner_url} alt={`${camp.display_name} banner`} style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover' as const }} />
-          </div>
-        )}
-        <div style={{
-          backgroundColor: '#F5F0D0', border: '1.5px solid rgba(212,160,32,0.4)',
-          padding: '16px 20px', marginTop: '24px',
-        }}>
-          {existingClaim === 'pending' || claimSuccess ? (
-            <p style={{ margin: 0, fontSize: '0.9rem', color: '#7a4a2a' }}>
-              Your claim request for <strong>{camp.display_name}</strong> has been submitted and is under review. We&apos;ll notify you by email once it&apos;s approved.
-            </p>
-          ) : existingClaim === 'denied' ? (
-            <p style={{ margin: 0, fontSize: '0.9rem', color: '#7a4a2a' }}>
-              Your claim request for <strong>{camp.display_name}</strong> was not approved. Questions? Email <a href="mailto:support@theplayaprovides.com" style={{ color: '#1E8A82' }}>support@theplayaprovides.com</a>.
-            </p>
-          ) : showClaimForm ? (
-            <form onSubmit={handleClaimSubmit}>
-              <p style={{ margin: '0 0 12px', fontSize: '0.9rem', color: '#7a4a2a', fontWeight: 600 }}>
-                Claim {camp.display_name}
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '10px' }}>
-                <div>
-                  <label style={{ fontSize: '0.8rem', color: '#7a4a2a', display: 'block', marginBottom: '4px' }}>
-                    Your role in the camp <span style={{ color: '#9A8878', fontWeight: 400 }}>(optional)</span>
-                  </label>
-                  <input
-                    type="text" value={claimRole} onChange={e => setClaimRole(e.target.value)}
-                    placeholder="e.g. Founder, Lead, Member…"
-                    style={claimInputStyle}
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: '0.8rem', color: '#7a4a2a', display: 'block', marginBottom: '4px' }}>
-                    Years involved <span style={{ color: '#9A8878', fontWeight: 400 }}>(optional)</span>
-                  </label>
-                  <input
-                    type="text" value={claimYears} onChange={e => setClaimYears(e.target.value)}
-                    placeholder="e.g. 2019–present"
-                    style={claimInputStyle}
-                  />
-                </div>
-                {claimError && <p style={{ margin: 0, fontSize: '0.8rem', color: '#cc0000' }}>{claimError}</p>}
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                  <button type="submit" disabled={claimSubmitting} style={claimSubmitBtnStyle}>
-                    {claimSubmitting ? 'Submitting…' : 'Submit Claim'}
-                  </button>
-                  <button type="button" onClick={() => { setShowClaimForm(false); setClaimError(''); }} style={claimCancelBtnStyle}>
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </form>
-          ) : (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' as const }}>
-              <p style={{ margin: 0, fontSize: '0.9rem', color: '#7a4a2a' }}>
-                This camp page hasn&apos;t been claimed yet. Are you a member of <strong>{camp.display_name}</strong>?
-              </p>
-              <button
-                onClick={() => currentUserId ? setShowClaimForm(true) : window.location.href = '/login'}
-                style={{ padding: '8px 18px', backgroundColor: '#1E8A82', color: '#fff', border: '2px solid #1C1610', boxShadow: '2px 2px 0 #1C1610', fontWeight: 700, fontSize: '0.875rem', flexShrink: 0, cursor: 'pointer' }}
-              >
-                Claim This Page
-              </button>
-            </div>
-          )}
+      {/* Banner image for unclaimed camps */}
+      {!camp.is_claimed && camp.banner_url && (
+        <div style={{ marginBottom: '24px' }}>
+          <img src={camp.banner_url} alt={`${camp.display_name} banner`} style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover' as const }} />
         </div>
-        </>
       )}
 
       {/* BM data for unclaimed stubs — show whenever non-null */}
@@ -714,14 +700,14 @@ export default function CampPage() {
         {members.length === 0 ? (
           <p style={{ color: '#9A8878', fontSize: '0.9rem', fontStyle: 'italic' as const }}>No members listed yet.</p>
         ) : (
-          <div style={{ overflowX: 'auto' as const, maxWidth: '100%', width: '100%' }}>
+          <div style={{ overflowX: 'auto' as const, backgroundColor: '#FDFAF4', border: '1.5px solid rgba(28,22,16,0.12)' }}>
             {/* Header row */}
-            <div style={{ ...memberGridStyle(editMode), padding: '6px 12px', fontSize: '0.6rem', fontWeight: 700, color: '#4A3828', textTransform: 'uppercase' as const, letterSpacing: '0.06em', borderBottom: '2px solid rgba(28,22,16,0.15)', marginBottom: '2px' }}>
+            <div style={{ ...memberGridStyle(editMode), padding: '12px 15px', fontSize: '0.6rem', fontWeight: 700, color: '#4A3828', textTransform: 'uppercase' as const, letterSpacing: '0.08em', fontFamily: "'Space Mono', monospace", borderBottom: '1.5px solid rgba(28,22,16,0.12)', backgroundColor: '#EDE5D0' }}>
               <div>Name</div>
               <div>Location</div>
               <div>Wish List</div>
               <div>Camp Years</div>
-              <div style={{ textAlign: 'center' as const }}>2026 Camp?</div>
+              <div style={{ textAlign: 'center' as const }}>2026</div>
               {editMode && <div>Actions</div>}
             </div>
 
@@ -741,7 +727,7 @@ export default function CampPage() {
               const rc = ret2026 ? retCfg[ret2026] : null;
 
               return (
-                <div key={member.id} style={{ ...memberGridStyle(editMode), padding: '10px 12px', backgroundColor: '#FDFAF4', borderBottom: '1px solid rgba(28,22,16,0.06)', marginBottom: '2px', alignItems: 'center' }}>
+                <div key={member.id} style={{ ...memberGridStyle(editMode), padding: '10px 15px', backgroundColor: '#FDFAF4', borderBottom: '1px solid rgba(28,22,16,0.06)', alignItems: 'center' }}>
 
                   {/* Name column */}
                   <Link href={`/profile/${member.username}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', minWidth: 0 }}>
@@ -929,6 +915,12 @@ const socialPillStyle: React.CSSProperties = {
   fontFamily: "'Space Mono', monospace", fontSize: '0.6rem', fontWeight: 700,
 };
 
+const claimLabelStyle: React.CSSProperties = {
+  display: 'block', fontFamily: "'Space Mono', monospace",
+  fontSize: '0.58rem', fontWeight: 700, color: '#4A3828',
+  textTransform: 'uppercase' as const, letterSpacing: '0.08em', marginBottom: '5px',
+};
+
 const claimInputStyle: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box' as const,
   padding: '8px 12px',
@@ -1033,6 +1025,6 @@ function CampListView({ item }: { item: any }) {
 const campToggleGroupStyle: React.CSSProperties = { display: 'flex', border: '2px solid #1C1610', overflow: 'hidden' };
 const campToggleButtonStyle: React.CSSProperties = { border: 'none', padding: '6px 10px', cursor: 'pointer' };
 const campGridStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' };
-const campListContainerStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column' as const };
-const campListHeaderStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: CAMP_LIST_COLS, gap: '10px', padding: '8px 12px', fontSize: '0.6rem', fontWeight: 700, color: '#4A3828', textTransform: 'uppercase' as const, letterSpacing: '0.06em', borderBottom: '2px solid rgba(28,22,16,0.15)' };
+const campListContainerStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column' as const, backgroundColor: '#FDFAF4', border: '1.5px solid rgba(28,22,16,0.12)', overflowX: 'auto' as const };
+const campListHeaderStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: CAMP_LIST_COLS, gap: '10px', padding: '12px 15px', fontSize: '0.6rem', fontWeight: 700, color: '#4A3828', fontFamily: "'Space Mono', monospace", textTransform: 'uppercase' as const, letterSpacing: '0.08em', borderBottom: '1.5px solid rgba(28,22,16,0.12)', backgroundColor: '#EDE5D0' };
 const campSkeletonStyle: React.CSSProperties = { height: '280px', backgroundColor: '#EDE5D0' };
