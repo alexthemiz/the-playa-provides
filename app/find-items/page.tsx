@@ -77,6 +77,20 @@ export default function FindItemsPage() {
   }, [viewMode]);
 
   useEffect(() => {
+    async function markBrowsed() {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.user) return
+      supabase
+        .from('profiles')
+        .update({ has_browsed: true })
+        .eq('id', session.user.id)
+        .eq('has_browsed', false)
+        .then(() => {})
+    }
+    markBrowsed()
+  }, [])
+
+  useEffect(() => {
     const syncModalWithUrl = () => {
       const pathParts = window.location.pathname.split('/');
       const idFromUrl = pathParts[pathParts.length - 1];
