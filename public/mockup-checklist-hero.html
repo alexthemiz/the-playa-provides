@@ -137,6 +137,35 @@
 
   .frogger-btn { margin: 12px 20px 0; align-self: flex-start; background: none; border: 1.5px solid rgba(28,22,16,0.18); padding: 5px 10px; font-family: 'Space Mono', monospace; font-size: 0.6rem; color: #9A8878; cursor: pointer; }
 
+  /* ── SLIDE-IN ANIMATION ── */
+  @keyframes slideDown {
+    from { transform: translateY(-110%); }
+    to   { transform: translateY(0); }
+  }
+  .cl-inner.animate {
+    animation: slideDown 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  /* overlay panel */
+  .checklist-overlay {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 38px;
+    pointer-events: none;
+  }
+  .checklist-overlay .cl-inner {
+    width: 100%;
+    pointer-events: all;
+  }
+
+  .replay-btn {
+    position: absolute; bottom: 10px; right: 12px;
+    font-family: 'Space Mono', monospace; font-size: 0.48rem; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    background: none; border: 1px solid rgba(28,22,16,0.2);
+    color: #9A8878; padding: 4px 8px; cursor: pointer; z-index: 10;
+  }
+
   /* ── DEMO LAYOUT ── */
   .demos { display: flex; flex-direction: column; gap: 0; }
   .demo-label {
@@ -149,8 +178,8 @@
 </head>
 <body>
 
-<!-- ══ STATE 1: NEW USER (checklist visible) ══ -->
-<div class="demo-label">New user — checklist fills the right panel</div>
+<!-- ══ STATE 1: NEW USER — checklist slides over scrolling content ══ -->
+<div class="demo-label">New user — checklist slides in from top, scrolling content underneath</div>
 
 <div class="nav">
   <div class="nav-logo">The Playa <span>Provides</span></div>
@@ -174,9 +203,34 @@
     </div>
   </div>
 
-  <div class="hero-right">
-    <div class="checklist-panel">
-      <div class="cl-inner">
+  <div class="hero-right" style="position:relative; overflow:hidden;">
+
+    <!-- scrolling content always underneath -->
+    <div class="revealed-panel">
+      <div class="scroll-row">
+        <div class="scroll-row-label">Wish List Items</div>
+        <div class="tag-row">
+          <span class="tag">shade structure</span>
+          <span class="tag">e-bike</span>
+          <span class="tag">solar charger</span>
+          <span class="tag">camp stove</span>
+        </div>
+      </div>
+      <div class="scroll-row">
+        <div class="scroll-row-label">Available Now</div>
+        <div class="polaroid-row">
+          <div class="polaroid"><div class="polaroid-img">🚲</div><div class="polaroid-caption">Trail Bike</div></div>
+          <div class="polaroid"><div class="polaroid-img">⛺</div><div class="polaroid-caption">4-Person Tent</div></div>
+          <div class="polaroid"><div class="polaroid-img">🔆</div><div class="polaroid-caption">Solar Lantern</div></div>
+          <div class="polaroid"><div class="polaroid-img">🥘</div><div class="polaroid-caption">Camp Stove</div></div>
+        </div>
+      </div>
+      <button class="frogger-btn">🚲 play</button>
+    </div>
+
+    <!-- checklist slides in over the top -->
+    <div class="checklist-overlay">
+      <div class="cl-inner animate" id="cl-box">
         <div class="cl-header" style="margin-bottom:12px;">
           <div>
             <div class="cl-title">Getting Started</div>
@@ -230,6 +284,8 @@
         </div>
       </div>
     </div>
+
+    <button class="replay-btn" onclick="var b=document.getElementById('cl-box');b.classList.remove('animate');void b.offsetWidth;b.classList.add('animate');">↺ replay</button>
   </div>
 </div>
 
