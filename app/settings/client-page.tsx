@@ -1,0 +1,584 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabaseClient';
+import { geocodeZip } from '@/lib/geocodeZip';
+
+const US_STATES = ["", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"];
+
+export default function SettingsPage() {
+  const router = useRouter();
+  const [showSetupBanner, setShowSetupBanner] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const [profile, setProfile] = useState<any>({
+    full_name: '',
+    preferred_name: '',
+    username: '',
+    pronouns: '',
+    contact_email: '',
+    bio: '',
+    city: '',
+    state: '',
+    zip_code: '',
+  });
+
+  const [locations, setLocations] = useState<any[]>([]);
+
+  // Account & Security state
+  const [newEmail, setNewEmail] = useState('');
+  const [emailMsg, setEmailMsg] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordMsg, setPasswordMsg] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteStep, setDeleteStep] = useState<'confirm1' | 'deleting' | 'error'>('confirm1');
+  const [deleteError, setDeleteError] = useState('');
+  const [deleteLocationIndex, setDeleteLocationIndex] = useState<number | null>(null);
+  const [toast, setToast] = useState<{ message: string; isError?: boolean } | null>(null);
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('setup') === 'true') {
+      setShowSetupBanner(true);
+      window.history.replaceState(null, '', '/settings');
+    }
+  }, []);
+
+  useEffect(() => {
+    async function loadAllData() {
+      try {
+        const { data: { user: activeUser } } = await supabase.auth.getUser();
+        if (activeUser) {
+          setUser(activeUser);
+          const { data: pData } = await supabase.from('profiles').select('*').eq('id', activeUser.id).maybeSingle();
+          if (pData) setProfile({ ...pData });
+          const { data: lData } = await supabase.from('locations').select('*').eq('user_id', activeUser.id).order('created_at', { ascending: true });
+          if (lData) setLocations(lData);
+        }
+      } catch (err) {
+        console.error('Settings load error:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadAllData();
+  }, []);
+
+  const addLocation = () => {
+    setLocations([...locations, { _isNew: true, label: '', is_default: false, address_line_1: '', city: '', state: '', zip_code: '' }]);
+  };
+
+  const updateLocation = (index: number, field: string, value: any) => {
+    const newLocs = [...locations];
+    newLocs[index][field] = value;
+    setLocations(newLocs);
+  };
+
+  const setDefaultLocation = (index: number) => {
+    setLocations(prev => prev.map((loc, i) => ({ ...loc, is_default: i === index })));
+  };
+
+  async function handleSave() {
+    const errors: Record<string, string> = {};
+    if (!profile.preferred_name?.trim()) errors.preferred_name = 'This field is required.';
+    if (!profile.username?.trim()) errors.username = 'This field is required.';
+    if (!profile.full_name?.trim()) errors.full_name = 'This field is required.';
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
+    }
+    setFieldErrors({});
+    setSaving(true);
+    if (!user) return;
+
+    const { data: existingUser } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('username', profile.username.trim().toLowerCase())
+      .neq('id', user.id)
+      .maybeSingle();
+    if (existingUser) {
+      setFieldErrors({ username: 'This username is already taken.' });
+      setSaving(false);
+      return;
+    }
+
+    const { error: pErr } = await supabase.from('profiles').upsert({ id: user.id, ...profile, username: profile.username.trim().toLowerCase(), updated_at: new Date() });
+
+    const newLocsRaw = locations
+      .filter(l => l._isNew)
+      .map(({ _isNew, id, ...rest }) => ({ ...rest, user_id: user.id }));
+    const newLocs = await Promise.all(
+      newLocsRaw.map(async loc => {
+        const coords = await geocodeZip(loc.zip_code);
+        return { ...loc, ...(coords ?? {}) };
+      })
+    );
+    const existingLocsRaw = locations
+      .filter(l => !l._isNew)
+      .map(({ _isNew, ...rest }) => ({ ...rest, user_id: user.id }));
+    const existingLocs = await Promise.all(
+      existingLocsRaw.map(async loc => {
+        if (loc.latitude != null) return loc;
+        const coords = await geocodeZip(loc.zip_code);
+        return { ...loc, ...(coords ?? {}) };
+      })
+    );
+
+    const { error: iErr } = newLocs.length > 0
+      ? await supabase.from('locations').insert(newLocs)
+      : { error: null };
+    const { error: uErr } = existingLocs.length > 0
+      ? await supabase.from('locations').upsert(existingLocs)
+      : { error: null };
+    const lErr = iErr || uErr;
+
+    if (pErr || lErr) showToast("Error saving: " + (pErr?.message || lErr?.message), true);
+    else {
+      showToast("Settings saved!");
+      if (profile.has_seen_welcome === false) {
+        router.push(`/profile/${profile.username.trim().toLowerCase()}`);
+      }
+    }
+
+    setSaving(false);
+  }
+
+  async function handleUpdateEmail() {
+    const { error } = await supabase.auth.updateUser({ email: newEmail });
+    if (error) setEmailMsg('Error: ' + error.message);
+    else setEmailMsg(`A confirmation link has been sent to ${newEmail}. Click it to complete the change.`);
+  }
+
+  async function handleUpdatePassword() {
+    if (newPassword !== confirmPassword) {
+      setPasswordError('Passwords do not match.');
+      return;
+    }
+    setPasswordError('');
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) {
+      setPasswordMsg('Error: ' + error.message);
+    } else {
+      setPasswordMsg('Password updated successfully.');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    }
+  }
+
+  async function handleDeleteAccount() {
+    setDeleteStep('deleting');
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No active session');
+      const { error } = await supabase.functions.invoke('delete-account', {
+        body: { user_id: session.user.id },
+      });
+      if (error) {
+        let msg = error.message;
+        try {
+          const body = await (error as any).context?.json();
+          if (body?.error) msg = body.error;
+        } catch (_) {}
+        throw new Error(msg);
+      }
+      await supabase.auth.signOut();
+      window.location.href = '/?deleted=true';
+    } catch (err: any) {
+      setDeleteError(err.message || 'Something went wrong.');
+      setDeleteStep('error');
+    }
+  }
+
+  async function handleDeleteLocation(index: number) {
+    const loc = locations[index];
+    if (!loc._isNew && loc.id) {
+      await supabase.from('locations').delete().eq('id', loc.id);
+    }
+    setLocations(prev => prev.filter((_, i) => i !== index));
+  }
+
+  function showToast(message: string, isError = false) {
+    setToast({ message, isError });
+    setTimeout(() => setToast(null), 3000);
+  }
+
+  if (loading) return <div style={{ padding: '100px', textAlign: 'center', backgroundColor: '#F6F1E8', minHeight: '100vh' }}>Syncing...</div>;
+
+  const isOAuthUser = user?.app_metadata?.provider === 'google';
+
+  return (
+    <div style={{ backgroundColor: '#F6F1E8', minHeight: '100vh', width: '100%', color: '#1C1610' }}>
+      <div className="rsp-px" style={{ backgroundColor: '#FDFAF4', borderBottom: '2px solid #1C1610', paddingTop: '28px', paddingBottom: '28px' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.9rem', fontWeight: 900, color: '#1C1610', margin: 0, lineHeight: 1.05 }}>
+            Account <em style={{ fontStyle: 'italic', color: '#1E8A82' }}>Settings.</em>
+          </h1>
+        </div>
+      </div>
+      <div style={{ padding: '28px 20px 64px', maxWidth: '520px', margin: '0 auto', fontFamily: 'Outfit, sans-serif' }}>
+
+        {showSetupBanner && (
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', backgroundColor: '#fffbeb', border: '1px solid #fcd34d', padding: '14px 16px', marginBottom: '8px' }}>
+            <p style={{ margin: 0, fontSize: '0.875rem', color: '#92400e', lineHeight: 1.5 }}>
+              <strong>Welcome!</strong> Please complete your profile to get started.
+            </p>
+            <button onClick={() => setShowSetupBanner(false)} style={{ background: 'none', border: 'none', color: '#92400e', cursor: 'pointer', fontSize: '1rem', lineHeight: 1, flexShrink: 0, padding: 0 }}>✕</button>
+          </div>
+        )}
+
+        <div style={{ display: 'grid', gap: '14px' }}>
+
+          {/* IDENTITY & CONTACT */}
+          <section style={sectionStyle}>
+            <h3 style={sectionHeaderStyle}>Identity & Contact</h3>
+            <div style={{ display: 'grid', gap: '8px' }}>
+
+              {/* Row 1: Preferred Name + Username */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', alignItems: 'start' as const }}>
+                <div>
+                  <label style={labelStyle}>Preferred Name <span style={{ color: '#999' }}>*</span></label>
+                  <p style={fieldNoteStyle}>Burner name, nickname, up to you</p>
+                  <input
+                    style={inputStyle}
+                    value={profile.preferred_name || ''}
+                    onChange={e => { setProfile({ ...profile, preferred_name: e.target.value }); setFieldErrors(p => ({ ...p, preferred_name: '' })); }}
+                  />
+                  {fieldErrors.preferred_name && <span style={errorStyle}>{fieldErrors.preferred_name}</span>}
+                </div>
+                <div>
+                  <label style={labelStyle}>Username <span style={{ color: '#999' }}>*</span></label>
+                  <p style={{ ...fieldNoteStyle, visibility: 'hidden' as const }}>placeholder</p>
+                  <input
+                    style={inputStyle}
+                    value={profile.username || ''}
+                    onChange={e => { setProfile({ ...profile, username: e.target.value.toLowerCase() }); setFieldErrors(p => ({ ...p, username: '' })); }}
+                  />
+                  {fieldErrors.username && <span style={errorStyle}>{fieldErrors.username}</span>}
+                </div>
+              </div>
+
+              {/* Row 2: Full Name (2/3) + Pronouns (1/3) */}
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '8px', alignItems: 'start' as const }}>
+                <div>
+                  <label style={labelStyle}>Full Name <span style={{ color: '#999' }}>*</span></label>
+                  <p style={fieldNoteStyle}>Kept private and never displayed publicly</p>
+                  <input
+                    style={inputStyle}
+                    value={profile.full_name || ''}
+                    onChange={e => { setProfile({ ...profile, full_name: e.target.value }); setFieldErrors(p => ({ ...p, full_name: '' })); }}
+                  />
+                  {fieldErrors.full_name && <span style={errorStyle}>{fieldErrors.full_name}</span>}
+                </div>
+                <div>
+                  <label style={labelStyle}>Pronouns</label>
+                  <p style={{ ...fieldNoteStyle, visibility: 'hidden' as const }}>placeholder</p>
+                  <input
+                    style={inputStyle}
+                    value={profile.pronouns || ''}
+                    onChange={e => setProfile({ ...profile, pronouns: e.target.value })}
+                    placeholder="e.g. she/her"
+                  />
+                </div>
+              </div>
+
+              {/* Row 3: City + State + Zip */}
+              <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr 1fr', gap: '8px' }}>
+                <div>
+                  <label style={labelStyle}>City</label>
+                  <input style={inputStyle} value={profile.city || ''} onChange={e => setProfile({ ...profile, city: e.target.value })} placeholder="e.g. San Francisco" />
+                </div>
+                <div>
+                  <label style={labelStyle}>State</label>
+                  <select style={inputStyle} value={profile.state || ''} onChange={e => setProfile({ ...profile, state: e.target.value })}>
+                    {US_STATES.map(s => <option key={s} value={s}>{s || '—'}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={labelStyle}>Zip</label>
+                  <input style={inputStyle} value={profile.zip_code || ''} onChange={e => setProfile({ ...profile, zip_code: e.target.value })} placeholder="94105" />
+                </div>
+              </div>
+
+              {/* Row 4: Contact Email for Messaging */}
+              <div>
+                <label style={labelStyle}>Contact Email for Messaging</label>
+                <p style={fieldNoteStyle}>
+                  The email address you want to use for messaging with other users.<br />This stays hidden until you reply.
+                </p>
+                <input
+                  style={inputStyle}
+                  value={profile.contact_email || ''}
+                  onChange={e => setProfile({ ...profile, contact_email: e.target.value })}
+                  placeholder="e.g. gear-requests@email.com"
+                />
+              </div>
+
+            </div>
+          </section>
+
+          {/* LOCATIONS */}
+          <section style={sectionStyle}>
+            <h3 style={sectionHeaderStyle}>Where Your Items Are Stored</h3>
+            <p style={{ color: '#666', fontSize: '12px', marginBottom: '12px', lineHeight: '1.5' }}>
+              These addresses appear as options when adding items to your inventory.<br />Only city, state, and zip are visible on available item listings.
+            </p>
+            {locations.map((loc, index) => (
+              <div key={index} style={addressCardStyle}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '8px', marginBottom: '8px', alignItems: 'center' }}>
+                  <input
+                    style={inputStyle}
+                    placeholder="Label (e.g. Home)"
+                    value={loc.label || ''}
+                    onChange={e => updateLocation(index, 'label', e.target.value)}
+                  />
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: '#555', cursor: 'pointer', whiteSpace: 'nowrap' as const }}>
+                    <input
+                      type="checkbox"
+                      checked={loc.is_default || false}
+                      onChange={() => setDefaultLocation(index)}
+                      style={{ accentColor: '#5ECFDF', cursor: 'pointer' }}
+                    />
+                    Set as default
+                  </label>
+                  <button
+                    onClick={() => !loc.is_default && setDeleteLocationIndex(index)}
+                    disabled={loc.is_default}
+                    title={loc.is_default ? 'Cannot remove your default location' : 'Remove this location'}
+                    style={{
+                      padding: '4px 10px',
+                      backgroundColor: loc.is_default ? '#f5f5f5' : '#fff0f0',
+                      color: loc.is_default ? '#bbb' : '#cc0000',
+                      border: `1px solid ${loc.is_default ? '#e0e0e0' : '#ffaaaa'}`,
+                      borderRadius: '6px',
+                      cursor: loc.is_default ? 'not-allowed' as const : 'pointer' as const,
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      whiteSpace: 'nowrap' as const,
+                    }}
+                  >
+                    Remove
+                  </button>
+                </div>
+                <input
+                  style={{ ...inputStyle, marginBottom: '8px' }}
+                  placeholder="Street Address"
+                  value={loc.address_line_1 || ''}
+                  onChange={e => updateLocation(index, 'address_line_1', e.target.value)}
+                />
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '8px' }}>
+                  <input style={inputStyle} placeholder="City" value={loc.city || ''} onChange={e => updateLocation(index, 'city', e.target.value)} />
+                  <select style={inputStyle} value={loc.state || ''} onChange={e => updateLocation(index, 'state', e.target.value)}>
+                    {US_STATES.map(s => <option key={s} value={s}>{s || 'State'}</option>)}
+                  </select>
+                  <input style={inputStyle} placeholder="Zip" value={loc.zip_code || ''} onChange={e => updateLocation(index, 'zip_code', e.target.value)} />
+                </div>
+              </div>
+            ))}
+            <button onClick={addLocation} style={smallButtonStyle}>+ Add Another Location</button>
+          </section>
+
+          {/* NOTIFICATIONS */}
+          <section style={sectionStyle}>
+            <h3 style={sectionHeaderStyle}>Notifications</h3>
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={profile.notify_new_items_email || false}
+                onChange={e => setProfile({ ...profile, notify_new_items_email: e.target.checked })}
+                style={{ marginTop: '2px', accentColor: '#1E8A82', cursor: 'pointer', width: '16px', height: '16px' }}
+              />
+              <div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#111' }}>
+                  Email me when someone I follow posts a new item
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#888', marginTop: '3px', lineHeight: 1.4 }}>
+                  Off by default. You can always check the bell icon in the header for in-app notifications.
+                </div>
+              </div>
+            </label>
+          </section>
+
+          <button onClick={handleSave} disabled={saving} style={{ ...buttonStyle, marginBottom: '40px' }}>
+            {saving ? 'Saving...' : 'Save Changes'}
+          </button>
+
+          {/* ACCOUNT & SECURITY */}
+          {user && (
+            <section style={sectionStyle}>
+              <h3 style={sectionHeaderStyle}>Account & Security</h3>
+
+              {/* Change Email */}
+              <div style={{ paddingBottom: '16px', marginBottom: '16px', borderBottom: '1px solid #eee' }}>
+                <h4 style={subHeaderStyle}>Change Email</h4>
+                {isOAuthUser ? (
+                  <p style={oauthNoteStyle}>You signed in with Google. To change your email, visit your Google account settings.</p>
+                ) : (
+                  <>
+                    <label style={labelStyle}>New Email Address</label>
+                    <input style={{ ...inputStyle, marginBottom: '8px' }} type="email" value={newEmail} onChange={e => setNewEmail(e.target.value)} placeholder="new@email.com" />
+                    <button onClick={handleUpdateEmail} style={smallButtonStyle}>Update Email</button>
+                    {emailMsg && <p style={successMsgStyle}>{emailMsg}</p>}
+                  </>
+                )}
+              </div>
+
+              {/* Change Password */}
+              <div style={{ paddingBottom: '16px', marginBottom: '16px', borderBottom: '1px solid #eee' }}>
+                <h4 style={subHeaderStyle}>Change Password</h4>
+                {isOAuthUser ? (
+                  <p style={oauthNoteStyle}>You signed in with Google. Password changes are managed through your Google account settings.</p>
+                ) : (
+                  <>
+                    <div style={{ display: 'grid', gap: '8px', marginBottom: '8px' }}>
+                      <div>
+                        <label style={labelStyle}>Current Password</label>
+                        <input style={inputStyle} type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} />
+                      </div>
+                      <div>
+                        <label style={labelStyle}>New Password</label>
+                        <input style={inputStyle} type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
+                      </div>
+                      <div>
+                        <label style={labelStyle}>Confirm New Password</label>
+                        <input style={inputStyle} type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
+                        {passwordError && <span style={errorStyle}>{passwordError}</span>}
+                      </div>
+                    </div>
+                    <button onClick={handleUpdatePassword} style={smallButtonStyle}>Update Password</button>
+                    {passwordMsg && <p style={successMsgStyle}>{passwordMsg}</p>}
+                  </>
+                )}
+              </div>
+
+              {/* Delete Account */}
+              <div>
+                <h4 style={subHeaderStyle}>Delete Account</h4>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <button onClick={() => setShowDeleteModal(true)} style={deleteButtonStyle}>Delete My Account</button>
+                </div>
+              </div>
+            </section>
+          )}
+
+        </div>
+      </div>
+
+      {/* Delete location confirmation modal */}
+      {deleteLocationIndex !== null && (
+        <div style={{ position: 'fixed' as const, inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ backgroundColor: '#fff', padding: '28px 24px', borderRadius: '12px', maxWidth: '360px', width: '90%' }}>
+            <h3 style={{ margin: '0 0 12px', fontSize: '1.1rem', color: '#111' }}>Remove this location?</h3>
+            <p style={{ margin: '0 0 20px', fontSize: '0.9rem', color: '#555', lineHeight: 1.5 }}>This can't be undone.</p>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                onClick={() => setDeleteLocationIndex(null)}
+                style={{ flex: 1, padding: '10px', backgroundColor: '#eee', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => { handleDeleteLocation(deleteLocationIndex); setDeleteLocationIndex(null); }}
+                style={{ flex: 1, padding: '10px', backgroundColor: '#fff0f0', color: '#cc0000', border: '1px solid #ffaaaa', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast */}
+      {toast && (
+        <div style={{
+          position: 'fixed' as const,
+          bottom: '24px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: toast.isError ? '#dc2626' : '#2D241E',
+          color: '#fff',
+          padding: '12px 24px',
+          borderRadius: '8px',
+          fontSize: '0.9rem',
+          fontWeight: 600,
+          zIndex: 9999,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+          whiteSpace: 'nowrap' as const,
+        }}>
+          {toast.message}
+        </div>
+      )}
+
+      {/* Delete account modal */}
+      {showDeleteModal && (
+        <div style={{ position: 'fixed' as const, inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ backgroundColor: '#fff', padding: '28px 24px', borderRadius: '12px', maxWidth: '360px', width: '90%' }}>
+
+            {deleteStep === 'confirm1' && (
+              <>
+                <h3 style={{ margin: '0 0 12px', fontSize: '1.1rem', color: '#111' }}>Delete Your Account</h3>
+                <p style={{ margin: '0 0 20px', fontSize: '0.9rem', color: '#555', lineHeight: 1.5 }}>
+                  Are you sure you want to delete your account? This cannot be undone. All your personal information will be permanently removed.
+                </p>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    onClick={() => { setShowDeleteModal(false); setDeleteStep('confirm1'); }}
+                    style={{ flex: 1, padding: '10px', backgroundColor: '#eee', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDeleteAccount}
+                    style={{ flex: 1, padding: '10px', backgroundColor: '#fff0f0', color: '#cc0000', border: '1px solid #ffaaaa', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}
+                  >
+                    Delete Account
+                  </button>
+                </div>
+              </>
+            )}
+
+            {deleteStep === 'deleting' && (
+              <div style={{ textAlign: 'center' as const, padding: '12px 0' }}>
+                <p style={{ margin: '0', fontSize: '0.95rem', color: '#555' }}>Deleting your account...</p>
+              </div>
+            )}
+
+            {deleteStep === 'error' && (
+              <>
+                <p style={{ margin: '0 0 16px', fontSize: '0.9rem', color: '#dc2626' }}>{deleteError}</p>
+                <button
+                  onClick={() => { setShowDeleteModal(false); setDeleteStep('confirm1'); setDeleteError(''); }}
+                  style={{ width: '100%', padding: '10px', backgroundColor: '#eee', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}
+                >
+                  Close
+                </button>
+              </>
+            )}
+
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const sectionStyle = { border: '1.5px solid rgba(28,22,16,0.1)', padding: '16px 20px 20px', backgroundColor: '#EDE5D0' };
+const sectionHeaderStyle = { margin: '0 0 14px 0', fontFamily: "'Arvo', serif", fontSize: '1rem', fontWeight: 700 as const, color: '#1C1610' };
+const subHeaderStyle = { margin: '0 0 8px', fontFamily: "'Arvo', serif", fontSize: '0.9rem', fontWeight: 700 as const, color: '#1C1610' };
+const labelStyle = { display: 'block', fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: '700' as const, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: '#4A3828', marginBottom: '5px' };
+const fieldNoteStyle = { color: '#9A8878', fontSize: '0.68rem', margin: '0 0 5px', lineHeight: '1.4' as const };
+const errorStyle = { display: 'block', color: '#dc2626', fontSize: '0.72rem', marginTop: '3px' } as const;
+const oauthNoteStyle = { color: '#9A8878', fontSize: '0.84rem', margin: '0' };
+const successMsgStyle = { color: '#16a34a', fontSize: '0.78rem', marginTop: '8px', marginBottom: '0' };
+const inputStyle = { width: '100%', padding: '9px 11px', backgroundColor: '#FDFAF4', border: '1.5px solid rgba(28,22,16,0.25)', color: '#1C1610', outline: 'none', boxSizing: 'border-box' as const, fontSize: '0.9rem', fontFamily: 'inherit' };
+const buttonStyle = { padding: '13px', backgroundColor: '#1E8A82', color: '#fff', fontWeight: 'bold' as const, border: '2px solid #1C1610', boxShadow: '3px 3px 0 #1C1610', cursor: 'pointer', width: '100%', fontFamily: 'inherit', fontSize: '0.9rem' };
+const smallButtonStyle = { width: '100%', padding: '10px', backgroundColor: '#EDE5D0', color: '#1C1610', border: '1.5px solid rgba(28,22,16,0.2)', cursor: 'pointer', fontSize: '0.84rem', fontFamily: 'inherit' };
+const addressCardStyle = { backgroundColor: '#EDE5D0', border: '1px solid rgba(28,22,16,0.12)', padding: '12px', marginBottom: '10px' };
+const deleteButtonStyle = { padding: '10px 24px', backgroundColor: '#fff0f0', color: '#cc0000', border: '1px solid #ffaaaa', cursor: 'pointer', fontWeight: '600' as const, fontSize: '0.9rem', fontFamily: 'inherit' };

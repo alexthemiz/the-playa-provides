@@ -644,7 +644,7 @@ export default function HomePage() {
                 <div style={{ padding: '0 24px 10px' }}>
                   <span style={{ fontFamily: "'Arvo', serif", fontSize: '0.95rem', fontWeight: 700, color: INK }}>Available Now</span>
                   <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: '0.78rem', color: INK_MID, display: 'block', marginTop: '2px' }}>
-                    See something you can use? Click on the item to see the details and make the request.
+                    Click on an item to see the details and make the request.
                   </span>
                 </div>
                 <div style={{ overflow: 'hidden' }}>
@@ -878,7 +878,7 @@ export default function HomePage() {
         <style>{`
           .resources-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
           .resources-col { display: flex; flex-direction: column; }
-          .resources-btn { padding: 11px 22px; font-weight: 700; font-size: 0.88rem; border: 2px solid ${INK}; box-shadow: 3px 3px 0 ${INK}; white-space: nowrap; margin-top: auto; display: block; text-align: center; }
+          .resources-btn { padding: 13px 28px; font-weight: 700; font-size: 0.9rem; border: 2px solid ${INK}; box-shadow: 3px 3px 0 ${INK}; white-space: nowrap; margin-top: auto; display: block; text-align: center; }
           @media (max-width: 640px) {
             .resources-grid { grid-template-columns: 1fr; gap: 28px; }
           }

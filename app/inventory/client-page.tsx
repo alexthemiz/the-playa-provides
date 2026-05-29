@@ -601,7 +601,7 @@ export default function InventoryPage() {
                 <th style={thStyle}>Location</th>
                 <th style={thStyle}>Description</th>
                 <th style={thStyle}>Availability</th>
-                <th style={thStyle}>Action</th>
+                <th style={thActionStyle}>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -725,7 +725,7 @@ export default function InventoryPage() {
                 <th style={thStyle}>Picked Up On</th>
                 <th style={thStyle}>Return By</th>
                 <th style={thStyle}>Status</th>
-                <th style={thStyle}>Action</th>
+                <th style={thActionStyle}>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -786,7 +786,7 @@ export default function InventoryPage() {
                   <th style={thStyle}>Item</th>
                   <th style={thStyle}>From</th>
                   <th style={thStyle}>Status</th>
-                  <th style={thStyle}>Action</th>
+                  <th style={thActionStyle}>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -841,7 +841,7 @@ export default function InventoryPage() {
                   <th style={thStyle}>Return By</th>
                   <th style={thStyle}>My Location</th>
                   <th style={thStyle}>Status</th>
-                  <th style={thStyle}>Action</th>
+                  <th style={thActionStyle}>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -1049,11 +1049,12 @@ function getStatusToggleStyle(optionValue: string, currentStatus: string): React
 const addButtonStyle: React.CSSProperties = { backgroundColor: '#1E8A82', color: '#fff', padding: '10px 20px', border: '2px solid #1C1610', boxShadow: '3px 3px 0 #1C1610', fontWeight: 'bold', cursor: 'pointer', whiteSpace: 'nowrap' as const, fontSize: '0.9rem' };
 const importButtonStyle: React.CSSProperties = { backgroundColor: '#EDE5D0', color: '#1C1610', padding: '10px 16px', border: '1.5px solid rgba(28,22,16,0.25)', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' as const, fontSize: '0.9rem' };
 const filterBarStyle: React.CSSProperties = { display: 'flex', gap: '12px', marginBottom: '24px', background: '#EDE5D0', padding: '16px', border: '1.5px solid rgba(28,22,16,0.12)', alignItems: 'flex-end' };
-const labelStyle: React.CSSProperties = { display: 'block', fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: '#9A8878', marginBottom: '5px' };
+const labelStyle: React.CSSProperties = { display: 'block', fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: '#4A3828', marginBottom: '5px' };
 const inputStyle: React.CSSProperties = { width: '100%', padding: '10px', backgroundColor: '#FDFAF4', border: '1.5px solid rgba(28,22,16,0.25)', color: '#1C1610', boxSizing: 'border-box' as const, fontSize: '0.9rem' };
 const tableContainerStyle: React.CSSProperties = { overflowX: 'auto', backgroundColor: '#FDFAF4', border: '1.5px solid rgba(28,22,16,0.12)' };
 const headerRowStyle: React.CSSProperties = { borderBottom: '1.5px solid rgba(28,22,16,0.12)', backgroundColor: '#EDE5D0' };
-const thStyle: React.CSSProperties = { padding: '15px', fontFamily: "'Space Mono', monospace", color: '#9A8878', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.08em' };
+const thStyle: React.CSSProperties = { padding: '15px', fontFamily: "'Space Mono', monospace", color: '#4A3828', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.08em' };
+const thActionStyle: React.CSSProperties = { padding: '15px 15px 15px 32px', fontFamily: "'Space Mono', monospace", color: '#4A3828', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.08em', whiteSpace: 'nowrap' as const, width: '1%' };
 const tdStyle: React.CSSProperties = { padding: '10px 15px', verticalAlign: 'middle', color: '#4A3828', fontSize: '0.9rem' };
 const rowStyle: React.CSSProperties = { borderBottom: '1px solid rgba(28,22,16,0.06)' };
 const thumbnailStyle: React.CSSProperties = { width: '50px', height: '50px', backgroundColor: '#EDE5D0', overflow: 'hidden', flexShrink: 0, border: '1px solid rgba(28,22,16,0.12)' };
