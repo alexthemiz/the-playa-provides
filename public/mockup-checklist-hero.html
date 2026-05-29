@@ -56,15 +56,16 @@
   }
 
   .checklist-panel {
-    padding: 14px 20px 14px;
+    padding: 0 28px;
     display: flex; flex-direction: column; height: 100%;
+    justify-content: center;
   }
 
   /* white inner box */
   .cl-inner {
     background: #fff;
     border: 1.5px solid rgba(28,22,16,0.2);
-    padding: 12px 10px 8px;
+    padding: 16px 14px 12px;
     flex: 0 0 auto;
     display: flex; flex-direction: column;
   }
@@ -175,14 +176,14 @@
 
   <div class="hero-right">
     <div class="checklist-panel">
-      <div class="cl-header" style="margin-bottom:10px;">
-        <div>
-          <div class="cl-title">Getting Started</div>
-          <div class="cl-subtitle">2 of 5 complete</div>
-        </div>
-        <button class="cl-dismiss">Skip ✕</button>
-      </div>
       <div class="cl-inner">
+        <div class="cl-header" style="margin-bottom:12px;">
+          <div>
+            <div class="cl-title">Getting Started</div>
+            <div class="cl-subtitle">2 of 5 complete</div>
+          </div>
+          <button class="cl-dismiss">Skip ✕</button>
+        </div>
         <div class="cl-item row-plain">
           <div class="check-box done"></div>
           <div class="item-body">
