@@ -56,9 +56,26 @@
   }
 
   .checklist-panel {
-    padding: 24px 24px 20px;
+    padding: 14px;
     display: flex; flex-direction: column; height: 100%;
   }
+
+  /* white inner box */
+  .cl-inner {
+    background: #fff;
+    border: 1.5px solid rgba(28,22,16,0.2);
+    padding: 16px 16px 12px;
+    flex: 1;
+    display: flex; flex-direction: column;
+  }
+
+  /* color variants for rows */
+  .row-plain   { background: transparent; }
+  .row-lime    { background: rgba(184,204,42,0.08); }
+  .row-teal    { background: rgba(30,138,130,0.07); }
+  .row-mustard { background: rgba(212,160,32,0.08); }
+  .row-rust    { background: rgba(194,72,32,0.07); }
+  .row-paper   { background: #F6F1E8; }
 
   .cl-header {
     display: flex; justify-content: space-between; align-items: flex-start;
@@ -88,10 +105,12 @@
   .check-box.done { background: #1E8A82; border-color: #1E8A82; }
   .check-box.done::after { content: '✓'; color: #fff; font-size: 0.7rem; font-weight: 700; }
 
-  .item-text { font-size: 0.82rem; color: #1C1610; flex: 1; line-height: 1.3; }
+  .item-body { flex: 1; }
+  .item-text { font-size: 0.8rem; font-weight: 700; color: #1C1610; line-height: 1.2; }
   .item-text.done { color: #9A8878; text-decoration: line-through; text-decoration-color: rgba(28,22,16,0.25); }
-  .item-where { font-family: 'Space Mono', monospace; font-size: 0.46rem; color: #9A8878; letter-spacing: 0.06em; text-transform: uppercase; flex-shrink: 0; }
-  .item-arrow { color: #9A8878; font-size: 0.7rem; flex-shrink: 0; }
+  .item-desc { font-size: 0.68rem; color: #9A8878; line-height: 1.35; margin-top: 2px; }
+  .item-desc.done { color: #C4B8AC; }
+  .item-where { font-family: 'Space Mono', monospace; font-size: 0.46rem; color: #9A8878; letter-spacing: 0.06em; text-transform: uppercase; flex-shrink: 0; align-self: flex-start; margin-top: 2px; }
 
   .cl-progress-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(28,22,16,0.1); }
   .cl-track { flex: 1; height: 3px; background: rgba(28,22,16,0.12); }
@@ -156,45 +175,168 @@
 
   <div class="hero-right">
     <div class="checklist-panel">
-      <div class="cl-header">
+      <div class="cl-header" style="margin-bottom:10px;">
         <div>
           <div class="cl-title">Getting Started</div>
           <div class="cl-subtitle">2 of 5 complete</div>
         </div>
         <button class="cl-dismiss">Skip ✕</button>
       </div>
-
-      <div>
-        <div class="cl-item">
+      <div class="cl-inner">
+        <div class="cl-item row-plain">
           <div class="check-box done"></div>
-          <span class="item-text done">Playa History</span>
+          <div class="item-body">
+            <div class="item-text done">Playa History</div>
+            <div class="item-desc done">Connect with campmates and see what they have and need</div>
+          </div>
           <span class="item-where">Profile →</span>
         </div>
-        <div class="cl-item">
+        <div class="cl-item row-plain">
           <div class="check-box"></div>
-          <span class="item-text">Wish List</span>
+          <div class="item-body">
+            <div class="item-text">Wish List</div>
+            <div class="item-desc">Share what you're looking for so others can reach out</div>
+          </div>
           <span class="item-where">Profile →</span>
         </div>
-        <div class="cl-item">
+        <div class="cl-item row-plain">
           <div class="check-box"></div>
-          <span class="item-text">Item locations</span>
+          <div class="item-body">
+            <div class="item-text">Item Locations</div>
+            <div class="item-desc">Home, storage unit, wherever your stuff lives</div>
+          </div>
           <span class="item-where">Settings →</span>
         </div>
-        <div class="cl-item">
+        <div class="cl-item row-plain">
           <div class="check-box done"></div>
-          <span class="item-text done">Add an item</span>
+          <div class="item-body">
+            <div class="item-text done">List an Item</div>
+            <div class="item-desc done">Choose who can see it, or keep it on your private inventory</div>
+          </div>
           <span class="item-where">List Item →</span>
         </div>
-        <div class="cl-item">
+        <div class="cl-item row-plain" style="border-bottom:none;">
           <div class="check-box"></div>
-          <span class="item-text">Browse gear</span>
+          <div class="item-body">
+            <div class="item-text">Browse Items</div>
+            <div class="item-desc">See what's available to borrow or keep</div>
+          </div>
           <span class="item-where">Find Items →</span>
         </div>
+        <div class="cl-progress-row">
+          <div class="cl-track"><div class="cl-fill"></div></div>
+          <span class="cl-count">2 / 5</span>
+        </div>
       </div>
+    </div>
+  </div>
+</div>
 
-      <div class="cl-progress-row">
-        <div class="cl-track"><div class="cl-fill"></div></div>
-        <span class="cl-count">2 / 5</span>
+<div class="divider"></div>
+
+<!-- ══ COLOR VARIANT A: alternating lime/teal/mustard tints ══ -->
+<div class="demo-label">Colour variant A — alternating tinted rows</div>
+<div class="nav">
+  <div class="nav-logo">The Playa <span>Provides</span></div>
+  <div class="nav-links"><a class="nav-link" href="#">Browse Items</a><a class="nav-link" href="#">My Inventory</a><a class="nav-link" href="#">My Profile</a></div>
+</div>
+<div class="hero">
+  <div class="hero-left">
+    <h1 class="hero-h1">Why let your stuff gather dust <span class="rust">in storage</span> when it could be gathering dust <span class="rust">on playa?</span></h1>
+    <p class="hero-sub">Lend what you've got, borrow what you need, and keep your money away from Amazon.</p>
+    <div class="hero-btns"><a class="btn-primary" href="#">Browse Gear →</a><a class="btn-secondary" href="#">List Your Stuff</a></div>
+  </div>
+  <div class="hero-right">
+    <div class="checklist-panel">
+      <div class="cl-header" style="margin-bottom:10px;">
+        <div><div class="cl-title">Getting Started</div><div class="cl-subtitle">2 of 5 complete</div></div>
+        <button class="cl-dismiss">Skip ✕</button>
+      </div>
+      <div class="cl-inner" style="padding:0; overflow:hidden;">
+        <div class="cl-item row-teal" style="padding:10px 14px;">
+          <div class="check-box done"></div>
+          <div class="item-body"><div class="item-text done">Playa History</div><div class="item-desc done">Connect with campmates and see what they have and need</div></div>
+          <span class="item-where">Profile →</span>
+        </div>
+        <div class="cl-item row-lime" style="padding:10px 14px;">
+          <div class="check-box"></div>
+          <div class="item-body"><div class="item-text">Wish List</div><div class="item-desc">Share what you're looking for so others can reach out</div></div>
+          <span class="item-where">Profile →</span>
+        </div>
+        <div class="cl-item row-mustard" style="padding:10px 14px;">
+          <div class="check-box"></div>
+          <div class="item-body"><div class="item-text">Item Locations</div><div class="item-desc">Home, storage unit, wherever your stuff lives</div></div>
+          <span class="item-where">Settings →</span>
+        </div>
+        <div class="cl-item row-teal" style="padding:10px 14px;">
+          <div class="check-box done"></div>
+          <div class="item-body"><div class="item-text done">List an Item</div><div class="item-desc done">Choose who can see it, or keep it on your private inventory</div></div>
+          <span class="item-where">List Item →</span>
+        </div>
+        <div class="cl-item row-lime" style="padding:10px 14px; border-bottom:none;">
+          <div class="check-box"></div>
+          <div class="item-body"><div class="item-text">Browse Items</div><div class="item-desc">See what's available to borrow or keep</div></div>
+          <span class="item-where">Find Items →</span>
+        </div>
+        <div class="cl-progress-row" style="padding: 10px 14px; margin:0; border-top: 1px solid rgba(28,22,16,0.1);">
+          <div class="cl-track"><div class="cl-fill"></div></div>
+          <span class="cl-count">2 / 5</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ══ COLOR VARIANT B: paper rows, ink left border accent ══ -->
+<div class="demo-label">Colour variant B — paper rows with ink left border</div>
+<div class="nav">
+  <div class="nav-logo">The Playa <span>Provides</span></div>
+  <div class="nav-links"><a class="nav-link" href="#">Browse Items</a><a class="nav-link" href="#">My Inventory</a><a class="nav-link" href="#">My Profile</a></div>
+</div>
+<div class="hero">
+  <div class="hero-left">
+    <h1 class="hero-h1">Why let your stuff gather dust <span class="rust">in storage</span> when it could be gathering dust <span class="rust">on playa?</span></h1>
+    <p class="hero-sub">Lend what you've got, borrow what you need, and keep your money away from Amazon.</p>
+    <div class="hero-btns"><a class="btn-primary" href="#">Browse Gear →</a><a class="btn-secondary" href="#">List Your Stuff</a></div>
+  </div>
+  <div class="hero-right">
+    <div class="checklist-panel">
+      <div class="cl-header" style="margin-bottom:10px;">
+        <div><div class="cl-title">Getting Started</div><div class="cl-subtitle">2 of 5 complete</div></div>
+        <button class="cl-dismiss">Skip ✕</button>
+      </div>
+      <div class="cl-inner" style="padding:0; overflow:hidden;">
+        <div class="cl-item row-paper" style="padding:10px 14px; border-left: 3px solid #1E8A82;">
+          <div class="check-box done"></div>
+          <div class="item-body"><div class="item-text done">Playa History</div><div class="item-desc done">Connect with campmates and see what they have and need</div></div>
+          <span class="item-where">Profile →</span>
+        </div>
+        <div class="cl-item row-paper" style="padding:10px 14px; border-left: 3px solid #EDE5D0;">
+          <div class="check-box"></div>
+          <div class="item-body"><div class="item-text">Wish List</div><div class="item-desc">Share what you're looking for so others can reach out</div></div>
+          <span class="item-where">Profile →</span>
+        </div>
+        <div class="cl-item row-paper" style="padding:10px 14px; border-left: 3px solid #EDE5D0;">
+          <div class="check-box"></div>
+          <div class="item-body"><div class="item-text">Item Locations</div><div class="item-desc">Home, storage unit, wherever your stuff lives</div></div>
+          <span class="item-where">Settings →</span>
+        </div>
+        <div class="cl-item row-paper" style="padding:10px 14px; border-left: 3px solid #1E8A82;">
+          <div class="check-box done"></div>
+          <div class="item-body"><div class="item-text done">List an Item</div><div class="item-desc done">Choose who can see it, or keep it on your private inventory</div></div>
+          <span class="item-where">List Item →</span>
+        </div>
+        <div class="cl-item row-paper" style="padding:10px 14px; border-bottom:none; border-left: 3px solid #EDE5D0;">
+          <div class="check-box"></div>
+          <div class="item-body"><div class="item-text">Browse Items</div><div class="item-desc">See what's available to borrow or keep</div></div>
+          <span class="item-where">Find Items →</span>
+        </div>
+        <div class="cl-progress-row" style="padding: 10px 14px; margin:0; border-top: 1px solid rgba(28,22,16,0.1);">
+          <div class="cl-track"><div class="cl-fill"></div></div>
+          <span class="cl-count">2 / 5</span>
+        </div>
       </div>
     </div>
   </div>
