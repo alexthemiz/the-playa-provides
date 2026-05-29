@@ -394,15 +394,15 @@ export default function FindItemsPage() {
           ) : (
             <div>
               <style>{`
-                .list-table { display: grid; grid-template-columns: 48px 1fr 180px 150px 190px; align-items: center; gap: 0 16px; }
+                .list-table { display: grid; grid-template-columns: 48px 1fr 130px 110px 140px 130px 80px; align-items: center; gap: 0 14px; }
                 .list-header { padding: 0 16px 6px; }
                 .list-col-label { font-family: 'Space Mono', monospace; font-size: 0.52rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: ${INK_LITE}; }
                 .list-row-wrap { border: 1.5px solid rgba(28,22,16,0.12); margin-bottom: 2px; cursor: pointer; transition: box-shadow 0.12s; background: ${PAPER_LT}; }
                 .list-row-wrap:hover { box-shadow: 3px 3px 0 ${INK}; }
                 .list-row { padding: 8px 16px; }
                 @media (max-width: 640px) {
-                  .list-table { grid-template-columns: 48px 1fr 90px; }
-                  .list-col-terms, .list-col-cat { display: none; }
+                  .list-table { grid-template-columns: 48px 1fr 100px; }
+                  .list-col-loc, .list-col-terms, .list-col-cat, .list-col-type { display: none; }
                 }
               `}</style>
 
@@ -411,9 +411,11 @@ export default function FindItemsPage() {
                 <div className="list-table">
                   <div />
                   <div className="list-col-label">Item</div>
-                  <div className="list-col-label">From</div>
+                  <div className="list-col-label">Posted By</div>
+                  <div className="list-col-label list-col-loc">Location</div>
                   <div className="list-col-label list-col-terms">Terms</div>
                   <div className="list-col-label list-col-cat">Category</div>
+                  <div className="list-col-label list-col-type">Type</div>
                 </div>
               </div>
 
@@ -446,21 +448,28 @@ export default function FindItemsPage() {
                           <span style={{ fontSize: '0.8rem', color: INK_LITE, marginLeft: '8px' }}>· {description}</span>
                         )}
                       </div>
-                      {/* From */}
+                      {/* Posted By */}
                       <div style={{ overflow: 'hidden', whiteSpace: 'nowrap' as const, textOverflow: 'ellipsis', fontSize: '0.75rem', color: INK_LITE }}>
-                        {owner}{location ? ` · ${location}` : ''}
+                        {owner}
+                      </div>
+                      {/* Location */}
+                      <div className="list-col-loc" style={{ overflow: 'hidden', whiteSpace: 'nowrap' as const, textOverflow: 'ellipsis', fontSize: '0.75rem', color: INK_LITE }}>
+                        {location || '—'}
                       </div>
                       {/* Terms */}
                       <div className="list-col-terms" style={{ overflow: 'hidden', whiteSpace: 'nowrap' as const, textOverflow: 'ellipsis', fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: INK_LITE, letterSpacing: '0.04em' }}>
                         {terms || '—'}
                       </div>
-                      {/* Category + type chips */}
-                      <div className="list-col-cat" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      {/* Category */}
+                      <div className="list-col-cat">
                         {item.category && (
-                          <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '2px 6px', border: `1px solid rgba(28,22,16,0.2)`, color: INK_LITE, background: PAPER_DK, overflow: 'hidden', whiteSpace: 'nowrap' as const }}>
+                          <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '2px 6px', border: `1px solid rgba(28,22,16,0.2)`, color: INK_LITE, background: PAPER_DK, whiteSpace: 'nowrap' as const }}>
                             {emoji} {item.category}
                           </span>
                         )}
+                      </div>
+                      {/* Borrow / Keep */}
+                      <div className="list-col-type">
                         <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.52rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '3px 8px', border: `1px solid ${isKeep ? RUST : TEAL}`, color: isKeep ? RUST : TEAL, background: isKeep ? RUST_LT : TEAL_LT, whiteSpace: 'nowrap' as const }}>
                           {isKeep ? 'Keep' : 'Borrow'}
                         </span>
@@ -526,18 +535,6 @@ export default function FindItemsPage() {
                 >
                   {/* Polaroid photo area */}
                   <div style={{ backgroundColor: PAPER_LT, padding: '8px 8px 28px', borderBottom: `1.5px solid rgba(28,22,16,0.1)`, position: 'relative', transform: `rotate(${rot}deg)` }}>
-                    {/* Borrow / Keep ribbon */}
-                    <div style={{
-                      position: 'absolute', top: '8px', left: '-2px', zIndex: 5,
-                      backgroundColor: isKeep ? RUST : LIME,
-                      color: isKeep ? '#fff' : INK,
-                      fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', fontWeight: 700,
-                      letterSpacing: '0.06em', padding: '3px 8px',
-                      boxShadow: `1px 1px 0 rgba(28,22,16,0.2)`,
-                    }}>
-                      {isKeep ? 'Keep' : 'Borrow'}
-                    </div>
-
                     {/* Photo or emoji */}
                     <div style={{ width: '100%', aspectRatio: '1/1', backgroundColor: PAPER_DK, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                       {hasImg
