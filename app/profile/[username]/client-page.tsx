@@ -38,6 +38,9 @@ export default function PublicProfilePage() {
   const [showWishMatchModal, setShowWishMatchModal] = useState(false);
   const [showAddItem, setShowAddItem] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [checklistState,     setChecklistState]     = useState<null | { playaHistory: boolean; wishList: boolean; locations: boolean; listedItem: boolean; browsed: boolean }>(null)
+  const [checklistDismissed, setChecklistDismissed] = useState(false)
+  const [checklistExpanded,  setChecklistExpanded]  = useState(false)
 
   // 2026 returning status — managed separately from regular year drafts
   const [draft2026, setDraft2026] = useState<{
@@ -72,6 +75,20 @@ export default function PublicProfilePage() {
           if (sessionUserId && sessionUserId === profileData.id) {
             setIsOwner(true);
             if (profileData.has_seen_welcome === false) setShowWelcome(true);
+            setChecklistDismissed(profileData.checklist_dismissed ?? false)
+
+            const [clCampsRes, clLocsRes, clGearRes] = await Promise.all([
+              supabase.from('user_camp_affiliations').select('id', { count: 'exact', head: true }).eq('user_id', sessionUserId),
+              supabase.from('locations').select('id', { count: 'exact', head: true }).eq('user_id', sessionUserId),
+              supabase.from('gear_items').select('id', { count: 'exact', head: true }).eq('user_id', sessionUserId),
+            ])
+            setChecklistState({
+              playaHistory: (clCampsRes.count ?? 0) > 0,
+              wishList:     Array.isArray(profileData.wish_list) && profileData.wish_list.length > 0,
+              locations:    (clLocsRes.count ?? 0) > 0,
+              listedItem:   (clGearRes.count ?? 0) > 0,
+              browsed:      profileData.has_browsed ?? false,
+            })
           }
           setCurrentUserId(sessionUserId);
 
@@ -702,8 +719,33 @@ export default function PublicProfilePage() {
         @media (max-width: 430px) { .title-break { display: block; } }
       `}</style>
 
-
-
+      {isOwner && checklistState && checklistDismissed && (() => {
+        const completed = Object.values(checklistState).filter(Boolean).length
+        const total = 5
+        if (completed === total) return null
+        return (
+          <div
+            onClick={() => setChecklistExpanded(e => !e)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '14px',
+              padding: '12px 20px', marginBottom: '20px',
+              background: '#FDFAF4', border: '2px solid #1C1610',
+              boxShadow: '4px 4px 0 #1C1610', cursor: 'pointer',
+            }}
+          >
+            <span style={{ fontFamily: "'Arvo', serif", fontSize: '0.88rem', fontWeight: 700, color: '#1C1610', flexShrink: 0 }}>
+              Getting Started
+            </span>
+            <div style={{ flex: 1, height: '6px', background: '#EDE5D0', border: '1px solid rgba(28,22,16,0.15)' }}>
+              <div style={{ height: '100%', background: '#1E8A82', width: `${(completed / total) * 100}%` }} />
+            </div>
+            <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', fontWeight: 700, color: '#9A8878', letterSpacing: '0.06em', whiteSpace: 'nowrap' as const, flexShrink: 0 }}>
+              {completed} of {total} complete
+            </span>
+            <span style={{ color: '#9A8878', fontSize: '0.75rem', flexShrink: 0 }}>{checklistExpanded ? '▴' : '▾'}</span>
+          </div>
+        )
+      })()}
 
       {/* FOLLOWERS / FOLLOWING MODAL */}
       {isOwner && openList && (
