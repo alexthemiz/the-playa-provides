@@ -149,6 +149,9 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
   };
 
   const hasTerms = !isKeep && !!(item.return_by || item.damage_price || item.loss_price);
+  const locationDisplay: string = item.location_display ||
+    (item.locations ? [item.locations.city, item.locations.zip_code].filter(Boolean).join(' ') : '') ||
+    '—';
 
   return (
     <div style={overlayStyle} onClick={onClose}>
@@ -204,8 +207,8 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
                     </span>
                   </div>
                 </div>
-                {/* Row 2: Pick up by (input) | Return by (display) */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px', paddingTop: '10px', borderTop: `1px solid rgba(28,22,16,0.1)` }}>
+                {/* Row 2: Pick up by (input) | Return by (display) | Item Location */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0 16px', paddingTop: '10px', borderTop: `1px solid rgba(28,22,16,0.1)` }}>
                   <div style={cellStyle}>
                     <label style={metaLabelStyle}>Pick up by</label>
                     <input
@@ -223,18 +226,28 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
                         : <span style={{ color: '#aaa', fontWeight: 400 }}>—</span>}
                     </span>
                   </div>
+                  <div style={cellStyle}>
+                    <span style={metaLabelStyle}>Item Location</span>
+                    <span style={{ fontSize: '0.88rem', color: INK, fontWeight: 600 }}>{locationDisplay}</span>
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* Keep-only: just show who posted it */}
+            {/* Keep-only: posted by + location */}
             {isKeep && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={metaLabelStyle}>Posted by</span>
-                {ownerUsername
-                  ? <a href={`/profile/${ownerUsername}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.88rem', color: TEAL, fontWeight: 600, textDecoration: 'none' }}>@{ownerUsername}</a>
-                  : <span style={{ fontSize: '0.88rem', color: INK }}>{ownerName || '—'}</span>
-                }
+              <div style={{ backgroundColor: PAPER_DK, border: `1px solid rgba(28,22,16,0.12)`, padding: '12px 14px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px' }}>
+                <div style={cellStyle}>
+                  <span style={metaLabelStyle}>Posted by</span>
+                  {ownerUsername
+                    ? <a href={`/profile/${ownerUsername}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.88rem', color: TEAL, fontWeight: 600, textDecoration: 'none' }}>@{ownerUsername}</a>
+                    : <span style={{ fontSize: '0.88rem', color: INK, fontWeight: 600 }}>{ownerName || '—'}</span>
+                  }
+                </div>
+                <div style={cellStyle}>
+                  <span style={metaLabelStyle}>Item Location</span>
+                  <span style={{ fontSize: '0.88rem', color: INK, fontWeight: 600 }}>{locationDisplay}</span>
+                </div>
               </div>
             )}
 
