@@ -24,8 +24,8 @@ function buildMessage({
 }): string {
   const hasTerms = !!(returnBy || damagePrice || lossPrice);
   const lines: string[] = [];
-  lines.push(`To: ${ownerName}${ownerUsername ? `, @${ownerUsername}` : ''}`);
-  lines.push(`Item: ${itemName}`);
+  lines.push(`To: ${ownerName}${ownerUsername ? ` (@${ownerUsername})` : ''}`);
+  lines.push(`Item: ${itemName} (theplayaprovides.com/find-items/${itemId})`);
   if (returnBy) lines.push(`Return by: ${new Date(returnBy).toLocaleDateString()}`);
   const fees: string[] = [];
   if (damagePrice) fees.push(`If damaged: $${damagePrice}`);
@@ -43,14 +43,14 @@ function buildMessage({
   lines.push('');
   lines.push('Thank you!');
   lines.push(requesterName || '');
-  if (requesterUsername) lines.push(`@${requesterUsername}`);
-  lines.push('');
-  lines.push(`theplayaprovides.com/find-items/${itemId}`);
+  if (requesterUsername) lines.push(`@${requesterUsername} (theplayaprovides.com/profile/${requesterUsername})`);
   return lines.join('\n');
 }
 
 function buildKeepMessage(itemName: string, requesterName: string, requesterUsername: string, itemId: number | string): string {
-  return `Hi! I'm interested in your ${itemName}. Is it still available?\n\n\nThank you!\n${requesterName || ''}${requesterUsername ? `\n@${requesterUsername}` : ''}\n\ntheplayaprovides.com/find-items/${itemId}`;
+  const itemLine = `Item: ${itemName} (theplayaprovides.com/find-items/${itemId})`;
+  const sig = requesterUsername ? `@${requesterUsername} (theplayaprovides.com/profile/${requesterUsername})` : '';
+  return `${itemLine}\n\nHi! I'm interested in your ${itemName}. Is it still available?\n\n\nThank you!\n${requesterName || ''}${sig ? `\n${sig}` : ''}`;
 }
 
 export default function RequestModal({ item, onClose }: RequestModalProps) {
@@ -171,39 +171,50 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
           </div>
         ) : (
           <>
-            {/* Borrow-only: compact 2×2 terms grid */}
-            {!isKeep && (item.damage_price || item.loss_price || item.return_by) && (
-              <div style={{ backgroundColor: PAPER_DK, border: `1px solid rgba(28,22,16,0.12)`, padding: '12px 14px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 16px' }}>
-                {/* Row 1: Pick up by (input) | Return by (display) */}
-                <div style={cellStyle}>
-                  <label style={metaLabelStyle}>Pick up by</label>
-                  <input
-                    type="date"
-                    value={pickupDate}
-                    onChange={e => setPickupDate(e.target.value)}
-                    style={{ width: '100%', border: `1px solid rgba(28,22,16,0.2)`, backgroundColor: '#fff', padding: '5px 7px', fontSize: '0.82rem', color: INK, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' as const }}
-                  />
+            {/* Borrow-only: terms block */}
+            {!isKeep && (
+              <div style={{ backgroundColor: PAPER_DK, border: `1px solid rgba(28,22,16,0.12)`, padding: '12px 14px', display: 'flex', flexDirection: 'column' as const, gap: '10px' }}>
+                {/* Row 1: Posted by | If damaged | If not returned */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0 16px' }}>
+                  <div style={cellStyle}>
+                    <span style={metaLabelStyle}>Posted by</span>
+                    {ownerUsername
+                      ? <a href={`/profile/${ownerUsername}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.88rem', color: TEAL, fontWeight: 600, textDecoration: 'none' }}>@{ownerUsername}</a>
+                      : <span style={{ fontSize: '0.88rem', color: INK, fontWeight: 600 }}>{ownerName || '—'}</span>
+                    }
+                  </div>
+                  <div style={cellStyle}>
+                    <span style={metaLabelStyle}>If damaged</span>
+                    <span style={{ fontSize: '0.88rem', color: INK, fontWeight: 600 }}>
+                      {item.damage_price ? `$${Math.round(item.damage_price)}` : <span style={{ color: '#aaa', fontWeight: 400 }}>—</span>}
+                    </span>
+                  </div>
+                  <div style={cellStyle}>
+                    <span style={metaLabelStyle}>If not returned</span>
+                    <span style={{ fontSize: '0.88rem', color: INK, fontWeight: 600 }}>
+                      {item.loss_price ? `$${Math.round(item.loss_price)}` : <span style={{ color: '#aaa', fontWeight: 400 }}>—</span>}
+                    </span>
+                  </div>
                 </div>
-                <div style={cellStyle}>
-                  <span style={metaLabelStyle}>Return by</span>
-                  <span style={{ fontSize: '0.88rem', color: INK, fontWeight: 600 }}>
-                    {item.return_by
-                      ? new Date(item.return_by).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-                      : <span style={{ color: '#aaa', fontWeight: 400 }}>—</span>}
-                  </span>
-                </div>
-                {/* Row 2: If damaged | If not returned */}
-                <div style={cellStyle}>
-                  <span style={metaLabelStyle}>If damaged</span>
-                  <span style={{ fontSize: '0.88rem', color: INK, fontWeight: 600 }}>
-                    {item.damage_price ? `$${Math.round(item.damage_price)}` : <span style={{ color: '#aaa', fontWeight: 400 }}>—</span>}
-                  </span>
-                </div>
-                <div style={cellStyle}>
-                  <span style={metaLabelStyle}>If not returned</span>
-                  <span style={{ fontSize: '0.88rem', color: INK, fontWeight: 600 }}>
-                    {item.loss_price ? `$${Math.round(item.loss_price)}` : <span style={{ color: '#aaa', fontWeight: 400 }}>—</span>}
-                  </span>
+                {/* Row 2: Pick up by (input) | Return by (display) */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px', paddingTop: '10px', borderTop: `1px solid rgba(28,22,16,0.1)` }}>
+                  <div style={cellStyle}>
+                    <label style={metaLabelStyle}>Pick up by</label>
+                    <input
+                      type="date"
+                      value={pickupDate}
+                      onChange={e => setPickupDate(e.target.value)}
+                      style={{ width: '100%', border: `1px solid rgba(28,22,16,0.2)`, backgroundColor: '#fff', padding: '5px 7px', fontSize: '0.82rem', color: INK, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' as const }}
+                    />
+                  </div>
+                  <div style={cellStyle}>
+                    <span style={metaLabelStyle}>Return by</span>
+                    <span style={{ fontSize: '0.88rem', color: INK, fontWeight: 600 }}>
+                      {item.return_by
+                        ? new Date(item.return_by).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                        : <span style={{ color: '#aaa', fontWeight: 400 }}>—</span>}
+                    </span>
+                  </div>
                 </div>
               </div>
             )}
