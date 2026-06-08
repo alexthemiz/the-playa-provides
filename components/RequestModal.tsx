@@ -22,6 +22,7 @@ function buildMessage({
   itemName: string; itemId: number | string;
   returnBy: string | null; damagePrice: number | null; lossPrice: number | null;
 }): string {
+  const hasTerms = !!(returnBy || damagePrice || lossPrice);
   const lines: string[] = [];
   lines.push(`To: ${ownerName}${ownerUsername ? `, @${ownerUsername}` : ''}`);
   lines.push(`Item: ${itemName}`);
@@ -33,10 +34,12 @@ function buildMessage({
   lines.push('');
   lines.push(`Hi! I'm interested in your ${itemName}.`);
   lines.push('');
-  lines.push("I've reviewed the terms above and:");
-  lines.push('Accept: [ ]');
-  lines.push('Counter: [ ] ______');
-  lines.push('');
+  if (hasTerms) {
+    lines.push("I've reviewed the terms above and:");
+    lines.push('Accept: [ ]');
+    lines.push('Counter: [ ] ______');
+    lines.push('');
+  }
   lines.push('');
   lines.push('Thank you!');
   lines.push(requesterName || '');
@@ -110,9 +113,14 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
     setSending(true);
     setSendError('');
     try {
-      const fullMessage = pickupDate
-        ? `Pick up by: ${new Date(pickupDate + 'T12:00:00').toLocaleDateString()}\n\n${message}`
-        : message;
+      let fullMessage = message;
+      if (pickupDate) {
+        const pickupLine = `Pick up by: ${new Date(pickupDate + 'T12:00:00').toLocaleDateString()}`;
+        const firstBlank = fullMessage.indexOf('\n\n');
+        fullMessage = firstBlank !== -1
+          ? fullMessage.slice(0, firstBlank) + '\n' + pickupLine + fullMessage.slice(firstBlank)
+          : pickupLine + '\n\n' + fullMessage;
+      }
 
       const { error } = await supabase.functions.invoke('send-request-email', {
         body: { itemId: item.id, ownerId: item.user_id, message: fullMessage, itemName: item.item_name, requesterName, requesterEmail },
@@ -132,93 +140,99 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
     }
   };
 
+  const hasTerms = !isKeep && !!(item.return_by || item.damage_price || item.loss_price);
+
   return (
     <div style={overlayStyle} onClick={onClose}>
       <div style={modalStyle} onClick={e => e.stopPropagation()}>
 
         {/* Header */}
-        <div style={headerRowStyle}>
-          <h2 style={titleStyle}>
-            {isKeep ? 'Request to Keep' : 'Request to Borrow'}:{' '}
-            <span style={{ fontStyle: 'italic' as const }}>{item.item_name}</span>
-          </h2>
-          <button onClick={onClose} style={closeBtnStyle}><X size={18} /></button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', paddingBottom: '16px', borderBottom: `1px solid rgba(28,22,16,0.12)` }}>
+          <div>
+            <p style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: '#888', margin: '0 0 4px' }}>
+              {isKeep ? 'Request to Keep' : 'Request to Borrow'}
+            </p>
+            <h2 style={{ fontFamily: "'Arvo', serif", fontSize: '1.15rem', fontWeight: 700, color: INK, margin: 0, lineHeight: 1.3 }}>
+              {item.item_name}
+            </h2>
+          </div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#888', padding: '2px', flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+            <X size={18} />
+          </button>
         </div>
 
         {sent ? (
           <div style={{ padding: '40px 0', textAlign: 'center' as const }}>
-            <div style={{ width: 56, height: 56, borderRadius: '50%', backgroundColor: '#d1fae5', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-              <Send size={24} color="#059669" />
+            <div style={{ width: 52, height: 52, borderRadius: '50%', backgroundColor: '#d1fae5', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
+              <Send size={22} color="#059669" />
             </div>
-            <p style={{ fontWeight: 700, fontSize: '1.1rem', color: INK, margin: '0 0 6px' }}>Message Sent!</p>
-            <p style={{ color: '#888', fontSize: '0.88rem', margin: 0 }}>The owner will receive an email shortly.</p>
+            <p style={{ fontWeight: 700, fontSize: '1rem', color: INK, margin: '0 0 4px' }}>Message Sent!</p>
+            <p style={{ color: '#888', fontSize: '0.85rem', margin: 0 }}>The owner will receive an email shortly.</p>
           </div>
         ) : (
           <>
-            {/* Owner info row */}
-            <div style={ownerRowStyle}>
-              <span style={metaLabelStyle}>From:</span>
-              <span style={{ color: INK, fontSize: '0.88rem' }}>
-                {ownerName}{ownerUsername && <span style={{ color: '#888' }}> @{ownerUsername}</span>}
-              </span>
-            </div>
-
-            {/* Borrow-only: damage/loss + return by + pick up date */}
-            {!isKeep && (
-              <>
-                {(item.damage_price || item.loss_price) && (
-                  <div style={termsRowStyle}>
-                    {item.damage_price && (
-                      <span style={termPillStyle}>If damaged: <strong>${Math.round(item.damage_price)}</strong></span>
-                    )}
-                    {item.loss_price && (
-                      <span style={termPillStyle}>If not returned: <strong>${Math.round(item.loss_price)}</strong></span>
-                    )}
-                  </div>
-                )}
-
-                <div style={dateRowStyle}>
-                  {item.return_by && (
-                    <div style={dateHalfStyle}>
-                      <span style={metaLabelStyle}>Return by</span>
-                      <span style={{ fontSize: '0.88rem', color: INK, fontWeight: 600 }}>
-                        {new Date(item.return_by).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                      </span>
-                    </div>
-                  )}
-                  <div style={dateHalfStyle}>
-                    <label style={metaLabelStyle}>Pick up by</label>
-                    <input
-                      type="date"
-                      value={pickupDate}
-                      onChange={e => setPickupDate(e.target.value)}
-                      style={dateInputStyle}
-                    />
-                  </div>
+            {/* Borrow-only: compact 2×2 terms grid */}
+            {!isKeep && (item.damage_price || item.loss_price || item.return_by) && (
+              <div style={{ backgroundColor: PAPER_DK, border: `1px solid rgba(28,22,16,0.12)`, padding: '12px 14px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 16px' }}>
+                {/* Row 1: Pick up by (input) | Return by (display) */}
+                <div style={cellStyle}>
+                  <label style={metaLabelStyle}>Pick up by</label>
+                  <input
+                    type="date"
+                    value={pickupDate}
+                    onChange={e => setPickupDate(e.target.value)}
+                    style={{ width: '100%', border: `1px solid rgba(28,22,16,0.2)`, backgroundColor: '#fff', padding: '5px 7px', fontSize: '0.82rem', color: INK, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' as const }}
+                  />
                 </div>
+                <div style={cellStyle}>
+                  <span style={metaLabelStyle}>Return by</span>
+                  <span style={{ fontSize: '0.88rem', color: INK, fontWeight: 600 }}>
+                    {item.return_by
+                      ? new Date(item.return_by).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                      : <span style={{ color: '#aaa', fontWeight: 400 }}>—</span>}
+                  </span>
+                </div>
+                {/* Row 2: If damaged | If not returned */}
+                <div style={cellStyle}>
+                  <span style={metaLabelStyle}>If damaged</span>
+                  <span style={{ fontSize: '0.88rem', color: INK, fontWeight: 600 }}>
+                    {item.damage_price ? `$${Math.round(item.damage_price)}` : <span style={{ color: '#aaa', fontWeight: 400 }}>—</span>}
+                  </span>
+                </div>
+                <div style={cellStyle}>
+                  <span style={metaLabelStyle}>If not returned</span>
+                  <span style={{ fontSize: '0.88rem', color: INK, fontWeight: 600 }}>
+                    {item.loss_price ? `$${Math.round(item.loss_price)}` : <span style={{ color: '#aaa', fontWeight: 400 }}>—</span>}
+                  </span>
+                </div>
+              </div>
+            )}
 
-                {item.return_terms && (
-                  <p style={returnTermsStyle}>"{item.return_terms}"</p>
-                )}
-              </>
+            {/* Return condition quote */}
+            {!isKeep && item.return_terms && (
+              <p style={{ fontSize: '0.82rem', color: '#666', fontStyle: 'italic' as const, margin: 0, paddingLeft: '10px', borderLeft: `2px solid ${PAPER_DK}` }}>
+                &ldquo;{item.return_terms}&rdquo;
+              </p>
             )}
 
             {/* Message box */}
-            <label style={{ ...metaLabelStyle, display: 'block', marginBottom: '6px' }}>Message to owner</label>
-            <textarea
-              value={message}
-              onChange={e => setMessage(e.target.value)}
-              style={textareaStyle}
-            />
+            <div>
+              <label style={{ ...metaLabelStyle, display: 'block', marginBottom: '6px' }}>Message to owner</label>
+              <textarea
+                value={message}
+                onChange={e => setMessage(e.target.value)}
+                style={{ width: '100%', minHeight: '260px', border: `1.5px solid rgba(28,22,16,0.2)`, backgroundColor: '#fff', padding: '12px', fontSize: '0.85rem', color: INK, fontFamily: 'Outfit, sans-serif', lineHeight: 1.65, resize: 'vertical' as const, outline: 'none', boxSizing: 'border-box' as const }}
+              />
+            </div>
 
             {sendError && (
-              <p style={{ color: '#ef4444', fontSize: '0.82rem', marginTop: '8px', textAlign: 'center' as const }}>{sendError}</p>
+              <p style={{ color: '#ef4444', fontSize: '0.82rem', margin: 0, textAlign: 'center' as const }}>{sendError}</p>
             )}
 
             <button
               onClick={handleSendRequest}
               disabled={sending || !message.trim()}
-              style={{ ...sendBtnStyle, opacity: sending || !message.trim() ? 0.5 : 1 }}
+              style={{ width: '100%', padding: '12px', backgroundColor: TEAL, color: '#fff', border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`, fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer', fontFamily: 'Outfit, sans-serif', opacity: sending || !message.trim() ? 0.5 : 1 }}
             >
               {sending ? 'Sending…' : 'Send Request'}
             </button>
@@ -237,60 +251,14 @@ const overlayStyle: React.CSSProperties = {
   justifyContent: 'center', padding: '16px', zIndex: 2000,
 };
 const modalStyle: React.CSSProperties = {
-  backgroundColor: PAPER, border: `2px solid ${INK}`, boxShadow: `5px 5px 0 ${INK}`,
+  backgroundColor: '#fff', border: `2px solid ${INK}`, boxShadow: `5px 5px 0 ${INK}`,
   width: '100%', maxWidth: '480px', maxHeight: '90vh', overflowY: 'auto', padding: '24px',
-  display: 'flex', flexDirection: 'column' as const, gap: '14px',
-};
-const headerRowStyle: React.CSSProperties = {
-  display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px',
-};
-const titleStyle: React.CSSProperties = {
-  fontFamily: "'Arvo', serif", fontSize: '1.1rem', fontWeight: 700, color: INK,
-  margin: 0, lineHeight: 1.3,
-};
-const closeBtnStyle: React.CSSProperties = {
-  background: 'none', border: 'none', cursor: 'pointer', color: '#888',
-  padding: '2px', flexShrink: 0, display: 'flex', alignItems: 'center',
-};
-const ownerRowStyle: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: '8px',
-  borderBottom: `1px solid rgba(28,22,16,0.12)`, paddingBottom: '12px',
+  display: 'flex', flexDirection: 'column' as const, gap: '16px',
 };
 const metaLabelStyle: React.CSSProperties = {
-  fontFamily: "'Space Mono', monospace", fontSize: '0.6rem', fontWeight: 700,
+  fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700,
   letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#888',
 };
-const termsRowStyle: React.CSSProperties = {
-  display: 'flex', gap: '10px', flexWrap: 'wrap' as const,
-};
-const termPillStyle: React.CSSProperties = {
-  fontSize: '0.82rem', color: INK, backgroundColor: PAPER_DK,
-  padding: '4px 10px', border: `1px solid rgba(28,22,16,0.15)`,
-};
-const dateRowStyle: React.CSSProperties = {
-  display: 'flex', gap: '12px',
-};
-const dateHalfStyle: React.CSSProperties = {
-  flex: 1, display: 'flex', flexDirection: 'column' as const, gap: '4px',
-};
-const dateInputStyle: React.CSSProperties = {
-  width: '100%', border: `1.5px solid rgba(28,22,16,0.25)`, backgroundColor: '#fff',
-  padding: '6px 8px', fontSize: '0.85rem', color: INK, outline: 'none',
-  fontFamily: 'inherit', boxSizing: 'border-box' as const,
-};
-const returnTermsStyle: React.CSSProperties = {
-  fontSize: '0.82rem', color: '#666', fontStyle: 'italic' as const,
-  margin: 0, paddingLeft: '8px', borderLeft: `2px solid ${PAPER_DK}`,
-};
-const textareaStyle: React.CSSProperties = {
-  width: '100%', minHeight: '260px', border: `1.5px solid rgba(28,22,16,0.25)`,
-  backgroundColor: '#fff', padding: '10px 12px', fontSize: '0.83rem',
-  color: INK, fontFamily: "'Courier New', monospace", lineHeight: 1.6,
-  resize: 'vertical' as const, outline: 'none', boxSizing: 'border-box' as const,
-};
-const sendBtnStyle: React.CSSProperties = {
-  width: '100%', padding: '12px', backgroundColor: TEAL, color: '#fff',
-  border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,
-  fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer',
-  fontFamily: 'Outfit, sans-serif',
+const cellStyle: React.CSSProperties = {
+  display: 'flex', flexDirection: 'column' as const, gap: '4px',
 };
