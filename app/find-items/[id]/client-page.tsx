@@ -241,7 +241,7 @@ const returnTermsBox: React.CSSProperties = { padding: '10px 12px', backgroundCo
 const conditionLabelStyle: React.CSSProperties = { margin: '0 0 4px 0', fontSize: '10px', color: '#888', textTransform: 'uppercase' as const, fontWeight: 'bold', letterSpacing: '0.06em' };
 
 // Request / owner buttons
-const borrowButtonStyle: React.CSSProperties = { padding: '12px 24px', borderRadius: '10px', border: 'none', backgroundColor: '#5ECFDF', color: '#000', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer' };
+const borrowButtonStyle: React.CSSProperties = { padding: '12px 28px', border: '2px solid #1C1610', boxShadow: '3px 3px 0 #1C1610', backgroundColor: '#1E8A82', color: '#fff', fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer', fontFamily: 'Outfit, sans-serif' };
 const ownerBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', textDecoration: 'none' };
 
 const deleteItemBtnStyle: React.CSSProperties = { padding: '8px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '1px solid #ffaaaa', borderRadius: '8px', fontSize: '13px', cursor: 'pointer', fontWeight: '600' };

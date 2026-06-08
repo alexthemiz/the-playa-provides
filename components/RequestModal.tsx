@@ -43,14 +43,22 @@ function buildMessage({
   lines.push('');
   lines.push('Thank you!');
   lines.push(requesterName || '');
-  if (requesterUsername) lines.push(`@${requesterUsername} (theplayaprovides.com/profile/${requesterUsername})`);
+  if (requesterUsername) lines.push(`theplayaprovides.com/profile/${requesterUsername}`);
   return lines.join('\n');
 }
 
-function buildKeepMessage(itemName: string, requesterName: string, requesterUsername: string, itemId: number | string): string {
-  const itemLine = `Item: ${itemName} (theplayaprovides.com/find-items/${itemId})`;
-  const sig = requesterUsername ? `@${requesterUsername} (theplayaprovides.com/profile/${requesterUsername})` : '';
-  return `${itemLine}\n\nHi! I'm interested in your ${itemName}. Is it still available?\n\n\nThank you!\n${requesterName || ''}${sig ? `\n${sig}` : ''}`;
+function buildKeepMessage(itemName: string, ownerName: string, ownerUsername: string, requesterName: string, requesterUsername: string, itemId: number | string): string {
+  const lines: string[] = [];
+  lines.push(`To: ${ownerName}${ownerUsername ? ` (@${ownerUsername})` : ''}`);
+  lines.push(`Item: ${itemName} (theplayaprovides.com/find-items/${itemId})`);
+  lines.push('');
+  lines.push(`Hi! I'm interested in your ${itemName}. Is it still available?`);
+  lines.push('');
+  lines.push('');
+  lines.push('Thank you!');
+  lines.push(requesterName || '');
+  if (requesterUsername) lines.push(`theplayaprovides.com/profile/${requesterUsername}`);
+  return lines.join('\n');
 }
 
 export default function RequestModal({ item, onClose }: RequestModalProps) {
@@ -94,7 +102,7 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
       setOwnerUsername(oUsername);
 
       if (isKeep) {
-        setMessage(buildKeepMessage(item.item_name, rName, rUsername, item.id));
+        setMessage(buildKeepMessage(item.item_name, oName, oUsername, rName, rUsername, item.id));
       } else {
         setMessage(buildMessage({
           ownerName: oName, ownerUsername: oUsername,
@@ -216,6 +224,17 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
                     </span>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Keep-only: just show who posted it */}
+            {isKeep && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={metaLabelStyle}>Posted by</span>
+                {ownerUsername
+                  ? <a href={`/profile/${ownerUsername}`} target="_blank" rel="noreferrer" style={{ fontSize: '0.88rem', color: TEAL, fontWeight: 600, textDecoration: 'none' }}>@{ownerUsername}</a>
+                  : <span style={{ fontSize: '0.88rem', color: INK }}>{ownerName || '—'}</span>
+                }
               </div>
             )}
 
