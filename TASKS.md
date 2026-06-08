@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-06-08 (session 35)_
+_Last updated: 2026-06-08 (session 35 — pre-launch complete)_
 
 ---
 
@@ -12,26 +12,14 @@ _Last updated: 2026-06-08 (session 35)_
 
 ---
 
-## 🎯 Next Session Priority — Pre-Launch Audit Fixes
+## 🎯 Next Session Priority — Post-Launch
 
-### 🔴 Fix before sharing publicly
-- [ ] **`getUser()` → `getSession()` in settings page** — `app/settings/client-page.tsx` line 56 calls `getUser()` during initial data load (runs on mount). This holds the GoTrue lock for a network round-trip, same pattern that caused the header hang (session 4). Fix: swap to `getSession()`.
-- [ ] **`.single()` crash on missing location** — `app/find-items/[id]/client-page.tsx` line 37 and `app/@modal/(.)find-items/[id]/page.tsx` line 40 call `.single()` on the `locations` table using `gear.location_id`. If an item has no location set (location_id is null), this throws and crashes the detail page. Fix: use `.maybeSingle()` and null-check before using result, or skip the query if `gear.location_id` is null.
-- [ ] **Fix OG image crop** — Resize to 1200×630px with padding/background in Canva, re-upload, re-push.
-- [ ] **Delete orphaned `/app/profile/page.tsx`** — old "My Gear Manager" page with hardcoded dark theme, stale column names, never linked. Safe to delete. _(was in Quick Wins)_
-- [ ] **Investigate `/app/auth/page.tsx`** — may be unlinked leftover. Check if anything routes to it before deleting. _(was in Quick Wins)_
-
-### 🟡 Do soon (won't block launch but will bite new users)
-- [ ] **Getting Started checklist — smoke test** — Log in as a test account; verify checklist slides in, items check off, Skip dismisses to collapsed progress bar on profile, all 5 complete auto-dismisses.
+- [ ] **Welcome email** — Triggered on signup via Supabase DB webhook; design and copy TBD; uses existing Resend/edge function setup.
 - [ ] **End-to-end test: Lend/Return flow** — Use two test accounts; go through full loan lifecycle; confirm emails fire.
 - [ ] **End-to-end test: Following & Notifications** — Follow a user, list an item as them, verify bell badge + dropdown; mark-as-read; email opt-in.
-- [ ] **Welcome email** — Triggered on signup via Supabase DB webhook; design and copy TBD; uses existing Resend/edge function setup.
-- [ ] **Smoke test: new user signup → onboarding** — Create a fresh account, go through setup banner, fill profile, list first item. Find any gaps.
-
-### 🟢 Polish / nice-to-have before launch
+- [ ] **Incomplete profile nudge** — Some early users have NULL full_name. Options: A) amber banner on /settings if required fields missing, B) one-time modal after login, C) validate only on save.
 - [ ] **Dust storm decision** — View `theplayaprovides.com/mockup-dust-storm.html`, decide storm / haze / skip; implement if yes.
-- [ ] **Header color consider** — "Provides" is currently lime green; consider making the whole logo one color (all green or all white). Nav links are `#aaa` gray — consider white.
-- [ ] **Incomplete profile nudge** — Some early users have NULL full_name. Options: A) amber banner on /settings if required fields missing, B) one-time modal after login, C) validate only on save. _(was in Ideas)_
+- [ ] **Header color** — "Provides" lime green; consider all-green or all-white logo; nav links `#aaa` → consider white.
 
 ---
 
@@ -111,11 +99,16 @@ _(nothing queued)_
 
 ---
 
-## ✅ Done (session 35 — 2026-06-08)
+## ✅ Done (session 35 — 2026-06-08, pre-launch)
 
 ### Pre-launch audit fixes
 - [x] Fix: borrow terms hidden for keep items — `isGift` checked wrong string (`'You can keep it'` → `'Available to Keep'`); fixed across all 8 surfaces: find-items detail page, parallel modal, quick-view panel, RequestModal UI, RequestModal pre-filled message, profile items table, camp card view, camp list view
 - [x] Fix: orphaned "shoes" row (id 30) with null user_id and null location_id — deleted from DB
+- [x] Fix: `getUser()` → `getSession()` in settings page — prevents GoTrue lock contention on mount
+- [x] Fix: OG image resized to 1200×630px — replaced `public/TPP_logo1.png`
+- [x] Confirmed: `/app/profile/page.tsx` and `/app/auth/page.tsx` already deleted — no action needed
+- [x] Smoke test: Getting Started checklist — slide-in, items, Skip, collapsed bar all working
+- [x] **Site promoted to public** 🎉
 
 ### RequestModal redesign
 - [x] Redesign: borrow flow — title eyebrow + Arvo item name; 2-row terms block (Row 1: Posted by @username (linked to profile) | If damaged | If not returned; Row 2: Pick up by date input | Return by | Item Location); return condition italic quote; taller message textarea; Outfit font (not Courier New)
