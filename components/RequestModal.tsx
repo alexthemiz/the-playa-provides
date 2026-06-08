@@ -8,11 +8,14 @@ interface RequestModalProps {
 }
 
 function buildInitialMessage(item: any): string {
+  const isKeep = item.availability_status === 'Available to Keep';
   const terms: string[] = [];
-  if (item.return_by) terms.push(`• Return by: ${new Date(item.return_by).toLocaleDateString()}`);
-  if (item.damage_price) terms.push(`• Damage agreement: $${item.damage_price}`);
-  if (item.loss_price) terms.push(`• Loss agreement: $${item.loss_price}`);
-  if (item.return_terms) terms.push(`• Condition: "${item.return_terms}"`);
+  if (!isKeep) {
+    if (item.return_by) terms.push(`• Return by: ${new Date(item.return_by).toLocaleDateString()}`);
+    if (item.damage_price) terms.push(`• Damage agreement: $${item.damage_price}`);
+    if (item.loss_price) terms.push(`• Loss agreement: $${item.loss_price}`);
+    if (item.return_terms) terms.push(`• Condition: "${item.return_terms}"`);
+  }
   if (terms.length > 0) {
     return `Hi! I'm interested in your ${item.item_name}.\n\nI've reviewed and accept the terms:\n${terms.join('\n')}\n\nIs it still available?`;
   }
@@ -109,7 +112,7 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
           ) : (
             <>
               {/* --- BORROWING TERMS --- */}
-              {(item.return_by || item.return_terms || item.damage_price || item.loss_price) && (
+              {item.availability_status !== 'Available to Keep' && (item.return_by || item.return_terms || item.damage_price || item.loss_price) && (
                 <div className="flex gap-3 mb-5">
                   {(item.return_by || item.damage_price || item.loss_price) && (
                     <div className="bg-gray-50 rounded-xl border border-gray-100 p-3 flex-1 space-y-2">

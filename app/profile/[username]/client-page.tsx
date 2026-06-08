@@ -1075,7 +1075,8 @@ export default function PublicProfilePage() {
               const loc = item.locations
                 ? [item.locations.city, item.locations.state].filter(Boolean).join(', ')
                 : '—';
-              const termsSummary = [
+              const isKeep = item.availability_status === 'Available to Keep';
+              const termsSummary = isKeep ? '' : [
                 item.return_by ? `Return by ${new Date(item.return_by).toLocaleDateString()}` : null,
                 item.damage_price ? `Damage agr. $${item.damage_price}` : null,
                 item.loss_price ? `Loss agr. $${item.loss_price}` : null,

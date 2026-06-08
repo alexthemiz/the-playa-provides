@@ -942,8 +942,8 @@ function CampCardView({ item }: { item: any }) {
   const locationDisplay = item.locations
     ? [item.locations.city, item.locations.state].filter(Boolean).join(', ')
     : 'N/A';
-  const hasTerms = item.return_by || item.return_terms;
   const isKeep = item.availability_status === 'Available to Keep';
+  const hasTerms = !isKeep && (item.return_by || item.return_terms);
   return (
     <div style={{ backgroundColor: '#FDFAF4', border: '1.5px solid rgba(28,22,16,0.15)', boxShadow: '3px 3px 0 rgba(28,22,16,0.1)' }}>
       <div style={{ position: 'relative' as const, backgroundColor: 'transparent', padding: '12px 12px 0 12px', width: '100%', overflow: 'hidden', boxSizing: 'border-box' as const }}>
@@ -983,13 +983,13 @@ function CampListView({ item }: { item: any }) {
   const locationDisplay = item.locations
     ? [item.locations.city, item.locations.state].filter(Boolean).join(', ')
     : '—';
-  const termsSummary = [
+  const isKeep = item.availability_status === 'Available to Keep';
+  const termsSummary = isKeep ? '' : [
     item.return_by ? `Return by ${new Date(item.return_by).toLocaleDateString()}` : null,
     item.damage_price ? `Damage agr. $${item.damage_price}` : null,
     item.loss_price ? `Loss agr. $${item.loss_price}` : null,
     item.return_terms ? 'Custom terms' : null,
   ].filter(Boolean).join(' · ');
-  const isKeep = item.availability_status === 'Available to Keep';
   return (
     <div style={{ display: 'grid', gridTemplateColumns: CAMP_LIST_COLS, gap: '10px', alignItems: 'center', padding: '10px 12px', backgroundColor: '#FDFAF4', borderBottom: '1px solid rgba(28,22,16,0.08)' }}>
       <div style={{ width: '50px', height: '50px', overflow: 'hidden', backgroundColor: '#EDE5D0', flexShrink: 0 }}>
