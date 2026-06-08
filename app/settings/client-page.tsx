@@ -53,7 +53,8 @@ export default function SettingsPage() {
   useEffect(() => {
     async function loadAllData() {
       try {
-        const { data: { user: activeUser } } = await supabase.auth.getUser();
+        const { data: { session } } = await supabase.auth.getSession();
+        const activeUser = session?.user;
         if (activeUser) {
           setUser(activeUser);
           const { data: pData } = await supabase.from('profiles').select('*').eq('id', activeUser.id).maybeSingle();
