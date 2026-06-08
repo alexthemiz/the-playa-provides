@@ -655,7 +655,7 @@ export default function FindItemsPage() {
               )}
 
               {/* Terms */}
-              {(selectedItem.return_by || selectedItem.return_terms || selectedItem.damage_price || selectedItem.loss_price) && (
+              {selectedItem.availability_status !== 'Available to Keep' && (selectedItem.return_by || selectedItem.return_terms || selectedItem.damage_price || selectedItem.loss_price) && (
                 <div style={{ marginBottom: '16px', padding: '14px', backgroundColor: PAPER_DK, border: `1px solid rgba(28,22,16,0.12)` }}>
                   <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: INK_LITE, marginBottom: '10px' }}>Borrowing Terms</div>
                   {selectedItem.return_by && (

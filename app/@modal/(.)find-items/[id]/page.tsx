@@ -102,7 +102,7 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
                 </div>
                 <div style={infoItemStyle}>
                   <User size={16} color="#00ccff" />
-                  <span>Owned by {item.owner_name}</span>
+                  <span>{item.availability_status === 'Available to Keep' ? 'Offered' : 'Owned'} by {item.owner_name}</span>
                 </div>
               </div>
 
@@ -113,7 +113,7 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
               
               {session ? (
                 <button style={actionButtonStyle} onClick={() => setIsRequestOpen(true)}>
-                  Request Item
+                  {item.availability_status === 'Available to Keep' ? 'Request to Keep' : 'Request to Borrow'}
                 </button>
               ) : (
                 <a href="/login" style={{ ...actionButtonStyle, display: 'block', textAlign: 'center' as const, textDecoration: 'none' }}>
