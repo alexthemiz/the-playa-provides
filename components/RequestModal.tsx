@@ -1,29 +1,59 @@
+'use client';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { X, Send, AlertTriangle, Calendar, Shield } from 'lucide-react';
+import { X, Send } from 'lucide-react';
 
 interface RequestModalProps {
   item: any;
   onClose: () => void;
 }
 
-function buildInitialMessage(item: any): string {
-  const isKeep = item.availability_status === 'Available to Keep';
-  const terms: string[] = [];
-  if (!isKeep) {
-    if (item.return_by) terms.push(`• Return by: ${new Date(item.return_by).toLocaleDateString()}`);
-    if (item.damage_price) terms.push(`• Damage agreement: $${item.damage_price}`);
-    if (item.loss_price) terms.push(`• Loss agreement: $${item.loss_price}`);
-    if (item.return_terms) terms.push(`• Condition: "${item.return_terms}"`);
-  }
-  if (terms.length > 0) {
-    return `Hi! I'm interested in your ${item.item_name}.\n\nI've reviewed and accept the terms:\n${terms.join('\n')}\n\nIs it still available?`;
-  }
-  return `Hi! I'm interested in your ${item.item_name}. Is it still available?`;
+const INK   = '#1C1610';
+const TEAL  = '#1E8A82';
+const PAPER = '#FDFAF4';
+const PAPER_DK = '#EDE5D0';
+
+function buildMessage({
+  ownerName, ownerUsername, requesterName, requesterUsername,
+  itemName, itemId, returnBy, damagePrice, lossPrice,
+}: {
+  ownerName: string; ownerUsername: string;
+  requesterName: string; requesterUsername: string;
+  itemName: string; itemId: number | string;
+  returnBy: string | null; damagePrice: number | null; lossPrice: number | null;
+}): string {
+  const lines: string[] = [];
+  lines.push(`To: ${ownerName}${ownerUsername ? `, @${ownerUsername}` : ''}`);
+  lines.push(`Item: ${itemName}`);
+  if (returnBy) lines.push(`Return by: ${new Date(returnBy).toLocaleDateString()}`);
+  const fees: string[] = [];
+  if (damagePrice) fees.push(`If damaged: $${damagePrice}`);
+  if (lossPrice) fees.push(`If not returned: $${lossPrice}`);
+  if (fees.length) lines.push(fees.join(', '));
+  lines.push('');
+  lines.push(`Hi! I'm interested in your ${itemName}.`);
+  lines.push('');
+  lines.push("I've reviewed the terms above and:");
+  lines.push('Accept: [ ]');
+  lines.push('Counter: [ ] ______');
+  lines.push('');
+  lines.push('');
+  lines.push('Thank you!');
+  lines.push(requesterName || '');
+  if (requesterUsername) lines.push(`@${requesterUsername}`);
+  lines.push('');
+  lines.push(`theplayaprovides.com/find-items/${itemId}`);
+  return lines.join('\n');
+}
+
+function buildKeepMessage(itemName: string, requesterName: string, requesterUsername: string, itemId: number | string): string {
+  return `Hi! I'm interested in your ${itemName}. Is it still available?\n\n\nThank you!\n${requesterName || ''}${requesterUsername ? `\n@${requesterUsername}` : ''}\n\ntheplayaprovides.com/find-items/${itemId}`;
 }
 
 export default function RequestModal({ item, onClose }: RequestModalProps) {
-  const [message, setMessage] = useState(() => buildInitialMessage(item));
+  const isKeep = item.availability_status === 'Available to Keep';
+
+  const [message, setMessage] = useState('');
   const [pickupDate, setPickupDate] = useState('');
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -31,24 +61,49 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
   const [requesterName, setRequesterName] = useState('');
   const [requesterEmail, setRequesterEmail] = useState('');
   const [requesterId, setRequesterId] = useState('');
+  const [requesterUsername, setRequesterUsername] = useState('');
+  const [ownerName, setOwnerName] = useState(item.owner_name || '');
+  const [ownerUsername, setOwnerUsername] = useState(item.owner_username || '');
 
   useEffect(() => {
-    async function getRequesterInfo() {
+    async function loadData() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       setRequesterEmail(user.email || '');
       setRequesterId(user.id);
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('preferred_name, contact_email')
-        .eq('id', user.id)
-        .maybeSingle();
-      if (profile) {
-        setRequesterName(profile.preferred_name || '');
-        if (profile.contact_email) setRequesterEmail(profile.contact_email);
+
+      const [requesterRes, ownerRes] = await Promise.all([
+        supabase.from('profiles').select('preferred_name, username, contact_email').eq('id', user.id).maybeSingle(),
+        item.owner_username
+          ? Promise.resolve({ data: { preferred_name: item.owner_name, username: item.owner_username } })
+          : supabase.from('profiles').select('preferred_name, username').eq('id', item.user_id).maybeSingle(),
+      ]);
+
+      const rName = requesterRes.data?.preferred_name || '';
+      const rUsername = requesterRes.data?.username || '';
+      const oName = ownerRes.data?.preferred_name || ownerName;
+      const oUsername = ownerRes.data?.username || '';
+
+      if (requesterRes.data?.contact_email) setRequesterEmail(requesterRes.data.contact_email);
+      setRequesterName(rName);
+      setRequesterUsername(rUsername);
+      setOwnerName(oName);
+      setOwnerUsername(oUsername);
+
+      if (isKeep) {
+        setMessage(buildKeepMessage(item.item_name, rName, rUsername, item.id));
+      } else {
+        setMessage(buildMessage({
+          ownerName: oName, ownerUsername: oUsername,
+          requesterName: rName, requesterUsername: rUsername,
+          itemName: item.item_name, itemId: item.id,
+          returnBy: item.return_by || null,
+          damagePrice: item.damage_price || null,
+          lossPrice: item.loss_price || null,
+        }));
       }
     }
-    getRequesterInfo();
+    loadData();
   }, []);
 
   const handleSendRequest = async () => {
@@ -56,130 +111,186 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
     setSendError('');
     try {
       const fullMessage = pickupDate
-        ? `Desired pickup date: ${new Date(pickupDate + 'T12:00:00').toLocaleDateString()}\n\n${message}`
+        ? `Pick up by: ${new Date(pickupDate + 'T12:00:00').toLocaleDateString()}\n\n${message}`
         : message;
 
-      const { data, error } = await supabase.functions.invoke('send-request-email', {
-        body: {
-          itemId: item.id,
-          ownerId: item.user_id,
-          message: fullMessage,
-          itemName: item.item_name,
-          requesterName,
-          requesterEmail,
-        },
+      const { error } = await supabase.functions.invoke('send-request-email', {
+        body: { itemId: item.id, ownerId: item.user_id, message: fullMessage, itemName: item.item_name, requesterName, requesterEmail },
       });
 
       if (error) throw error;
       setSent(true);
-      // Fire-and-forget: bell notification for item owner
       if (requesterId) {
-        supabase.from('notifications').insert({
-          type: 'item_request',
-          recipient_id: item.user_id,
-          actor_id: requesterId,
-          item_id: item.id,
-        });
+        supabase.from('notifications').insert({ type: 'item_request', recipient_id: item.user_id, actor_id: requesterId, item_id: item.id });
       }
       setTimeout(() => onClose(), 2000);
     } catch (err) {
       console.error('Error:', err);
-      setSendError('Something went wrong sending your request. Please try again.');
+      setSendError('Something went wrong. Please try again.');
     } finally {
       setSending(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" style={{ zIndex: 2000 }}>
-      <div className="bg-white rounded-2xl max-w-md w-full overflow-y-auto max-h-[90vh]">
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-gray-900">Request {item.item_name}</h2>
-            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full">
-              <X className="w-5 h-5 text-gray-500" />
-            </button>
-          </div>
+    <div style={overlayStyle} onClick={onClose}>
+      <div style={modalStyle} onClick={e => e.stopPropagation()}>
 
-          {sent ? (
-            <div className="py-12 text-center">
-              <div className="bg-green-100 text-green-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Send className="w-8 h-8" />
-              </div>
-              <h3 className="text-lg font-semibold">Message Sent!</h3>
-              <p className="text-gray-500">The owner will receive an email shortly.</p>
-            </div>
-          ) : (
-            <>
-              {/* --- BORROWING TERMS --- */}
-              {item.availability_status !== 'Available to Keep' && (item.return_by || item.return_terms || item.damage_price || item.loss_price) && (
-                <div className="flex gap-3 mb-5">
-                  {(item.return_by || item.damage_price || item.loss_price) && (
-                    <div className="bg-gray-50 rounded-xl border border-gray-100 p-3 flex-1 space-y-2">
-                      <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Borrowing Terms</h4>
-                      {item.return_by && (
-                        <div className="flex items-center gap-2 text-sm text-gray-700">
-                          <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                          <span>Return by: <strong>{new Date(item.return_by).toLocaleDateString()}</strong></span>
-                        </div>
-                      )}
-                      {item.damage_price && (
-                        <div className="flex items-center gap-2 text-sm text-gray-700">
-                          <Shield className="w-4 h-4 text-orange-400 flex-shrink-0" />
-                          <span>Damage agreement: <strong>${Math.round(item.damage_price)}</strong></span>
-                        </div>
-                      )}
-                      {item.loss_price && (
-                        <div className="flex items-center gap-2 text-sm text-gray-700">
-                          <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0" />
-                          <span>Loss agreement: <strong>${Math.round(item.loss_price)}</strong></span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  {item.return_terms && (
-                    <div className="bg-gray-50 rounded-xl border border-gray-100 p-3 flex-1">
-                      <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Return Condition</h4>
-                      <p className="text-sm text-gray-800 italic">"{item.return_terms}"</p>
-                    </div>
-                  )}
-                </div>
-              )}
-              {/* --- END BORROWING TERMS --- */}
-
-              <div className="mb-4">
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">When I'd like to pick up by</label>
-                <input
-                  type="date"
-                  value={pickupDate}
-                  onChange={(e) => setPickupDate(e.target.value)}
-                  className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-[#3ABFD4] focus:border-transparent outline-none text-sm"
-                  style={{ color: '#111' }}
-                />
-              </div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Message to owner</label>
-              <textarea
-                className="w-full border rounded-xl p-3 h-32 focus:ring-2 focus:ring-[#3ABFD4] focus:border-transparent outline-none text-sm"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                style={{ color: '#111' }}
-              />
-              {sendError && (
-                <p style={{ color: '#ef4444', fontSize: '0.85rem', marginTop: '12px', textAlign: 'center' as const }}>
-                  {sendError}
-                </p>
-              )}
-              <button
-                onClick={handleSendRequest}
-                disabled={sending || !message.trim()}
-                style={{ width: '100%', marginTop: '16px', backgroundColor: '#E8834A', color: '#000', padding: '12px', borderRadius: '12px', fontWeight: '600', fontSize: '15px', cursor: 'pointer', border: 'none', opacity: sending || !message.trim() ? 0.5 : 1 }}
-              >
-                {sending ? 'Sending...' : 'Send Request'}
-              </button>
-            </>
-          )}
+        {/* Header */}
+        <div style={headerRowStyle}>
+          <h2 style={titleStyle}>
+            {isKeep ? 'Request to Keep' : 'Request to Borrow'}:{' '}
+            <span style={{ fontStyle: 'italic' as const }}>{item.item_name}</span>
+          </h2>
+          <button onClick={onClose} style={closeBtnStyle}><X size={18} /></button>
         </div>
+
+        {sent ? (
+          <div style={{ padding: '40px 0', textAlign: 'center' as const }}>
+            <div style={{ width: 56, height: 56, borderRadius: '50%', backgroundColor: '#d1fae5', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <Send size={24} color="#059669" />
+            </div>
+            <p style={{ fontWeight: 700, fontSize: '1.1rem', color: INK, margin: '0 0 6px' }}>Message Sent!</p>
+            <p style={{ color: '#888', fontSize: '0.88rem', margin: 0 }}>The owner will receive an email shortly.</p>
+          </div>
+        ) : (
+          <>
+            {/* Owner info row */}
+            <div style={ownerRowStyle}>
+              <span style={metaLabelStyle}>From:</span>
+              <span style={{ color: INK, fontSize: '0.88rem' }}>
+                {ownerName}{ownerUsername && <span style={{ color: '#888' }}> @{ownerUsername}</span>}
+              </span>
+            </div>
+
+            {/* Borrow-only: damage/loss + return by + pick up date */}
+            {!isKeep && (
+              <>
+                {(item.damage_price || item.loss_price) && (
+                  <div style={termsRowStyle}>
+                    {item.damage_price && (
+                      <span style={termPillStyle}>If damaged: <strong>${Math.round(item.damage_price)}</strong></span>
+                    )}
+                    {item.loss_price && (
+                      <span style={termPillStyle}>If not returned: <strong>${Math.round(item.loss_price)}</strong></span>
+                    )}
+                  </div>
+                )}
+
+                <div style={dateRowStyle}>
+                  {item.return_by && (
+                    <div style={dateHalfStyle}>
+                      <span style={metaLabelStyle}>Return by</span>
+                      <span style={{ fontSize: '0.88rem', color: INK, fontWeight: 600 }}>
+                        {new Date(item.return_by).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </span>
+                    </div>
+                  )}
+                  <div style={dateHalfStyle}>
+                    <label style={metaLabelStyle}>Pick up by</label>
+                    <input
+                      type="date"
+                      value={pickupDate}
+                      onChange={e => setPickupDate(e.target.value)}
+                      style={dateInputStyle}
+                    />
+                  </div>
+                </div>
+
+                {item.return_terms && (
+                  <p style={returnTermsStyle}>"{item.return_terms}"</p>
+                )}
+              </>
+            )}
+
+            {/* Message box */}
+            <label style={{ ...metaLabelStyle, display: 'block', marginBottom: '6px' }}>Message to owner</label>
+            <textarea
+              value={message}
+              onChange={e => setMessage(e.target.value)}
+              style={textareaStyle}
+            />
+
+            {sendError && (
+              <p style={{ color: '#ef4444', fontSize: '0.82rem', marginTop: '8px', textAlign: 'center' as const }}>{sendError}</p>
+            )}
+
+            <button
+              onClick={handleSendRequest}
+              disabled={sending || !message.trim()}
+              style={{ ...sendBtnStyle, opacity: sending || !message.trim() ? 0.5 : 1 }}
+            >
+              {sending ? 'Sending…' : 'Send Request'}
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
 }
+
+// ── Styles ──────────────────────────────────────────────────────────────────
+
+const overlayStyle: React.CSSProperties = {
+  position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)',
+  backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center',
+  justifyContent: 'center', padding: '16px', zIndex: 2000,
+};
+const modalStyle: React.CSSProperties = {
+  backgroundColor: PAPER, border: `2px solid ${INK}`, boxShadow: `5px 5px 0 ${INK}`,
+  width: '100%', maxWidth: '480px', maxHeight: '90vh', overflowY: 'auto', padding: '24px',
+  display: 'flex', flexDirection: 'column' as const, gap: '14px',
+};
+const headerRowStyle: React.CSSProperties = {
+  display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px',
+};
+const titleStyle: React.CSSProperties = {
+  fontFamily: "'Arvo', serif", fontSize: '1.1rem', fontWeight: 700, color: INK,
+  margin: 0, lineHeight: 1.3,
+};
+const closeBtnStyle: React.CSSProperties = {
+  background: 'none', border: 'none', cursor: 'pointer', color: '#888',
+  padding: '2px', flexShrink: 0, display: 'flex', alignItems: 'center',
+};
+const ownerRowStyle: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', gap: '8px',
+  borderBottom: `1px solid rgba(28,22,16,0.12)`, paddingBottom: '12px',
+};
+const metaLabelStyle: React.CSSProperties = {
+  fontFamily: "'Space Mono', monospace", fontSize: '0.6rem', fontWeight: 700,
+  letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: '#888',
+};
+const termsRowStyle: React.CSSProperties = {
+  display: 'flex', gap: '10px', flexWrap: 'wrap' as const,
+};
+const termPillStyle: React.CSSProperties = {
+  fontSize: '0.82rem', color: INK, backgroundColor: PAPER_DK,
+  padding: '4px 10px', border: `1px solid rgba(28,22,16,0.15)`,
+};
+const dateRowStyle: React.CSSProperties = {
+  display: 'flex', gap: '12px',
+};
+const dateHalfStyle: React.CSSProperties = {
+  flex: 1, display: 'flex', flexDirection: 'column' as const, gap: '4px',
+};
+const dateInputStyle: React.CSSProperties = {
+  width: '100%', border: `1.5px solid rgba(28,22,16,0.25)`, backgroundColor: '#fff',
+  padding: '6px 8px', fontSize: '0.85rem', color: INK, outline: 'none',
+  fontFamily: 'inherit', boxSizing: 'border-box' as const,
+};
+const returnTermsStyle: React.CSSProperties = {
+  fontSize: '0.82rem', color: '#666', fontStyle: 'italic' as const,
+  margin: 0, paddingLeft: '8px', borderLeft: `2px solid ${PAPER_DK}`,
+};
+const textareaStyle: React.CSSProperties = {
+  width: '100%', minHeight: '260px', border: `1.5px solid rgba(28,22,16,0.25)`,
+  backgroundColor: '#fff', padding: '10px 12px', fontSize: '0.83rem',
+  color: INK, fontFamily: "'Courier New', monospace", lineHeight: 1.6,
+  resize: 'vertical' as const, outline: 'none', boxSizing: 'border-box' as const,
+};
+const sendBtnStyle: React.CSSProperties = {
+  width: '100%', padding: '12px', backgroundColor: TEAL, color: '#fff',
+  border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,
+  fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer',
+  fontFamily: 'Outfit, sans-serif',
+};
