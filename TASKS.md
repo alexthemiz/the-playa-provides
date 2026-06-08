@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-05-29 (session 33)_
+_Last updated: 2026-06-08 (session 35)_
 
 ---
 
@@ -12,31 +12,36 @@ _Last updated: 2026-05-29 (session 33)_
 
 ---
 
-## 🎯 Next Session Priority
-- [ ] **Deploy `send-loan-notification`** — pickup_by row removed from email HTML in session 27; needs copy-paste redeploy via Supabase Dashboard (Verify JWT off).
-- [ ] **Deploy `send-feedback-notification`** — file exists at `supabase/functions/send-feedback-notification/index.ts`; needs deploy via Supabase Dashboard (paste file contents, Verify JWT off). Widget currently saves to DB but email alert won't fire until this is deployed.
-- [ ] **Dust storm decision** — View `theplayaprovides.com/mockup-dust-storm.html`, decide storm / haze / skip; implement if yes.
+## 🎯 Next Session Priority — Pre-Launch Audit Fixes
+
+### 🔴 Fix before sharing publicly
+- [ ] **`getUser()` → `getSession()` in settings page** — `app/settings/client-page.tsx` line 56 calls `getUser()` during initial data load (runs on mount). This holds the GoTrue lock for a network round-trip, same pattern that caused the header hang (session 4). Fix: swap to `getSession()`.
+- [ ] **`.single()` crash on missing location** — `app/find-items/[id]/client-page.tsx` line 37 and `app/@modal/(.)find-items/[id]/page.tsx` line 40 call `.single()` on the `locations` table using `gear.location_id`. If an item has no location set (location_id is null), this throws and crashes the detail page. Fix: use `.maybeSingle()` and null-check before using result, or skip the query if `gear.location_id` is null.
 - [ ] **Fix OG image crop** — Resize to 1200×630px with padding/background in Canva, re-upload, re-push.
+- [ ] **Delete orphaned `/app/profile/page.tsx`** — old "My Gear Manager" page with hardcoded dark theme, stale column names, never linked. Safe to delete. _(was in Quick Wins)_
+- [ ] **Investigate `/app/auth/page.tsx`** — may be unlinked leftover. Check if anything routes to it before deleting. _(was in Quick Wins)_
+
+### 🟡 Do soon (won't block launch but will bite new users)
+- [ ] **Getting Started checklist — smoke test** — Log in as a test account; verify checklist slides in, items check off, Skip dismisses to collapsed progress bar on profile, all 5 complete auto-dismisses.
+- [ ] **End-to-end test: Lend/Return flow** — Use two test accounts; go through full loan lifecycle; confirm emails fire.
+- [ ] **End-to-end test: Following & Notifications** — Follow a user, list an item as them, verify bell badge + dropdown; mark-as-read; email opt-in.
+- [ ] **Welcome email** — Triggered on signup via Supabase DB webhook; design and copy TBD; uses existing Resend/edge function setup.
+- [ ] **Smoke test: new user signup → onboarding** — Create a fresh account, go through setup banner, fill profile, list first item. Find any gaps.
+
+### 🟢 Polish / nice-to-have before launch
+- [ ] **Dust storm decision** — View `theplayaprovides.com/mockup-dust-storm.html`, decide storm / haze / skip; implement if yes.
 - [ ] **Header color consider** — "Provides" is currently lime green; consider making the whole logo one color (all green or all white). Nav links are `#aaa` gray — consider white.
-- [ ] **Getting Started checklist — smoke test** — Log in as test account, verify checklist slides in, items check off correctly, Skip dismisses to profile collapsed bar, all 5 complete auto-dismisses.
-- [ ] **Welcome email (D from brainstorm)** — Triggered on signup via Supabase DB webhook; design and copy TBD; uses existing Resend/edge function setup.
+- [ ] **Incomplete profile nudge** — Some early users have NULL full_name. Options: A) amber banner on /settings if required fields missing, B) one-time modal after login, C) validate only on save. _(was in Ideas)_
 
 ---
 
 ## 🏗️ In Progress / Needs Testing
 - [ ] **Test spreadsheet import end-to-end in browser** — CSV upload, Excel upload, duplicate detection, error cases. (`fix/spreadsheet-import-user-id` merged — ready to test.)
-- [ ] **End-to-end test: Following & Notifications** — Follow a user, list a new item as them, verify bell badge + dropdown appears; test mark-as-read and mark-all-read; verify email opt-in; verify /find-items relationship filter. _(Fully implemented in code — this is a testing task only, not a build task.)_
-- [ ] **End-to-end test: Return flow** — Borrower clicks Return Item → owner sees Confirm Return → owner confirms → item goes back to Not Available. _(Fully implemented in code — this is a testing task only, not a build task.)_
 
 ---
 
 ## 🔧 Bugs & Fixes
-- [ ] **OG preview image gets cropped when sharing links** — Current image is not 1200×630px. Resize with padding/background in Canva, re-upload to repo, re-push.
----
-
-## ⚡ Quick Wins
-- [ ] **Delete orphaned `/app/profile/page.tsx`** — Old "My Gear Manager" page, never linked to, uses outdated patterns (hardcoded dark theme, `burner_user_name` localStorage, stale column names). Safe to delete.
-- [ ] **Investigate `/app/auth/page.tsx`** — May be an unlinked leftover. Check if anything routes to it before deleting.
+_(moved to Pre-Launch Audit section above)_
 
 ---
 
@@ -105,6 +110,23 @@ _(nothing queued)_
 - [ ] **FAQ page** — TBD whether it replaces /about or sits alongside it. Content TBD. Should cover: how borrowing/lending works, what happens if something is damaged, how camps work, how visibility settings work, how to get listed on the resources directory.
 
 ---
+
+## ✅ Done (session 35 — 2026-06-08)
+
+### Pre-launch audit fixes
+- [x] Fix: borrow terms hidden for keep items — `isGift` checked wrong string (`'You can keep it'` → `'Available to Keep'`); fixed across all 8 surfaces: find-items detail page, parallel modal, quick-view panel, RequestModal UI, RequestModal pre-filled message, profile items table, camp card view, camp list view
+- [x] Fix: orphaned "shoes" row (id 30) with null user_id and null location_id — deleted from DB
+
+### RequestModal redesign
+- [x] Redesign: borrow flow — title eyebrow + Arvo item name; 2-row terms block (Row 1: Posted by @username (linked to profile) | If damaged | If not returned; Row 2: Pick up by date input | Return by | Item Location); return condition italic quote; taller message textarea; Outfit font (not Courier New)
+- [x] Redesign: keep flow — matching styled box with Posted by | Item Location; same message structure
+- [x] Fix: message template — To: OwnerName (@username); Item: name (URL); Accept/Counter checkboxes only shown when terms exist; signature is preferred name + profile URL (no @username line, no parentheses)
+- [x] Fix: pickup date inserts into message header block (not prepended above To: line)
+- [x] Fix: Request button on item detail page and parallel modal — updated to new design system (teal #1E8A82, white text, ink border + offset shadow)
+
+## ✅ Done (session 34 — 2026-06-08)
+- [x] Deploy `send-loan-notification` — confirmed `pickup_by` was never in the email HTML; file was already clean; deployed to Supabase Dashboard (Verify JWT off).
+- [x] Pre-launch codebase audit — audited all app/ and components/ files; key findings logged in Next Session Priority section.
 
 ## ✅ Done (session 33 — 2026-05-29)
 
