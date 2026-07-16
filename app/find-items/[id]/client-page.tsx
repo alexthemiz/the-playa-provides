@@ -171,7 +171,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
           {/* Button row — centered, below text column */}
           <div style={{ display: 'flex', justifyContent: 'center' as const, gap: '10px', marginTop: '8px' }}>
             {session?.user?.id === item.user_id ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%', maxWidth: '420px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
                 <a href={`/list-item?edit=${item.id}`} style={editDetailsBtnStyle}>Edit Details</a>
                 <ShareButton itemId={item.id} itemName={item.item_name} style={shareInlineBtnStyle} />
                 <button onClick={() => setConfirmDelete(true)} style={{ ...deleteListingBtnStyle, marginLeft: 'auto' }}>Delete Listing</button>
