@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { MapPin, User, X } from 'lucide-react';
 import PolaroidPhoto from '@/components/PolaroidPhoto';
 import RequestModal from '@/components/RequestModal';
+import ShareButton from '@/components/ShareButton';
 
 export default function ItemModal({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -127,6 +128,8 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
                   </button>
                 </div>
               )}
+
+              <ShareButton itemId={item.id} itemName={item.item_name} />
             </div>
           </div>
         ) : (

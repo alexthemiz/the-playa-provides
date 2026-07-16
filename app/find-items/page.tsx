@@ -7,6 +7,7 @@ import ImageSlider from '@/components/ImageSlider';
 import { Search, MapPin, User, Package, X, LayoutGrid, List, Map } from 'lucide-react';
 import Link from 'next/link';
 import RequestModal from '@/components/RequestModal';
+import ShareButton from '@/components/ShareButton';
 
 const MapView = dynamic(() => import('@/components/MapView'), { ssr: false });
 
@@ -703,6 +704,8 @@ export default function FindItemsPage() {
                   Log In to Request →
                 </a>
               )}
+
+              <ShareButton itemId={selectedItem.id} itemName={selectedItem.item_name} />
             </div>
           </div>
         </div>

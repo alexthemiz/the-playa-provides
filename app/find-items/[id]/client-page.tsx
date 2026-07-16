@@ -6,6 +6,7 @@ import { MapPin, User, ChevronLeft, Shield, AlertTriangle, Calendar } from 'luci
 import Link from 'next/link';
 import RequestModal from '@/components/RequestModal'; // Assuming this is your path
 import ImageSlider from '@/components/ImageSlider';
+import ShareButton from '@/components/ShareButton';
 
 export default function ItemDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -183,6 +184,10 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
                 Log In to Request
               </a>
             )}
+          </div>
+
+          <div style={{ maxWidth: '320px', margin: '0 auto' }}>
+            <ShareButton itemId={item.id} itemName={item.item_name} />
           </div>
         </div>
       </div>
