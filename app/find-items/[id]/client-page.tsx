@@ -177,21 +177,21 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
                 <button onClick={() => setConfirmDelete(true)} style={{ ...deleteListingBtnStyle, marginLeft: 'auto' }}>Delete Listing</button>
               </div>
             ) : session ? (
-              <button style={borrowButtonStyle} onClick={() => setIsModalOpen(true)}>
-                {requestLabel}
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+                <button style={borrowButtonStyle} onClick={() => setIsModalOpen(true)}>
+                  {requestLabel}
+                </button>
+                <ShareButton itemId={item.id} itemName={item.item_name} style={{ ...shareInlineBtnStyle, marginLeft: 'auto' }} />
+              </div>
             ) : (
-              <a href="/login" style={{ ...borrowButtonStyle, display: 'block', textAlign: 'center' as const, textDecoration: 'none' }}>
-                Log In to Request
-              </a>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+                <a href="/login" style={{ ...borrowButtonStyle, textDecoration: 'none' }}>
+                  Log In to Request
+                </a>
+                <ShareButton itemId={item.id} itemName={item.item_name} style={{ ...shareInlineBtnStyle, marginLeft: 'auto' }} />
+              </div>
             )}
           </div>
-
-          {session?.user?.id !== item.user_id && (
-            <div style={{ maxWidth: '320px', margin: '0 auto' }}>
-              <ShareButton itemId={item.id} itemName={item.item_name} />
-            </div>
-          )}
         </div>
       </div>
 
@@ -251,11 +251,11 @@ const conditionLabelStyle: React.CSSProperties = { margin: '0 0 4px 0', fontSize
 // Request / owner buttons
 const borrowButtonStyle: React.CSSProperties = { padding: '12px 28px', border: '2px solid #1C1610', boxShadow: '3px 3px 0 #1C1610', backgroundColor: '#1E8A82', color: '#fff', fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer', fontFamily: 'Outfit, sans-serif' };
 const ownerBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', textDecoration: 'none' };
-const editDetailsBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#fff', color: '#1E8A82', border: '1.5px solid #1E8A82', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', whiteSpace: 'nowrap' as const };
-const shareInlineBtnStyle: React.CSSProperties = { width: 'auto', flex: '0 0 auto', padding: '10px 20px', marginTop: 0, borderRadius: '8px', border: '1.5px solid #1C1610', fontSize: '13px', whiteSpace: 'nowrap' as const };
+const editDetailsBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#fff', color: '#1E8A82', border: '2px solid #1E8A82', fontSize: '13px', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', whiteSpace: 'nowrap' as const };
+const shareInlineBtnStyle: React.CSSProperties = { width: 'auto', flex: '0 0 auto', padding: '10px 20px', marginTop: 0, border: '2px solid #1C1610', fontSize: '13px', whiteSpace: 'nowrap' as const };
 
 const deleteItemBtnStyle: React.CSSProperties = { padding: '8px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '1px solid #ffaaaa', borderRadius: '8px', fontSize: '13px', cursor: 'pointer', fontWeight: '600' };
-const deleteListingBtnStyle: React.CSSProperties = { ...deleteItemBtnStyle, padding: '10px 20px', fontWeight: 700, whiteSpace: 'nowrap' as const };
+const deleteListingBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '2px solid #cc0000', fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const };
 const deleteOverlayStyle: React.CSSProperties = { position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100, padding: '20px' };
 const deleteModalStyle: React.CSSProperties = { backgroundColor: '#fff', padding: '24px', borderRadius: '16px', maxWidth: '400px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' };
 const cancelBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#f5f5f5', color: '#333', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600' };
