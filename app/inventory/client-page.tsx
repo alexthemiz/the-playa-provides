@@ -597,7 +597,7 @@ export default function InventoryPage() {
             </colgroup>
             <thead>
               <tr style={headerRowStyle}>
-                <th style={thStyle}>Item Name</th>
+                <th style={thStyle}>Item</th>
                 <th style={thStyle}>Category</th>
                 <th style={thStyle}>Location</th>
                 <th style={thStyle}>Description</th>
