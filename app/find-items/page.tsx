@@ -57,6 +57,8 @@ export default function FindItemsPage() {
 
   const [selectedItem,     setSelectedItem]     = useState<any>(null);
   const [showRequestForm,  setShowRequestForm]  = useState(false);
+  const [confirmDeleteItem, setConfirmDeleteItem] = useState(false);
+  const [deletingItem,      setDeletingItem]      = useState(false);
   const [viewMode,         setViewMode]         = useState<'cards' | 'list' | 'map'>(
     () => (typeof window !== 'undefined' ? (localStorage.getItem('findItemsView') as 'cards' | 'list' | 'map') || 'cards' : 'cards')
   );
@@ -164,7 +166,30 @@ export default function FindItemsPage() {
   const handleCloseModal = () => {
     setSelectedItem(null);
     setShowRequestForm(false);
+    setConfirmDeleteItem(false);
     window.history.pushState(null, '', '/find-items');
+  };
+
+  const handleDeleteSelectedItem = async () => {
+    if (!selectedItem) return;
+    setDeletingItem(true);
+    try {
+      if (selectedItem.image_urls?.length) {
+        const paths = selectedItem.image_urls.map((url: string) => {
+          const parts = url.split('/gear-photos/');
+          return parts.length > 1 ? parts[1] : null;
+        }).filter(Boolean);
+        if (paths.length) await supabase.storage.from('gear-photos').remove(paths);
+      }
+      const { error } = await supabase.from('gear_items').delete().eq('id', selectedItem.id);
+      if (error) throw error;
+      setConfirmDeleteItem(false);
+      handleCloseModal();
+      fetchItems();
+    } catch (err: any) {
+      console.error('Delete error:', err.message);
+      setDeletingItem(false);
+    }
   };
 
   const toggleCategory = (cat: string) => {
@@ -663,7 +688,27 @@ export default function FindItemsPage() {
               )}
 
               {/* CTA */}
-              {userId ? (
+              {userId && selectedItem.user_id === userId ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+                  <a
+                    href={`/list-item?edit=${selectedItem.id}`}
+                    style={{ padding: '10px 20px', backgroundColor: '#fff', color: TEAL, border: `2px solid ${TEAL}`, fontSize: '13px', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' }}
+                  >
+                    Edit Details
+                  </a>
+                  <ShareButton
+                    itemId={selectedItem.id}
+                    itemName={selectedItem.item_name}
+                    style={{ width: 'auto', flex: '0 0 auto', padding: '10px 20px', marginTop: 0, border: `2px solid ${INK}`, fontSize: '13px', whiteSpace: 'nowrap' as const }}
+                  />
+                  <button
+                    onClick={() => setConfirmDeleteItem(true)}
+                    style={{ marginLeft: 'auto', padding: '10px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '2px solid #cc0000', fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' }}
+                  >
+                    Delete Listing
+                  </button>
+                </div>
+              ) : userId ? (
                 <button
                   onClick={() => setShowRequestForm(true)}
                   style={{
@@ -691,7 +736,9 @@ export default function FindItemsPage() {
                 </a>
               )}
 
-              <ShareButton itemId={selectedItem.id} itemName={selectedItem.item_name} />
+              {!(userId && selectedItem.user_id === userId) && (
+                <ShareButton itemId={selectedItem.id} itemName={selectedItem.item_name} />
+              )}
             </div>
           </div>
         </div>
@@ -700,6 +747,23 @@ export default function FindItemsPage() {
       {/* Request message form */}
       {showRequestForm && selectedItem && (
         <RequestModal item={selectedItem} onClose={() => setShowRequestForm(false)} />
+      )}
+
+      {/* Delete confirmation */}
+      {confirmDeleteItem && selectedItem && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100, padding: '20px' }}>
+          <div style={{ backgroundColor: '#fff', padding: '24px', borderRadius: '16px', maxWidth: '400px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
+            <p style={{ margin: '0 0 20px 0', fontSize: '15px', color: INK, lineHeight: 1.5 }}>
+              Are you sure you want to delete this item? This cannot be undone.
+            </p>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button onClick={() => setConfirmDeleteItem(false)} style={{ padding: '10px 20px', backgroundColor: '#f5f5f5', color: '#333', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>Cancel</button>
+              <button onClick={handleDeleteSelectedItem} disabled={deletingItem} style={{ padding: '10px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '1px solid #ffaaaa', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }}>
+                {deletingItem ? 'Deleting...' : 'Delete Item'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
