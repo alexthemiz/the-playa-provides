@@ -445,7 +445,7 @@ export default function FindItemsPage() {
                       </div>
                       {/* Item name */}
                       <div style={{ minWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap' as const }}>
-                        <span style={{ fontFamily: "'Arvo', serif", fontSize: '0.9rem', fontWeight: 700, color: INK }}>{item.item_name}</span>
+                        <span style={{ fontFamily: "'Arvo', serif", fontSize: '0.8rem', fontWeight: 700, color: INK }}>{item.item_name}</span>
                       </div>
                       {/* Category */}
                       <div className="list-col-cat">
