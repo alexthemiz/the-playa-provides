@@ -11,6 +11,7 @@ import WelcomeModal from '@/components/WelcomeModal';
 import ImportSpreadsheetModal from '@/components/ImportSpreadsheetModal';
 import TransferModal from '@/components/TransferModal';
 import LendModal from '@/components/LendModal';
+import ShareLink from '@/components/ShareLink';
 
 export default function InventoryPage() {
   const [items, setItems] = useState<any[]>([]);
@@ -632,12 +633,18 @@ export default function InventoryPage() {
                         </div>
                         <div>
                           <div style={{ fontWeight: 'bold', color: '#2D241E' }}>{item.item_name}</div>
-                          <button
-                            onClick={() => { setEditingItem(item); setIsModalOpen(true); }}
-                            style={editLinkStyle}
-                          >
-                            Edit Details
-                          </button>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+                            <a href={`/find-items/${item.id}`} style={inlineRowLinkStyle}>View</a>
+                            <span style={rowLinkDividerStyle}>·</span>
+                            <button
+                              onClick={() => { setEditingItem(item); setIsModalOpen(true); }}
+                              style={inlineRowLinkStyle}
+                            >
+                              Edit
+                            </button>
+                            <span style={rowLinkDividerStyle}>·</span>
+                            <ShareLink itemId={item.id} itemName={item.item_name} style={inlineRowLinkStyle} />
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -1059,6 +1066,8 @@ const tdStyle: React.CSSProperties = { padding: '10px 15px', verticalAlign: 'mid
 const rowStyle: React.CSSProperties = { borderBottom: '1px solid rgba(28,22,16,0.06)' };
 const thumbnailStyle: React.CSSProperties = { width: '50px', height: '50px', backgroundColor: '#EDE5D0', overflow: 'hidden', flexShrink: 0, border: '1px solid rgba(28,22,16,0.12)' };
 const editLinkStyle: React.CSSProperties = { background: 'none', border: 'none', color: '#1E8A82', fontSize: '0.75rem', padding: 0, cursor: 'pointer', textDecoration: 'underline', marginTop: '4px', display: 'block' };
+const inlineRowLinkStyle: React.CSSProperties = { background: 'none', border: 'none', color: '#1E8A82', fontSize: '0.75rem', padding: 0, cursor: 'pointer', textDecoration: 'underline', display: 'inline' };
+const rowLinkDividerStyle: React.CSSProperties = { color: '#c8bca8', fontSize: '0.7rem' };
 const csvButtonStyle: React.CSSProperties = { background: 'none', border: 'none', color: '#9A8878', cursor: 'pointer', fontSize: '0.85rem', textDecoration: 'underline' };
 const locationDropdownStyle: React.CSSProperties = { position: 'absolute' as const, top: '100%', left: 0, right: 0, backgroundColor: '#FDFAF4', border: '1.5px solid rgba(28,22,16,0.2)', boxShadow: '3px 3px 0 rgba(28,22,16,0.08)', zIndex: 100, marginTop: '4px', padding: '8px' };
 const locationOptionStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 4px', cursor: 'pointer' };

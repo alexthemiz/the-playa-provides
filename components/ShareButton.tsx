@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Share2, Check } from 'lucide-react';
+import { shareItem } from '@/lib/shareItem';
 
 const INK = '#1C1610';
 
@@ -14,29 +15,10 @@ export default function ShareButton({ itemId, itemName }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/find-items/${itemId}`;
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: itemName,
-          text: `Check out "${itemName}" on The Playa Provides`,
-          url,
-        });
-      } catch (err: unknown) {
-        if ((err as Error)?.name !== 'AbortError') {
-          console.error('Share failed:', err);
-        }
-      }
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(url);
+    const result = await shareItem(itemId, itemName);
+    if (result === 'copied') {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (err: unknown) {
-      console.error('Copy failed:', err);
     }
   };
 
