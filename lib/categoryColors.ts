@@ -1,5 +1,5 @@
 export const CATEGORY_ACCENTS: Record<string, string> = {
-  'Shelter & Shade':    '#1E8A82', // teal
+  'Shelter & Shade':    '#4A90E2', // sky blue
   'Power & Lighting':   '#D4A020', // mustard
   'Clothing & Fun':     '#C24820', // rust
   'Bikes & Transport':  '#8A9A10', // lime dark
