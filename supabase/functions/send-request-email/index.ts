@@ -7,6 +7,15 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+function escapeHtml(input: string): string {
+  return input
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 serve(async (req: Request) => {
   // 1. Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -14,7 +23,7 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { ownerId, message, itemName, requesterName, requesterEmail } = await req.json()
+    const { ownerId, message, itemName, requesterName, requesterUsername, requesterEmail } = await req.json()
 
     const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
@@ -42,6 +51,15 @@ serve(async (req: Request) => {
       throw new Error('Could not find owner email')
     }
 
+    const safeItemName = escapeHtml(itemName || '')
+    const safeMessage = escapeHtml(message || '')
+    const safeOwnerName = escapeHtml(ownerName)
+    const safeRequesterName = escapeHtml(requesterName || 'A community member')
+
+    const fromLine = requesterUsername
+      ? `${safeRequesterName} (<a href="https://theplayaprovides.com/profile/${escapeHtml(requesterUsername)}" style="color:#1E8A82; text-decoration:none; font-weight:600;">@${escapeHtml(requesterUsername)}</a>)`
+      : safeRequesterName
+
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -53,19 +71,24 @@ serve(async (req: Request) => {
         to: [ownerEmail],
         subject: `New Request for: ${itemName}`,
         html: `
-          <div style="font-family: sans-serif; color: #333; max-width: 600px;">
-            <h1 style="color: #C08261;">New Borrow Request!</h1>
-            <p>Hey ${ownerName}, someone is interested in your <strong>${itemName}</strong>.</p>
-            <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 16px 0;">
-              <p style="margin: 0;"><strong>Message:</strong></p>
-              <p style="margin: 8px 0 0; font-style: italic;">"${message}"</p>
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; color: #2D241E; max-width: 560px; margin: 0 auto;">
+            <div style="background: #1E8A82; padding: 20px 24px;">
+              <p style="margin: 0; color: rgba(255,255,255,0.85); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;">New Borrow Request</p>
+              <h1 style="margin: 6px 0 0; color: #fff; font-size: 20px; font-weight: 700;">${safeItemName}</h1>
             </div>
-            <div style="background: #fdf3ec; border: 1px solid #f0d8c8; padding: 15px; border-radius: 8px; margin: 16px 0;">
-              <p style="margin: 0; font-size: 0.9em; color: #666;"><strong>From:</strong> ${requesterName || 'A community member'}${requesterEmail ? ` &lt;${requesterEmail}&gt;` : ''}</p>
-              ${requesterEmail ? `<p style="margin: 8px 0 0; font-size: 0.9em; color: #666;">Reply directly to this email to get in touch.</p>` : ''}
+            <div style="padding: 24px; background: #fff; border: 1px solid #eee; border-top: none;">
+              <p style="margin: 0 0 16px; font-size: 15px; line-height: 1.5;">Hey ${safeOwnerName}, someone is interested in your <strong>${safeItemName}</strong>.</p>
+
+              <p style="margin: 0 0 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #999;">From</p>
+              <p style="margin: 0 0 20px; font-size: 15px;">${fromLine}</p>
+
+              <p style="margin: 0 0 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #999;">Message</p>
+              <div style="border: 1px solid #e5ddd0; background: #FBF8F2; padding: 16px; margin-bottom: 20px; white-space: pre-wrap; font-size: 13px; line-height: 1.6; color: #4A3828; font-family: 'Courier New', monospace;">${safeMessage}</div>
+
+              ${requesterEmail ? `<p style="margin: 0; font-size: 13px; color: #888;">Reply directly to this email to get in touch.</p>` : ''}
             </div>
-            <p style="font-size: 0.8em; color: #999; margin-top: 24px;">
-              Sent via <a href="https://theplayaprovides.com" style="color: #C08261;">The Playa Provides</a>
+            <p style="font-size: 12px; color: #aaa; margin: 16px 4px 0;">
+              Sent via <a href="https://theplayaprovides.com" style="color: #1E8A82;">The Playa Provides</a>
             </p>
           </div>
         `,

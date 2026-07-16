@@ -131,7 +131,7 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
       }
 
       const { error } = await supabase.functions.invoke('send-request-email', {
-        body: { itemId: item.id, ownerId: item.user_id, message: fullMessage, itemName: item.item_name, requesterName, requesterEmail },
+        body: { itemId: item.id, ownerId: item.user_id, message: fullMessage, itemName: item.item_name, requesterName, requesterUsername, requesterEmail },
       });
 
       if (error) throw error;
