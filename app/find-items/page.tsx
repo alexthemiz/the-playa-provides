@@ -39,8 +39,6 @@ const CATEGORY_EMOJI: Record<string, string> = {
   'Miscellaneous':      '📦',
 }
 
-// Slight rotation per card for polaroid feel
-const CARD_ROTS = [0.6, -0.8, 0.3, -1.1, 0.7, -0.4, 1.0, -0.5, 0.9, -1.2, 0.4, -0.7]
 
 export default function FindItemsPage() {
   const [items,               setItems]               = useState<any[]>([]);
@@ -282,7 +280,7 @@ export default function FindItemsPage() {
                 />
               </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, marginLeft: 'auto' }}>
+            <div className="fi-show-from" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, marginLeft: 'auto' }}>
               <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: INK_LITE, whiteSpace: 'nowrap' as const }}>Show from:</span>
               {['Everyone', 'Following', 'Followers', 'Campmates'].map(opt => (
                 <button key={opt} onClick={() => toggleRelationship(opt)}
@@ -302,11 +300,15 @@ export default function FindItemsPage() {
             @media (max-width: 640px) {
               .fi-search-row { flex-direction: column !important; align-items: stretch !important; gap: 8px !important; }
               .fi-search-row > div { flex-shrink: 1 !important; width: 100%; }
+              .fi-show-from { flex-wrap: wrap !important; }
+              .fi-category-group { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; }
+              .fi-category-group .fi-label { grid-column: 1 / -1; }
+              .fi-category-group button { padding: 6px 4px !important; font-size: 0.62rem !important; white-space: normal !important; text-align: center !important; }
             }
           `}</style>
 
           <div className="fi-filters" style={{ marginBottom: '4px' }}>
-            <div className="fi-filter-group">
+            <div className="fi-filter-group fi-category-group">
               <span className="fi-label">Category:</span>
               {categories.map(cat => (
                 <button key={cat} onClick={() => toggleCategory(cat)}
@@ -386,16 +388,12 @@ export default function FindItemsPage() {
             <div className="list-container">
               <style>{`
                 .list-container { background: #FDFAF4; border: 1.5px solid rgba(28,22,16,0.12); overflow-x: auto; }
-                .list-table { display: grid; grid-template-columns: 48px 1fr 130px 110px 220px 130px 140px 90px; align-items: center; gap: 0 14px; }
+                .list-table { display: grid; grid-template-columns: 48px 1fr 130px 110px 220px 130px 140px 90px; align-items: center; gap: 0 14px; min-width: 1050px; }
                 .list-header-row { background: #EDE5D0; border-bottom: 1.5px solid rgba(28,22,16,0.12); padding: 15px 16px; }
                 .list-col-label { font-family: 'Space Mono', monospace; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #4A3828; }
                 .list-row { padding: 10px 16px; border-bottom: 1px solid rgba(28,22,16,0.06); cursor: pointer; transition: background-color 0.12s; }
                 .list-row:hover { background-color: rgba(28,22,16,0.035); }
                 .list-row:last-child { border-bottom: none; }
-                @media (max-width: 640px) {
-                  .list-table { grid-template-columns: 48px 1fr 100px; }
-                  .list-col-loc, .list-col-terms, .list-col-cat, .list-col-type, .list-col-desc { display: none; }
-                }
               `}</style>
 
               {/* Header */}
@@ -484,8 +482,8 @@ export default function FindItemsPage() {
           }
           @media (min-width: 1100px) { .fi-grid { grid-template-columns: repeat(5, 1fr); } }
           @media (min-width:  860px) and (max-width: 1099px) { .fi-grid { grid-template-columns: repeat(4, 1fr); } }
-          @media (min-width:  600px) and (max-width:  859px) { .fi-grid { grid-template-columns: repeat(3, 1fr); } }
-          @media (max-width: 599px)  { .fi-grid { grid-template-columns: repeat(2, 1fr); } }
+          @media (max-width: 859px) { .fi-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; } }
+          @media (max-width: 480px) { .fi-grid { gap: 8px; } }
           .item-card { transition: transform 0.12s, box-shadow 0.12s; cursor: pointer; }
           .item-card:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 ${INK} !important; }
         `}</style>
@@ -510,7 +508,6 @@ export default function FindItemsPage() {
               const isKeep   = item.availability_status === 'Available to Keep';
               const owner    = item.profiles?.preferred_name || item.profiles?.username || 'Member';
               const location = item.locations ? [item.locations.city, item.locations.state].filter(Boolean).join(', ') : null;
-              const rot      = CARD_ROTS[i % CARD_ROTS.length];
 
               return (
                 <div
@@ -524,7 +521,7 @@ export default function FindItemsPage() {
                   }}
                 >
                   {/* Polaroid photo area */}
-                  <div style={{ backgroundColor: PAPER_LT, padding: '8px 8px 28px', borderBottom: `1.5px solid rgba(28,22,16,0.1)`, position: 'relative', transform: `rotate(${rot}deg)` }}>
+                  <div style={{ backgroundColor: PAPER_LT, padding: '8px 8px 14px', borderBottom: `1.5px solid rgba(28,22,16,0.1)`, position: 'relative' }}>
                     {/* Photo or emoji */}
                     <div style={{ width: '100%', aspectRatio: '1/1', backgroundColor: PAPER_DK, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                       {hasImg
@@ -532,11 +529,6 @@ export default function FindItemsPage() {
                         : <span style={{ fontSize: '3rem' }}>{emoji}</span>
                       }
                     </div>
-
-                    {/* Caption below photo */}
-                    <span style={{ display: 'block', textAlign: 'center', fontFamily: "'Arvo', serif", fontSize: '0.65rem', fontStyle: 'italic', color: INK_MID, marginTop: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {item.item_name}
-                    </span>
                   </div>
 
                   {/* Card body */}
