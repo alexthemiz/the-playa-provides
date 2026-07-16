@@ -393,14 +393,15 @@ export default function FindItemsPage() {
               <p style={{ color: INK_MID, fontSize: '0.9rem' }}>Try adjusting your filters, or check back after someone lists something.</p>
             </div>
           ) : (
-            <div>
+            <div className="list-container">
               <style>{`
+                .list-container { background: #FDFAF4; border: 1.5px solid rgba(28,22,16,0.12); overflow-x: auto; }
                 .list-table { display: grid; grid-template-columns: 48px 1fr 130px 110px 220px 130px 140px 90px; align-items: center; gap: 0 14px; }
-                .list-header { padding: 0 16px 6px; }
-                .list-col-label { font-family: 'Space Mono', monospace; font-size: 0.52rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: ${INK_LITE}; }
-                .list-row-wrap { border: 1.5px solid rgba(28,22,16,0.12); margin-bottom: 2px; cursor: pointer; transition: box-shadow 0.12s; background: ${PAPER_LT}; }
-                .list-row-wrap:hover { box-shadow: 3px 3px 0 ${INK}; }
-                .list-row { padding: 8px 16px; }
+                .list-header-row { background: #EDE5D0; border-bottom: 1.5px solid rgba(28,22,16,0.12); padding: 15px 16px; }
+                .list-col-label { font-family: 'Space Mono', monospace; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #4A3828; }
+                .list-row { padding: 10px 16px; border-bottom: 1px solid rgba(28,22,16,0.06); cursor: pointer; transition: background-color 0.12s; }
+                .list-row:hover { background-color: rgba(28,22,16,0.035); }
+                .list-row:last-child { border-bottom: none; }
                 @media (max-width: 640px) {
                   .list-table { grid-template-columns: 48px 1fr 100px; }
                   .list-col-loc, .list-col-terms, .list-col-cat, .list-col-type, .list-col-desc { display: none; }
@@ -408,17 +409,15 @@ export default function FindItemsPage() {
               `}</style>
 
               {/* Header */}
-              <div className="list-header">
-                <div className="list-table">
-                  <div />
-                  <div className="list-col-label">Item</div>
-                  <div className="list-col-label list-col-cat">Category</div>
-                  <div className="list-col-label list-col-loc">Location</div>
-                  <div className="list-col-label list-col-desc">Description</div>
-                  <div className="list-col-label">Owner</div>
-                  <div className="list-col-label list-col-terms">Terms</div>
-                  <div className="list-col-label list-col-type">Available To</div>
-                </div>
+              <div className="list-table list-header-row">
+                <div />
+                <div className="list-col-label">Item</div>
+                <div className="list-col-label list-col-cat">Category</div>
+                <div className="list-col-label list-col-loc">Location</div>
+                <div className="list-col-label list-col-desc">Description</div>
+                <div className="list-col-label">Owner</div>
+                <div className="list-col-label list-col-terms">Terms</div>
+                <div className="list-col-label list-col-type">Available To</div>
               </div>
 
               {filteredItems.map((item) => {
@@ -432,51 +431,49 @@ export default function FindItemsPage() {
                 return (
                   <div
                     key={item.id}
-                    className="list-row-wrap"
+                    className="list-table list-row"
                     onClick={() => handleOpenItem(item)}
                   >
-                    <div className="list-table list-row">
-                      {/* Thumbnail */}
-                      <div style={{ width: '48px', height: '48px', backgroundColor: PAPER_DK, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                        {hasImg
-                          ? <img src={item.image_urls[0]} alt={item.item_name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                          : <span style={{ fontSize: '1.4rem' }}>{emoji}</span>
-                        }
-                      </div>
-                      {/* Item name */}
-                      <div style={{ minWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap' as const }}>
-                        <span style={{ fontFamily: "'Arvo', serif", fontSize: '0.8rem', fontWeight: 700, color: INK }}>{item.item_name}</span>
-                      </div>
-                      {/* Category */}
-                      <div className="list-col-cat">
-                        {item.category && (
-                          <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '2px 6px', border: `1px solid rgba(28,22,16,0.2)`, color: INK_LITE, background: PAPER_DK, whiteSpace: 'nowrap' as const }}>
-                            {emoji} {item.category}
-                          </span>
-                        )}
-                      </div>
-                      {/* Location */}
-                      <div className="list-col-loc" style={{ overflow: 'hidden', whiteSpace: 'nowrap' as const, textOverflow: 'ellipsis', fontSize: '0.75rem', color: INK_MID }}>
-                        {location || '—'}
-                      </div>
-                      {/* Description */}
-                      <div className="list-col-desc" style={{ overflow: 'hidden', whiteSpace: 'nowrap' as const, textOverflow: 'ellipsis', fontSize: '0.8rem', color: INK_MID }}>
-                        {description || '—'}
-                      </div>
-                      {/* Owner */}
-                      <div style={{ overflow: 'hidden', whiteSpace: 'nowrap' as const, textOverflow: 'ellipsis', fontSize: '0.75rem', color: INK_MID }}>
-                        {owner}
-                      </div>
-                      {/* Terms */}
-                      <div className="list-col-terms" style={{ overflow: 'hidden', whiteSpace: 'nowrap' as const, textOverflow: 'ellipsis', fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: INK_MID, letterSpacing: '0.04em' }}>
-                        {terms || '—'}
-                      </div>
-                      {/* Available To (Borrow / Keep) */}
-                      <div className="list-col-type">
-                        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.52rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '3px 8px', border: `1px solid ${isKeep ? RUST : TEAL}`, color: isKeep ? RUST : TEAL, background: isKeep ? RUST_LT : TEAL_LT, whiteSpace: 'nowrap' as const }}>
-                          {isKeep ? 'Keep' : 'Borrow'}
+                    {/* Thumbnail */}
+                    <div style={{ width: '48px', height: '48px', backgroundColor: PAPER_DK, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                      {hasImg
+                        ? <img src={item.image_urls[0]} alt={item.item_name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                        : <span style={{ fontSize: '1.4rem' }}>{emoji}</span>
+                      }
+                    </div>
+                    {/* Item name */}
+                    <div style={{ minWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap' as const }}>
+                      <span style={{ fontFamily: "'Arvo', serif", fontSize: '0.8rem', fontWeight: 700, color: INK }}>{item.item_name}</span>
+                    </div>
+                    {/* Category */}
+                    <div className="list-col-cat">
+                      {item.category && (
+                        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '2px 6px', border: `1px solid rgba(28,22,16,0.2)`, color: INK_LITE, background: PAPER_DK, whiteSpace: 'nowrap' as const }}>
+                          {emoji} {item.category}
                         </span>
-                      </div>
+                      )}
+                    </div>
+                    {/* Location */}
+                    <div className="list-col-loc" style={{ overflow: 'hidden', whiteSpace: 'nowrap' as const, textOverflow: 'ellipsis', fontSize: '0.75rem', color: INK_MID }}>
+                      {location || '—'}
+                    </div>
+                    {/* Description */}
+                    <div className="list-col-desc" style={{ overflow: 'hidden', whiteSpace: 'nowrap' as const, textOverflow: 'ellipsis', fontSize: '0.8rem', color: INK_MID }}>
+                      {description || '—'}
+                    </div>
+                    {/* Owner */}
+                    <div style={{ overflow: 'hidden', whiteSpace: 'nowrap' as const, textOverflow: 'ellipsis', fontSize: '0.75rem', color: INK_MID }}>
+                      {owner}
+                    </div>
+                    {/* Terms */}
+                    <div className="list-col-terms" style={{ overflow: 'hidden', whiteSpace: 'nowrap' as const, textOverflow: 'ellipsis', fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', color: INK_MID, letterSpacing: '0.04em' }}>
+                      {terms || '—'}
+                    </div>
+                    {/* Available To (Borrow / Keep) */}
+                    <div className="list-col-type">
+                      <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.52rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '3px 8px', border: `1px solid ${isKeep ? RUST : TEAL}`, color: isKeep ? RUST : TEAL, background: isKeep ? RUST_LT : TEAL_LT, whiteSpace: 'nowrap' as const }}>
+                        {isKeep ? 'Keep' : 'Borrow'}
+                      </span>
                     </div>
                   </div>
                 );
