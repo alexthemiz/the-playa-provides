@@ -9,8 +9,9 @@ interface Props {
     item_name: string
     // terms pre-filled from the listing
     return_by?: string | null
-    damage_fee?: number | null
-    borrowing_terms?: string | null
+    damage_price?: number | null
+    loss_price?: number | null
+    return_terms?: string | null
   }
   ownerId: string
   onClose: () => void
@@ -22,9 +23,9 @@ export default function LendModal({ item, ownerId, onClose, onSuccess }: Props) 
   const [matched, setMatched] = useState<{ id: string; username: string; preferred_name: string | null } | null>(null)
   const [lookupError, setLookupError] = useState('')
   const [returnBy, setReturnBy] = useState(item.return_by || '')
-  const [damageAgreement, setDamageAgreement] = useState(item.damage_fee != null ? String(item.damage_fee) : '')
-  const [lossAgreement, setLossAgreement] = useState('')
-  const [notes, setNotes] = useState(item.borrowing_terms || '')
+  const [damageAgreement, setDamageAgreement] = useState(item.damage_price != null ? String(item.damage_price) : '')
+  const [lossAgreement, setLossAgreement] = useState(item.loss_price != null ? String(item.loss_price) : '')
+  const [notes, setNotes] = useState(item.return_terms || '')
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
 
@@ -86,7 +87,8 @@ export default function LendModal({ item, ownerId, onClose, onSuccess }: Props) 
         <button onClick={onClose} style={closeStyle}>✕</button>
         <h2 style={{ margin: '0 0 8px', color: '#2D241E', fontSize: '1.2rem' }}>Lend Item</h2>
         <p style={{ margin: '0 0 20px', color: '#666', fontSize: '0.9rem' }}>
-          Enter the username or email of the person borrowing <strong>{item.item_name}</strong>, then confirm the terms.
+          Enter the username or email of the person borrowing{' '}
+          <a href={`/find-items/${item.id}`} target="_blank" rel="noreferrer" style={{ color: '#1E8A82', fontWeight: 700, textDecoration: 'none' }}>{item.item_name}</a>, then confirm the terms.
         </p>
 
         {/* Lookup */}
