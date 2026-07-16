@@ -7,6 +7,7 @@ import Link from 'next/link';
 import RequestModal from '@/components/RequestModal'; // Assuming this is your path
 import ImageSlider from '@/components/ImageSlider';
 import ShareButton from '@/components/ShareButton';
+import { CATEGORY_ACCENTS, DEFAULT_CATEGORY_ACCENT } from '@/lib/categoryColors';
 
 export default function ItemDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -98,14 +99,17 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
         {/* Right column: details */}
         <div style={detailsPane}>
           <h1 style={titleStyle}>{item.item_name}</h1>
-          <p style={categoryStyle}>{item.category} • {item.condition}</p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+            <span style={categoryStyle}>Condition: {item.condition}</span>
+            {item.category && (
+              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '3px 8px', border: `1px solid ${CATEGORY_ACCENTS[item.category] || DEFAULT_CATEGORY_ACCENT}`, color: '#fff', background: CATEGORY_ACCENTS[item.category] || DEFAULT_CATEGORY_ACCENT, whiteSpace: 'nowrap' as const }}>
+                {item.category}
+              </span>
+            )}
+          </div>
 
-          {/* Location | Owner row */}
+          {/* Owner | Location row */}
           <div style={locationOwnerRow}>
-            <span style={metaItem}>
-              <MapPin size={15} color="#5ECFDF" /> {item.location_display}
-            </span>
-            <span style={{ color: '#bbb', fontSize: '14px', margin: '0 6px' }}>|</span>
             <span style={metaItem}>
               <User size={15} color="#5ECFDF" />
               {item.owner_username ? (
@@ -113,6 +117,10 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
               ) : (
                 <span>{isGift ? 'Offered' : 'Owned'} by {item.owner_name}</span>
               )}
+            </span>
+            <span style={{ color: '#bbb', fontSize: '14px', margin: '0 6px' }}>|</span>
+            <span style={metaItem}>
+              <MapPin size={15} color="#5ECFDF" /> {item.location_display}
             </span>
           </div>
 

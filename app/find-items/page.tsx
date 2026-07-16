@@ -8,6 +8,7 @@ import { Search, MapPin, User, Package, X, LayoutGrid, List, Map } from 'lucide-
 import Link from 'next/link';
 import RequestModal from '@/components/RequestModal';
 import ShareButton from '@/components/ShareButton';
+import { CATEGORY_ACCENTS as CAT_ACCENTS, DEFAULT_CATEGORY_ACCENT } from '@/lib/categoryColors';
 
 const MapView = dynamic(() => import('@/components/MapView'), { ssr: false });
 
@@ -235,17 +236,6 @@ export default function FindItemsPage() {
     };
   }
 
-  const CAT_ACCENTS: Record<string, string> = {
-    'Shelter & Shade':    TEAL,
-    'Power & Lighting':   MUSTARD,
-    'Clothing & Fun':     RUST,
-    'Bikes & Transport':  LIME_DK,
-    'Safety & First Aid': '#7B4FCF',
-    'Kitchen & Water':    '#1E8A82',
-    'Tools & Hardware':   INK_MID,
-    'Miscellaneous':      INK_LITE,
-  };
-
   return (
     <div style={{ backgroundColor: PAPER, minHeight: '100vh', color: INK }}>
 
@@ -448,7 +438,7 @@ export default function FindItemsPage() {
                     {/* Category */}
                     <div className="list-col-cat">
                       {item.category && (
-                        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '2px 6px', border: `1px solid rgba(28,22,16,0.2)`, color: INK_LITE, background: PAPER_DK, whiteSpace: 'nowrap' as const }}>
+                        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '2px 6px', border: `1px solid ${CAT_ACCENTS[item.category] || DEFAULT_CATEGORY_ACCENT}`, color: '#fff', background: CAT_ACCENTS[item.category] || DEFAULT_CATEGORY_ACCENT, whiteSpace: 'nowrap' as const }}>
                           {emoji} {item.category}
                         </span>
                       )}
@@ -563,7 +553,7 @@ export default function FindItemsPage() {
                         {isKeep ? 'Keep' : 'Borrow'}
                       </span>
                       {item.category && (
-                        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.52rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '2px 7px', border: `1px solid rgba(28,22,16,0.15)`, color: INK_LITE }}>
+                        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.52rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '2px 7px', border: `1px solid ${CAT_ACCENTS[item.category] || DEFAULT_CATEGORY_ACCENT}`, color: '#fff', background: CAT_ACCENTS[item.category] || DEFAULT_CATEGORY_ACCENT }}>
                           {item.category.split(' ')[0]}
                         </span>
                       )}
@@ -641,6 +631,11 @@ export default function FindItemsPage() {
                     <MapPin size={12} />
                     {[selectedItem.locations.city, selectedItem.locations.state].filter(Boolean).join(', ')}
                   </span></>
+                )}
+                {selectedItem.category && (
+                  <span style={{ marginLeft: 'auto', flexShrink: 0, fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' as const, padding: '3px 8px', border: `1px solid ${CAT_ACCENTS[selectedItem.category] || DEFAULT_CATEGORY_ACCENT}`, color: '#fff', background: CAT_ACCENTS[selectedItem.category] || DEFAULT_CATEGORY_ACCENT, whiteSpace: 'nowrap' as const }}>
+                    {CATEGORY_EMOJI[selectedItem.category] || '📦'} {selectedItem.category}
+                  </span>
                 )}
               </div>
 
