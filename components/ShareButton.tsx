@@ -9,9 +9,10 @@ const INK = '#1C1610';
 interface ShareButtonProps {
   itemId: string | number;
   itemName: string;
+  style?: React.CSSProperties;
 }
 
-export default function ShareButton({ itemId, itemName }: ShareButtonProps) {
+export default function ShareButton({ itemId, itemName, style }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
 
   const handleShare = async () => {
@@ -23,7 +24,7 @@ export default function ShareButton({ itemId, itemName }: ShareButtonProps) {
   };
 
   return (
-    <button onClick={handleShare} style={shareButtonStyle}>
+    <button onClick={handleShare} style={{ ...shareButtonStyle, ...style }}>
       {copied ? <Check size={16} /> : <Share2 size={16} />}
       {copied ? 'Link copied!' : 'Share'}
     </button>
