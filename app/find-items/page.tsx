@@ -8,6 +8,8 @@ import { Search, MapPin, User, Package, X, LayoutGrid, List, Map } from 'lucide-
 import Link from 'next/link';
 import RequestModal from '@/components/RequestModal';
 import ShareButton from '@/components/ShareButton';
+import LendModal from '@/components/LendModal';
+import TransferModal from '@/components/TransferModal';
 import { CATEGORY_ACCENTS as CAT_ACCENTS, DEFAULT_CATEGORY_ACCENT } from '@/lib/categoryColors';
 
 const MapView = dynamic(() => import('@/components/MapView'), { ssr: false });
@@ -59,6 +61,7 @@ export default function FindItemsPage() {
   const [showRequestForm,  setShowRequestForm]  = useState(false);
   const [confirmDeleteItem, setConfirmDeleteItem] = useState(false);
   const [deletingItem,      setDeletingItem]      = useState(false);
+  const [showTransferFlow,  setShowTransferFlow]  = useState(false);
   const [viewMode,         setViewMode]         = useState<'cards' | 'list' | 'map'>(
     () => (typeof window !== 'undefined' ? (localStorage.getItem('findItemsView') as 'cards' | 'list' | 'map') || 'cards' : 'cards')
   );
@@ -226,6 +229,7 @@ export default function FindItemsPage() {
   const filteredItems = items.filter(item => {
     if (item.visibility === 'private') return false;
     if (item.availability_status === 'Not Available') return false;
+    if (item.is_on_loan) return false;
     if (!item.item_name?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     if (zipQuery && !item.locations?.zip_code?.includes(zipQuery)) return false;
     if (!categoryFilters.includes('All') && !categoryFilters.includes(item.category)) return false;
@@ -694,8 +698,14 @@ export default function FindItemsPage() {
                     href={`/list-item?edit=${selectedItem.id}`}
                     style={{ padding: '10px 20px', backgroundColor: '#fff', color: TEAL, border: `2px solid ${TEAL}`, fontSize: '13px', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' }}
                   >
-                    Edit Details
+                    Edit
                   </a>
+                  <button
+                    onClick={() => setShowTransferFlow(true)}
+                    style={{ padding: '10px 20px', backgroundColor: '#fff', color: MUSTARD, border: `2px solid ${MUSTARD}`, fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' }}
+                  >
+                    Transfer
+                  </button>
                   <ShareButton
                     itemId={selectedItem.id}
                     itemName={selectedItem.item_name}
@@ -705,7 +715,7 @@ export default function FindItemsPage() {
                     onClick={() => setConfirmDeleteItem(true)}
                     style={{ marginLeft: 'auto', padding: '10px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '2px solid #cc0000', fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' }}
                   >
-                    Delete Listing
+                    Delete
                   </button>
                 </div>
               ) : userId ? (
@@ -747,6 +757,15 @@ export default function FindItemsPage() {
       {/* Request message form */}
       {showRequestForm && selectedItem && (
         <RequestModal item={selectedItem} onClose={() => setShowRequestForm(false)} />
+      )}
+
+      {/* Transfer / Lend flow */}
+      {showTransferFlow && selectedItem && (
+        selectedItem.availability_status === 'Available to Keep' ? (
+          <TransferModal item={selectedItem} ownerId={selectedItem.user_id} onClose={() => setShowTransferFlow(false)} onSuccess={() => { setShowTransferFlow(false); fetchItems(); }} />
+        ) : (
+          <LendModal item={selectedItem} ownerId={selectedItem.user_id} onClose={() => setShowTransferFlow(false)} onSuccess={() => { setShowTransferFlow(false); fetchItems(); }} />
+        )
       )}
 
       {/* Delete confirmation */}

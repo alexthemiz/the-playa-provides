@@ -20,6 +20,8 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showTransferFlow, setShowTransferFlow] = useState(false);
+  const [myLoan, setMyLoan] = useState<any>(null);
+  const [returningItem, setReturningItem] = useState(false);
 
   useEffect(() => {
     async function fetchItem() {
@@ -50,6 +52,19 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
             ? `${locationRes.data.city} (${locationRes.data.zip_code})`
             : 'Location N/A'
         });
+
+        // RLS scopes this to rows where the current user is the owner or
+        // borrower — returns null for everyone else, which is what we want:
+        // third parties only ever see the public is_on_loan flag on gear.
+        if (s?.user) {
+          const { data: loan } = await supabase
+            .from('item_loans')
+            .select('id, status, borrower_id, owner_id')
+            .eq('item_id', resolvedParams.id)
+            .in('status', ['pending_handover', 'active', 'return_pending'])
+            .maybeSingle();
+          setMyLoan(loan);
+        }
       } catch (err) {
         console.error("Detail page fetch error:", err);
       } finally {
@@ -58,6 +73,32 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
     }
     fetchItem();
   }, [resolvedParams.id]);
+
+  async function handleReturnItem() {
+    if (!myLoan) return;
+    setReturningItem(true);
+    try {
+      const { error } = await supabase
+        .from('item_loans')
+        .update({ borrower_confirmed_return: true, status: 'return_pending' })
+        .eq('id', myLoan.id);
+      if (error) throw error;
+      setMyLoan((prev: any) => ({ ...prev, status: 'return_pending' }));
+      await supabase.from('notifications').insert({
+        type: 'loan_return_pending',
+        recipient_id: myLoan.owner_id,
+        actor_id: session?.user?.id,
+        item_id: item.id,
+      });
+      await supabase.functions.invoke('send-loan-notification', {
+        body: { type: 'borrower_confirmed_return', loan_id: myLoan.id },
+      });
+    } catch (err: any) {
+      console.error('Return item error:', err.message);
+    } finally {
+      setReturningItem(false);
+    }
+  }
 
   async function handleDeleteItem() {
     if (!item) return;
@@ -84,6 +125,9 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
 
   const isGift = item.availability_status === 'Available to Keep';
   const requestLabel = isGift ? 'Request to Keep' : 'Request to Borrow';
+  const isOwner = session?.user?.id === item.user_id;
+  const isBorrower = !!myLoan && myLoan.borrower_id === session?.user?.id;
+  const onLoan = !!item.is_on_loan;
 
   return (
     <div style={containerStyle}>
@@ -110,6 +154,12 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
               </span>
             )}
           </div>
+
+          {onLoan && (
+            <div style={{ display: 'inline-block', padding: '3px 10px', marginBottom: '10px', backgroundColor: '#F5F0D0', color: '#92400e', fontSize: '0.75rem', fontWeight: 700 }}>
+              Currently on loan
+            </div>
+          )}
 
           {/* Owner | Location row */}
           <div style={locationOwnerRow}>
@@ -181,25 +231,59 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
 
           {/* Button row — centered, below text column */}
           <div style={{ display: 'flex', justifyContent: 'center' as const, gap: '10px', marginTop: '8px' }}>
-            {session?.user?.id === item.user_id ? (
+            {isOwner ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
-                <a href={`/list-item?edit=${item.id}`} style={editDetailsBtnStyle}>Edit Details</a>
-                <button onClick={() => setShowTransferFlow(true)} style={transferBtnStyle}>Transfer</button>
-                <ShareButton itemId={item.id} itemName={item.item_name} style={shareInlineBtnStyle} />
-                <button onClick={() => setConfirmDelete(true)} style={{ ...deleteListingBtnStyle, marginLeft: 'auto' }}>Delete Listing</button>
+                {onLoan ? (
+                  <>
+                    <span style={disabledBtnStyle}>Edit Details</span>
+                    <span style={disabledBtnStyle}>Transfer</span>
+                    <ShareButton itemId={item.id} itemName={item.item_name} style={shareInlineBtnStyle} />
+                    <span style={{ ...disabledBtnStyle, marginLeft: 'auto' }}>Delete Listing</span>
+                  </>
+                ) : (
+                  <>
+                    <a href={`/list-item?edit=${item.id}`} style={editDetailsBtnStyle}>Edit Details</a>
+                    <button onClick={() => setShowTransferFlow(true)} style={transferBtnStyle}>Transfer</button>
+                    <ShareButton itemId={item.id} itemName={item.item_name} style={shareInlineBtnStyle} />
+                    <button onClick={() => setConfirmDelete(true)} style={{ ...deleteListingBtnStyle, marginLeft: 'auto' }}>Delete Listing</button>
+                  </>
+                )}
+              </div>
+            ) : isBorrower && myLoan.status === 'active' ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+                <button style={returnItemBtnStyle} onClick={handleReturnItem} disabled={returningItem}>
+                  {returningItem ? 'Returning...' : 'Return Item'}
+                </button>
+                <ShareButton itemId={item.id} itemName={item.item_name} style={{ ...shareInlineBtnStyle, marginLeft: 'auto' }} />
+              </div>
+            ) : isBorrower && myLoan.status === 'return_pending' ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+                <span style={disabledBtnStyle}>Return Pending — waiting on owner to confirm</span>
+              </div>
+            ) : isBorrower && myLoan.status === 'pending_handover' ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+                <span style={disabledBtnStyle}>Pending handover — check your <Link href="/inventory" style={{ color: '#1E8A82' }}>inventory</Link></span>
               </div>
             ) : session ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
-                <button style={borrowButtonStyle} onClick={() => setIsModalOpen(true)}>
-                  {requestLabel}
-                </button>
+                {onLoan ? (
+                  <span style={disabledBtnStyle}>Currently on loan</span>
+                ) : (
+                  <button style={borrowButtonStyle} onClick={() => setIsModalOpen(true)}>
+                    {requestLabel}
+                  </button>
+                )}
                 <ShareButton itemId={item.id} itemName={item.item_name} style={{ ...shareInlineBtnStyle, marginLeft: 'auto' }} />
               </div>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
-                <a href="/login" style={{ ...borrowButtonStyle, textDecoration: 'none' }}>
-                  Log In to Request
-                </a>
+                {onLoan ? (
+                  <span style={disabledBtnStyle}>Currently on loan</span>
+                ) : (
+                  <a href="/login" style={{ ...borrowButtonStyle, textDecoration: 'none' }}>
+                    Log In to Request
+                  </a>
+                )}
                 <ShareButton itemId={item.id} itemName={item.item_name} style={{ ...shareInlineBtnStyle, marginLeft: 'auto' }} />
               </div>
             )}
@@ -274,6 +358,8 @@ const ownerBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundCol
 const editDetailsBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#fff', color: '#1E8A82', border: '2px solid #1E8A82', fontSize: '13px', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', whiteSpace: 'nowrap' as const };
 const transferBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#fff', color: '#D4A020', border: '2px solid #D4A020', fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' };
 const shareInlineBtnStyle: React.CSSProperties = { width: 'auto', flex: '0 0 auto', padding: '10px 20px', marginTop: 0, border: '2px solid #1C1610', backgroundColor: '#fff', fontSize: '13px', whiteSpace: 'nowrap' as const };
+const disabledBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#f5f5f5', color: '#aaa', border: '2px solid #e0e0e0', fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' };
+const returnItemBtnStyle: React.CSSProperties = { padding: '12px 28px', border: '2px solid #1C1610', boxShadow: '3px 3px 0 #1C1610', backgroundColor: '#16a34a', color: '#fff', fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer', fontFamily: 'Outfit, sans-serif' };
 
 const deleteItemBtnStyle: React.CSSProperties = { padding: '8px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '1px solid #ffaaaa', borderRadius: '8px', fontSize: '13px', cursor: 'pointer', fontWeight: '600' };
 const deleteListingBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '2px solid #cc0000', fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const };

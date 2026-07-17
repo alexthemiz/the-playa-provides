@@ -120,7 +120,7 @@ export default function InventoryPage() {
         // Inbound loans (borrower side)
         const { data: inboundLoanData } = await supabase
           .from('item_loans')
-          .select('id, item_id, status, owner_confirmed_pickup, borrower_confirmed_pickup, borrower_confirmed_return, return_by, picked_up_at, borrower_location_id, owner:profiles!item_loans_owner_id_fkey(preferred_name, username), gear_items(item_name, category)')
+          .select('id, item_id, owner_id, status, owner_confirmed_pickup, borrower_confirmed_pickup, borrower_confirmed_return, return_by, picked_up_at, borrower_location_id, owner:profiles!item_loans_owner_id_fkey(preferred_name, username), gear_items(item_name, category)')
           .eq('borrower_id', user.id)
           .in('status', ['pending_handover', 'active', 'return_pending']);
         setInboundLoans(inboundLoanData || []);
@@ -380,6 +380,12 @@ export default function InventoryPage() {
       .eq('id', loan.id);
     if (!error) {
       setInboundLoans(prev => prev.map(l => l.id === loan.id ? { ...l, status: 'return_pending', borrower_confirmed_return: true } : l));
+      await supabase.from('notifications').insert({
+        type: 'loan_return_pending',
+        recipient_id: loan.owner_id,
+        actor_id: userId,
+        item_id: loan.item_id,
+      });
       await supabase.functions.invoke('send-loan-notification', {
         body: { type: 'borrower_confirmed_return', loan_id: loan.id },
       });

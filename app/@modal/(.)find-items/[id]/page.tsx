@@ -108,11 +108,21 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
               </div>
 
               <hr style={dividerStyle} />
-              
+
               <h4 style={sectionLabelStyle}>Description</h4>
               <p style={descriptionStyle}>{item.description || 'No description provided.'}</p>
-              
-              {session ? (
+
+              {item.is_on_loan && (
+                <div style={{ display: 'inline-block', padding: '3px 10px', marginBottom: '12px', backgroundColor: '#F5F0D0', color: '#92400e', fontSize: '0.75rem', fontWeight: 700, borderRadius: '4px' }}>
+                  Currently on loan
+                </div>
+              )}
+
+              {item.is_on_loan ? (
+                <span style={{ ...actionButtonStyle, display: 'block', textAlign: 'center' as const, backgroundColor: '#f5f5f5', color: '#aaa', border: '2px solid #e0e0e0', boxShadow: 'none', cursor: 'default' }}>
+                  Currently on loan
+                </span>
+              ) : session ? (
                 <button style={actionButtonStyle} onClick={() => setIsRequestOpen(true)}>
                   {item.availability_status === 'Available to Keep' ? 'Request to Keep' : 'Request to Borrow'}
                 </button>
@@ -121,11 +131,18 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
                   Log In to Request
                 </a>
               )}
-              {session?.user?.id === item.user_id && (
+              {session?.user?.id === item.user_id && !item.is_on_loan && (
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
                   <button onClick={() => setConfirmDelete(true)} style={deleteItemBtnStyle}>
                     Delete this item
                   </button>
+                </div>
+              )}
+              {session?.user?.id === item.user_id && item.is_on_loan && (
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
+                  <span style={{ ...deleteItemBtnStyle, color: '#aaa', border: '1px solid #e0e0e0', backgroundColor: '#f5f5f5' }}>
+                    Can't delete while on loan
+                  </span>
                 </div>
               )}
 
