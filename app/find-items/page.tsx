@@ -30,6 +30,8 @@ const RUST_LT  = '#F5E0D8'
 const MUSTARD  = '#D4A020'
 const MUSTARD_LT = '#F5F0D0'
 
+const disabledPillStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#f5f5f5', color: '#aaa', border: '2px solid #e0e0e0', fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' };
+
 const CATEGORY_EMOJI: Record<string, string> = {
   'Bikes & Transport':  '🚲',
   'Clothing & Fun':     '🧥',
@@ -691,46 +693,77 @@ export default function FindItemsPage() {
                 </div>
               )}
 
+              {selectedItem.is_on_loan && (
+                <div style={{ display: 'inline-block', padding: '3px 10px', marginBottom: '12px', backgroundColor: MUSTARD_LT, color: '#92400e', fontFamily: "'Space Mono', monospace", fontSize: '0.7rem', fontWeight: 700 }}>
+                  Currently on loan
+                </div>
+              )}
+
               {/* CTA */}
               {userId && selectedItem.user_id === userId ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
-                  <a
-                    href={`/list-item?edit=${selectedItem.id}`}
-                    style={{ padding: '10px 20px', backgroundColor: '#fff', color: TEAL, border: `2px solid ${TEAL}`, fontSize: '13px', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' }}
-                  >
-                    Edit
-                  </a>
-                  <button
-                    onClick={() => setShowTransferFlow(true)}
-                    style={{ padding: '10px 20px', backgroundColor: '#fff', color: MUSTARD, border: `2px solid ${MUSTARD}`, fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' }}
-                  >
-                    Transfer
-                  </button>
-                  <ShareButton
-                    itemId={selectedItem.id}
-                    itemName={selectedItem.item_name}
-                    style={{ width: 'auto', flex: '0 0 auto', padding: '10px 20px', marginTop: 0, border: `2px solid ${INK}`, backgroundColor: '#fff', fontSize: '13px', whiteSpace: 'nowrap' as const }}
-                  />
-                  <button
-                    onClick={() => setConfirmDeleteItem(true)}
-                    style={{ marginLeft: 'auto', padding: '10px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '2px solid #cc0000', fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' }}
-                  >
-                    Delete
-                  </button>
+                  {selectedItem.is_on_loan ? (
+                    <>
+                      <span style={disabledPillStyle}>Edit</span>
+                      <span style={disabledPillStyle}>Transfer</span>
+                      <ShareButton
+                        itemId={selectedItem.id}
+                        itemName={selectedItem.item_name}
+                        style={{ width: 'auto', flex: '0 0 auto', padding: '10px 20px', marginTop: 0, border: `2px solid ${INK}`, backgroundColor: '#fff', fontSize: '13px', whiteSpace: 'nowrap' as const }}
+                      />
+                      <span style={{ ...disabledPillStyle, marginLeft: 'auto' }}>Delete</span>
+                    </>
+                  ) : (
+                    <>
+                      <a
+                        href={`/list-item?edit=${selectedItem.id}`}
+                        style={{ padding: '10px 20px', backgroundColor: '#fff', color: TEAL, border: `2px solid ${TEAL}`, fontSize: '13px', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' }}
+                      >
+                        Edit
+                      </a>
+                      <button
+                        onClick={() => setShowTransferFlow(true)}
+                        style={{ padding: '10px 20px', backgroundColor: '#fff', color: MUSTARD, border: `2px solid ${MUSTARD}`, fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' }}
+                      >
+                        Transfer
+                      </button>
+                      <ShareButton
+                        itemId={selectedItem.id}
+                        itemName={selectedItem.item_name}
+                        style={{ width: 'auto', flex: '0 0 auto', padding: '10px 20px', marginTop: 0, border: `2px solid ${INK}`, backgroundColor: '#fff', fontSize: '13px', whiteSpace: 'nowrap' as const }}
+                      />
+                      <button
+                        onClick={() => setConfirmDeleteItem(true)}
+                        style={{ marginLeft: 'auto', padding: '10px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '2px solid #cc0000', fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' }}
+                      >
+                        Delete
+                      </button>
+                    </>
+                  )}
                 </div>
               ) : userId ? (
-                <button
-                  onClick={() => setShowRequestForm(true)}
-                  style={{
-                    width: '100%', padding: '14px',
-                    backgroundColor: TEAL, color: '#fff',
-                    border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,
-                    fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer',
-                    fontFamily: 'Outfit, sans-serif', transition: 'transform 0.1s, box-shadow 0.1s',
-                  }}
-                >
-                  Request to {selectedItem.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'} →
-                </button>
+                selectedItem.is_on_loan ? (
+                  <span style={{ ...disabledPillStyle, display: 'block', width: '100%', textAlign: 'center' as const, padding: '14px' }}>
+                    Currently on loan
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => setShowRequestForm(true)}
+                    style={{
+                      width: '100%', padding: '14px',
+                      backgroundColor: TEAL, color: '#fff',
+                      border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,
+                      fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer',
+                      fontFamily: 'Outfit, sans-serif', transition: 'transform 0.1s, box-shadow 0.1s',
+                    }}
+                  >
+                    Request to {selectedItem.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'} →
+                  </button>
+                )
+              ) : selectedItem.is_on_loan ? (
+                <span style={{ ...disabledPillStyle, display: 'block', width: '100%', textAlign: 'center' as const, padding: '14px' }}>
+                  Currently on loan
+                </span>
               ) : (
                 <a
                   href="/login"
