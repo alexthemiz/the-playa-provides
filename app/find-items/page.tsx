@@ -699,7 +699,7 @@ export default function FindItemsPage() {
                   <ShareButton
                     itemId={selectedItem.id}
                     itemName={selectedItem.item_name}
-                    style={{ width: 'auto', flex: '0 0 auto', padding: '10px 20px', marginTop: 0, border: `2px solid ${INK}`, fontSize: '13px', whiteSpace: 'nowrap' as const }}
+                    style={{ width: 'auto', flex: '0 0 auto', padding: '10px 20px', marginTop: 0, border: `2px solid ${INK}`, backgroundColor: '#fff', fontSize: '13px', whiteSpace: 'nowrap' as const }}
                   />
                   <button
                     onClick={() => setConfirmDeleteItem(true)}

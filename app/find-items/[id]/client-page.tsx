@@ -273,7 +273,7 @@ const borrowButtonStyle: React.CSSProperties = { padding: '12px 28px', border: '
 const ownerBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', textDecoration: 'none' };
 const editDetailsBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#fff', color: '#1E8A82', border: '2px solid #1E8A82', fontSize: '13px', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', whiteSpace: 'nowrap' as const };
 const transferBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#fff', color: '#D4A020', border: '2px solid #D4A020', fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' };
-const shareInlineBtnStyle: React.CSSProperties = { width: 'auto', flex: '0 0 auto', padding: '10px 20px', marginTop: 0, border: '2px solid #1C1610', fontSize: '13px', whiteSpace: 'nowrap' as const };
+const shareInlineBtnStyle: React.CSSProperties = { width: 'auto', flex: '0 0 auto', padding: '10px 20px', marginTop: 0, border: '2px solid #1C1610', backgroundColor: '#fff', fontSize: '13px', whiteSpace: 'nowrap' as const };
 
 const deleteItemBtnStyle: React.CSSProperties = { padding: '8px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '1px solid #ffaaaa', borderRadius: '8px', fontSize: '13px', cursor: 'pointer', fontWeight: '600' };
 const deleteListingBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '2px solid #cc0000', fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const };
