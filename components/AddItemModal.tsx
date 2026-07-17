@@ -360,7 +360,6 @@ const hintStyle: React.CSSProperties = { fontSize: '12px', color: '#888', margin
 const inputStyle: React.CSSProperties = { padding: '9px 12px', borderRadius: '8px', border: '1px solid #ddd', backgroundColor: '#fff', color: '#111', fontSize: '14px', outline: 'none', width: '100%', boxSizing: 'border-box' as const };
 const radioGroupStyle: React.CSSProperties = { display: 'flex', flexDirection: 'row' as const, gap: '8px' };
 const radioLabelStyle: React.CSSProperties = { flex: 1, padding: '10px 12px', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' };
-const detailsBoxStyle: React.CSSProperties = { marginTop: '10px', padding: '14px', backgroundColor: '#f9f9f9', borderRadius: '10px', border: '1px solid #eee' };
 const unifiedBoxStyle: React.CSSProperties = { marginTop: '6px', backgroundColor: '#fff', borderRadius: '10px', border: '1px solid #ddd', overflow: 'hidden' };
 const unifiedTextareaStyle: React.CSSProperties = { display: 'block', width: '100%', minHeight: '80px', padding: '12px 14px', border: 'none', background: 'transparent', fontSize: '14px', color: '#111', resize: 'vertical' as const, outline: 'none', boxSizing: 'border-box' as const, fontFamily: 'inherit' };
 const trayStyle: React.CSSProperties = { padding: '12px 14px', display: 'flex', gap: '10px' };

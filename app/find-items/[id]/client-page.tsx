@@ -349,19 +349,15 @@ const descText: React.CSSProperties = { lineHeight: '1.7', color: '#444', fontSi
 const termsSection: React.CSSProperties = { backgroundColor: '#f7f7f7', padding: '16px', borderRadius: '12px', border: '1px solid #e5e5e5' };
 const termsTitleStyle: React.CSSProperties = { color: '#555', fontSize: '11px', textTransform: 'uppercase' as const, marginBottom: '8px', marginTop: 0, letterSpacing: '1px', fontWeight: 800 };
 const priceTag: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#2D241E' };
-const returnTermsBox: React.CSSProperties = { padding: '10px 12px', backgroundColor: '#efefef', borderRadius: '8px', border: '1px solid #ddd' };
-const conditionLabelStyle: React.CSSProperties = { margin: '0 0 4px 0', fontSize: '10px', color: '#888', textTransform: 'uppercase' as const, fontWeight: 'bold', letterSpacing: '0.06em' };
 
 // Request / owner buttons
 const borrowButtonStyle: React.CSSProperties = { padding: '12px 28px', border: '2px solid #1C1610', boxShadow: '3px 3px 0 #1C1610', backgroundColor: '#1E8A82', color: '#fff', fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer', fontFamily: 'Outfit, sans-serif' };
-const ownerBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', textDecoration: 'none' };
 const editDetailsBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#fff', color: '#1E8A82', border: '2px solid #1E8A82', fontSize: '13px', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', whiteSpace: 'nowrap' as const };
 const transferBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#fff', color: '#D4A020', border: '2px solid #D4A020', fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' };
 const shareInlineBtnStyle: React.CSSProperties = { width: 'auto', flex: '0 0 auto', padding: '10px 20px', marginTop: 0, border: '2px solid #1C1610', backgroundColor: '#fff', fontSize: '13px', whiteSpace: 'nowrap' as const };
 const disabledBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#f5f5f5', color: '#aaa', border: '2px solid #e0e0e0', fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' };
 const returnItemBtnStyle: React.CSSProperties = { padding: '12px 28px', border: '2px solid #1C1610', boxShadow: '3px 3px 0 #1C1610', backgroundColor: '#16a34a', color: '#fff', fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer', fontFamily: 'Outfit, sans-serif' };
 
-const deleteItemBtnStyle: React.CSSProperties = { padding: '8px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '1px solid #ffaaaa', borderRadius: '8px', fontSize: '13px', cursor: 'pointer', fontWeight: '600' };
 const deleteListingBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '2px solid #cc0000', fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const };
 const deleteOverlayStyle: React.CSSProperties = { position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100, padding: '20px' };
 const deleteModalStyle: React.CSSProperties = { backgroundColor: '#fff', padding: '24px', borderRadius: '16px', maxWidth: '400px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' };

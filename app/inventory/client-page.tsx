@@ -21,7 +21,6 @@ export default function InventoryPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [showWelcome, setShowWelcome] = useState(false);
   const [showImport, setShowImport] = useState(false);
-  const [displayName, setDisplayName] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
@@ -67,8 +66,7 @@ export default function InventoryPage() {
       const user = session?.user ?? null;
       if (user) {
         setUserId(user.id);
-        const { data: profileData } = await supabase.from('profiles').select('preferred_name, has_seen_welcome').eq('id', user.id).maybeSingle();
-        if (profileData?.preferred_name) setDisplayName(profileData.preferred_name);
+        const { data: profileData } = await supabase.from('profiles').select('has_seen_welcome').eq('id', user.id).maybeSingle();
 
         const [followingRes, campRes] = await Promise.all([
           supabase.from('user_follows').select('following_id').eq('follower_id', user.id),
@@ -272,14 +270,6 @@ export default function InventoryPage() {
     await supabase.functions.invoke('send-loan-notification', {
       body: { type: 'owner_confirmed_pickup', loan_id: loan.id },
     });
-  }
-
-  async function handleDisputeReturn(loan: any) {
-    await supabase
-      .from('item_loans')
-      .update({ status: 'disputed' })
-      .eq('id', loan.id);
-    fetchMyInventory();
   }
 
   async function handleSubmitDispute() {

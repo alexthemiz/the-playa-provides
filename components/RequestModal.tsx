@@ -10,7 +10,6 @@ interface RequestModalProps {
 
 const INK   = '#1C1610';
 const TEAL  = '#1E8A82';
-const PAPER = '#FDFAF4';
 const PAPER_DK = '#EDE5D0';
 
 function buildMessage({
@@ -149,7 +148,6 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
     }
   };
 
-  const hasTerms = !isKeep && !!(item.return_by || item.damage_price || item.loss_price);
   const locationDisplay: string = item.location_display ||
     (item.locations ? [item.locations.city, item.locations.zip_code].filter(Boolean).join(' ') : '') ||
     '—';

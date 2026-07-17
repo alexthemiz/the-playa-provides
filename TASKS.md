@@ -17,9 +17,9 @@ _Last updated: 2026-06-08 (session 35 — pre-launch complete)_
 - [ ] **Welcome email** — Triggered on signup via Supabase DB webhook; design and copy TBD; uses existing Resend/edge function setup.
 - [ ] **End-to-end test: Lend/Return flow** — Use two test accounts; go through full loan lifecycle; confirm emails fire.
 - [ ] **End-to-end test: Following & Notifications** — Follow a user, list an item as them, verify bell badge + dropdown; mark-as-read; email opt-in.
-- [ ] **Incomplete profile nudge** — Some early users have NULL full_name. Options: A) amber banner on /settings if required fields missing, B) one-time modal after login, C) validate only on save.
+- [ ] **Incomplete profile nudge** — Some early users have NULL full_name. Settings already validates full_name on save (option C); proactive banner/modal (options A/B) not built. See full options list under Ideas & Long Term.
 - [ ] **Dust storm decision** — View `theplayaprovides.com/mockup-dust-storm.html`, decide storm / haze / skip; implement if yes.
-- [ ] **Header color** — "Provides" lime green; consider all-green or all-white logo; nav links `#aaa` → consider white.
+- [ ] **Header nav link color** — "Provides" lime green already shipped (session 29). Still open: nav links are `#aaa` → consider white.
 
 ---
 
@@ -48,8 +48,8 @@ _(moved to Pre-Launch Audit section above)_
 ---
 
 ## 💡 Ideas & Long Term
- - [ ] /camps page — currently blank; consider building as a searchable directory of all camps with claimed/unclaimed pages
- - [ ] /profile page — currently blank; consider redirecting logged-in users to their own profile (/profile/[username]), or building as a member directory
+ - [ ] /camps page — no index route exists (`app/camps/` only has `[slug]`), so it 404s; consider building as a searchable directory of all camps with claimed/unclaimed pages
+ - [ ] /profile page — no index route exists (`app/profile/` only has `[username]`), so it 404s; consider redirecting logged-in users to their own profile (/profile/[username]), or building as a member directory
  - [ ] **Shepherd.js product tour** — two single-page tours (profile page, inventory page); steps highlight key UI elements; seen state stored in `onboarding_tours_seen` jsonb on profiles; build after UI stabilizes
  - [ ] **Custom Supabase Auth domain** — Upgrade to Supabase Pro, set `auth.theplayaprovides.com` as custom auth domain + DNS config. Fixes Google OAuth consent screen showing `bklycpitofjrjhizttny.supabase.co` instead of the app domain.
 - [ ] **Dispute arbitration UI** — Loans with `status = disputed` have no admin UI yet; flagged for future resolution flow.
@@ -63,7 +63,7 @@ _(moved to Pre-Launch Audit section above)_
 - [ ] **New user onboarding — welcome email** — D from the session 33 brainstorm; triggered on signup; copy TBD.
 - [ ] **Camp page: member chat** — real-time or async chat window on camp hub pages, visible to camp members only. Needs scoping (real-time vs. threaded, moderation, notifications).
 - [ ] **SEO / noindex for restricted items** — Public items indexable by search engines; campmates-only and followers-only items should have noindex meta tag.
-- [ ] **Incomplete profile nudge** — Some users have NULL full_name (and potentially other required fields) from before required field validation was added. Options: (A) Soft banner at top of /settings page if required fields are missing — non-blocking, just a nudge; (B) One-time modal after login prompting user to complete their profile, dismissible and non-blocking; (C) Validate only on save — no proactive warning, error only appears when user next visits /settings and tries to save. Option B is most user-friendly at scale.
+- [ ] **Incomplete profile nudge** — Some users have NULL full_name (and potentially other required fields) from before required field validation was added. Option (C) validate-only-on-save is already shipped (`app/settings/client-page.tsx`). Still open: (A) soft banner at top of /settings if required fields missing, or (B) one-time modal after login. Option B is most user-friendly at scale.
 - [x] **Borrowed item detail page** — DONE (session 2026-07-17): on-loan items hidden from find-items grid/list; item page still reachable directly with Edit/Transfer/Delete grayed for owner, Request grayed for third parties, "Return Item" button for the active borrower, "Currently on loan" badge for everyone. See done-log below.
 - [ ] **Item history — lending/transfer dates** — Tabled 2026-07-17. Add a history section to the item listing page showing dates only (lent on / returned on / ownership transferred on) — explicitly NOT names of past lendees or owners, to avoid exposing borrower identity publicly. Current state ships only a live "Currently on loan" badge, no history. Needs: schema for a lightweight append-only log (or derive from item_loans/item_transfers completed rows), and a decision on whether it's visible to everyone or owner-only.
 - [ ] **Return flow limbo/reminder** — If owner never confirms return after borrower clicks "Return Item", send daily bell notification to owner. Add option for borrower to ping owner with a reminder button.
@@ -74,7 +74,14 @@ _(moved to Pre-Launch Audit section above)_
 - [ ] **Sitewide font overhaul** — Current fonts are functional but generic. Design pass needed across all pages.
 - [ ] **Credibility layer** — TBD; some way to signal trustworthiness of lenders/borrowers.
 - [ ] **Gamification / incentivization** — Badges, leaderboards, real-world prizes, playa party invitations.
-- [ ] **Tailwind deviation** — Several components (`header.tsx`, `footer.tsx`, `RequestModal.tsx`, `resources/page.tsx`, `layout.tsx`, `terms/page.tsx`, `SubmitCampModal.tsx`, `ImageSlider.tsx`) use Tailwind utility classes in JSX despite CLAUDE.md convention. Not broken but inconsistent. Options: (A) update CLAUDE.md to officially allow Tailwind in JSX, or (B) do a cleanup pass to convert to inline styles. Decide before the codebase grows further.
+- [ ] **Tailwind deviation** — RE-AUDITED 2026-07-17: most of the originally-listed files are already clean (header, footer, RequestModal, resources, layout, terms all inline-styles-only now). Only `SubmitCampModal.tsx` (65 Tailwind class occurrences) and `ImageSlider.tsx` (full Tailwind) remain. Convert those two to inline styles, or update CLAUDE.md to officially allow Tailwind — decide before the codebase grows further.
+- [ ] **Design consistency pass — old palette in modals** — Full audit 2026-07-17 found nearly every modal component still on the pre-"Playful Field Guide" palette (`#2D241E` ink, `#5ECFDF` teal, `#C08261` tan) never converted in the session-28 overhaul: `LendModal.tsx`, `TransferModal.tsx`, `AddItemModal.tsx`, `WelcomeModal.tsx`, `WishListMatchModal.tsx`, `ImportSpreadsheetModal.tsx`, `FeedbackWidget.tsx`, plus `inventory/client-page.tsx`, `find-items/[id]/client-page.tsx`, `settings/client-page.tsx`, `profile/[username]/client-page.tsx`, `privacy/page.tsx`, `auth/auth-code-error/page.tsx`. Also `MapView.tsx` pins are still old blue `#3ABFD4` (also a leftover unused `--color-playa-blue` CSS var in `globals.css:31`). This is a real, scoped redesign pass — not a quick fix.
+- [ ] **Extract shared item-action-row logic** — `app/find-items/page.tsx` (quick-view), `app/find-items/[id]/client-page.tsx` (detail page), and `app/@modal/(.)find-items/[id]/page.tsx` (intercepted modal) each independently reimplement the Edit/Transfer/Share/Delete/Request/Return-Item button row plus the `isOwner`/`isBorrower`/`onLoan` gating and the `item_loans`+profile fetch. This triplication already caused one real bug (2026-07-17: the borrower's Return Item button only existed on the detail page for the first pass, silently missing from the other two until a follow-up fix). Worth a `useItemActions(item, session)` hook + shared `<ItemActionRow>` component so this can't drift again.
+- [ ] **`alert()` stragglers** — `list-item/client-page.tsx` (7 calls), `AddItemModal.tsx` (2), `SubmitCampModal.tsx` (1), `AvatarUpload.tsx` (1) still use native `alert()` instead of the inline-toast pattern used elsewhere (RequestModal, LendModal, settings).
+- [ ] **Dead `clever-endpoint` edge function** — deployed on Supabase with no local source file, content is a leftover duplicate of `send-feedback-notification`, zero references in the codebase. No MCP tool to delete edge functions — needs manual removal via Supabase Dashboard.
+- [ ] **`gear_items` RLS policy consolidation** — three near-duplicate owner-scoped policies exist (`Owner Access`, `Users can manage their own gear`, `Users can manage their own gear_items`) doing the same thing. Harmless but worth consolidating to one for clarity.
+- [ ] **`SECURITY DEFINER` functions missing `search_path`** — Supabase advisor flags ~9 functions (`notify_followers_on_new_item`, `notify_on_new_follower`, `handle_camp_claim_approved/denied`, `confirm_transfer_receipt`, `handle_new_user`, `sync_gear_item_loan_flag`, etc.) without an explicit `search_path`. Low real-world risk (no dynamic SQL / user-controlled schema references), but cheap to fix with `set search_path = public` on each.
+- [ ] **Migrations not tracked in git** — `supabase/migrations/` in the repo has only 1 file vs. 42+ migrations actually applied to the live project. Schema history/diffing isn't reconstructable from git alone; everything lives in Supabase only.
 
 ---
 
@@ -93,7 +100,7 @@ _(nothing queued)_
 ---
 
 ## 🚀 Features (Designed, Ready to Build)
-- [ ] **Notification types Phase 2** — Wire remaining transfer/loan/return events into the `notifications` table and bell. Most types are now in the schema and header switch; gaps: transfer acceptance bell insert, item request bell insert, loan return confirmation (done), any remaining edge cases.
+- [x] **Notification types Phase 2** — DONE: transfer_accepted/declined, item_request, loan_return_confirmed, loan_pickup_ready, transfer_pickup_ready, and loan_return_pending are all wired to inserts + header switch cases as of 2026-07-17.
 - [ ] **Wish list match — logged-out state** — Currently the "I have one of these" button only shows to logged-in users. Consider showing a prompt to logged-out visitors to sign in to send a match.
 - [ ] **New user guidance flow** — Tooltips or highlight circles around key features; step-by-step walkthrough page by page. Triggered on first login, after the welcome modal. Scope TBD.
 - [ ] **FAQ page** — TBD whether it replaces /about or sits alongside it. Content TBD. Should cover: how borrowing/lending works, what happens if something is damaged, how camps work, how visibility settings work, how to get listed on the resources directory.
@@ -116,6 +123,15 @@ _(nothing queued)_
 - [x] Action column button alignment — `th` had 32px left padding the `td`s didn't match, drifting buttons left of their own header across all 4 inventory tables; added matching `tdActionStyle`
 - [x] "Pending Handover"/"Send Reminder"/"I've Handed It Over" labels shortened for column width
 - [x] **Visibility stuck private after loan return** — `updateStatus` (the To Borrow/To Keep/Private toggle) only ever forced `visibility: 'private'` moving *to* Not Available, never restored it moving away; since `handleOwnerConfirmReturn` sets an item to Not Available + private automatically, re-toggling status back to available left `visibility` stuck at `'private'` (not even a valid dropdown option), making the item invisible on find-items with no obvious cause. Fixed in `updateStatus`; also hand-fixed the two live items already stuck in that state.
+
+### Full site audit (4 parallel investigations: dead code, design consistency, backend/DB, incomplete features)
+- [x] **Security fix** — `gear_items` had two leftover RLS policies granting `anon` unconditional INSERT and UPDATE (`WITH CHECK (true)`), completely bypassing ownership — anyone with the public API key could insert junk listings or overwrite/vandalize any existing item's owner, terms, or visibility without logging in. Dropped both; existing owner-scoped policies already cover all real app behavior. Confirmed clean via `get_advisors` afterward.
+- [x] **Return Item button gap closed** — the quick-view modal and intercepted `@modal` route were missing the borrower's Return Item flow entirely (only the full detail page had it from the loan-visibility feature earlier today); both now fetch the viewer's own loan row and show Return Item / Return Pending / Pending Handover states matching the detail page.
+- [x] **Homepage checklist stuck-loading bug** — `fetchCurrentUser` in `app/page.tsx` had no try/catch; a thrown error would leave `checklistLoading` true forever. Added try/catch/finally (same pattern already documented as a recurring bug class). Also added try/catch to `fetchWishlists`/`fetchMarqueeItems` for consistency.
+- [x] Removed 15 dead mockup/prototype HTML files from `public/` (publicly served at real URLs, zero code references) and `marketing.plugin` (unrelated Claude Code plugin bundle at repo root). Kept `mockup-dust-storm.html` — still an open decision.
+- [x] Removed dead code: unused `handleDisputeReturn` + `displayName` state (`inventory/client-page.tsx`); unused `returnTermsBox`/`conditionLabelStyle`/`ownerBtnStyle`/`deleteItemBtnStyle` style consts (`find-items/[id]/client-page.tsx`); unused `User`/`Package` icon imports + `LIME`/`LIME_DK` consts + unused loop index (`find-items/page.tsx`); unused `detailsBoxStyle` (`AddItemModal.tsx`); unused `PAPER` const + dead `hasTerms` var (`RequestModal.tsx`).
+- [x] Dropped two unreachable DB triggers (`on_loan_status_change`, `on_transfer_status_change`) — fired on `status = 'accepted'`/`'declined'`, a value the app's loan/transfer state machine never actually writes. Confirmed zero live trigger activity before dropping.
+- [x] Remaining findings not fixed today (design consistency pass, shared item-action-row extraction, `alert()` cleanup, dead `clever-endpoint` edge function, RLS policy consolidation, `search_path` warnings, migrations-not-in-git gap) logged under Ideas & Long Term above.
 
 ## ✅ Done (session 35 — 2026-06-08, pre-launch)
 
