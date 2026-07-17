@@ -147,8 +147,18 @@ export default function InventoryPage() {
   }
 
   async function updateStatus(itemId: number, newStatus: string) {
+    const currentItem = items.find(i => i.id === itemId);
     const update: any = { availability_status: newStatus };
-    if (newStatus === 'Not Available') update.visibility = 'private';
+    // 'private' is only ever a valid resting visibility for a 'Not Available'
+    // item (it's not even an option in the visibility dropdown) — restore
+    // public visibility when leaving that status so the item isn't stuck
+    // invisible on find-items. Don't touch a deliberately-chosen
+    // followers/campmates visibility on unrelated status changes.
+    if (newStatus === 'Not Available') {
+      update.visibility = 'private';
+    } else if (currentItem?.visibility === 'private') {
+      update.visibility = 'public';
+    }
     const { error } = await supabase
       .from('gear_items')
       .update(update)
@@ -157,7 +167,7 @@ export default function InventoryPage() {
       setItems(prev => prev.map(i => i.id === itemId ? {
         ...i,
         availability_status: newStatus,
-        ...(newStatus === 'Not Available' ? { visibility: 'private' } : {}),
+        ...(update.visibility ? { visibility: update.visibility } : {}),
       } : i));
     }
   }
