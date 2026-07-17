@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { supabase } from '@/lib/supabaseClient';
 import ImageSlider from '@/components/ImageSlider';
-import { Search, MapPin, User, Package, X, LayoutGrid, List, Map } from 'lucide-react';
+import { Search, MapPin, X, LayoutGrid, List, Map } from 'lucide-react';
 import Link from 'next/link';
 import RequestModal from '@/components/RequestModal';
 import ShareButton from '@/components/ShareButton';
@@ -21,8 +21,6 @@ const INK_LITE = '#9A8878'
 const PAPER    = '#F6F1E8'
 const PAPER_DK = '#EDE5D0'
 const PAPER_LT = '#FDFAF4'
-const LIME     = '#B8CC2A'
-const LIME_DK  = '#8A9A10'
 const TEAL     = '#1E8A82'
 const TEAL_LT  = '#D4EDEB'
 const RUST     = '#C24820'
@@ -64,6 +62,8 @@ export default function FindItemsPage() {
   const [confirmDeleteItem, setConfirmDeleteItem] = useState(false);
   const [deletingItem,      setDeletingItem]      = useState(false);
   const [showTransferFlow,  setShowTransferFlow]  = useState(false);
+  const [myLoan,            setMyLoan]            = useState<any>(null);
+  const [returningItem,     setReturningItem]     = useState(false);
   const [viewMode,         setViewMode]         = useState<'cards' | 'list' | 'map'>(
     () => (typeof window !== 'undefined' ? (localStorage.getItem('findItemsView') as 'cards' | 'list' | 'map') || 'cards' : 'cards')
   );
@@ -115,6 +115,20 @@ export default function FindItemsPage() {
     }
     return () => window.removeEventListener('popstate', syncModalWithUrl);
   }, [items, loading]);
+
+  useEffect(() => {
+    setMyLoan(null);
+    if (!selectedItem || !userId) return;
+    // RLS scopes this to rows where the current user is the owner or
+    // borrower — returns null for everyone else, which is what we want.
+    supabase
+      .from('item_loans')
+      .select('id, status, borrower_id, owner_id')
+      .eq('item_id', selectedItem.id)
+      .in('status', ['pending_handover', 'active', 'return_pending'])
+      .maybeSingle()
+      .then(({ data }) => setMyLoan(data));
+  }, [selectedItem?.id, userId]);
 
   async function fetchRelationships() {
     try {
@@ -173,6 +187,32 @@ export default function FindItemsPage() {
     setShowRequestForm(false);
     setConfirmDeleteItem(false);
     window.history.pushState(null, '', '/find-items');
+  };
+
+  const handleReturnItem = async () => {
+    if (!myLoan) return;
+    setReturningItem(true);
+    try {
+      const { error } = await supabase
+        .from('item_loans')
+        .update({ borrower_confirmed_return: true, status: 'return_pending' })
+        .eq('id', myLoan.id);
+      if (error) throw error;
+      setMyLoan((prev: any) => ({ ...prev, status: 'return_pending' }));
+      await supabase.from('notifications').insert({
+        type: 'loan_return_pending',
+        recipient_id: myLoan.owner_id,
+        actor_id: userId,
+        item_id: selectedItem.id,
+      });
+      await supabase.functions.invoke('send-loan-notification', {
+        body: { type: 'borrower_confirmed_return', loan_id: myLoan.id },
+      });
+    } catch (err: any) {
+      console.error('Return item error:', err.message);
+    } finally {
+      setReturningItem(false);
+    }
   };
 
   const handleDeleteSelectedItem = async () => {
@@ -533,7 +573,7 @@ export default function FindItemsPage() {
           </div>
         ) : (
           <div className="fi-grid">
-            {filteredItems.map((item, i) => {
+            {filteredItems.map((item) => {
               const emoji    = CATEGORY_EMOJI[item.category] || '📦';
               const hasImg   = Array.isArray(item.image_urls) && item.image_urls.length > 0;
               const isKeep   = item.availability_status === 'Available to Keep';
@@ -741,6 +781,30 @@ export default function FindItemsPage() {
                     </>
                   )}
                 </div>
+              ) : myLoan && myLoan.borrower_id === userId && myLoan.status === 'active' ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+                  <button
+                    onClick={handleReturnItem}
+                    disabled={returningItem}
+                    style={{
+                      width: '100%', padding: '14px',
+                      backgroundColor: '#16a34a', color: '#fff',
+                      border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,
+                      fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer',
+                      fontFamily: 'Outfit, sans-serif',
+                    }}
+                  >
+                    {returningItem ? 'Returning...' : 'Return Item'}
+                  </button>
+                </div>
+              ) : myLoan && myLoan.borrower_id === userId && myLoan.status === 'return_pending' ? (
+                <span style={{ ...disabledPillStyle, display: 'block', width: '100%', textAlign: 'center' as const, padding: '14px' }}>
+                  Return Pending — waiting on owner to confirm
+                </span>
+              ) : myLoan && myLoan.borrower_id === userId && myLoan.status === 'pending_handover' ? (
+                <span style={{ ...disabledPillStyle, display: 'block', width: '100%', textAlign: 'center' as const, padding: '14px' }}>
+                  Pending handover — check your inventory
+                </span>
               ) : userId ? (
                 selectedItem.is_on_loan ? (
                   <span style={{ ...disabledPillStyle, display: 'block', width: '100%', textAlign: 'center' as const, padding: '14px' }}>

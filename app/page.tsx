@@ -104,63 +104,76 @@ export default function HomePage() {
 
   useEffect(() => {
     async function fetchCurrentUser() {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.user) { setChecklistLoading(false); return }
-      const uid = session.user.id
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session?.user) { return }
+        const uid = session.user.id
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('username, checklist_dismissed, wish_list, has_browsed')
-        .eq('id', uid)
-        .single()
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username, checklist_dismissed, wish_list, has_browsed')
+          .eq('id', uid)
+          .single()
 
-      if (!profile) { setChecklistLoading(false); return }
-      setCurrentUsername(profile.username)
-      setChecklistDismissed(profile.checklist_dismissed ?? false)
+        if (!profile) { return }
+        setCurrentUsername(profile.username)
+        setChecklistDismissed(profile.checklist_dismissed ?? false)
 
-      if (profile.checklist_dismissed) { setChecklistLoading(false); return }
+        if (profile.checklist_dismissed) { return }
 
-      const [campsRes, locsRes, gearRes] = await Promise.all([
-        supabase.from('user_camp_affiliations').select('id', { count: 'exact', head: true }).eq('user_id', uid),
-        supabase.from('locations').select('id', { count: 'exact', head: true }).eq('user_id', uid),
-        supabase.from('gear_items').select('id', { count: 'exact', head: true }).eq('user_id', uid),
-      ])
+        const [campsRes, locsRes, gearRes] = await Promise.all([
+          supabase.from('user_camp_affiliations').select('id', { count: 'exact', head: true }).eq('user_id', uid),
+          supabase.from('locations').select('id', { count: 'exact', head: true }).eq('user_id', uid),
+          supabase.from('gear_items').select('id', { count: 'exact', head: true }).eq('user_id', uid),
+        ])
 
-      const state: ChecklistState = {
-        playaHistory: (campsRes.count ?? 0) > 0,
-        wishList:     Array.isArray(profile.wish_list) && profile.wish_list.length > 0,
-        locations:    (locsRes.count ?? 0) > 0,
-        listedItem:   (gearRes.count ?? 0) > 0,
-        browsed:      profile.has_browsed ?? false,
+        const state: ChecklistState = {
+          playaHistory: (campsRes.count ?? 0) > 0,
+          wishList:     Array.isArray(profile.wish_list) && profile.wish_list.length > 0,
+          locations:    (locsRes.count ?? 0) > 0,
+          listedItem:   (gearRes.count ?? 0) > 0,
+          browsed:      profile.has_browsed ?? false,
+        }
+        setChecklistState(state)
+      } catch (err) {
+        console.error('fetchCurrentUser error:', err)
+      } finally {
+        setChecklistLoading(false)
       }
-      setChecklistState(state)
-      setChecklistLoading(false)
     }
     fetchCurrentUser()
   }, [])
 
   useEffect(() => {
     async function fetchWishlists() {
-      const { data } = await supabase.from('profiles').select('username, wish_list').not('wish_list', 'is', null)
-      const tags: { tag: string; username: string }[] = []
-      for (const row of data || []) {
-        if (!row.username) continue
-        const list = Array.isArray(row.wish_list) ? row.wish_list : []
-        for (const tag of list) { if (tag) tags.push({ tag, username: row.username }) }
+      try {
+        const { data } = await supabase.from('profiles').select('username, wish_list').not('wish_list', 'is', null)
+        const tags: { tag: string; username: string }[] = []
+        for (const row of data || []) {
+          if (!row.username) continue
+          const list = Array.isArray(row.wish_list) ? row.wish_list : []
+          for (const tag of list) { if (tag) tags.push({ tag, username: row.username }) }
+        }
+        setWishlistTags(tags)
+      } catch (err) {
+        console.error('fetchWishlists error:', err)
       }
-      setWishlistTags(tags)
     }
     fetchWishlists()
   }, [])
 
   useEffect(() => {
     async function fetchMarqueeItems() {
-      const { data } = await supabase
-        .from('gear_items')
-        .select('id, item_name, image_urls, category, availability_status')
-        .in('availability_status', ['Available to Borrow', 'Available to Keep'])
-        .limit(20)
-      setMarqueeItems(data || [])
+      try {
+        const { data } = await supabase
+          .from('gear_items')
+          .select('id, item_name, image_urls, category, availability_status')
+          .in('availability_status', ['Available to Borrow', 'Available to Keep'])
+          .limit(20)
+        setMarqueeItems(data || [])
+      } catch (err) {
+        console.error('fetchMarqueeItems error:', err)
+      }
     }
     fetchMarqueeItems()
   }, [])
