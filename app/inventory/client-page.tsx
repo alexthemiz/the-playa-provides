@@ -96,7 +96,7 @@ export default function InventoryPage() {
         // Fetch active transfers (owner side)
         const { data: transferData } = await supabase
           .from('item_transfers')
-          .select('id, item_id, status, owner_confirmed, recipient_confirmed, recipient:profiles!item_transfers_recipient_id_fkey(preferred_name, username)')
+          .select('id, item_id, status, owner_confirmed, recipient_confirmed, recipient_id, recipient:profiles!item_transfers_recipient_id_fkey(preferred_name, username)')
           .eq('owner_id', user.id)
           .in('status', ['pending_handover']);
         setActiveTransfers(transferData || []);
@@ -204,6 +204,12 @@ export default function InventoryPage() {
       .update({ owner_confirmed: true })
       .eq('id', transfer.id);
     if (!error) {
+      await supabase.from('notifications').insert({
+        type: 'transfer_pickup_ready',
+        recipient_id: transfer.recipient_id,
+        actor_id: userId,
+        item_id: transfer.item_id,
+      });
       await supabase.functions.invoke('send-transfer-notification', {
         body: { type: 'owner_confirmed', transfer_id: transfer.id },
       });
@@ -231,6 +237,12 @@ export default function InventoryPage() {
       .update({ owner_confirmed_pickup: true })
       .eq('id', loan.id);
     if (!error) {
+      await supabase.from('notifications').insert({
+        type: 'loan_pickup_ready',
+        recipient_id: loan.borrower_id,
+        actor_id: userId,
+        item_id: loan.item_id,
+      });
       await supabase.functions.invoke('send-loan-notification', {
         body: { type: 'owner_confirmed_pickup', loan_id: loan.id },
       });

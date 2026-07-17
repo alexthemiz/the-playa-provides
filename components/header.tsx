@@ -291,6 +291,8 @@ export default function Header() {
                 case 'camp_claim_approved':   return { text: `Your claim for ${campName} was approved!`,    href: `/camps/${campSlug}` }
                 case 'camp_claim_denied':     return { text: `Your claim for ${campName} was not approved`, href: `/camps/${campSlug}` }
                 case 'loan_return_confirmed': return { text: `confirmed return of ${itemName}`,             href: '/inventory' }
+                case 'loan_pickup_ready':     return { text: `says they've handed over ${itemName} — confirm you got it`, href: '/inventory' }
+                case 'transfer_pickup_ready': return { text: `says they've handed over ${itemName} — confirm you got it`, href: '/inventory' }
                 case 'camp_member_removed':   return { text: `You have been removed from ${campName}`,      href: '/' }
                 case 'wish_list_match': {
                   const items     = (n.meta as any)?.items
