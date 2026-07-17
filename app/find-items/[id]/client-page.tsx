@@ -7,6 +7,8 @@ import Link from 'next/link';
 import RequestModal from '@/components/RequestModal'; // Assuming this is your path
 import ImageSlider from '@/components/ImageSlider';
 import ShareButton from '@/components/ShareButton';
+import LendModal from '@/components/LendModal';
+import TransferModal from '@/components/TransferModal';
 import { CATEGORY_ACCENTS, DEFAULT_CATEGORY_ACCENT } from '@/lib/categoryColors';
 
 export default function ItemDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -17,6 +19,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
   const [session, setSession] = useState<any>(undefined); // undefined = not yet checked
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showTransferFlow, setShowTransferFlow] = useState(false);
 
   useEffect(() => {
     async function fetchItem() {
@@ -181,6 +184,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
             {session?.user?.id === item.user_id ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
                 <a href={`/list-item?edit=${item.id}`} style={editDetailsBtnStyle}>Edit Details</a>
+                <button onClick={() => setShowTransferFlow(true)} style={transferBtnStyle}>Transfer</button>
                 <ShareButton itemId={item.id} itemName={item.item_name} style={shareInlineBtnStyle} />
                 <button onClick={() => setConfirmDelete(true)} style={{ ...deleteListingBtnStyle, marginLeft: 'auto' }}>Delete Listing</button>
               </div>
@@ -205,6 +209,14 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
 
       {isModalOpen && (
         <RequestModal item={item} onClose={() => setIsModalOpen(false)} />
+      )}
+
+      {showTransferFlow && (
+        isGift ? (
+          <TransferModal item={item} ownerId={item.user_id} onClose={() => setShowTransferFlow(false)} onSuccess={() => setShowTransferFlow(false)} />
+        ) : (
+          <LendModal item={item} ownerId={item.user_id} onClose={() => setShowTransferFlow(false)} onSuccess={() => setShowTransferFlow(false)} />
+        )
       )}
 
       {confirmDelete && (
@@ -260,6 +272,7 @@ const conditionLabelStyle: React.CSSProperties = { margin: '0 0 4px 0', fontSize
 const borrowButtonStyle: React.CSSProperties = { padding: '12px 28px', border: '2px solid #1C1610', boxShadow: '3px 3px 0 #1C1610', backgroundColor: '#1E8A82', color: '#fff', fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer', fontFamily: 'Outfit, sans-serif' };
 const ownerBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', textDecoration: 'none' };
 const editDetailsBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#fff', color: '#1E8A82', border: '2px solid #1E8A82', fontSize: '13px', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', whiteSpace: 'nowrap' as const };
+const transferBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#fff', color: '#D4A020', border: '2px solid #D4A020', fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' };
 const shareInlineBtnStyle: React.CSSProperties = { width: 'auto', flex: '0 0 auto', padding: '10px 20px', marginTop: 0, border: '2px solid #1C1610', fontSize: '13px', whiteSpace: 'nowrap' as const };
 
 const deleteItemBtnStyle: React.CSSProperties = { padding: '8px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '1px solid #ffaaaa', borderRadius: '8px', fontSize: '13px', cursor: 'pointer', fontWeight: '600' };
