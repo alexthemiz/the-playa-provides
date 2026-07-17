@@ -605,7 +605,7 @@ export default function InventoryPage() {
               <col style={{ width: '110px' }} />
               <col style={{ width: '290px' }} />
               <col style={{ width: '170px' }} />
-              <col style={{ width: '140px' }} />
+              <col style={{ width: '180px' }} />
             </colgroup>
             <thead>
               <tr style={headerRowStyle}>
@@ -719,7 +719,7 @@ export default function InventoryPage() {
                     </td>
 
                     {/* ACTION BUTTON */}
-                    <td style={tdStyle}>
+                    <td style={tdActionStyle}>
                       {renderActionButton(item)}
                     </td>
                   </tr>
@@ -777,7 +777,7 @@ export default function InventoryPage() {
                             {loan.status === 'return_pending' ? 'Return Pending' : 'Out on Loan'}
                           </span>
                         </td>
-                        <td style={tdStyle}>
+                        <td style={tdActionStyle}>
                           {loan.status === 'return_pending' && (
                             <div style={{ display: 'flex', gap: '6px' }}>
                               <button onClick={() => handleOwnerConfirmReturn(loan)} style={handsOverButtonStyle}>Confirm Return</button>
@@ -824,7 +824,7 @@ export default function InventoryPage() {
                           {transfer.owner_confirmed ? 'Handed over — confirm receipt' : 'Pending handover'}
                         </span>
                       </td>
-                      <td style={tdStyle}>
+                      <td style={tdActionStyle}>
                         <div style={{ display: 'flex', gap: '6px' }}>
                           {transfer.owner_confirmed && (
                             <button onClick={() => handleRecipientConfirmTransfer(transfer)} style={handsOverButtonStyle}>
@@ -926,7 +926,7 @@ export default function InventoryPage() {
                             : 'Active loan'}
                         </span>
                       </td>
-                      <td style={tdStyle}>
+                      <td style={tdActionStyle}>
                         {loan.status === 'pending_handover' && loan.owner_confirmed_pickup && (
                           <button onClick={() => handleBorrowerConfirmPickup(loan)} style={handsOverButtonStyle}>Got It</button>
                         )}
@@ -1075,6 +1075,7 @@ const headerRowStyle: React.CSSProperties = { borderBottom: '1.5px solid rgba(28
 const thStyle: React.CSSProperties = { padding: '15px', fontFamily: "'Space Mono', monospace", color: '#4A3828', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.08em' };
 const thActionStyle: React.CSSProperties = { padding: '15px 15px 15px 32px', fontFamily: "'Space Mono', monospace", color: '#4A3828', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.08em', whiteSpace: 'nowrap' as const, width: '1%' };
 const tdStyle: React.CSSProperties = { padding: '10px 15px', verticalAlign: 'middle', color: '#4A3828', fontSize: '0.9rem' };
+const tdActionStyle: React.CSSProperties = { ...tdStyle, padding: '10px 15px 10px 32px' };
 const rowStyle: React.CSSProperties = { borderBottom: '1px solid rgba(28,22,16,0.06)' };
 const thumbnailStyle: React.CSSProperties = { width: '50px', height: '50px', backgroundColor: '#EDE5D0', overflow: 'hidden', flexShrink: 0, border: '1px solid rgba(28,22,16,0.12)' };
 const editLinkStyle: React.CSSProperties = { background: 'none', border: 'none', color: '#1E8A82', fontSize: '0.75rem', padding: 0, cursor: 'pointer', textDecoration: 'underline', marginTop: '4px', display: 'block' };
