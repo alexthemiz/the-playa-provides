@@ -137,7 +137,8 @@ export default function RequestModal({ item, onClose }: RequestModalProps) {
       if (error) throw error;
       setSent(true);
       if (requesterId) {
-        supabase.from('notifications').insert({ type: 'item_request', recipient_id: item.user_id, actor_id: requesterId, item_id: item.id });
+        const { error: notifErr } = await supabase.from('notifications').insert({ type: 'item_request', recipient_id: item.user_id, actor_id: requesterId, item_id: item.id });
+        if (notifErr) console.error('item_request notification insert failed:', notifErr.message);
       }
       setTimeout(() => onClose(), 2000);
     } catch (err) {
