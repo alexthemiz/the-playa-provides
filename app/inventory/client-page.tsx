@@ -432,15 +432,15 @@ export default function InventoryPage() {
       if (transfer.owner_confirmed) {
         return (
           <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '4px' }}>
-            <span style={pendingBadgeStyle}>Pending Handover</span>
+            <span style={pendingBadgeStyle}>Pending</span>
             <span style={{ fontSize: '0.75rem', color: '#888' }}>Waiting for {recipientName}…</span>
-            <button onClick={() => handleSendTransferReminder(transfer)} style={reminderButtonStyle}>Send Reminder</button>
+            <button onClick={() => handleSendTransferReminder(transfer)} style={reminderButtonStyle}>Remind</button>
           </div>
         );
       }
       return (
         <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '4px' }}>
-          <span style={pendingBadgeStyle}>Pending Handover</span>
+          <span style={pendingBadgeStyle}>Pending</span>
           <button onClick={() => handleOwnerConfirmTransfer(transfer)} style={handsOverButtonStyle}>I've Handed It Over</button>
           <button onClick={() => handleCancelTransfer(transfer)} style={cancelActionButtonStyle}>Cancel</button>
         </div>
@@ -454,15 +454,15 @@ export default function InventoryPage() {
       if (loan.owner_confirmed_pickup) {
         return (
           <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '4px' }}>
-            <span style={pendingBadgeStyle}>Pending Handover</span>
+            <span style={pendingBadgeStyle}>Pending</span>
             <span style={{ fontSize: '0.75rem', color: '#888' }}>Waiting for {borrowerName}…</span>
-            <button onClick={() => handleSendLoanReminder(loan)} style={reminderButtonStyle}>Send Reminder</button>
+            <button onClick={() => handleSendLoanReminder(loan)} style={reminderButtonStyle}>Remind</button>
           </div>
         );
       }
       return (
         <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '4px' }}>
-          <span style={pendingBadgeStyle}>Pending Handover</span>
+          <span style={pendingBadgeStyle}>Pending</span>
           <button onClick={() => handleOwnerConfirmPickup(loan)} style={handsOverButtonStyle}>I've Handed It Over</button>
           <button onClick={() => handleCancelLoan(loan)} style={cancelActionButtonStyle}>Cancel</button>
         </div>
