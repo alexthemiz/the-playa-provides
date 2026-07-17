@@ -64,7 +64,8 @@ _(moved to Pre-Launch Audit section above)_
 - [ ] **Camp page: member chat** — real-time or async chat window on camp hub pages, visible to camp members only. Needs scoping (real-time vs. threaded, moderation, notifications).
 - [ ] **SEO / noindex for restricted items** — Public items indexable by search engines; campmates-only and followers-only items should have noindex meta tag.
 - [ ] **Incomplete profile nudge** — Some users have NULL full_name (and potentially other required fields) from before required field validation was added. Options: (A) Soft banner at top of /settings page if required fields are missing — non-blocking, just a nudge; (B) One-time modal after login prompting user to complete their profile, dismissible and non-blocking; (C) Validate only on save — no proactive warning, error only appears when user next visits /settings and tries to save. Option B is most user-friendly at scale.
-- [ ] **Borrowed item detail page** — When an item is currently out on loan, determine what shows on the unique item page for: (1) the borrower, (2) the owner, (3) anyone else. Should "Request this item" be hidden? Should there be a loan status indicator?
+- [x] **Borrowed item detail page** — DONE (session 2026-07-17): on-loan items hidden from find-items grid/list; item page still reachable directly with Edit/Transfer/Delete grayed for owner, Request grayed for third parties, "Return Item" button for the active borrower, "Currently on loan" badge for everyone. See done-log below.
+- [ ] **Item history — lending/transfer dates** — Tabled 2026-07-17. Add a history section to the item listing page showing dates only (lent on / returned on / ownership transferred on) — explicitly NOT names of past lendees or owners, to avoid exposing borrower identity publicly. Current state ships only a live "Currently on loan" badge, no history. Needs: schema for a lightweight append-only log (or derive from item_loans/item_transfers completed rows), and a decision on whether it's visible to everyone or owner-only.
 - [ ] **Return flow limbo/reminder** — If owner never confirms return after borrower clicks "Return Item", send daily bell notification to owner. Add option for borrower to ping owner with a reminder button.
 - [ ] **Camp member year/attendance breakdown** — Ability to filter or view all campers attending in a specific year, or see who's attending the current year across all camps.
 - [ ] **Wish list ticker optimization** — Homepage currently fetches all profiles' wish_list arrays and flattens in the browser. At scale, replace with a dedicated `wish_list_items` table (one row per tag per user) to enable pagination, location filtering, and efficient querying.
@@ -98,6 +99,23 @@ _(nothing queued)_
 - [ ] **FAQ page** — TBD whether it replaces /about or sits alongside it. Content TBD. Should cover: how borrowing/lending works, what happens if something is damaged, how camps work, how visibility settings work, how to get listed on the resources directory.
 
 ---
+
+## ✅ Done (session — 2026-07-17)
+
+### Loan-aware item visibility + notifications
+- [x] `gear_items.is_on_loan` boolean added, kept in sync via a `security definer` trigger on `item_loans` status changes — needed because `item_loans` itself is RLS-scoped to owner/borrower only, so a client-side join would silently return nothing for third-party viewers
+- [x] find-items grid/list — actively-loaned items excluded
+- [x] Item detail page + intercepted modal (`@modal/(.)find-items/[id]`) + find-items quick-view — all three now gate Edit/Transfer/Delete (owner) and Request (everyone else) gray when on loan; quick-view modal's CTA was missed in the first pass (reachable via direct URL sync bypassing the grid filter) and fixed in a follow-up
+- [x] Active borrower sees a "Return Item" button on the item detail page instead of a dead Request button; confirming return inserts a new `loan_return_pending` bell notification for the owner (both from the detail page and from `/inventory`'s existing return flow) in addition to the existing email
+- [x] find-items quick-view modal — added Transfer button, shortened owner labels to Edit/Transfer/Share/Delete to match the item detail page
+- [x] Redesigned `app/@modal/(.)find-items/[id]/page.tsx` — was still on the pre-"Playful Field Guide" color scheme with only a bare Delete link; brought up to current design tokens + full button set
+- [x] Bell notifications for owner-confirmed handover — `loan_pickup_ready` / `transfer_pickup_ready` types added, inserted from `handleOwnerConfirmTransfer`/`handleOwnerConfirmPickup` in `app/inventory/client-page.tsx`
+- [x] Fixed `send-transfer-notification` edge function — deployed version was a stale copy-paste of `send-loan-notification` (read `loan_id`, queried `item_loans`, referenced the removed `pickup_by` column); local file was already correct but never redeployed — transfer emails had likely never actually sent. Redeployed via MCP.
+
+### Bugs found along the way
+- [x] Action column button alignment — `th` had 32px left padding the `td`s didn't match, drifting buttons left of their own header across all 4 inventory tables; added matching `tdActionStyle`
+- [x] "Pending Handover"/"Send Reminder"/"I've Handed It Over" labels shortened for column width
+- [x] **Visibility stuck private after loan return** — `updateStatus` (the To Borrow/To Keep/Private toggle) only ever forced `visibility: 'private'` moving *to* Not Available, never restored it moving away; since `handleOwnerConfirmReturn` sets an item to Not Available + private automatically, re-toggling status back to available left `visibility` stuck at `'private'` (not even a valid dropdown option), making the item invisible on find-items with no obvious cause. Fixed in `updateStatus`; also hand-fixed the two live items already stuck in that state.
 
 ## ✅ Done (session 35 — 2026-06-08, pre-launch)
 
