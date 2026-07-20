@@ -72,6 +72,7 @@ export default function HomePage() {
   const [featureTab,      setFeatureTab]      = useState<'how' | 'why'>('how')
   const [submitCampOpen,  setSubmitCampOpen]  = useState(false)
   const [currentUsername, setCurrentUsername] = useState<string | null>(null)
+  const [currentUserId,      setCurrentUserId]      = useState<string | null>(null)
   const [checklistState,     setChecklistState]     = useState<ChecklistState | null>(null)
   const [checklistDismissed, setChecklistDismissed] = useState<boolean>(false)
   const [checklistLoading,   setChecklistLoading]   = useState(true)
@@ -108,18 +109,23 @@ export default function HomePage() {
         const { data: { session } } = await supabase.auth.getSession()
         if (!session?.user) { return }
         const uid = session.user.id
+        setCurrentUserId(uid)
 
         const { data: profile } = await supabase
           .from('profiles')
-          .select('username, checklist_dismissed, wish_list, has_browsed')
+          .select('username, wish_list, has_browsed')
           .eq('id', uid)
           .single()
 
         if (!profile) { return }
         setCurrentUsername(profile.username)
-        setChecklistDismissed(profile.checklist_dismissed ?? false)
 
-        if (profile.checklist_dismissed) { return }
+        // Dismissal is session-scoped (sessionStorage), not permanent — the
+        // checklist should keep nudging incomplete users on future visits
+        // rather than vanishing forever the first time they skip it.
+        const dismissedThisSession = sessionStorage.getItem(`checklistDismissed_${uid}`) === 'true'
+        setChecklistDismissed(dismissedThisSession)
+        if (dismissedThisSession) { return }
 
         const [campsRes, locsRes, gearRes] = await Promise.all([
           supabase.from('user_camp_affiliations').select('id', { count: 'exact', head: true }).eq('user_id', uid),
@@ -467,11 +473,11 @@ export default function HomePage() {
   }, [gameRunning]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Checklist dismiss handler ──────────────────────────────────────────────
-  const handleChecklistDismiss = async () => {
+  // Session-scoped, not permanent: hides for the rest of this browser session,
+  // but resurfaces on the next fresh session if items are still incomplete.
+  const handleChecklistDismiss = () => {
     setChecklistDismissed(true)
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session?.user) return
-    await supabase.from('profiles').update({ checklist_dismissed: true }).eq('id', session.user.id)
+    if (currentUserId) sessionStorage.setItem(`checklistDismissed_${currentUserId}`, 'true')
   }
 
   // ── Scroll view data ───────────────────────────────────────────────────────
