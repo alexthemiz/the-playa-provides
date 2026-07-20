@@ -11,6 +11,7 @@ import ShareButton from '@/components/ShareButton';
 import LendModal from '@/components/LendModal';
 import TransferModal from '@/components/TransferModal';
 import { CATEGORY_ACCENTS, DEFAULT_CATEGORY_ACCENT } from '@/lib/categoryColors';
+import { useItemLoan } from '@/lib/useItemLoan';
 
 const INK      = '#1C1610';
 const INK_MID  = '#4A3828';
@@ -31,8 +32,7 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showTransferFlow, setShowTransferFlow] = useState(false);
-  const [myLoan, setMyLoan] = useState<any>(null);
-  const [returningItem, setReturningItem] = useState(false);
+  const { myLoan, isBorrower, returningItem, handleReturnItem } = useItemLoan(item?.id, session?.user?.id);
 
   useEffect(() => {
     async function fetchEnrichedItem() {
@@ -66,18 +66,6 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
             ? `${locationRes.data.city} (${locationRes.data.zip_code})`
             : 'Location N/A'
         });
-
-        // RLS scopes this to rows where the current user is the owner or
-        // borrower — returns null for everyone else, which is what we want.
-        if (s?.user) {
-          const { data: loan } = await supabase
-            .from('item_loans')
-            .select('id, status, borrower_id, owner_id')
-            .eq('item_id', resolvedParams.id)
-            .in('status', ['pending_handover', 'active', 'return_pending'])
-            .maybeSingle();
-          setMyLoan(loan);
-        }
       } catch (err) {
         console.error("Modal fetch error:", err);
       } finally {
@@ -88,32 +76,6 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
   }, [resolvedParams.id]);
 
   const close = () => router.back();
-
-  async function handleReturnItem() {
-    if (!myLoan || !item) return;
-    setReturningItem(true);
-    try {
-      const { error } = await supabase
-        .from('item_loans')
-        .update({ borrower_confirmed_return: true, status: 'return_pending' })
-        .eq('id', myLoan.id);
-      if (error) throw error;
-      setMyLoan((prev: any) => ({ ...prev, status: 'return_pending' }));
-      await supabase.from('notifications').insert({
-        type: 'loan_return_pending',
-        recipient_id: myLoan.owner_id,
-        actor_id: session?.user?.id,
-        item_id: item.id,
-      });
-      await supabase.functions.invoke('send-loan-notification', {
-        body: { type: 'borrower_confirmed_return', loan_id: myLoan.id },
-      });
-    } catch (err: any) {
-      console.error('Return item error:', err.message);
-    } finally {
-      setReturningItem(false);
-    }
-  }
 
   async function handleDeleteItem() {
     if (!item) return;
@@ -137,7 +99,6 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
 
   const isGift = item?.availability_status === 'Available to Keep';
   const isOwner = session?.user?.id === item?.user_id;
-  const isBorrower = !!myLoan && myLoan.borrower_id === session?.user?.id;
 
   return (
     <div style={overlayStyle} onClick={close}>
@@ -246,7 +207,7 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
                     </>
                   )}
                 </div>
-              ) : isBorrower && myLoan.status === 'active' ? (
+              ) : isBorrower && myLoan && myLoan.status === 'active' ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
                   <button
                     onClick={handleReturnItem}
@@ -256,11 +217,11 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
                     {returningItem ? 'Returning...' : 'Return Item'}
                   </button>
                 </div>
-              ) : isBorrower && myLoan.status === 'return_pending' ? (
+              ) : isBorrower && myLoan && myLoan.status === 'return_pending' ? (
                 <span style={{ ...disabledPillStyle, display: 'block', width: '100%', textAlign: 'center' as const, padding: '14px' }}>
                   Return Pending — waiting on owner to confirm
                 </span>
-              ) : isBorrower && myLoan.status === 'pending_handover' ? (
+              ) : isBorrower && myLoan && myLoan.status === 'pending_handover' ? (
                 <span style={{ ...disabledPillStyle, display: 'block', width: '100%', textAlign: 'center' as const, padding: '14px' }}>
                   Pending handover — check your inventory
                 </span>

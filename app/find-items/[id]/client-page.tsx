@@ -10,6 +10,7 @@ import ShareButton from '@/components/ShareButton';
 import LendModal from '@/components/LendModal';
 import TransferModal from '@/components/TransferModal';
 import { CATEGORY_ACCENTS, DEFAULT_CATEGORY_ACCENT } from '@/lib/categoryColors';
+import { useItemLoan } from '@/lib/useItemLoan';
 
 export default function ItemDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -20,8 +21,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showTransferFlow, setShowTransferFlow] = useState(false);
-  const [myLoan, setMyLoan] = useState<any>(null);
-  const [returningItem, setReturningItem] = useState(false);
+  const { myLoan, isBorrower, returningItem, handleReturnItem } = useItemLoan(item?.id, session?.user?.id);
 
   useEffect(() => {
     async function fetchItem() {
@@ -52,19 +52,6 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
             ? `${locationRes.data.city} (${locationRes.data.zip_code})`
             : 'Location N/A'
         });
-
-        // RLS scopes this to rows where the current user is the owner or
-        // borrower — returns null for everyone else, which is what we want:
-        // third parties only ever see the public is_on_loan flag on gear.
-        if (s?.user) {
-          const { data: loan } = await supabase
-            .from('item_loans')
-            .select('id, status, borrower_id, owner_id')
-            .eq('item_id', resolvedParams.id)
-            .in('status', ['pending_handover', 'active', 'return_pending'])
-            .maybeSingle();
-          setMyLoan(loan);
-        }
       } catch (err) {
         console.error("Detail page fetch error:", err);
       } finally {
@@ -73,32 +60,6 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
     }
     fetchItem();
   }, [resolvedParams.id]);
-
-  async function handleReturnItem() {
-    if (!myLoan) return;
-    setReturningItem(true);
-    try {
-      const { error } = await supabase
-        .from('item_loans')
-        .update({ borrower_confirmed_return: true, status: 'return_pending' })
-        .eq('id', myLoan.id);
-      if (error) throw error;
-      setMyLoan((prev: any) => ({ ...prev, status: 'return_pending' }));
-      await supabase.from('notifications').insert({
-        type: 'loan_return_pending',
-        recipient_id: myLoan.owner_id,
-        actor_id: session?.user?.id,
-        item_id: item.id,
-      });
-      await supabase.functions.invoke('send-loan-notification', {
-        body: { type: 'borrower_confirmed_return', loan_id: myLoan.id },
-      });
-    } catch (err: any) {
-      console.error('Return item error:', err.message);
-    } finally {
-      setReturningItem(false);
-    }
-  }
 
   async function handleDeleteItem() {
     if (!item) return;
@@ -126,7 +87,6 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
   const isGift = item.availability_status === 'Available to Keep';
   const requestLabel = isGift ? 'Request to Keep' : 'Request to Borrow';
   const isOwner = session?.user?.id === item.user_id;
-  const isBorrower = !!myLoan && myLoan.borrower_id === session?.user?.id;
   const onLoan = !!item.is_on_loan;
 
   return (
@@ -249,18 +209,18 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
                   </>
                 )}
               </div>
-            ) : isBorrower && myLoan.status === 'active' ? (
+            ) : isBorrower && myLoan && myLoan.status === 'active' ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
                 <button style={returnItemBtnStyle} onClick={handleReturnItem} disabled={returningItem}>
                   {returningItem ? 'Returning...' : 'Return Item'}
                 </button>
                 <ShareButton itemId={item.id} itemName={item.item_name} style={{ ...shareInlineBtnStyle, marginLeft: 'auto' }} />
               </div>
-            ) : isBorrower && myLoan.status === 'return_pending' ? (
+            ) : isBorrower && myLoan && myLoan.status === 'return_pending' ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
                 <span style={disabledBtnStyle}>Return Pending — waiting on owner to confirm</span>
               </div>
-            ) : isBorrower && myLoan.status === 'pending_handover' ? (
+            ) : isBorrower && myLoan && myLoan.status === 'pending_handover' ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
                 <span style={disabledBtnStyle}>Pending handover — check your <Link href="/inventory" style={{ color: '#1E8A82' }}>inventory</Link></span>
               </div>

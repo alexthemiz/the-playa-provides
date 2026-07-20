@@ -11,6 +11,7 @@ import ShareButton from '@/components/ShareButton';
 import LendModal from '@/components/LendModal';
 import TransferModal from '@/components/TransferModal';
 import { CATEGORY_ACCENTS as CAT_ACCENTS, DEFAULT_CATEGORY_ACCENT } from '@/lib/categoryColors';
+import { useItemLoan } from '@/lib/useItemLoan';
 
 const MapView = dynamic(() => import('@/components/MapView'), { ssr: false });
 
@@ -62,8 +63,7 @@ export default function FindItemsPage() {
   const [confirmDeleteItem, setConfirmDeleteItem] = useState(false);
   const [deletingItem,      setDeletingItem]      = useState(false);
   const [showTransferFlow,  setShowTransferFlow]  = useState(false);
-  const [myLoan,            setMyLoan]            = useState<any>(null);
-  const [returningItem,     setReturningItem]     = useState(false);
+  const { myLoan, returningItem, handleReturnItem } = useItemLoan(selectedItem?.id, userId);
   const [viewMode,         setViewMode]         = useState<'cards' | 'list' | 'map'>(
     () => (typeof window !== 'undefined' ? (localStorage.getItem('findItemsView') as 'cards' | 'list' | 'map') || 'cards' : 'cards')
   );
@@ -115,20 +115,6 @@ export default function FindItemsPage() {
     }
     return () => window.removeEventListener('popstate', syncModalWithUrl);
   }, [items, loading]);
-
-  useEffect(() => {
-    setMyLoan(null);
-    if (!selectedItem || !userId) return;
-    // RLS scopes this to rows where the current user is the owner or
-    // borrower — returns null for everyone else, which is what we want.
-    supabase
-      .from('item_loans')
-      .select('id, status, borrower_id, owner_id')
-      .eq('item_id', selectedItem.id)
-      .in('status', ['pending_handover', 'active', 'return_pending'])
-      .maybeSingle()
-      .then(({ data }) => setMyLoan(data));
-  }, [selectedItem?.id, userId]);
 
   async function fetchRelationships() {
     try {
@@ -187,32 +173,6 @@ export default function FindItemsPage() {
     setShowRequestForm(false);
     setConfirmDeleteItem(false);
     window.history.pushState(null, '', '/find-items');
-  };
-
-  const handleReturnItem = async () => {
-    if (!myLoan) return;
-    setReturningItem(true);
-    try {
-      const { error } = await supabase
-        .from('item_loans')
-        .update({ borrower_confirmed_return: true, status: 'return_pending' })
-        .eq('id', myLoan.id);
-      if (error) throw error;
-      setMyLoan((prev: any) => ({ ...prev, status: 'return_pending' }));
-      await supabase.from('notifications').insert({
-        type: 'loan_return_pending',
-        recipient_id: myLoan.owner_id,
-        actor_id: userId,
-        item_id: selectedItem.id,
-      });
-      await supabase.functions.invoke('send-loan-notification', {
-        body: { type: 'borrower_confirmed_return', loan_id: myLoan.id },
-      });
-    } catch (err: any) {
-      console.error('Return item error:', err.message);
-    } finally {
-      setReturningItem(false);
-    }
   };
 
   const handleDeleteSelectedItem = async () => {
