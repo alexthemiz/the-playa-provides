@@ -1,0 +1,1 @@
+ALTER TABLE gear_items ALTER COLUMN user_id DROP NOT NULL;
