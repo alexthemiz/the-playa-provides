@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-06-08 (session 35 — pre-launch complete)_
+_Last updated: 2026-07-20 (full-site audit + follow-through complete)_
 
 ---
 
@@ -14,7 +14,6 @@ _Last updated: 2026-06-08 (session 35 — pre-launch complete)_
 
 ## 🎯 Next Session Priority — Post-Launch
 
-- [ ] **⚠️ Delete dead `clever-endpoint` edge function** — Supabase Dashboard → Edge Functions. Duplicate of `send-feedback-notification`, zero references. No MCP tool can delete edge functions, so this needs Alex directly — the one leftover item from the 2026-07-17 full-site audit.
 - [ ] **Welcome email** — Triggered on signup via Supabase DB webhook; design and copy TBD; uses existing Resend/edge function setup.
 - [ ] **End-to-end test: Lend/Return flow** — Use two test accounts; go through full loan lifecycle; confirm emails fire.
 - [ ] **End-to-end test: Following & Notifications** — Follow a user, list an item as them, verify bell badge + dropdown; mark-as-read; email opt-in.
@@ -79,7 +78,7 @@ _(moved to Pre-Launch Audit section above)_
 - [x] **Design consistency pass — old palette in modals** — DONE 2026-07-17: migrated all 15 flagged files (`LendModal`, `TransferModal`, `AddItemModal`, `WelcomeModal`, `WishListMatchModal`, `ImportSpreadsheetModal`, `FeedbackWidget`, `inventory/client-page`, `find-items/[id]/client-page`, `settings/client-page`, `profile/[username]/client-page`, `privacy`, `auth/auth-code-error`, `MapView`, plus `list-item/client-page`) from `#2D241E`/`#5ECFDF`/`#C08261`/`#3ABFD4` to current tokens. Also caught two variants the hex grep missed (`#00aacc`, an `rgba(0,204,255,...)` decomposition of `#00ccff`) and fixed text-contrast fallout on buttons whose bg got darker. Removed unused `--color-sienna`/`--color-playa-blue` CSS vars. `SubmitCampModal.tsx` intentionally skipped — bundled with its Tailwind conversion above. Verified via computed styles on /privacy and /auth/auth-code-error (reachable without login); the affected modals need an authenticated click-through to verify visually.
 - [x] **Extract shared item-action-row logic** — DONE 2026-07-17, scoped down from the original idea: extracted the *stateful logic* (the `item_loans` fetch, `isBorrower`, and `handleReturnItem`) into `lib/useItemLoan.ts`, used by all three surfaces. Did NOT merge the JSX/button rendering into a shared component — the "Edit Details" vs "Edit" label difference between the detail page and the two compact surfaces is intentional (narrower space gets shorter labels, per earlier direction), not drift, so kept each file's own rendering to avoid visual-regression risk on a change that couldn't be click-tested.
 - [x] **`alert()` stragglers** — DONE 2026-07-17: `list-item/client-page.tsx` + `AddItemModal.tsx` got the settings-page toast pattern; `SubmitCampModal.tsx` got an inline error line (kept Tailwind, that conversion is still the deferred item above); `AvatarUpload.tsx` got an `onError` callback prop wired to the profile page's existing `saveError` state.
-- [ ] **⚠️ ACTION NEEDED (Alex) — Dead `clever-endpoint` edge function** — deployed on Supabase with no local source file, content is a leftover duplicate of `send-feedback-notification`, zero references in the codebase. There is no MCP tool to delete edge functions, so this is the one remaining item from the full-site audit that genuinely needs a human: Supabase Dashboard → Edge Functions → `clever-endpoint` → delete.
+- [x] **Dead `clever-endpoint` edge function** — DONE 2026-07-20: deleted via Supabase Dashboard (confirmed 0 invocations ever, since its deploy). Was a duplicate of `send-feedback-notification` under Supabase's auto-generated slug, left over from before that function was properly named.
 - [x] **`gear_items` RLS policy consolidation** — DONE 2026-07-17: dropped two byte-identical duplicate policies, kept `Owner Access`.
 - [x] **`SECURITY DEFINER` functions missing `search_path`** — DONE 2026-07-17: `set search_path = public` added to all 7 remaining flagged functions (2 of the original 9 were the dead loan/transfer-accepted triggers dropped earlier the same session). Advisor confirmed clean.
 - [x] **Migrations not tracked in git** — DONE 2026-07-17: reconstructed all 46 migrations from `supabase_migrations.schema_migrations` (which stores the raw SQL Supabase's own tracking already keeps) into `supabase/migrations/`, one file per migration, named to match Supabase's version+name exactly. Retroactive documentation only, no schema changes applied. Going forward, every `apply_migration` call should also land its SQL here.
@@ -142,7 +141,7 @@ _(nothing queued)_
 - [x] `alert()` → inline error UI across `list-item/client-page.tsx`, `AddItemModal.tsx`, `SubmitCampModal.tsx`, `AvatarUpload.tsx`.
 - [x] **Design consistency pass** — migrated all 15 flagged files off the pre-redesign palette to current tokens; caught two additional stale-color variants (`#00aacc`, an rgba decomposition of `#00ccff`) the original grep missed; removed 2 unused CSS custom properties. `SubmitCampModal.tsx` skipped (bundled with its own Tailwind conversion, still deferred).
 - [x] **Shared `useItemLoan` hook extracted** (`lib/useItemLoan.ts`) — centralizes the `item_loans` fetch + `isBorrower` + `handleReturnItem` logic that all 3 item-view surfaces previously duplicated (the same duplication that caused the earlier Return Item gap). JSX/button rendering intentionally left per-file — didn't merge into a shared component since the label differences (Edit Details vs Edit) are deliberate, and a full JSX merge couldn't be visually verified without login.
-- [ ] Still deferred: `SubmitCampModal.tsx`/`ImageSlider.tsx` Tailwind conversion, dead `clever-endpoint` edge function (needs Dashboard deletion), migrations-not-in-git gap.
+- [x] **Everything closed out** — `SubmitCampModal.tsx`/`ImageSlider.tsx` converted off Tailwind, migration history reconstructed into git, `clever-endpoint` deleted via Dashboard (0 invocations ever, confirmed by Alex before deleting). Nothing outstanding from the 2026-07-17 full-site audit.
 
 ## ✅ Done (session 35 — 2026-06-08, pre-launch)
 
