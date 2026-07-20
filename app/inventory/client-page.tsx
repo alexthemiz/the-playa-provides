@@ -32,6 +32,7 @@ export default function InventoryPage() {
   const [activeLoans, setActiveLoans] = useState<any[]>([]);
   const [inboundTransfers, setInboundTransfers] = useState<any[]>([]);
   const [inboundLoans, setInboundLoans] = useState<any[]>([]);
+  const [givenAwayItems, setGivenAwayItems] = useState<any[]>([]);
   const [transferItem, setTransferItem] = useState<any>(null);
   const [lendItem, setLendItem] = useState<any>(null);
   const [disputeLoan, setDisputeLoan] = useState<any>(null);
@@ -122,6 +123,39 @@ export default function InventoryPage() {
           .eq('borrower_id', user.id)
           .in('status', ['pending_handover', 'active', 'return_pending']);
         setInboundLoans(inboundLoanData || []);
+
+        // Items given away (completed transfers where I was the owner).
+        // item_name is a snapshot taken at transfer time — my own record of
+        // what I gave away, independent of the item's current state. The
+        // gear_items embed (for current owner) follows normal visibility
+        // RLS with no special bypass: if the item's since gone private under
+        // its current owner, this legitimately comes back null, same as it
+        // would for any other viewer.
+        const { data: givenAwayData } = await supabase
+          .from('item_transfers')
+          .select('id, item_id, item_name, completed_at, gear_items(user_id), recipient:profiles!item_transfers_recipient_id_fkey(username, preferred_name)')
+          .eq('owner_id', user.id)
+          .eq('status', 'complete')
+          .order('completed_at', { ascending: false });
+        const currentOwnerIds = [...new Set(
+          (givenAwayData || [])
+            .map((t: any) => t.gear_items?.user_id)
+            .filter(Boolean)
+        )];
+        let currentOwnerMap: Record<string, { username: string; preferred_name: string | null }> = {};
+        if (currentOwnerIds.length > 0) {
+          const { data: ownerProfiles } = await supabase
+            .from('profiles')
+            .select('id, username, preferred_name')
+            .in('id', currentOwnerIds);
+          currentOwnerMap = Object.fromEntries(
+            (ownerProfiles || []).map((p: any) => [p.id, p])
+          );
+        }
+        setGivenAwayItems((givenAwayData || []).map((t: any) => ({
+          ...t,
+          currentOwner: t.gear_items?.user_id ? currentOwnerMap[t.gear_items.user_id] : null,
+        })));
 
         // User's saved locations (for borrower location dropdown)
         const { data: locData } = await supabase
@@ -943,6 +977,59 @@ export default function InventoryPage() {
                           <span style={{ fontSize: '0.75rem', color: '#aaa', fontStyle: 'italic' as const }}>Return Pending</span>
                         )}
                       </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      {/* ITEMS I'VE GIVEN AWAY */}
+      <div style={{ marginTop: '40px' }}>
+        <h2 style={{ color: '#1C1610', fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
+          Items I&apos;ve Given Away
+        </h2>
+          <div style={tableContainerStyle}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const }}>
+              <thead>
+                <tr style={headerRowStyle}>
+                  <th style={thStyle}>Item</th>
+                  <th style={thStyle}>Given To</th>
+                  <th style={thStyle}>Current Owner</th>
+                  <th style={thStyle}>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {givenAwayItems.length === 0 && (
+                  <tr><td colSpan={4} style={{ ...tdStyle, color: '#9A8878', fontStyle: 'italic' as const }}>You haven&apos;t given any items away yet.</td></tr>
+                )}
+                {givenAwayItems.map(transfer => {
+                  const recipientName = transfer.recipient?.preferred_name || transfer.recipient?.username || '—';
+                  const recipientUsername = transfer.recipient?.username;
+                  const currentOwnerName = transfer.currentOwner
+                    ? (transfer.currentOwner.preferred_name || transfer.currentOwner.username)
+                    : null;
+                  const stillWithRecipient = transfer.currentOwner && recipientUsername && transfer.currentOwner.username === recipientUsername;
+                  const givenOn = transfer.completed_at ? new Date(transfer.completed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+                  return (
+                    <tr key={transfer.id} style={rowStyle}>
+                      <td style={{ ...tdStyle, fontWeight: 600, color: '#2D241E' }}>{transfer.item_name || '—'}</td>
+                      <td style={tdStyle}>
+                        {recipientUsername
+                          ? <Link href={`/profile/${recipientUsername}`} style={{ color: '#1E8A82', textDecoration: 'none', fontWeight: 500 }}>{recipientName}</Link>
+                          : recipientName}
+                      </td>
+                      <td style={tdStyle}>
+                        {stillWithRecipient ? (
+                          <span style={{ color: '#9A8878', fontStyle: 'italic' as const, fontSize: '0.85rem' }}>Still with {recipientName}</span>
+                        ) : currentOwnerName ? (
+                          <Link href={`/profile/${transfer.currentOwner.username}`} style={{ color: '#1E8A82', textDecoration: 'none', fontWeight: 500 }}>{currentOwnerName}</Link>
+                        ) : (
+                          <span style={{ color: '#9A8878', fontStyle: 'italic' as const, fontSize: '0.85rem' }}>Not visible to you</span>
+                        )}
+                      </td>
+                      <td style={tdStyle}>{givenOn}</td>
                     </tr>
                   );
                 })}

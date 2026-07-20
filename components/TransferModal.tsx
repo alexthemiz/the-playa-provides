@@ -49,6 +49,7 @@ export default function TransferModal({ item, ownerId, onClose, onSuccess }: Pro
           item_id: item.id,
           owner_id: ownerId,
           recipient_id: matched.id,
+          item_name: item.item_name,
         })
         .select()
         .single()
