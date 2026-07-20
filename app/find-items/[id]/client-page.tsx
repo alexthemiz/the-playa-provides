@@ -248,9 +248,9 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
                 <ShareButton itemId={item.id} itemName={item.item_name} style={{ ...shareInlineBtnStyle, marginLeft: 'auto' }} />
               </div>
             )}
-
-            <ItemHistory itemId={item.id} isOwner={isOwner} createdAt={item.created_at} />
           </div>
+
+          <ItemHistory itemId={item.id} isOwner={isOwner} createdAt={item.created_at} />
         </div>
       </div>
 
