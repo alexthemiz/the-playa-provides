@@ -85,7 +85,7 @@ export default function LendModal({ item, ownerId, onClose, onSuccess }: Props) 
     <div style={overlayStyle}>
       <div style={modalStyle}>
         <button onClick={onClose} style={closeStyle}>✕</button>
-        <h2 style={{ margin: '0 0 8px', color: '#2D241E', fontSize: '1.2rem' }}>Lend Item</h2>
+        <h2 style={{ margin: '0 0 8px', color: '#1C1610', fontSize: '1.2rem' }}>Lend Item</h2>
         <p style={{ margin: '0 0 20px', color: '#666', fontSize: '0.9rem' }}>
           Enter the username or email of the person borrowing{' '}
           <a href={`/find-items/${item.id}`} target="_blank" rel="noreferrer" style={{ color: '#1E8A82', fontWeight: 700, textDecoration: 'none' }}>{item.item_name}</a>, then confirm the terms.
@@ -105,13 +105,13 @@ export default function LendModal({ item, ownerId, onClose, onSuccess }: Props) 
         {lookupError && <p style={errorStyle}>{lookupError}</p>}
         {matched && (
           <div style={matchedBoxStyle}>
-            <span style={{ color: '#2D241E', fontWeight: 600 }}>{matched.preferred_name || matched.username}</span>
+            <span style={{ color: '#1C1610', fontWeight: 600 }}>{matched.preferred_name || matched.username}</span>
             <span style={{ color: '#888', fontSize: '0.85rem', marginLeft: '6px' }}>@{matched.username}</span>
           </div>
         )}
 
         {/* Terms */}
-        <p style={{ margin: '20px 0 10px', fontWeight: 700, color: '#2D241E', fontSize: '0.9rem' }}>Lending Terms</p>
+        <p style={{ margin: '20px 0 10px', fontWeight: 700, color: '#1C1610', fontSize: '0.9rem' }}>Lending Terms</p>
 
         <div style={termsGridStyle}>
           <div>
@@ -159,11 +159,11 @@ export default function LendModal({ item, ownerId, onClose, onSuccess }: Props) 
 const overlayStyle: React.CSSProperties = { position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }
 const modalStyle: React.CSSProperties = { backgroundColor: '#fff', borderRadius: '16px', padding: '28px', width: '500px', maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto' as const, position: 'relative' as const, boxShadow: '0 8px 32px rgba(0,0,0,0.15)' }
 const closeStyle: React.CSSProperties = { position: 'absolute' as const, top: '16px', right: '16px', background: 'none', border: 'none', fontSize: '1rem', cursor: 'pointer', color: '#888' }
-const inputStyle: React.CSSProperties = { width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '0.9rem', color: '#2D241E', boxSizing: 'border-box' as const }
-const lookupButtonStyle: React.CSSProperties = { padding: '10px 16px', backgroundColor: '#2D241E', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem', whiteSpace: 'nowrap' as const }
+const inputStyle: React.CSSProperties = { width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '0.9rem', color: '#1C1610', boxSizing: 'border-box' as const }
+const lookupButtonStyle: React.CSSProperties = { padding: '10px 16px', backgroundColor: '#1C1610', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem', whiteSpace: 'nowrap' as const }
 const matchedBoxStyle: React.CSSProperties = { backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '10px 14px', marginBottom: '4px' }
 const errorStyle: React.CSSProperties = { color: '#dc2626', fontSize: '0.85rem', margin: '4px 0' }
 const cancelButtonStyle: React.CSSProperties = { padding: '10px 18px', backgroundColor: '#f0f0f0', color: '#666', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }
-const confirmButtonStyle: React.CSSProperties = { padding: '10px 18px', backgroundColor: '#5ECFDF', color: '#000', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }
+const confirmButtonStyle: React.CSSProperties = { padding: '10px 18px', backgroundColor: '#1E8A82', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }
 const termsGridStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }
 const labelStyle: React.CSSProperties = { display: 'block', fontSize: '0.75rem', color: '#888', marginBottom: '5px' }

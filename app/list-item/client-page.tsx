@@ -467,7 +467,7 @@ function ListItemPageInner() {
             bottom: '24px',
             left: '50%',
             transform: 'translateX(-50%)',
-            backgroundColor: toast.isError ? '#dc2626' : '#2D241E',
+            backgroundColor: toast.isError ? '#dc2626' : '#1C1610',
             color: '#fff',
             padding: '12px 24px',
             borderRadius: '8px',

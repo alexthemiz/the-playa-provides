@@ -69,7 +69,7 @@ export default function TransferModal({ item, ownerId, onClose, onSuccess }: Pro
     <div style={overlayStyle}>
       <div style={modalStyle}>
         <button onClick={onClose} style={closeStyle}>✕</button>
-        <h2 style={{ margin: '0 0 8px', color: '#2D241E', fontSize: '1.2rem' }}>Transfer Item</h2>
+        <h2 style={{ margin: '0 0 8px', color: '#1C1610', fontSize: '1.2rem' }}>Transfer Item</h2>
         <p style={{ margin: '0 0 20px', color: '#666', fontSize: '0.9rem' }}>
           Enter the username or email of the person you're giving <strong>{item.item_name}</strong> to.
         </p>
@@ -89,7 +89,7 @@ export default function TransferModal({ item, ownerId, onClose, onSuccess }: Pro
 
         {matched && (
           <div style={matchedBoxStyle}>
-            <span style={{ color: '#2D241E', fontWeight: 600 }}>
+            <span style={{ color: '#1C1610', fontWeight: 600 }}>
               {matched.preferred_name || matched.username}
             </span>
             <span style={{ color: '#888', fontSize: '0.85rem', marginLeft: '6px' }}>@{matched.username}</span>
@@ -116,9 +116,9 @@ export default function TransferModal({ item, ownerId, onClose, onSuccess }: Pro
 const overlayStyle: React.CSSProperties = { position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }
 const modalStyle: React.CSSProperties = { backgroundColor: '#fff', borderRadius: '16px', padding: '28px', width: '440px', maxWidth: '90vw', position: 'relative' as const, boxShadow: '0 8px 32px rgba(0,0,0,0.15)' }
 const closeStyle: React.CSSProperties = { position: 'absolute' as const, top: '16px', right: '16px', background: 'none', border: 'none', fontSize: '1rem', cursor: 'pointer', color: '#888' }
-const inputStyle: React.CSSProperties = { flex: 1, padding: '10px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '0.9rem', color: '#2D241E' }
-const lookupButtonStyle: React.CSSProperties = { padding: '10px 16px', backgroundColor: '#2D241E', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }
+const inputStyle: React.CSSProperties = { flex: 1, padding: '10px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '0.9rem', color: '#1C1610' }
+const lookupButtonStyle: React.CSSProperties = { padding: '10px 16px', backgroundColor: '#1C1610', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }
 const matchedBoxStyle: React.CSSProperties = { backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '10px 14px', marginBottom: '4px' }
 const errorStyle: React.CSSProperties = { color: '#dc2626', fontSize: '0.85rem', margin: '4px 0' }
 const cancelButtonStyle: React.CSSProperties = { padding: '10px 18px', backgroundColor: '#f0f0f0', color: '#666', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }
-const confirmButtonStyle: React.CSSProperties = { padding: '10px 18px', backgroundColor: '#C08261', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }
+const confirmButtonStyle: React.CSSProperties = { padding: '10px 18px', backgroundColor: '#D4A020', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }

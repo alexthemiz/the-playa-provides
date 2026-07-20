@@ -36,7 +36,7 @@ export default function WelcomeModal({ userId, onClose }: WelcomeModalProps) {
         {/* Header */}
         <div style={{ textAlign: 'center' as const, marginBottom: '20px' }}>
           <div style={{ fontSize: '1.6rem', marginBottom: '6px' }}>🔥</div>
-          <h1 style={{ margin: '0 0 10px', fontSize: '1.6rem', color: '#2D241E', fontWeight: 'bold', lineHeight: 1.2 }}>
+          <h1 style={{ margin: '0 0 10px', fontSize: '1.6rem', color: '#1C1610', fontWeight: 'bold', lineHeight: 1.2 }}>
             The Playa Provides you<br />with a Welcome
           </h1>
           <p style={{ margin: 0, color: '#666', fontSize: '1rem', lineHeight: '1.6' }}>
@@ -52,11 +52,11 @@ export default function WelcomeModal({ userId, onClose }: WelcomeModalProps) {
             { num: '3', title: 'Connect and collaborate with campmates', desc: 'Add your playa history to access camp features and inventories.' },
           ].map(step => (
             <div key={step.num} style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-              <div style={{ width: '30px', height: '30px', borderRadius: '50%', backgroundColor: '#C08261', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.85rem', flexShrink: 0 }}>
+              <div style={{ width: '30px', height: '30px', borderRadius: '50%', backgroundColor: '#1E8A82', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.85rem', flexShrink: 0 }}>
                 {step.num}
               </div>
               <div>
-                <div style={{ fontWeight: 'bold', color: '#2D241E', fontSize: '0.95rem' }}>{step.title}</div>
+                <div style={{ fontWeight: 'bold', color: '#1C1610', fontSize: '0.95rem' }}>{step.title}</div>
                 <div style={{ color: '#666', fontSize: '0.85rem', lineHeight: '1.5', marginTop: '2px' }}>{step.desc}</div>
               </div>
             </div>
@@ -102,7 +102,7 @@ const modalStyle: React.CSSProperties = {
 };
 
 const primaryBtnStyle: React.CSSProperties = {
-  flex: 2, padding: '14px', backgroundColor: '#C08261', color: '#fff',
+  flex: 2, padding: '14px', backgroundColor: '#1E8A82', color: '#fff',
   border: 'none', borderRadius: '10px', fontWeight: 'bold', fontSize: '0.95rem',
   cursor: 'pointer',
 };

@@ -16,7 +16,7 @@ function fixIcons() {
 
 function createCountIcon(count: number) {
   return L.divIcon({
-    html: `<div style="background:#3ABFD4;color:#000;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;box-shadow:0 2px 6px rgba(0,0,0,0.25);border:2px solid #fff">${count}</div>`,
+    html: `<div style="background:#1E8A82;color:#fff;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;box-shadow:0 2px 6px rgba(0,0,0,0.25);border:2px solid #fff">${count}</div>`,
     className: '',
     iconSize: [36, 36],
     iconAnchor: [18, 18],
@@ -112,7 +112,7 @@ export default function MapView({ items, onSelectItem }: Props) {
                       style={{ cursor: 'pointer', padding: '6px 0', borderBottom: '1px solid #f0f0f0' }}
                     >
                       <div style={{ fontWeight: '600', fontSize: '13px', color: '#111' }}>{item.item_name}</div>
-                      <div style={{ fontSize: '11px', color: '#3ABFD4', fontWeight: 'bold', textTransform: 'uppercase' as const, marginTop: '2px' }}>
+                      <div style={{ fontSize: '11px', color: '#1E8A82', fontWeight: 'bold', textTransform: 'uppercase' as const, marginTop: '2px' }}>
                         {item.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'}
                       </div>
                     </div>

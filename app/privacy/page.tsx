@@ -66,7 +66,7 @@ export default function PrivacyPage() {
             The Playa Provides offers sign-in via Google OAuth. If you use this option, we receive
             your name and email address from Google to create your account.
           </p>
-          <p style={{ ...pStyle, fontWeight: 600, color: '#2D241E' }}>
+          <p style={{ ...pStyle, fontWeight: 600, color: '#1C1610' }}>
             The Playa Provides' use and transfer of information received from Google APIs to any
             other app will adhere to the{' '}
             <a
@@ -179,7 +179,7 @@ const containerStyle: React.CSSProperties = {
 const h1Style: React.CSSProperties = {
   fontSize: '2rem',
   fontWeight: 800,
-  color: '#2D241E',
+  color: '#1C1610',
   marginBottom: '4px',
 };
 
@@ -214,7 +214,7 @@ const googleBoxStyle: React.CSSProperties = {
 const h2Style: React.CSSProperties = {
   fontSize: '1rem',
   fontWeight: 700,
-  color: '#2D241E',
+  color: '#1C1610',
   marginBottom: '10px',
   textTransform: 'uppercase' as const,
   letterSpacing: '0.05em',

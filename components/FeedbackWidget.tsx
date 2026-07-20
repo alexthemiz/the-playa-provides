@@ -144,14 +144,14 @@ export default function FeedbackWidget() {
             }}
           >
             {success ? (
-              <p style={{ textAlign: 'center' as const, fontSize: '1rem', color: '#2D241E', fontWeight: 600, margin: '16px 0' }}>
+              <p style={{ textAlign: 'center' as const, fontSize: '1rem', color: '#1C1610', fontWeight: 600, margin: '16px 0' }}>
                 Thanks — feedback received.
               </p>
             ) : (
               <>
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                  <span style={{ fontWeight: 700, fontSize: '1rem', color: '#2D241E' }}>Share Feedback</span>
+                  <span style={{ fontWeight: 700, fontSize: '1rem', color: '#1C1610' }}>Share Feedback</span>
                   <button onClick={handleClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#888', display: 'flex', alignItems: 'center' }}>
                     <X size={18} />
                   </button>
@@ -241,7 +241,7 @@ const fieldStyle: React.CSSProperties = {
   border: '1px solid #ddd',
   borderRadius: 6,
   fontSize: '0.9rem',
-  color: '#2D241E',
+  color: '#1C1610',
   backgroundColor: '#fff',
   boxSizing: 'border-box' as const,
   fontFamily: 'inherit',

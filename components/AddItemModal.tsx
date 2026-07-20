@@ -216,7 +216,7 @@ export default function AddItemModal({
               ].map(status => (
                 <label key={status.id} style={{
                   ...radioLabelStyle,
-                  border: availability === status.id ? '2px solid #5ECFDF' : '1px solid #eee',
+                  border: availability === status.id ? '2px solid #1E8A82' : '1px solid #eee',
                   backgroundColor: availability === status.id ? '#f0fbff' : '#fff',
                 }}>
                   <input type="radio" value={status.id} checked={availability === status.id} onChange={e => setAvailability(e.target.value)} style={{ display: 'none' }} />
@@ -235,7 +235,7 @@ export default function AddItemModal({
             <div style={sectionStyle}>
               <label style={labelStyle}>Select who can view this item</label>
               {campMateIds.length === 0 && (
-                <p style={hintStyle}>Add your camp history <a href="/settings" target="_blank" rel="noreferrer" style={{ color: '#5ECFDF', fontWeight: 600, textDecoration: 'none' }}>to your profile</a> to unlock campmates-only sharing</p>
+                <p style={hintStyle}>Add your camp history <a href="/settings" target="_blank" rel="noreferrer" style={{ color: '#1E8A82', fontWeight: 600, textDecoration: 'none' }}>to your profile</a> to unlock campmates-only sharing</p>
               )}
               <select
                 value={visibility}
@@ -339,7 +339,7 @@ export default function AddItemModal({
       {confirmDelete && (
         <div style={deleteOverlayStyle}>
           <div style={deleteModalStyle}>
-            <p style={{ margin: '0 0 20px 0', fontSize: '15px', color: '#2D241E', lineHeight: 1.5 }}>
+            <p style={{ margin: '0 0 20px 0', fontSize: '15px', color: '#1C1610', lineHeight: 1.5 }}>
               Are you sure you want to delete this item? This cannot be undone.
             </p>
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
@@ -358,7 +358,7 @@ export default function AddItemModal({
           bottom: '24px',
           left: '50%',
           transform: 'translateX(-50%)',
-          backgroundColor: toast.isError ? '#dc2626' : '#2D241E',
+          backgroundColor: toast.isError ? '#dc2626' : '#1C1610',
           color: '#fff',
           padding: '12px 24px',
           borderRadius: '8px',
@@ -396,7 +396,7 @@ const trayInputStyle: React.CSSProperties = { padding: '7px 10px', borderRadius:
 const photoPlaceholderStyle: React.CSSProperties = { width: '80px', height: '80px', borderRadius: '10px', border: '2px dashed #ddd', display: 'flex', flexDirection: 'column' as const, alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#aaa', fontSize: '10px', textAlign: 'center' as const, gap: '4px' };
 const photoPreviewStyle: React.CSSProperties = { width: '80px', height: '80px', objectFit: 'cover' as const, borderRadius: '10px', border: '1px solid #eee' };
 const removePhotoBtnStyle: React.CSSProperties = { position: 'absolute' as const, top: '-5px', right: '-5px', backgroundColor: '#ff4444', color: 'white', border: 'none', borderRadius: '50%', width: '20px', height: '20px', fontSize: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' };
-const submitBtnStyle: React.CSSProperties = { padding: '13px', backgroundColor: '#5ECFDF', color: 'black', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', fontSize: '15px', boxShadow: '0 4px 12px rgba(0,204,255,0.3)', marginTop: '4px' };
+const submitBtnStyle: React.CSSProperties = { padding: '13px', backgroundColor: '#1E8A82', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', fontSize: '15px', boxShadow: '0 4px 12px rgba(30,138,130,0.3)', marginTop: '4px' };
 const deleteItemBtnStyle: React.CSSProperties = { padding: '8px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '1px solid #ffaaaa', borderRadius: '8px', fontSize: '13px', cursor: 'pointer', fontWeight: '600' };
 const deleteOverlayStyle: React.CSSProperties = { position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100, padding: '20px' };
 const deleteModalStyle: React.CSSProperties = { backgroundColor: '#fff', padding: '24px', borderRadius: '16px', maxWidth: '400px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' };

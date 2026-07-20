@@ -164,7 +164,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
           {/* Owner | Location row */}
           <div style={locationOwnerRow}>
             <span style={metaItem}>
-              <User size={15} color="#5ECFDF" />
+              <User size={15} color="#1E8A82" />
               {item.owner_username ? (
                 <span>{isGift ? 'Offered' : 'Owned'} by <Link href={`/profile/${item.owner_username}`} style={ownerLinkStyle}>{item.owner_name}</Link></span>
               ) : (
@@ -173,7 +173,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
             </span>
             <span style={{ color: '#bbb', fontSize: '14px', margin: '0 6px' }}>|</span>
             <span style={metaItem}>
-              <MapPin size={15} color="#5ECFDF" /> {item.location_display}
+              <MapPin size={15} color="#1E8A82" /> {item.location_display}
             </span>
           </div>
 
@@ -306,7 +306,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
       {confirmDelete && (
         <div style={deleteOverlayStyle}>
           <div style={deleteModalStyle}>
-            <p style={{ margin: '0 0 20px 0', fontSize: '15px', color: '#2D241E', lineHeight: 1.5 }}>
+            <p style={{ margin: '0 0 20px 0', fontSize: '15px', color: '#1C1610', lineHeight: 1.5 }}>
               Are you sure you want to delete this item? This cannot be undone.
             </p>
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
@@ -324,17 +324,17 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
 
 // ── Styles ─────────────────────────────────────────────────────────────────
 
-const containerStyle: React.CSSProperties = { padding: '32px 20px', maxWidth: '1000px', margin: '0 auto', color: '#2D241E' };
-const backLinkStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '5px', color: '#5ECFDF', textDecoration: 'none', marginBottom: '20px', fontWeight: 'bold' };
+const containerStyle: React.CSSProperties = { padding: '32px 20px', maxWidth: '1000px', margin: '0 auto', color: '#1C1610' };
+const backLinkStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '5px', color: '#1E8A82', textDecoration: 'none', marginBottom: '20px', fontWeight: 'bold' };
 const contentGrid: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '28px' };
 const detailsPane: React.CSSProperties = { display: 'flex', flexDirection: 'column' as const, gap: '10px' };
-const titleStyle: React.CSSProperties = { fontSize: '26px', fontWeight: 'bold', margin: 0, color: '#2D241E' };
-const categoryStyle: React.CSSProperties = { color: '#00aacc', fontWeight: 'bold', fontSize: '13px', textTransform: 'uppercase' as const, marginBottom: '4px', letterSpacing: '0.05em' };
+const titleStyle: React.CSSProperties = { fontSize: '26px', fontWeight: 'bold', margin: 0, color: '#1C1610' };
+const categoryStyle: React.CSSProperties = { color: '#1E8A82', fontWeight: 'bold', fontSize: '13px', textTransform: 'uppercase' as const, marginBottom: '4px', letterSpacing: '0.05em' };
 
 // Location | Owner row
 const locationOwnerRow: React.CSSProperties = { display: 'flex', alignItems: 'center', flexWrap: 'wrap' as const, gap: '4px', fontSize: '14px', color: '#444' };
 const metaItem: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: '#444' };
-const ownerLinkStyle: React.CSSProperties = { color: '#00aacc', textDecoration: 'none', fontWeight: '500' };
+const ownerLinkStyle: React.CSSProperties = { color: '#1E8A82', textDecoration: 'none', fontWeight: '500' };
 
 // Pick up / Return by row
 const dateRow: React.CSSProperties = { display: 'flex', gap: '16px', flexWrap: 'wrap' as const };
@@ -348,7 +348,7 @@ const descText: React.CSSProperties = { lineHeight: '1.7', color: '#444', fontSi
 // Lending Terms box
 const termsSection: React.CSSProperties = { backgroundColor: '#f7f7f7', padding: '16px', borderRadius: '12px', border: '1px solid #e5e5e5' };
 const termsTitleStyle: React.CSSProperties = { color: '#555', fontSize: '11px', textTransform: 'uppercase' as const, marginBottom: '8px', marginTop: 0, letterSpacing: '1px', fontWeight: 800 };
-const priceTag: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#2D241E' };
+const priceTag: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#1C1610' };
 
 // Request / owner buttons
 const borrowButtonStyle: React.CSSProperties = { padding: '12px 28px', border: '2px solid #1C1610', boxShadow: '3px 3px 0 #1C1610', backgroundColor: '#1E8A82', color: '#fff', fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer', fontFamily: 'Outfit, sans-serif' };

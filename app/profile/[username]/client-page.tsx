@@ -478,8 +478,8 @@ export default function PublicProfilePage() {
     setItems(gearData || []);
   }
 
-  if (loading) return <div style={{ color: '#2D241E', padding: '40px' }}>Loading...</div>;
-  if (!profile) return <div style={{ color: '#2D241E', padding: '40px' }}>User not found.</div>;
+  if (loading) return <div style={{ color: '#1C1610', padding: '40px' }}>Loading...</div>;
+  if (!profile) return <div style={{ color: '#1C1610', padding: '40px' }}>User not found.</div>;
 
   const locationStr = [profile.city, profile.state].filter(Boolean).join(', ');
 
@@ -519,9 +519,9 @@ export default function PublicProfilePage() {
             {isEditing ? (
               <AvatarUpload url={profile.avatar_url} onUpload={(url) => setProfile({ ...profile, avatar_url: url })} onError={setSaveError} />
             ) : (
-              <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: '#f0f0f0', backgroundImage: profile.avatar_url ? `url(${profile.avatar_url})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center', border: '3px solid #C08261', flexShrink: 0 }}>
+              <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: '#f0f0f0', backgroundImage: profile.avatar_url ? `url(${profile.avatar_url})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center', border: '3px solid #D4A020', flexShrink: 0 }}>
                 {!profile.avatar_url && (
-                  <span style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', fontSize: '1.8rem', color: '#C08261' }}>
+                  <span style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', fontSize: '1.8rem', color: '#D4A020' }}>
                     {profile.preferred_name?.charAt(0)}
                   </span>
                 )}
@@ -532,7 +532,7 @@ export default function PublicProfilePage() {
             <div style={{ flex: 1, minWidth: 0 }}>
               {isEditing ? (
                 <input
-                  style={{ backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', fontSize: '1.5rem', width: '100%', padding: '5px' }}
+                  style={{ backgroundColor: '#fff', color: '#1C1610', border: '1px solid #ddd', fontSize: '1.5rem', width: '100%', padding: '5px' }}
                   value={profile.preferred_name || ''}
                   onChange={e => setProfile({ ...profile, preferred_name: e.target.value })}
                 />
@@ -635,7 +635,7 @@ export default function PublicProfilePage() {
                         placeholder="https://..."
                         value={(profile.social_links || {})[key] || ''}
                         onChange={e => setProfile({ ...profile, social_links: { ...(profile.social_links || {}), [key]: e.target.value } })}
-                        style={{ width: '100%', backgroundColor: '#fff', color: '#2D241E', border: '1px solid #ddd', padding: '6px 8px', fontSize: '12px', boxSizing: 'border-box' as const, outline: 'none' }}
+                        style={{ width: '100%', backgroundColor: '#fff', color: '#1C1610', border: '1px solid #ddd', padding: '6px 8px', fontSize: '12px', boxSizing: 'border-box' as const, outline: 'none' }}
                       />
                     </div>
                   ))}
@@ -759,7 +759,7 @@ export default function PublicProfilePage() {
             <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 201, backgroundColor: '#fff', border: '2px solid #1C1610', boxShadow: '4px 4px 0 #1C1610', minWidth: '460px', maxWidth: '560px', overflow: 'hidden' as const }}>
               {/* Modal header */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>
-                <span style={{ fontWeight: 700, fontSize: '14px', color: '#2D241E', textTransform: 'capitalize' as const }}>{openList}</span>
+                <span style={{ fontWeight: 700, fontSize: '14px', color: '#1C1610', textTransform: 'capitalize' as const }}>{openList}</span>
                 <button onClick={() => setOpenList(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: '18px', lineHeight: 1, padding: '2px 6px' }}>{'×'}</button>
               </div>
 
@@ -793,11 +793,11 @@ export default function PublicProfilePage() {
                 ) : (
                   (openList === 'followers' ? followersList : followingList).map((entry) => (
                     <div key={entry.id} style={{ display: 'grid', gridTemplateColumns: '40px minmax(100px, 180px) 100px 85px 75px', gap: '12px', alignItems: 'center', padding: '10px 16px', borderBottom: '1px solid #f9f9f9' }}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#f0f0f0', backgroundImage: entry.avatar_url ? `url(${entry.avatar_url})` : 'none' as const, backgroundSize: 'cover' as const, backgroundPosition: 'center' as const, border: '2px solid #e5e5e5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', color: '#C08261', fontWeight: 'bold' as const, flexShrink: 0 }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#f0f0f0', backgroundImage: entry.avatar_url ? `url(${entry.avatar_url})` : 'none' as const, backgroundSize: 'cover' as const, backgroundPosition: 'center' as const, border: '2px solid #e5e5e5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', color: '#D4A020', fontWeight: 'bold' as const, flexShrink: 0 }}>
                         {!entry.avatar_url && (entry.preferred_name?.charAt(0) || entry.username?.charAt(0) || '?')}
                       </div>
                       <a href={`/profile/${entry.username}`} style={{ textDecoration: 'none' as const, color: 'inherit' as const }}>
-                        <div style={{ fontWeight: 600, fontSize: '14px', color: '#2D241E' }}>{entry.preferred_name || entry.username}</div>
+                        <div style={{ fontWeight: 600, fontSize: '14px', color: '#1C1610' }}>{entry.preferred_name || entry.username}</div>
                         <div style={{ fontSize: '12px', color: '#aaa' }}>@{entry.username}</div>
                       </a>
                       <button
@@ -861,12 +861,12 @@ export default function PublicProfilePage() {
                             onChange={e => handle2026CampInputChange(e.target.value)}
                             onFocus={() => { if (draft2026.campInput.trim()) setDraft2026(prev => ({ ...prev, showDropdown: true })); }}
                             onBlur={() => setTimeout(() => setDraft2026(prev => ({ ...prev, showDropdown: false })), 150)}
-                            style={{ width: '100%', padding: '6px 8px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', backgroundColor: '#fff', color: '#2D241E', boxSizing: 'border-box' as const, outline: 'none' }}
+                            style={{ width: '100%', padding: '6px 8px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', backgroundColor: '#fff', color: '#1C1610', boxSizing: 'border-box' as const, outline: 'none' }}
                           />
                           {draft2026.showDropdown && (draft2026.searchResults.length > 0 || draft2026.campInput.trim()) && (
                             <div style={{ position: 'absolute' as const, top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #ddd', borderRadius: '6px', zIndex: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', overflow: 'hidden' as const }}>
                               {draft2026.searchResults.map((camp: any) => (
-                                <div key={camp.id} onMouseDown={() => setDraft2026(prev => ({ ...prev, campInput: camp.display_name, campId: camp.id, searchResults: [], showDropdown: false }))} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '0.875rem', color: '#2D241E' }}>
+                                <div key={camp.id} onMouseDown={() => setDraft2026(prev => ({ ...prev, campInput: camp.display_name, campId: camp.id, searchResults: [], showDropdown: false }))} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '0.875rem', color: '#1C1610' }}>
                                   {camp.display_name}
                                 </div>
                               ))}
@@ -893,7 +893,7 @@ export default function PublicProfilePage() {
                     <select
                       value={draft.year}
                       onChange={e => updateDraft(draft.tempId, { year: parseInt(e.target.value) })}
-                      style={{ padding: '6px 8px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', backgroundColor: '#fff', color: '#2D241E', flexShrink: 0, width: '90px' }}
+                      style={{ padding: '6px 8px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', backgroundColor: '#fff', color: '#1C1610', flexShrink: 0, width: '90px' }}
                     >
                       {YEAR_OPTIONS.map(y => <option key={y} value={y}>{y}</option>)}
                     </select>
@@ -914,12 +914,12 @@ export default function PublicProfilePage() {
                           onChange={e => handleCampInputChange(draft.tempId, e.target.value)}
                           onFocus={() => { if (draft.campInput.trim()) updateDraft(draft.tempId, { showDropdown: true }); }}
                           onBlur={() => setTimeout(() => updateDraft(draft.tempId, { showDropdown: false }), 150)}
-                          style={{ width: '100%', padding: '6px 8px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', backgroundColor: '#fff', color: '#2D241E', boxSizing: 'border-box' as const, outline: 'none' }}
+                          style={{ width: '100%', padding: '6px 8px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', backgroundColor: '#fff', color: '#1C1610', boxSizing: 'border-box' as const, outline: 'none' }}
                         />
                         {draft.showDropdown && (draft.searchResults.length > 0 || draft.campInput.trim()) && (
                           <div style={{ position: 'absolute' as const, top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #ddd', borderRadius: '6px', zIndex: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', overflow: 'hidden' as const }}>
                             {draft.searchResults.map((camp: any) => (
-                              <div key={camp.id} onMouseDown={() => selectCamp(draft.tempId, camp)} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '0.875rem', color: '#2D241E' }}>
+                              <div key={camp.id} onMouseDown={() => selectCamp(draft.tempId, camp)} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '0.875rem', color: '#1C1610' }}>
                                 {camp.display_name}
                               </div>
                             ))}
@@ -1090,8 +1090,8 @@ export default function PublicProfilePage() {
                   { label: 'Followers', bg: '#f0effe', color: '#6D28D9', border: '#ddd6fe' },
                   { label: 'Campmates', bg: '#f0fdf4', color: '#15803D', border: '#bbf7d0' },
                 ];
-                if (v === 'private') return [{ label: 'Just Me', bg: '#fdf3ec', color: '#C08261', border: '#f0d8c8' }];
-                return [{ label: 'Everyone', bg: '#fdf3ec', color: '#C08261', border: '#f0d8c8' }];
+                if (v === 'private') return [{ label: 'Just Me', bg: '#F5F0D0', color: '#92400e', border: '#e8dcae' }];
+                return [{ label: 'Everyone', bg: '#F5F0D0', color: '#92400e', border: '#e8dcae' }];
               })();
 
               return (

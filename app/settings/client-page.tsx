@@ -345,7 +345,7 @@ export default function SettingsPage() {
                       type="checkbox"
                       checked={loc.is_default || false}
                       onChange={() => setDefaultLocation(index)}
-                      style={{ accentColor: '#5ECFDF', cursor: 'pointer' }}
+                      style={{ accentColor: '#1E8A82', cursor: 'pointer' }}
                     />
                     Set as default
                   </label>
@@ -503,7 +503,7 @@ export default function SettingsPage() {
           bottom: '24px',
           left: '50%',
           transform: 'translateX(-50%)',
-          backgroundColor: toast.isError ? '#dc2626' : '#2D241E',
+          backgroundColor: toast.isError ? '#dc2626' : '#1C1610',
           color: '#fff',
           padding: '12px 24px',
           borderRadius: '8px',

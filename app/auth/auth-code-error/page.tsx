@@ -7,18 +7,15 @@ export default function AuthCodeErrorPage() {
     <div style={containerStyle}>
       <div style={cardStyle}>
         <div style={{ fontSize: '2rem', marginBottom: '16px' }}>🔗</div>
-        <h1 style={{ margin: '0 0 10px', fontSize: '1.4rem', fontWeight: 'bold', color: '#2D241E' }}>
+        <h1 style={{ margin: '0 0 10px', fontSize: '1.4rem', fontWeight: 'bold', color: '#1C1610' }}>
           Link Expired or Invalid
         </h1>
         <p style={{ margin: '0 0 24px', color: '#666', fontSize: '0.95rem', lineHeight: '1.6' }}>
-          That magic link has either expired or already been used. Links are single-use and valid for one hour.
+          That link has either expired or already been used.
         </p>
         <Link href="/login" style={buttonStyle}>
           Back to Login
         </Link>
-        <p style={{ marginTop: '16px', fontSize: '0.8rem', color: '#aaa' }}>
-          Just request a new magic link from the login page.
-        </p>
       </div>
     </div>
   );
@@ -46,8 +43,8 @@ const cardStyle: React.CSSProperties = {
 const buttonStyle: React.CSSProperties = {
   display: 'inline-block',
   padding: '12px 28px',
-  backgroundColor: '#5ECFDF',
-  color: '#000',
+  backgroundColor: '#1E8A82',
+  color: '#fff',
   fontWeight: 600,
   borderRadius: '8px',
   textDecoration: 'none',

@@ -128,7 +128,7 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, i
         {success ? (
           <div style={{ textAlign: 'center' as const, padding: '20px 0' }}>
             <p style={{ fontSize: '1.4rem', marginBottom: '8px' }}>🎉</p>
-            <p style={{ fontWeight: 700, fontSize: '1.05rem', color: '#2D241E', margin: '0 0 8px' }}>
+            <p style={{ fontWeight: 700, fontSize: '1.05rem', color: '#1C1610', margin: '0 0 8px' }}>
               Message sent to {recipientName}!
             </p>
             <p style={{ fontSize: '0.9rem', color: '#777', margin: 0 }}>
@@ -137,7 +137,7 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, i
           </div>
         ) : (
           <>
-            <h2 style={{ margin: '0 0 4px', color: '#2D241E', fontSize: '1.15rem', paddingRight: '24px' }}>
+            <h2 style={{ margin: '0 0 4px', color: '#1C1610', fontSize: '1.15rem', paddingRight: '24px' }}>
               Help make {recipientName}&apos;s wish list dreams come true
             </h2>
             <p style={{ margin: '0 0 20px', color: '#888', fontSize: '0.85rem' }}>
@@ -154,9 +154,9 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, i
                       type="checkbox"
                       checked={selectedTags.has(tag)}
                       onChange={() => toggleTag(tag)}
-                      style={{ accentColor: '#5ECFDF', width: '15px', height: '15px', flexShrink: 0 }}
+                      style={{ accentColor: '#1E8A82', width: '15px', height: '15px', flexShrink: 0 }}
                     />
-                    <span style={{ fontSize: '0.95rem', color: '#2D241E' }}>{tag}</span>
+                    <span style={{ fontSize: '0.95rem', color: '#1C1610' }}>{tag}</span>
                   </div>
                   <div style={{ display: 'flex', gap: '12px', flexShrink: 0 }}>
                     {(['borrow', 'keep'] as const).map(term => (
@@ -167,7 +167,7 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, i
                           value={term}
                           checked={tagTerms.get(tag) === term}
                           onChange={() => setTagTerms(prev => new Map(prev).set(tag, term))}
-                          style={{ accentColor: '#5ECFDF' }}
+                          style={{ accentColor: '#1E8A82' }}
                         />
                         {term === 'borrow' ? 'To Borrow' : 'To Keep'}
                       </label>
@@ -212,9 +212,9 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, i
                         type="checkbox"
                         checked={selectedItemIds.has(item.id)}
                         onChange={() => toggleItem(item.id, item.item_name)}
-                        style={{ accentColor: '#5ECFDF', width: '15px', height: '15px', flexShrink: 0 }}
+                        style={{ accentColor: '#1E8A82', width: '15px', height: '15px', flexShrink: 0 }}
                       />
-                      <span style={{ fontSize: '0.95rem', color: '#2D241E' }}>{item.item_name}</span>
+                      <span style={{ fontSize: '0.95rem', color: '#1C1610' }}>{item.item_name}</span>
                       {visLabel && (
                         <span style={{ fontSize: '0.72rem', color: '#aaa', marginLeft: '6px', fontStyle: 'italic' }}>
                           {visLabel}
@@ -238,7 +238,7 @@ export default function WishListMatchModal({ profile, wishTags, currentUserId, i
               onChange={e => setNote(e.target.value)}
               rows={3}
               placeholder="e.g. I have a 10-person tent in great condition — happy to lend!"
-              style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '0.9rem', color: '#2D241E', boxSizing: 'border-box' as const, resize: 'vertical' as const, outline: 'none', marginBottom: '4px' }}
+              style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '0.9rem', color: '#1C1610', boxSizing: 'border-box' as const, resize: 'vertical' as const, outline: 'none', marginBottom: '4px' }}
             />
 
             {error && <p style={{ color: '#dc2626', fontSize: '0.85rem', margin: '4px 0 8px' }}>{error}</p>}
@@ -287,6 +287,6 @@ const cancelStyle: React.CSSProperties = {
   border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600,
 };
 const sendStyle: React.CSSProperties = {
-  padding: '10px 18px', backgroundColor: '#5ECFDF', color: '#000',
+  padding: '10px 18px', backgroundColor: '#1E8A82', color: '#fff',
   border: 'none', borderRadius: '6px', fontWeight: 600,
 };

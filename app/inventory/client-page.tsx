@@ -548,7 +548,7 @@ export default function InventoryPage() {
             onClick={() => setLocationDropdownOpen(o => !o)}
             style={{ ...inputStyle, textAlign: 'left' as const, cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
           >
-            <span style={{ color: selectedLocations.length > 0 ? '#2D241E' : '#aaa' }}>{locationButtonLabel}</span>
+            <span style={{ color: selectedLocations.length > 0 ? '#1C1610' : '#aaa' }}>{locationButtonLabel}</span>
             <span style={{ fontSize: '0.6rem', color: '#aaa' }}>▼</span>
           </button>
           {locationDropdownOpen && (
@@ -564,7 +564,7 @@ export default function InventoryPage() {
                       onChange={() => toggleLocation(loc)}
                       style={{ cursor: 'pointer' }}
                     />
-                    <span style={{ fontSize: '0.85rem', color: '#2D241E' }}>{loc}</span>
+                    <span style={{ fontSize: '0.85rem', color: '#1C1610' }}>{loc}</span>
                   </label>
                 ))
               )}
@@ -650,7 +650,7 @@ export default function InventoryPage() {
                           )}
                         </div>
                         <div>
-                          <div style={{ fontWeight: 'bold', color: '#2D241E' }}>{item.item_name}</div>
+                          <div style={{ fontWeight: 'bold', color: '#1C1610' }}>{item.item_name}</div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
                             <a href={`/find-items/${item.id}`} style={inlineRowLinkStyle}>View</a>
                             <span style={rowLinkDividerStyle}>·</span>
@@ -738,7 +738,7 @@ export default function InventoryPage() {
 
       {/* ITEMS OUT ON LOAN */}
       <div style={{ marginTop: '40px' }}>
-        <h2 style={{ color: '#2D241E', fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
+        <h2 style={{ color: '#1C1610', fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
           Items Out on Loan
         </h2>
         <div style={tableContainerStyle}>
@@ -767,7 +767,7 @@ export default function InventoryPage() {
                     const itemName = loan.gear_items?.item_name || items.find(i => i.id === loan.item_id)?.item_name || '—';
                     return (
                       <tr key={loan.id} style={rowStyle}>
-                        <td style={{ ...tdStyle, fontWeight: 600, color: '#2D241E' }}>
+                        <td style={{ ...tdStyle, fontWeight: 600, color: '#1C1610' }}>
                           {itemName}
                           <a href={`/find-items/${loan.item_id}`} style={editLinkStyle}>View Item Details</a>
                         </td>
@@ -801,7 +801,7 @@ export default function InventoryPage() {
 
       {/* ITEMS BEING TRANSFERRED TO ME */}
       <div style={{ marginTop: '40px' }}>
-        <h2 style={{ color: '#2D241E', fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
+        <h2 style={{ color: '#1C1610', fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
           Items Being Transferred to Me
         </h2>
           <div style={tableContainerStyle}>
@@ -823,7 +823,7 @@ export default function InventoryPage() {
                   const itemName = transfer.gear_items?.item_name || '—';
                   return (
                     <tr key={transfer.id} style={rowStyle}>
-                      <td style={{ ...tdStyle, fontWeight: 600, color: '#2D241E' }}>{itemName}</td>
+                      <td style={{ ...tdStyle, fontWeight: 600, color: '#1C1610' }}>{itemName}</td>
                       <td style={tdStyle}>{ownerName}</td>
                       <td style={tdStyle}>
                         <span style={{ fontSize: '0.8rem', color: '#555' }}>
@@ -852,7 +852,7 @@ export default function InventoryPage() {
 
       {/* ITEMS I'M BORROWING */}
       <div style={{ marginTop: '40px' }}>
-        <h2 style={{ color: '#2D241E', fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
+        <h2 style={{ color: '#1C1610', fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
           Items I&apos;m Borrowing
         </h2>
           <div style={tableContainerStyle}>
@@ -884,7 +884,7 @@ export default function InventoryPage() {
                   const isAddingNew = newLoanLocData.loanId === loan.id;
                   return (
                     <tr key={loan.id} style={rowStyle}>
-                      <td style={{ ...tdStyle, fontWeight: 600, color: '#2D241E' }}>
+                      <td style={{ ...tdStyle, fontWeight: 600, color: '#1C1610' }}>
                         {itemName}
                         <a href={`/find-items/${loan.item_id}`} style={editLinkStyle}>View Item Details</a>
                       </td>
@@ -1019,9 +1019,9 @@ export default function InventoryPage() {
               </>
             ) : (
               <>
-                <h3 style={{ margin: '0 0 6px', fontSize: '1rem', color: '#2D241E' }}>Dispute Return</h3>
+                <h3 style={{ margin: '0 0 6px', fontSize: '1rem', color: '#1C1610' }}>Dispute Return</h3>
                 <p style={{ margin: '0 0 16px', fontSize: '0.85rem', color: '#888', lineHeight: 1.4 }}>
-                  Describe the issue with <strong style={{ color: '#2D241E' }}>{disputeLoan.gear_items?.item_name || 'this item'}</strong>. Our team will follow up.
+                  Describe the issue with <strong style={{ color: '#1C1610' }}>{disputeLoan.gear_items?.item_name || 'this item'}</strong>. Our team will follow up.
                 </p>
                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#555', marginBottom: '6px', textTransform: 'uppercase' as const, letterSpacing: '0.05em' }}>
                   Describe the issue
@@ -1031,7 +1031,7 @@ export default function InventoryPage() {
                   onChange={e => setDisputeMessage(e.target.value)}
                   rows={5}
                   placeholder="e.g. The item was returned damaged..."
-                  style={{ width: '100%', padding: '10px', fontSize: '0.9rem', border: '1px solid #ddd', borderRadius: '8px', resize: 'vertical' as const, boxSizing: 'border-box' as const, color: '#2D241E', fontFamily: 'inherit' }}
+                  style={{ width: '100%', padding: '10px', fontSize: '0.9rem', border: '1px solid #ddd', borderRadius: '8px', resize: 'vertical' as const, boxSizing: 'border-box' as const, color: '#1C1610', fontFamily: 'inherit' }}
                 />
                 <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
                   <button
