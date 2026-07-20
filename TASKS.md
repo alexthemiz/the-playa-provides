@@ -25,6 +25,8 @@ _Last updated: 2026-07-20 (full-site audit + follow-through complete)_
 
 ## 🏗️ In Progress / Needs Testing
 - [ ] **Test spreadsheet import end-to-end in browser** — CSV upload, Excel upload, duplicate detection, error cases. (`fix/spreadsheet-import-user-id` merged — ready to test.)
+- [ ] **Test Item History section** (2026-07-20) — owner-only collapsible section on item detail/quick-view/modal. Verify: shows correct dates/names as owner; a borrower sees nothing even for an active loan; layout renders below the button row, not beside it (fixed once already).
+- [ ] **Test Items I've Given Away table** (2026-07-20) — on /inventory. Verify: item name always shows even if current owner made it private; "Given To" always shows; "Current Owner" shows real name when visible to you, "Not visible to you" when the current owner's privacy settings block it (test by re-gifting a test item to a third account and having them set it private).
 
 ---
 
