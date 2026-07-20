@@ -38,6 +38,12 @@ export default function AddItemModal({
   const [deleting, setDeleting] = useState(false);
   const [followingIds, setFollowingIds] = useState<string[]>([]);
   const [campMateIds, setCampMateIds] = useState<string[]>([]);
+  const [toast, setToast] = useState<{ message: string; isError?: boolean } | null>(null);
+
+  function showToast(message: string, isError = false) {
+    setToast({ message, isError });
+    setTimeout(() => setToast(null), 3000);
+  }
 
   useEffect(() => {
     async function fetchLocations() {
@@ -77,7 +83,7 @@ export default function AddItemModal({
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
-    if (files.length + imageUrls.length > 4) { alert("Max 4 photos total."); return; }
+    if (files.length + imageUrls.length > 4) { showToast("Max 4 photos total.", true); return; }
 
     setUploading(true);
     const currentPhotos = [...imageUrls];
@@ -144,7 +150,7 @@ export default function AddItemModal({
       ? await supabase.from('gear_items').update(payload).eq('id', itemToEdit.id)
       : await supabase.from('gear_items').insert([{ ...payload, user_id: user.id }]);
 
-    if (error) alert("Error: " + error.message);
+    if (error) showToast("Error: " + error.message, true);
     else onSuccess();
     setLoading(false);
   }
@@ -343,6 +349,26 @@ export default function AddItemModal({
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {toast && (
+        <div style={{
+          position: 'fixed' as const,
+          bottom: '24px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: toast.isError ? '#dc2626' : '#2D241E',
+          color: '#fff',
+          padding: '12px 24px',
+          borderRadius: '8px',
+          fontSize: '0.9rem',
+          fontWeight: 600,
+          zIndex: 9999,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+          whiteSpace: 'nowrap' as const,
+        }}>
+          {toast.message}
         </div>
       )}
     </div>

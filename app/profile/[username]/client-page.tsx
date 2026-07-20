@@ -517,7 +517,7 @@ export default function PublicProfilePage() {
           <div className="profile-header-row" style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
             {/* Avatar */}
             {isEditing ? (
-              <AvatarUpload url={profile.avatar_url} onUpload={(url) => setProfile({ ...profile, avatar_url: url })} />
+              <AvatarUpload url={profile.avatar_url} onUpload={(url) => setProfile({ ...profile, avatar_url: url })} onError={setSaveError} />
             ) : (
               <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: '#f0f0f0', backgroundImage: profile.avatar_url ? `url(${profile.avatar_url})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center', border: '3px solid #C08261', flexShrink: 0 }}>
                 {!profile.avatar_url && (

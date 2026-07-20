@@ -40,6 +40,12 @@ function ListItemPageInner() {
   const [followingIds, setFollowingIds] = useState<string[]>([]);
   const [campMateIds, setCampMateIds] = useState<string[]>([]);
   const [campDataLoaded, setCampDataLoaded] = useState(false);
+  const [toast, setToast] = useState<{ message: string; isError?: boolean } | null>(null);
+
+  function showToast(message: string, isError = false) {
+    setToast({ message, isError });
+    setTimeout(() => setToast(null), 3000);
+  }
 
   // Controlled text-field state (replaces uncontrolled name= inputs)
   const [itemName, setItemName] = useState('');
@@ -120,7 +126,7 @@ function ListItemPageInner() {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
-    if (files.length + imageUrls.length > 4) { alert("Max 4 photos total."); return; }
+    if (files.length + imageUrls.length > 4) { showToast("Max 4 photos total.", true); return; }
 
     setUploading(true);
     try {
@@ -140,7 +146,7 @@ function ListItemPageInner() {
       e.target.value = "";
     } catch (err) {
       console.error('Photo upload exception:', err);
-      alert('Photo upload failed. Please try again.');
+      showToast('Photo upload failed. Please try again.', true);
     } finally {
       setUploading(false);
     }
@@ -151,19 +157,19 @@ function ListItemPageInner() {
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { alert("You must be logged in!"); return; }
+      if (!user) { showToast("You must be logged in!", true); return; }
 
       // If user is adding a new location inline, insert it first
       let resolvedLocationId: string | null = selectedLocationId || null;
       if (selectedLocationId === '__new__') {
-        if (!newLocData.label) { alert("Please give your new location a label (e.g. Home)."); return; }
+        if (!newLocData.label) { showToast("Please give your new location a label (e.g. Home).", true); return; }
         const coords = await geocodeZip(newLocData.zip_code);
         const { data: newLoc, error: locErr } = await supabase
           .from('locations')
           .insert({ ...newLocData, user_id: user.id, ...(coords ?? {}) })
           .select('id')
           .single();
-        if (locErr || !newLoc) { alert(`Error saving location: ${locErr?.message}`); return; }
+        if (locErr || !newLoc) { showToast(`Error saving location: ${locErr?.message}`, true); return; }
         resolvedLocationId = newLoc.id;
         setLocations(prev => [...prev, { id: newLoc.id, label: newLocData.label }]);
       }
@@ -187,7 +193,7 @@ function ListItemPageInner() {
         // Edit mode: update existing record
         const { error } = await supabase.from('gear_items').update(itemPayload).eq('id', editId);
         if (error) {
-          alert(`Error: ${error.message}`);
+          showToast(`Error: ${error.message}`, true);
         } else {
           setShowSuccessModal(true);
         }
@@ -199,7 +205,7 @@ function ListItemPageInner() {
         }]).select('id').single();
 
         if (error || !newItem) {
-          alert(`Error: ${error?.message ?? 'Item was not saved. Please try again.'}`);
+          showToast(`Error: ${error?.message ?? 'Item was not saved. Please try again.'}`, true);
         } else {
           // Fire-and-forget: notify followers who have email opt-in
           supabase.functions.invoke('send-follow-notification', {
@@ -210,7 +216,7 @@ function ListItemPageInner() {
       }
     } catch (err) {
       console.error('handleSubmit exception:', err);
-      alert('Something went wrong. Please try again.');
+      showToast('Something went wrong. Please try again.', true);
     } finally {
       setLoading(false);
     }
@@ -452,6 +458,26 @@ function ListItemPageInner() {
                 <button onClick={() => router.push('/inventory')} style={secondaryActionBtn}>Go to Inventory</button>
               </div>
             </div>
+          </div>
+        )}
+
+        {toast && (
+          <div style={{
+            position: 'fixed' as const,
+            bottom: '24px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            backgroundColor: toast.isError ? '#dc2626' : '#2D241E',
+            color: '#fff',
+            padding: '12px 24px',
+            borderRadius: '8px',
+            fontSize: '0.9rem',
+            fontWeight: 600,
+            zIndex: 9999,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+            whiteSpace: 'nowrap' as const,
+          }}>
+            {toast.message}
           </div>
         )}
       </div>

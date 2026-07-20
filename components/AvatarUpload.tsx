@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
-export default function AvatarUpload({ url, onUpload }: { url: string; onUpload: (url: string) => void }) {
+export default function AvatarUpload({ url, onUpload, onError }: { url: string; onUpload: (url: string) => void; onError?: (message: string) => void }) {
   const [uploading, setUploading] = useState(false);
 
   async function uploadAvatar(event: any) {
@@ -21,7 +21,7 @@ export default function AvatarUpload({ url, onUpload }: { url: string; onUpload:
       const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
       onUpload(data.publicUrl);
     } catch (error: any) {
-      alert(error.message);
+      onError?.(error.message || 'Avatar upload failed. Please try again.');
     } finally {
       setUploading(false);
     }

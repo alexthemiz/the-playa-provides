@@ -11,6 +11,7 @@ interface SubmitCampModalProps {
 export default function SubmitCampModal({ onClose }: SubmitCampModalProps) {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   
   const [formData, setFormData] = useState({
     camp_name: '',
@@ -36,6 +37,7 @@ export default function SubmitCampModal({ onClose }: SubmitCampModalProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setSubmitError('');
     try {
       const { error } = await supabase.from('playa_resources').insert([{ ...formData, is_verified: false }]);
       if (error) throw error;
@@ -46,7 +48,7 @@ export default function SubmitCampModal({ onClose }: SubmitCampModalProps) {
       setSubmitted(true);
     } catch (err) {
       console.error(err);
-      alert('Error submitting camp.');
+      setSubmitError('Error submitting camp. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -171,6 +173,8 @@ export default function SubmitCampModal({ onClose }: SubmitCampModalProps) {
                   <textarea className="w-full border-2 border-stone-200 rounded-lg p-1.5 h-16 text-black focus:border-[#C08261] outline-none resize-none text-sm" value={formData.about_camp} onChange={(e) => setFormData({...formData, about_camp: e.target.value})} placeholder="Brief history or camp mission..." />
                 </div>
               </div>
+
+{submitError && <p className="text-red-600 text-sm text-center">{submitError}</p>}
 
 <button type="submit" disabled={loading} className="w-full bg-[#C08261] text-white py-3 rounded-2xl font-bold hover:bg-[#A66D51] transition-all text-sm uppercase tracking-normal shadow-lg active:scale-95">
   {loading ? 'Submitting...' : 'Submit for Review'}
