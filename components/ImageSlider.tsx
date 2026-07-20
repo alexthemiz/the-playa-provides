@@ -3,18 +3,22 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Package } from 'lucide-react';
 
+const TEAL = '#1E8A82';
+
 interface ImageSliderProps {
   images: string[] | null;
-  aspectRatio?: string; // Optional: lets us use different shapes
+  aspectRatio?: string; // CSS aspect-ratio value, e.g. "1 / 1" or "4 / 3"
 }
 
-export default function ImageSlider({ images, aspectRatio = "aspect-square" }: ImageSliderProps) {
+export default function ImageSlider({ images, aspectRatio = "1 / 1" }: ImageSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [hovering, setHovering] = useState(false);
+  const [arrowHovered, setArrowHovered] = useState<'prev' | 'next' | null>(null);
 
   if (!images || images.length === 0) {
     return (
-      <div className={`flex flex-col items-center justify-center h-full text-gray-600 italic bg-[#111] min-h-[200px] ${aspectRatio}`}>
-        <Package className="h-8 w-8 mb-2 opacity-20" />
+      <div style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: '200px', color: '#a1a1aa', fontStyle: 'italic' as const, backgroundColor: '#111', aspectRatio }}>
+        <Package style={{ height: '32px', width: '32px', marginBottom: '8px', opacity: 0.2 }} />
         No Photos
       </div>
     );
@@ -33,31 +37,47 @@ export default function ImageSlider({ images, aspectRatio = "aspect-square" }: I
   };
 
   return (
-    <div className={`relative w-full h-full overflow-hidden group ${aspectRatio}`}>
+    <div
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+      style={{ position: 'relative' as const, width: '100%', height: '100%', overflow: 'hidden', aspectRatio }}
+    >
       <img
         src={images[currentIndex]}
-        className="object-contain w-full h-full transition-opacity duration-300 bg-black"
+        style={{ objectFit: 'contain' as const, width: '100%', height: '100%', transition: 'opacity 0.3s', backgroundColor: '#000' }}
         alt="Gear view"
       />
-      
+
       {images.length > 1 && (
         <>
-          <div className="absolute inset-0 flex items-center justify-between p-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-            <button onClick={prev} className="bg-black/60 hover:bg-black/90 text-white p-2 rounded-full backdrop-blur-sm transition-all border border-white/10 active:scale-90 pointer-events-auto">
-              <ChevronLeft className="h-5 w-5" />
+          <div style={{ position: 'absolute' as const, inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px', opacity: hovering ? 1 : 0, transition: 'opacity 0.2s' }}>
+            <button
+              onClick={prev}
+              onMouseEnter={() => setArrowHovered('prev')}
+              onMouseLeave={() => setArrowHovered(null)}
+              style={{ pointerEvents: 'auto' as const, backgroundColor: arrowHovered === 'prev' ? 'rgba(0,0,0,0.9)' : 'rgba(0,0,0,0.6)', color: '#fff', padding: '8px', borderRadius: '999px', backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', transition: 'background-color 0.15s', display: 'flex' }}
+            >
+              <ChevronLeft style={{ height: '20px', width: '20px' }} />
             </button>
-            <button onClick={next} className="bg-black/60 hover:bg-black/90 text-white p-2 rounded-full backdrop-blur-sm transition-all border border-white/10 active:scale-90 pointer-events-auto">
-              <ChevronRight className="h-5 w-5" />
+            <button
+              onClick={next}
+              onMouseEnter={() => setArrowHovered('next')}
+              onMouseLeave={() => setArrowHovered(null)}
+              style={{ pointerEvents: 'auto' as const, backgroundColor: arrowHovered === 'next' ? 'rgba(0,0,0,0.9)' : 'rgba(0,0,0,0.6)', color: '#fff', padding: '8px', borderRadius: '999px', backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', transition: 'background-color 0.15s', display: 'flex' }}
+            >
+              <ChevronRight style={{ height: '20px', width: '20px' }} />
             </button>
           </div>
-          
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 px-2 py-1 bg-black/40 backdrop-blur-md rounded-full border border-white/10">
+
+          <div style={{ position: 'absolute' as const, bottom: '16px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '6px', padding: '4px 8px', backgroundColor: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(6px)', borderRadius: '999px', border: '1px solid rgba(255,255,255,0.1)' }}>
             {images.map((_, i) => (
-              <div 
-                key={i} 
-                className={`transition-all duration-300 rounded-full ${
-                  i === currentIndex ? "bg-cyan-400 w-4 h-1" : "bg-white/30 w-1 h-1"
-                }`} 
+              <div
+                key={i}
+                style={{
+                  transition: 'all 0.3s', borderRadius: '999px',
+                  backgroundColor: i === currentIndex ? TEAL : 'rgba(255,255,255,0.3)',
+                  width: i === currentIndex ? '16px' : '4px', height: '4px',
+                }}
               />
             ))}
           </div>
