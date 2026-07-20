@@ -155,6 +155,10 @@ export default function InventoryPage() {
         setGivenAwayItems((givenAwayData || []).map((t: any) => ({
           ...t,
           currentOwner: t.gear_items?.user_id ? currentOwnerMap[t.gear_items.user_id] : null,
+          // Whether the live gear_items row resolved at all under normal
+          // visibility RLS — same signal that gates "Current Owner", reused
+          // to decide whether "View Listing" is a real link or a dead end.
+          itemVisible: !!t.gear_items,
         })));
 
         // User's saved locations (for borrower location dropdown)
@@ -996,13 +1000,14 @@ export default function InventoryPage() {
                 <tr style={headerRowStyle}>
                   <th style={thStyle}>Item</th>
                   <th style={thStyle}>Given To</th>
+                  <th style={thStyle}>Transfer Date</th>
                   <th style={thStyle}>Current Owner</th>
-                  <th style={thStyle}>Date</th>
+                  <th style={thActionStyle}>View Listing</th>
                 </tr>
               </thead>
               <tbody>
                 {givenAwayItems.length === 0 && (
-                  <tr><td colSpan={4} style={{ ...tdStyle, color: '#9A8878', fontStyle: 'italic' as const }}>You haven&apos;t given any items away yet.</td></tr>
+                  <tr><td colSpan={5} style={{ ...tdStyle, color: '#9A8878', fontStyle: 'italic' as const }}>You haven&apos;t given any items away yet.</td></tr>
                 )}
                 {givenAwayItems.map(transfer => {
                   const recipientName = transfer.recipient?.preferred_name || transfer.recipient?.username || '—';
@@ -1020,6 +1025,7 @@ export default function InventoryPage() {
                           ? <Link href={`/profile/${recipientUsername}`} style={{ color: '#1E8A82', textDecoration: 'none', fontWeight: 500 }}>{recipientName}</Link>
                           : recipientName}
                       </td>
+                      <td style={tdStyle}>{givenOn}</td>
                       <td style={tdStyle}>
                         {stillWithRecipient ? (
                           <span style={{ color: '#9A8878', fontStyle: 'italic' as const, fontSize: '0.85rem' }}>Still with {recipientName}</span>
@@ -1029,7 +1035,11 @@ export default function InventoryPage() {
                           <span style={{ color: '#9A8878', fontStyle: 'italic' as const, fontSize: '0.85rem' }}>Not visible to you</span>
                         )}
                       </td>
-                      <td style={tdStyle}>{givenOn}</td>
+                      <td style={tdActionStyle}>
+                        {transfer.itemVisible
+                          ? <Link href={`/find-items/${transfer.item_id}`} style={{ color: '#1E8A82', textDecoration: 'none', fontWeight: 500, fontSize: '0.85rem' }}>View Listing</Link>
+                          : <span style={{ color: '#c8bca8', fontSize: '0.85rem' }}>N/A</span>}
+                      </td>
                     </tr>
                   );
                 })}
