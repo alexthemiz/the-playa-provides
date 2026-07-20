@@ -286,7 +286,7 @@ export default function InventoryPage() {
     // 1. Complete the loan
     await supabase
       .from('item_loans')
-      .update({ owner_confirmed_return: true, status: 'complete' })
+      .update({ owner_confirmed_return: true, status: 'complete', returned_at: new Date().toISOString() })
       .eq('id', loan.id);
 
     // 2. Mark item unavailable and private

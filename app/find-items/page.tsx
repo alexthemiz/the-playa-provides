@@ -12,6 +12,7 @@ import LendModal from '@/components/LendModal';
 import TransferModal from '@/components/TransferModal';
 import { CATEGORY_ACCENTS as CAT_ACCENTS, DEFAULT_CATEGORY_ACCENT } from '@/lib/categoryColors';
 import { useItemLoan } from '@/lib/useItemLoan';
+import ItemHistory from '@/components/ItemHistory';
 
 const MapView = dynamic(() => import('@/components/MapView'), { ssr: false });
 
@@ -806,6 +807,8 @@ export default function FindItemsPage() {
               {!(userId && selectedItem.user_id === userId) && (
                 <ShareButton itemId={selectedItem.id} itemName={selectedItem.item_name} />
               )}
+
+              <ItemHistory itemId={selectedItem.id} isOwner={!!userId && selectedItem.user_id === userId} createdAt={selectedItem.created_at} />
             </div>
           </div>
         </div>

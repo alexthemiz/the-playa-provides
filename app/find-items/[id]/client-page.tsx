@@ -11,6 +11,7 @@ import LendModal from '@/components/LendModal';
 import TransferModal from '@/components/TransferModal';
 import { CATEGORY_ACCENTS, DEFAULT_CATEGORY_ACCENT } from '@/lib/categoryColors';
 import { useItemLoan } from '@/lib/useItemLoan';
+import ItemHistory from '@/components/ItemHistory';
 
 export default function ItemDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -247,6 +248,8 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
                 <ShareButton itemId={item.id} itemName={item.item_name} style={{ ...shareInlineBtnStyle, marginLeft: 'auto' }} />
               </div>
             )}
+
+            <ItemHistory itemId={item.id} isOwner={isOwner} createdAt={item.created_at} />
           </div>
         </div>
       </div>

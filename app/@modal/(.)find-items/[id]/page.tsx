@@ -12,6 +12,7 @@ import LendModal from '@/components/LendModal';
 import TransferModal from '@/components/TransferModal';
 import { CATEGORY_ACCENTS, DEFAULT_CATEGORY_ACCENT } from '@/lib/categoryColors';
 import { useItemLoan } from '@/lib/useItemLoan';
+import ItemHistory from '@/components/ItemHistory';
 
 const INK      = '#1C1610';
 const INK_MID  = '#4A3828';
@@ -243,6 +244,8 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
                   <ShareButton itemId={item.id} itemName={item.item_name} style={{ ...shareInlineBtnStyle, marginLeft: 'auto' }} />
                 </div>
               )}
+
+              <ItemHistory itemId={item.id} isOwner={isOwner} createdAt={item.created_at} />
             </div>
           </div>
         ) : (
