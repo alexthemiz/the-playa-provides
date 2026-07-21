@@ -873,8 +873,8 @@ export default function PublicProfilePage() {
               const is2026No = draft2026.status === 'no';
               return (
                 <div style={{ marginBottom: '20px' }}>
-                  <p style={{ ...subheadStyle, marginBottom: '8px' }}>Attending In 2026?</p>
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' as const, marginBottom: '14px' }}>
+                    <span style={{ ...subheadStyle, marginBottom: 0 }}>Attending In 2026?</span>
                     {(['yes', 'maybe', 'no'] as const).map(s => {
                       const cfg = { yes: { label: 'Yes', bg: '#dcfce7', col: '#16a34a', brd: '#86efac' }, maybe: { label: 'Maybe', bg: '#fef9c3', col: '#92400e', brd: '#fde68a' }, no: { label: 'No', bg: '#fee2e2', col: '#dc2626', brd: '#fca5a5' } }[s];
                       const active = draft2026.status === s;
@@ -890,12 +890,12 @@ export default function PublicProfilePage() {
                     })}
                   </div>
 
-                  <p style={{ ...subheadStyle, marginBottom: '8px' }}>Camp:</p>
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' as const }}>
+                    <span style={{ ...subheadStyle, marginBottom: 0 }}>Camp:</span>
                     {is2026No ? (
-                      <input disabled value="N/A" style={{ flex: 1, minWidth: '160px', padding: '6px 8px', border: '1px solid #eee', borderRadius: '6px', fontSize: '13px', backgroundColor: '#f5f5f5', color: '#aaa', boxSizing: 'border-box' as const }} />
+                      <input disabled value="N/A" style={{ width: '110px', flexShrink: 0, padding: '6px 8px', border: '1px solid #eee', borderRadius: '6px', fontSize: '13px', backgroundColor: '#f5f5f5', color: '#aaa', boxSizing: 'border-box' as const }} />
                     ) : (
-                      <div style={{ position: 'relative' as const, flex: 1, minWidth: '160px' }}>
+                      <div style={{ position: 'relative' as const, width: '110px', flexShrink: 0 }}>
                         <input
                           type="text"
                           placeholder="Camp name..."
