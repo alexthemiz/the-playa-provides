@@ -701,7 +701,7 @@ export default function CampPage() {
               <div>Name</div>
               <div>Location</div>
               <div>Camp Years</div>
-              <div style={{ textAlign: 'center' as const }}>2026</div>
+              <div style={{ textAlign: 'center' as const, whiteSpace: 'nowrap' as const }}>2026 Camp?</div>
               <div>Wish List</div>
               {editMode && <div>Actions</div>}
             </div>
@@ -866,9 +866,12 @@ function memberGridStyle(editMode: boolean): React.CSSProperties {
     // Fixed-width columns first, wish list last so it absorbs all remaining space.
     // Wish list's 300px floor forces horizontal scroll on phones instead of
     // squeezing chips into a one-per-line stack.
+    // Header row and member rows are separate grid containers — they only stay
+    // aligned because every column except the last is a fixed width. Don't use
+    // auto/fit-content here or the header drifts from the rows.
     gridTemplateColumns: editMode
-      ? 'minmax(140px, 180px) 110px minmax(90px, 150px) 50px minmax(300px, 1fr) auto'
-      : 'minmax(140px, 180px) 110px minmax(90px, 150px) 50px minmax(300px, 1fr)',
+      ? 'minmax(140px, 180px) 110px 90px 80px minmax(300px, 1fr) auto'
+      : 'minmax(140px, 180px) 110px 90px 80px minmax(300px, 1fr)',
     gap: '10px',
     alignItems: 'center',
   };
