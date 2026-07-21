@@ -700,9 +700,9 @@ export default function CampPage() {
             <div style={{ ...memberGridStyle(editMode), padding: '12px 15px', fontSize: '0.6rem', fontWeight: 700, color: '#4A3828', textTransform: 'uppercase' as const, letterSpacing: '0.08em', fontFamily: "'Space Mono', monospace", borderBottom: '1.5px solid rgba(28,22,16,0.12)', backgroundColor: '#EDE5D0' }}>
               <div>Name</div>
               <div>Location</div>
-              <div>Wish List</div>
               <div>Camp Years</div>
               <div style={{ textAlign: 'center' as const }}>2026</div>
+              <div>Wish List</div>
               {editMode && <div>Actions</div>}
             </div>
 
@@ -744,14 +744,6 @@ export default function CampPage() {
                     {[member.city, member.state].filter(Boolean).join(', ') || <span style={{ color: '#9A8878' }}>—</span>}
                   </div>
 
-                  {/* Wish List column */}
-                  <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '4px', alignItems: 'center' }}>
-                    {wishList.length > 0
-                      ? wishList.map(tag => <span key={tag} style={wishTagStyle}>{tag}</span>)
-                      : <span style={{ fontSize: '12px', color: '#9A8878' }}>—</span>
-                    }
-                  </div>
-
                   {/* Years Attended column */}
                   <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' as const }}>
                     {[...member.years].sort((a: number, b: number) => b - a).map((year: number) => (
@@ -764,6 +756,14 @@ export default function CampPage() {
                     <div style={{ width: '26px', height: '26px', border: `1px solid ${rc ? rc.border : 'rgba(28,22,16,0.15)'}`, backgroundColor: rc ? rc.bg : '#FDFAF4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 700, color: rc ? rc.color : 'transparent' }}>
                       {rc?.symbol || ''}
                     </div>
+                  </div>
+
+                  {/* Wish List column */}
+                  <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '4px', alignItems: 'center' }}>
+                    {wishList.length > 0
+                      ? wishList.map(tag => <span key={tag} style={wishTagStyle}>{tag}</span>)
+                      : <span style={{ fontSize: '12px', color: '#9A8878' }}>—</span>
+                    }
                   </div>
 
                   {/* Actions column — only in edit mode, never for self */}
@@ -863,9 +863,12 @@ const sectionHeadStyle: React.CSSProperties = {
 function memberGridStyle(editMode: boolean): React.CSSProperties {
   return {
     display: 'grid',
+    // Fixed-width columns first, wish list last so it absorbs all remaining space.
+    // Wish list's 300px floor forces horizontal scroll on phones instead of
+    // squeezing chips into a one-per-line stack.
     gridTemplateColumns: editMode
-      ? 'minmax(120px, 1fr) 120px minmax(80px, 2.5fr) auto 70px auto'
-      : 'minmax(120px, 1fr) 120px minmax(80px, 2.5fr) auto 70px',
+      ? 'minmax(140px, 180px) 110px minmax(90px, 150px) 50px minmax(300px, 1fr) auto'
+      : 'minmax(140px, 180px) 110px minmax(90px, 150px) 50px minmax(300px, 1fr)',
     gap: '10px',
     alignItems: 'center',
   };
