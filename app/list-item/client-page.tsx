@@ -392,41 +392,55 @@ function ListItemPageInner() {
 
             {availability === 'Available to Borrow' && (
               <div style={sectionStyle}>
-                <label style={labelStyle}>Lending Terms <span style={{ fontSize: '11px', color: '#aaa', fontWeight: '500', textTransform: 'none' as const, letterSpacing: '0' }}>— all optional but encouraged</span></label>
-                <p style={hintStyle}>Borrowers see this before they request. Set expectations upfront to avoid issues later.</p>
+                <label style={labelStyle}>Lending Terms</label>
+                <p style={hintStyle}>Optional but encouraged — set expectations upfront to avoid issues later.</p>
                 <div style={unifiedBoxStyle}>
                   <style>{`
                     .terms-tray { display: flex; gap: 10px; }
+                    .tray-money { display: flex; gap: 10px; flex: 2; min-width: 0; }
+                    .tray-money > div { flex: 1; min-width: 0; }
+                    .lbl-mobile { display: none; }
                     @media (max-width: 940px) {
                       .terms-tray { flex-direction: column; gap: 14px; }
+                      .lbl-desktop { display: none; }
+                      .lbl-mobile { display: inline; }
+                      .tray-return-labelrow { display: flex; align-items: baseline; gap: 8px; }
                     }
                   `}</style>
+                  <div style={{ ...trayLabelStyle, padding: '12px 14px 0' }}>Return Instructions</div>
                   <textarea
-                    placeholder="e.g. Please clean before returning, no modifications."
-                    style={unifiedTextareaStyle}
+                    placeholder="Please remove dust, no modifications, etc."
+                    style={{ ...unifiedTextareaStyle, paddingTop: '6px' }}
                     value={returnTerms}
                     onChange={e => setReturnTerms(e.target.value)}
                   />
                   <div style={trayStyle} className="terms-tray">
                     <div style={trayItemStyle}>
-                      <div style={trayLabelStyle}>Return by</div>
-                      <div style={trayHintStyle}>Gear must be back by:</div>
+                      <div className="tray-return-labelrow">
+                        <div style={trayLabelStyle}>
+                          <span className="lbl-desktop">Return by</span>
+                          <span className="lbl-mobile">Return Date</span>
+                        </div>
+                        <div style={trayHintStyle}>Gear must be back by:</div>
+                      </div>
                       <input type="date" style={trayInputStyle} value={returnBy} onChange={e => setReturnBy(e.target.value)} />
                     </div>
-                    <div style={trayItemStyle}>
-                      <div style={trayLabelStyle}>If Damaged</div>
-                      <div style={trayHintStyle}>Borrower pays:</div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <span style={{ fontSize: '13px', color: '#777', fontWeight: 600 }}>$</span>
-                        <input type="number" placeholder="0" style={{ ...trayInputStyle, flex: 1, width: 0 }} value={damagePrice} onChange={e => setDamagePrice(e.target.value)} />
+                    <div className="tray-money">
+                      <div>
+                        <div style={trayLabelStyle}>If Damaged</div>
+                        <div style={trayHintStyle}>Borrower pays:</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span style={{ fontSize: '13px', color: '#777', fontWeight: 600 }}>$</span>
+                          <input type="number" placeholder="0" style={{ ...trayInputStyle, flex: 1, width: 0 }} value={damagePrice} onChange={e => setDamagePrice(e.target.value)} />
+                        </div>
                       </div>
-                    </div>
-                    <div style={trayItemStyle}>
-                      <div style={trayLabelStyle}>If Not Returned</div>
-                      <div style={trayHintStyle}>Borrower pays:</div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <span style={{ fontSize: '13px', color: '#777', fontWeight: 600 }}>$</span>
-                        <input type="number" placeholder="0" style={{ ...trayInputStyle, flex: 1, width: 0 }} value={lossPrice} onChange={e => setLossPrice(e.target.value)} />
+                      <div>
+                        <div style={trayLabelStyle}>If Not Returned</div>
+                        <div style={trayHintStyle}>Borrower pays:</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span style={{ fontSize: '13px', color: '#777', fontWeight: 600 }}>$</span>
+                          <input type="number" placeholder="0" style={{ ...trayInputStyle, flex: 1, width: 0 }} value={lossPrice} onChange={e => setLossPrice(e.target.value)} />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -518,7 +532,7 @@ const trayItemStyle: React.CSSProperties = { flex: 1, minWidth: 0 };
 const trayLabelStyle: React.CSSProperties = { fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', color: '#9A8878', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.04em' };
 const trayHintStyle: React.CSSProperties = { fontSize: '11px', color: '#9A8878', margin: '2px 0 4px', fontStyle: 'italic' as const };
 const trayInputStyle: React.CSSProperties = { padding: '7px 10px', border: '1.5px solid rgba(28,22,16,0.25)', backgroundColor: '#FDFAF4', color: '#1C1610', fontSize: '13px', outline: 'none', width: '100%', boxSizing: 'border-box' as const };
-const submitButtonStyle: React.CSSProperties = { padding: '14px', backgroundColor: '#1E8A82', color: '#fff', border: '2px solid #1C1610', boxShadow: '3px 3px 0 #1C1610', fontWeight: 'bold', cursor: 'pointer', fontSize: '15px', marginTop: '8px' };
+const submitButtonStyle: React.CSSProperties = { padding: '14px 48px', backgroundColor: '#1E8A82', color: '#fff', border: '2px solid #1C1610', boxShadow: '3px 3px 0 #1C1610', fontWeight: 'bold', cursor: 'pointer', fontSize: '15px', marginTop: '8px', alignSelf: 'center' as const };
 const photoUploadContainer: React.CSSProperties = { display: 'flex', gap: '10px', flexWrap: 'wrap' as const };
 const photoPlaceholder: React.CSSProperties = { width: '80px', height: '80px', border: '2px dashed rgba(28,22,16,0.2)', display: 'flex', flexDirection: 'column' as const, alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#9A8878', fontSize: '10px', textAlign: 'center' as const, gap: '4px' };
 const photoPreviewImg: React.CSSProperties = { width: '80px', height: '80px', objectFit: 'cover' as const, border: '1px solid rgba(28,22,16,0.12)' };
