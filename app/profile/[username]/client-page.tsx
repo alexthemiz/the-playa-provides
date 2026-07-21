@@ -553,8 +553,16 @@ export default function PublicProfilePage() {
                 {/* Right: counts + action button */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' as const }}>
                   <div className="profile-follower-row" style={{ display: 'flex', gap: '12px' }}>
-                    <span style={{ fontSize: '0.8rem', color: '#4A3828' }}><strong style={{ fontFamily: "'Arvo', serif" }}>{followerCount}</strong> <span style={{ color: '#9A8878' }}>followers</span></span>
-                    <span style={{ fontSize: '0.8rem', color: '#4A3828' }}><strong style={{ fontFamily: "'Arvo', serif" }}>{followingCount}</strong> <span style={{ color: '#9A8878' }}>following</span></span>
+                    <span
+                      onClick={isOwner ? () => { setOpenList('followers'); fetchList('followers'); } : undefined}
+                      style={{ fontSize: '0.8rem', color: '#4A3828', cursor: isOwner ? 'pointer' : 'default' }}>
+                      <strong style={{ fontFamily: "'Arvo', serif" }}>{followerCount}</strong> <span style={{ color: '#9A8878' }}>followers</span>
+                    </span>
+                    <span
+                      onClick={isOwner ? () => { setOpenList('following'); fetchList('following'); } : undefined}
+                      style={{ fontSize: '0.8rem', color: '#4A3828', cursor: isOwner ? 'pointer' : 'default' }}>
+                      <strong style={{ fontFamily: "'Arvo', serif" }}>{followingCount}</strong> <span style={{ color: '#9A8878' }}>following</span>
+                    </span>
                   </div>
                   {isOwner ? (
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' as const }}>
