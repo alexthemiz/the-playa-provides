@@ -328,48 +328,69 @@ export default function PublicProfilePage() {
     if (error) { setSaveError('Error saving profile. Please try again.'); return; }
     setSaveError(null);
 
-    // Delete and reinsert all affiliations
-    await supabase.from('user_camp_affiliations').delete().eq('user_id', profile.id);
+    // Resolve every draft into the row it would produce, without touching the DB yet.
+    // user_camp_affiliations has an AFTER INSERT trigger that notifies the camp owner
+    // ("X joined Camp"), so re-inserting a row that hasn't actually changed re-fires
+    // that notification on every single profile save. Only rows that are new or
+    // genuinely different from what's already saved get deleted/reinserted below.
+    type DesiredRow = { matchId: string | null; year: number; is_open_camping: boolean; camp_id: string | null; returning_status: string | null };
+    const desiredRows: DesiredRow[] = [];
 
-    // Regular year entries (capped at 2025)
     for (const draft of draftAffiliations) {
+      const existingMatch = affiliations.find((a: any) => a.id === draft.tempId);
       if (draft.is_open_camping) {
-        await supabase.from('user_camp_affiliations').insert({
-          user_id: profile.id, camp_id: null, year: draft.year, is_open_camping: true,
-        });
+        desiredRows.push({ matchId: existingMatch ? draft.tempId : null, year: draft.year, is_open_camping: true, camp_id: null, returning_status: null });
         continue;
       }
       if (!draft.campInput.trim()) continue;
       let campId = draft.campId;
       if (!campId) campId = await findOrCreateCamp(draft.campInput);
       if (!campId) continue;
-      await supabase.from('user_camp_affiliations').insert({
-        user_id: profile.id, camp_id: campId, year: draft.year, is_open_camping: false,
-      });
+      desiredRows.push({ matchId: existingMatch ? draft.tempId : null, year: draft.year, is_open_camping: false, camp_id: campId, returning_status: null });
     }
 
-    // 2026 returning row â€" handled separately
+    // 2026 returning row — handled separately
     if (draft2026.status) {
-      const row: Record<string, any> = {
-        user_id: profile.id,
-        year: 2026,
-        returning_status: draft2026.status,
-      };
-      if (draft2026.status === 'no') {
-        row.camp_id = null;
-        row.is_open_camping = false;
-      } else if (draft2026.isOpenCamping) {
-        row.camp_id = null;
-        row.is_open_camping = true;
-      } else {
-        let campId = draft2026.campId;
-        if (!campId && draft2026.campInput.trim()) {
-          campId = await findOrCreateCamp(draft2026.campInput);
+      const existingMatch2026 = affiliations.find((a: any) => a.year === 2026);
+      let camp_id: string | null = null;
+      let is_open_camping = false;
+      if (draft2026.status !== 'no') {
+        if (draft2026.isOpenCamping) {
+          is_open_camping = true;
+        } else if (draft2026.campInput.trim()) {
+          camp_id = draft2026.campId || await findOrCreateCamp(draft2026.campInput);
         }
-        row.camp_id = campId || null;
-        row.is_open_camping = false;
       }
-      await supabase.from('user_camp_affiliations').insert(row);
+      desiredRows.push({ matchId: existingMatch2026 ? existingMatch2026.id : null, year: 2026, is_open_camping, camp_id, returning_status: draft2026.status });
+    }
+
+    // Rows that match an existing DB row on every field — leave completely untouched.
+    const unchangedIds = new Set(
+      desiredRows
+        .filter(r => {
+          if (!r.matchId) return false;
+          const existing = affiliations.find((a: any) => a.id === r.matchId);
+          return !!existing
+            && existing.year === r.year
+            && !!existing.is_open_camping === r.is_open_camping
+            && (existing.camp_id || null) === (r.camp_id || null)
+            && (existing.returning_status || null) === (r.returning_status || null);
+        })
+        .map(r => r.matchId as string)
+    );
+
+    // Delete every existing row that's either removed entirely or changed (changed ones get reinserted below).
+    const idsToDelete = affiliations.filter((a: any) => !unchangedIds.has(a.id)).map((a: any) => a.id);
+    if (idsToDelete.length > 0) {
+      await supabase.from('user_camp_affiliations').delete().in('id', idsToDelete);
+    }
+
+    // Insert every row that's new or changed.
+    const rowsToInsert = desiredRows.filter(r => !r.matchId || !unchangedIds.has(r.matchId));
+    for (const row of rowsToInsert) {
+      await supabase.from('user_camp_affiliations').insert({
+        user_id: profile.id, camp_id: row.camp_id, year: row.year, is_open_camping: row.is_open_camping, returning_status: row.returning_status,
+      });
     }
 
     const { data: affData } = await supabase
