@@ -28,9 +28,9 @@ export default function AvatarUpload({ url, onUpload, onError }: { url: string; 
   }
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column' as const, alignItems: 'flex-start', gap: '6px', width: '80px', flexShrink: 0 }}>
       <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: '#222', backgroundImage: `url(${url})`, backgroundSize: 'cover', backgroundPosition: 'center', border: '2px solid #333' }} />
-      <input type="file" accept="image/*" onChange={uploadAvatar} disabled={uploading} style={{ fontSize: '0.8rem' }} />
+      <input type="file" accept="image/*" onChange={uploadAvatar} disabled={uploading} style={{ fontSize: '0.65rem', width: '80px' }} />
     </div>
   );
 }
