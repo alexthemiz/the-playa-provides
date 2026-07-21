@@ -302,9 +302,8 @@ function ListItemPageInner() {
 
             <div style={sectionStyle}>
               <label style={labelStyle}>Description</label>
-              <p style={hintStyle}>Share details and specs, existing damage, and any other useful information.</p>
               <textarea
-                placeholder="Describe your item"
+                placeholder="Details and specs, existing damage, any other useful information"
                 style={{ ...inputStyle, minHeight: '80px' }}
                 value={description}
                 onChange={e => setDescription(e.target.value)}
@@ -339,7 +338,7 @@ function ListItemPageInner() {
                 {[
                   { id: 'Available to Borrow', label: 'Lend It',        sub: 'Set your terms below' },
                   { id: 'Available to Keep',   label: 'Gift It',         sub: 'Give the item away' },
-                  { id: 'Not Available',       label: 'Keep it Private', sub: 'Add to your inventory' },
+                  { id: 'Not Available',       label: 'Keep Private', sub: 'Add to your inventory' },
                 ].map(status => (
                   <label key={status.id} style={{
                     ...radioLabelStyle,
