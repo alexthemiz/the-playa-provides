@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-07-20_
+_Last updated: 2026-07-21_
 
 > **Note on this file's shape:** this is a living project-state document, not a changelog. It's meant to be uploaded as context (e.g. to a Claude Project) without dragging in months of session-by-session history — if you want the archaeology of *how* something was built, `git log -p TASKS.md` and the commit history have it. What lives here is: what's actually shipped and how it currently works, what's mid-flight, and what's next.
 
@@ -16,6 +16,7 @@ _Last updated: 2026-07-20_
 
 ## 🎯 Next Session Priority
 
+- [ ] **Verify first daily admin report email** — cron fires 13:00 UTC (8am EST / 9am EDT) daily; first run expected 2026-07-22. If no email, check `cron.job_run_details` and the `send-daily-report` edge function logs.
 - [ ] **Welcome email** — Triggered on signup via Supabase DB webhook; design and copy TBD. Uses the existing Resend/edge-function setup (other transactional emails already work this way).
 - [ ] **End-to-end test: Lend/Return flow** — Two test accounts, full loan lifecycle, confirm emails + bell notifications fire at each step.
 - [ ] **End-to-end test: Following & Notifications** — Follow a user, list an item as them, verify bell badge + dropdown, mark-as-read, email opt-in.
@@ -50,8 +51,12 @@ _Last updated: 2026-07-20_
 
 ### Notifications
 - Single `notifications` table (`recipient_id`, `actor_id`, `item_id`, `camp_id`, `type`, `meta` jsonb, `read`), bell icon in header polling every 30s.
-- Current allowed types (`notifications_type_check` constraint): `new_item`, `new_follower`, `transfer_accepted`, `transfer_declined`, `loan_accepted`, `loan_declined`, `item_request`, `camp_join`, `camp_claim_approved`, `camp_claim_denied`, `loan_return_confirmed`, `camp_member_removed`, `wish_list_match`, `loan_pickup_ready`, `transfer_pickup_ready`, `loan_return_pending`. `loan_accepted`/`loan_declined` are defined but currently unreachable — nothing in the app writes those specific values (the accept/decline flow works differently than that early design assumed).
+- Current allowed types (`notifications_type_check` constraint): `new_item`, `new_follower`, `transfer_accepted`, `transfer_declined`, `loan_accepted`, `loan_declined`, `item_request`, `camp_join`, `camp_claim_approved`, `camp_claim_denied`, `loan_return_confirmed`, `camp_member_removed`, `wish_list_match`, `loan_pickup_ready`, `transfer_pickup_ready`, `loan_return_pending`, `loan_initiated`, `transfer_initiated`. `loan_accepted`/`loan_declined` are defined but currently unreachable — nothing in the app writes those specific values (the accept/decline flow works differently than that early design assumed).
 - Every type has a matching `case` in `components/header.tsx`'s bell dropdown for display text + link.
+- Opening the bell dropdown auto-marks all unread notifications as read (no per-item clicking needed).
+
+### Admin
+- **Daily stats email** — `send-daily-report` edge function (deployed, Verify JWT off) emails alex@theplayaprovides.com daily at 13:00 UTC (8am EST / 9am EDT) via pg_cron job `tpp-daily-report` + `pg_net`. Mondays add a Last-7-Days section. Stats: signups + logins (via `get_recent_signup_count` / `get_recent_login_count` SECURITY DEFINER helpers reading `auth.users` — profiles has no `created_at`), items posted, loans initiated/returned/active, transfers completed, follows, feedback, camp claims, visibility snapshot. The cron job's SQL (with the anon key baked in) lives in `supabase/migrations/20260721161622_schedule_daily_report_cron.sql`.
 
 ### Onboarding
 - Getting Started checklist (`components/ChecklistBox.tsx`) — slides in on the homepage hero for logged-in users with incomplete setup (playa history, wish list, a saved location, a listed item, having browsed items). Dismissal is **session-scoped** (sessionStorage, not a permanent DB flag) — skipping it hides it for that browser session only; it resurfaces on a fresh session if items are still incomplete. `profiles.checklist_dismissed` still exists in the schema but is no longer written to.
