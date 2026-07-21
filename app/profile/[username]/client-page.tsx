@@ -1124,8 +1124,8 @@ export default function PublicProfilePage() {
         {items.length === 0 ? (
           <p style={{ color: '#aaa', fontSize: '0.9rem' }}>No items listed yet.</p>
         ) : (
-          <div className="profile-items-scroll">
-          <div className="profile-items-table" style={{ display: 'flex', flexDirection: 'column' as const, gap: '2px' }}>
+          <div className="profile-items-scroll" style={{ backgroundColor: '#FDFAF4', border: '1.5px solid rgba(28,22,16,0.12)' }}>
+          <div className="profile-items-table" style={{ display: 'flex', flexDirection: 'column' as const }}>
             <div style={{ ...listHeaderStyle, gridTemplateColumns: isOwner ? '50px 160px 1fr 140px 120px 1fr 80px' : '50px 160px 1fr 140px 120px 1fr' }}>
               <div />
               <div>Item</div>
@@ -1233,7 +1233,7 @@ const camp2026NAStyle: React.CSSProperties = { ...camp2026ChipBase, backgroundCo
 const camp2026TBDStyle: React.CSSProperties = { ...camp2026ChipBase, backgroundColor: '#fef9c3', color: '#92400e', borderColor: '#fde68a' };
 const camp2026OpenCampingStyle: React.CSSProperties = { ...camp2026ChipBase, backgroundColor: '#F5F0D0', color: '#D4A020', borderColor: '#D4A020' };
 const editTextareaStyle: React.CSSProperties = { width: '100%', backgroundColor: '#FDFAF4', color: '#1C1610', border: '1.5px solid rgba(28,22,16,0.25)', padding: '10px', height: '80px', boxSizing: 'border-box' as const, outline: 'none' };
-const listHeaderStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: LIST_COLS, gap: '10px', padding: '8px 12px', fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', fontWeight: 700, color: '#9A8878', textTransform: 'uppercase' as const, letterSpacing: '0.06em', borderBottom: '1.5px solid rgba(28,22,16,0.12)' };
-const listRowStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: LIST_COLS, gap: '10px', alignItems: 'center', padding: '10px 12px', backgroundColor: '#FDFAF4', borderBottom: '1px solid rgba(28,22,16,0.06)' };
+const listHeaderStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: LIST_COLS, gap: '10px', padding: '12px 15px', fontFamily: "'Space Mono', monospace", fontSize: '0.6rem', fontWeight: 700, color: '#4A3828', textTransform: 'uppercase' as const, letterSpacing: '0.08em', borderBottom: '1.5px solid rgba(28,22,16,0.12)', backgroundColor: '#EDE5D0' };
+const listRowStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: LIST_COLS, gap: '10px', alignItems: 'center', padding: '10px 12px', backgroundColor: '#FDFAF4', borderBottom: '1px solid rgba(28,22,16,0.08)' };
 const listImgStyle: React.CSSProperties = { width: '50px', height: '50px', overflow: 'hidden', backgroundColor: '#EDE5D0', flexShrink: 0 };
 const listColStyle: React.CSSProperties = { fontSize: '12px', color: '#4A3828', overflow: 'hidden', whiteSpace: 'nowrap' as const };
