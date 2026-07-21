@@ -709,11 +709,11 @@ export default function InventoryPage() {
         <div style={tableContainerStyle}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const, tableLayout: 'fixed' as const }}>
             <colgroup>
-              <col style={{ width: '200px' }} />
-              <col style={{ width: '110px' }} />
-              <col style={{ width: '110px' }} />
-              <col style={{ width: '290px' }} />
-              <col style={{ width: '170px' }} />
+              <col style={{ width: '190px' }} />
+              <col style={{ width: '100px' }} />
+              <col style={{ width: '100px' }} />
+              <col style={{ width: '250px' }} />
+              <col style={{ width: '240px' }} />
               <col style={{ width: '180px' }} />
             </colgroup>
             <thead>
@@ -783,7 +783,7 @@ export default function InventoryPage() {
 
                     {/* STATUS TOGGLE */}
                     <td style={tdStyle}>
-                      <div style={{ display: 'flex', gap: '4px' }}>
+                      <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' as const }}>
                         {[
                           { value: 'Available to Borrow', label: 'To Borrow' },
                           { value: 'Available to Keep', label: 'To Keep' },
