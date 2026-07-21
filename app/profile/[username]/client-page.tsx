@@ -925,15 +925,15 @@ export default function PublicProfilePage() {
                   {attending2026Badge(aff2026.returning_status)}
                   <span style={{ ...subheadStyle, marginBottom: 0 }}>Camp:</span>
                   {aff2026.returning_status === 'no' ? (
-                    <span style={{ fontSize: '0.95rem', color: '#9A8878', fontStyle: 'italic' as const }}>N/A</span>
+                    <span style={camp2026ChipStyle}>N/A</span>
                   ) : aff2026.is_open_camping ? (
-                    <span style={{ fontSize: '0.95rem', color: '#9A8878', fontStyle: 'italic' as const }}>Open Camping</span>
+                    <span style={camp2026ChipStyle}>Open Camping</span>
                   ) : campSlug2026 ? (
-                    <a href={`/camps/${campSlug2026}`} style={{ fontSize: '0.95rem', color: '#1E8A82', textDecoration: 'none', fontWeight: 700 }}>{campName2026}</a>
+                    <a href={`/camps/${campSlug2026}`} style={{ ...camp2026ChipStyle, color: '#1E8A82', textDecoration: 'none' }}>{campName2026}</a>
                   ) : campName2026 ? (
-                    <span style={{ fontSize: '0.95rem', color: '#1C1610', fontWeight: 600 }}>{campName2026}</span>
+                    <span style={camp2026ChipStyle}>{campName2026}</span>
                   ) : (
-                    <span style={{ fontSize: '0.95rem', color: '#9A8878', fontStyle: 'italic' as const }}>TBD</span>
+                    <span style={camp2026ChipStyle}>TBD</span>
                   )}
                 </div>
               );
@@ -1214,6 +1214,7 @@ export default function PublicProfilePage() {
 const LIST_COLS = '50px 160px 1fr 140px 120px 1fr 60px';
 
 const subheadStyle: React.CSSProperties = { fontFamily: "'Space Mono', monospace", color: '#4A3828', textTransform: 'uppercase' as const, fontSize: '0.68rem', fontWeight: 700, marginBottom: '6px', marginTop: 0, letterSpacing: '0.08em' };
+const camp2026ChipStyle: React.CSSProperties = { fontSize: '0.85rem', fontWeight: 700, padding: '4px 12px', backgroundColor: '#EDE5D0', color: '#4A3828', border: '1.5px solid rgba(28,22,16,0.2)', flexShrink: 0 };
 const editTextareaStyle: React.CSSProperties = { width: '100%', backgroundColor: '#FDFAF4', color: '#1C1610', border: '1.5px solid rgba(28,22,16,0.25)', padding: '10px', height: '80px', boxSizing: 'border-box' as const, outline: 'none' };
 const listHeaderStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: LIST_COLS, gap: '10px', padding: '8px 12px', fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', fontWeight: 700, color: '#9A8878', textTransform: 'uppercase' as const, letterSpacing: '0.06em', borderBottom: '1.5px solid rgba(28,22,16,0.12)' };
 const listRowStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: LIST_COLS, gap: '10px', alignItems: 'center', padding: '10px 12px', backgroundColor: '#FDFAF4', borderBottom: '1px solid rgba(28,22,16,0.06)' };
