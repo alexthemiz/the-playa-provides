@@ -481,7 +481,7 @@ export default function PublicProfilePage() {
   };
 
   const handle2026CampInputChange = async (value: string) => {
-    setDraft2026(prev => ({ ...prev, campInput: value, campId: null, showDropdown: !!value.trim() }));
+    setDraft2026(prev => ({ ...prev, campInput: value, campId: null, isOpenCamping: false, isTBD: false, showDropdown: !!value.trim() }));
     if (value.trim()) {
       const results = await searchCampsDB(value);
       setDraft2026(prev => ({ ...prev, searchResults: results, showDropdown: true }));
@@ -893,18 +893,17 @@ export default function PublicProfilePage() {
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' as const }}>
                     <span style={{ ...subheadStyle, marginBottom: 0 }}>Camp:</span>
                     {is2026No ? (
-                      <input disabled value="N/A" style={{ width: '110px', flexShrink: 0, padding: '6px 8px', border: '1px solid #eee', borderRadius: '6px', fontSize: '13px', backgroundColor: '#f5f5f5', color: '#aaa', boxSizing: 'border-box' as const }} />
+                      <input disabled value="N/A" style={{ width: '275px', flexShrink: 0, padding: '6px 8px', border: '1px solid #eee', borderRadius: '6px', fontSize: '13px', backgroundColor: '#f5f5f5', color: '#aaa', boxSizing: 'border-box' as const }} />
                     ) : (
-                      <div style={{ position: 'relative' as const, width: '110px', flexShrink: 0 }}>
+                      <div style={{ position: 'relative' as const, width: '275px', flexShrink: 0 }}>
                         <input
                           type="text"
                           placeholder="Camp name..."
-                          disabled={draft2026.isOpenCamping || draft2026.isTBD}
                           value={draft2026.campInput}
                           onChange={e => handle2026CampInputChange(e.target.value)}
                           onFocus={() => { if (draft2026.campInput.trim()) setDraft2026(prev => ({ ...prev, showDropdown: true })); }}
                           onBlur={() => setTimeout(() => setDraft2026(prev => ({ ...prev, showDropdown: false })), 150)}
-                          style={{ width: '100%', padding: '6px 8px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', backgroundColor: (draft2026.isOpenCamping || draft2026.isTBD) ? '#f5f5f5' : '#fff', color: (draft2026.isOpenCamping || draft2026.isTBD) ? '#aaa' : '#1C1610', boxSizing: 'border-box' as const, outline: 'none' }}
+                          style={{ width: '100%', padding: '6px 8px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', backgroundColor: '#fff', color: '#1C1610', boxSizing: 'border-box' as const, outline: 'none' }}
                         />
                         {draft2026.showDropdown && (draft2026.searchResults.length > 0 || draft2026.campInput.trim()) && (
                           <div style={{ position: 'absolute' as const, top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #ddd', borderRadius: '6px', zIndex: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', overflow: 'hidden' as const }}>
@@ -925,7 +924,7 @@ export default function PublicProfilePage() {
                     <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: is2026No ? '#bbb' : '#555', cursor: is2026No ? 'default' as const : 'pointer' }}>
                       <input
                         type="checkbox"
-                        disabled={is2026No || draft2026.isTBD}
+                        disabled={is2026No}
                         checked={!is2026No && draft2026.isOpenCamping}
                         onChange={e => setDraft2026(prev => ({ ...prev, isOpenCamping: e.target.checked, isTBD: false, campInput: '', campId: null }))}
                       />
@@ -934,7 +933,7 @@ export default function PublicProfilePage() {
                     <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: is2026No ? '#bbb' : '#555', cursor: is2026No ? 'default' as const : 'pointer' }}>
                       <input
                         type="checkbox"
-                        disabled={is2026No || draft2026.isOpenCamping}
+                        disabled={is2026No}
                         checked={!is2026No && draft2026.isTBD}
                         onChange={e => setDraft2026(prev => ({ ...prev, isTBD: e.target.checked, isOpenCamping: false, campInput: '', campId: null }))}
                       />
