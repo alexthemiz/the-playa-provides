@@ -17,6 +17,7 @@ _Last updated: 2026-07-21_
 ## 🎯 Next Session Priority
 
 - [ ] **Verify first daily admin report email** — cron fires 13:00 UTC (8am EST / 9am EDT) daily; first run expected 2026-07-22. If no email, check `cron.job_run_details` and the `send-daily-report` edge function logs.
+- [ ] **Verify 2026-07-21 fixes on prod** — (1) follower/following counts on own profile open the lists modal again; (2) inventory Availability toggles no longer collide with the Action column (root cause: 190px of buttons in a 170px column — enlarged browser font settings made it worse; column widened to 240px + wrap fallback).
 - [ ] **Welcome email** — Triggered on signup via Supabase DB webhook; design and copy TBD. Uses the existing Resend/edge-function setup (other transactional emails already work this way).
 - [ ] **End-to-end test: Lend/Return flow** — Two test accounts, full loan lifecycle, confirm emails + bell notifications fire at each step.
 - [ ] **End-to-end test: Following & Notifications** — Follow a user, list an item as them, verify bell badge + dropdown, mark-as-read, email opt-in.
