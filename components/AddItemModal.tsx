@@ -277,7 +277,13 @@ export default function AddItemModal({
                   value={returnTerms}
                   onChange={e => setReturnTerms(e.target.value)}
                 />
-                <div style={trayStyle}>
+                <style>{`
+                  .terms-tray { display: flex; gap: 10px; }
+                  @media (max-width: 940px) {
+                    .terms-tray { flex-direction: column; gap: 14px; }
+                  }
+                `}</style>
+                <div style={trayStyle} className="terms-tray">
                   <div style={trayItemStyle}>
                     <div style={trayLabelStyle}>Return by</div>
                     <div style={trayHintStyle}>Gear must be back by:</div>
@@ -388,7 +394,7 @@ const radioGroupStyle: React.CSSProperties = { display: 'flex', flexDirection: '
 const radioLabelStyle: React.CSSProperties = { flex: 1, padding: '10px 12px', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' };
 const unifiedBoxStyle: React.CSSProperties = { marginTop: '6px', backgroundColor: '#fff', borderRadius: '10px', border: '1px solid #ddd', overflow: 'hidden' };
 const unifiedTextareaStyle: React.CSSProperties = { display: 'block', width: '100%', minHeight: '80px', padding: '12px 14px', border: 'none', background: 'transparent', fontSize: '14px', color: '#111', resize: 'vertical' as const, outline: 'none', boxSizing: 'border-box' as const, fontFamily: 'inherit' };
-const trayStyle: React.CSSProperties = { padding: '12px 14px', display: 'flex', gap: '10px' };
+const trayStyle: React.CSSProperties = { padding: '12px 14px' };
 const trayItemStyle: React.CSSProperties = { flex: 1, minWidth: 0 };
 const trayLabelStyle: React.CSSProperties = { fontSize: '11px', color: '#777', fontWeight: '600', textTransform: 'uppercase' as const, letterSpacing: '0.04em' };
 const trayHintStyle: React.CSSProperties = { fontSize: '11px', color: '#aaa', margin: '2px 0 4px', fontStyle: 'italic' as const };

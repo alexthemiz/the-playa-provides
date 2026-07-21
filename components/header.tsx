@@ -294,6 +294,8 @@ export default function Header() {
                 case 'loan_pickup_ready':     return { text: `says they've handed over ${itemName} — confirm you got it`, href: '/inventory' }
                 case 'transfer_pickup_ready': return { text: `says they've handed over ${itemName} — confirm you got it`, href: '/inventory' }
                 case 'loan_return_pending':   return { text: `says they've returned ${itemName} — confirm receipt`, href: '/inventory' }
+                case 'loan_initiated':        return { text: `agreed to lend you ${itemName} — pending handover`, href: '/inventory' }
+                case 'transfer_initiated':    return { text: `is giving you ${itemName} — pending handover`,      href: '/inventory' }
                 case 'camp_member_removed':   return { text: `You have been removed from ${campName}`,      href: '/' }
                 case 'wish_list_match': {
                   const items     = (n.meta as any)?.items
@@ -335,7 +337,11 @@ export default function Header() {
         onClick={() => {
           const next = !bellOpen
           setBellOpen(next)
-          if (next) { fetchNotifications(); onOpen?.() }
+          if (next) {
+            fetchNotifications()
+            if (unreadCount > 0) handleMarkAllRead()
+            onOpen?.()
+          }
         }}
         style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'relative' as const, padding: '4px', display: 'flex', alignItems: 'center' }}
       >

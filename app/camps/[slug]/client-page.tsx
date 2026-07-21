@@ -815,12 +815,16 @@ export default function CampPage() {
             Only members of this camp can view this list.
           </p>
         ) : campItemsLoading ? (
-          <div style={campGridStyle}>{[...Array(3)].map((_, i) => <div key={i} style={campSkeletonStyle} />)}</div>
+          <>
+            <style>{campGridResponsiveCss}</style>
+            <div className="camp-grid">{[...Array(3)].map((_, i) => <div key={i} style={campSkeletonStyle} />)}</div>
+          </>
         ) : campItems.length === 0 ? (
           <p style={{ color: '#9A8878', fontSize: '0.9rem', fontStyle: 'italic' as const }}>No items have been shared by camp members yet.</p>
         ) : (
           <div style={{ overflowX: 'auto' as const, maxWidth: '100%', width: '100%' }}>
-          <div style={campViewMode === 'grid' ? campGridStyle : campListContainerStyle}>
+          {campViewMode === 'grid' && <style>{campGridResponsiveCss}</style>}
+          <div className={campViewMode === 'grid' ? 'camp-grid' : undefined} style={campViewMode === 'grid' ? undefined : campListContainerStyle}>
             {campViewMode === 'list' && (
               <div style={campListHeaderStyle}>
                 <div style={{ width: '50px' }} />
@@ -946,27 +950,27 @@ function CampCardView({ item }: { item: any }) {
   const hasTerms = !isKeep && (item.return_by || item.return_terms);
   return (
     <div style={{ backgroundColor: '#FDFAF4', border: '1.5px solid rgba(28,22,16,0.15)', boxShadow: '3px 3px 0 rgba(28,22,16,0.1)' }}>
-      <div style={{ position: 'relative' as const, backgroundColor: 'transparent', padding: '12px 12px 0 12px', width: '100%', overflow: 'hidden', boxSizing: 'border-box' as const }}>
+      <div style={{ position: 'relative' as const, backgroundColor: 'transparent', padding: '8px 8px 0 8px', width: '100%', overflow: 'hidden', boxSizing: 'border-box' as const }}>
         <PolaroidPhoto src={item.image_urls?.[0]} alt={item.item_name} itemId={item.id} noRotate />
-        <div style={{ position: 'absolute', top: '10px', left: '10px', backgroundColor: isKeep ? '#C24820' : '#1E8A82', color: '#fff', padding: '3px 8px', border: 'none', fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', fontWeight: 700, zIndex: 5 }}>
+        <div style={{ position: 'absolute', top: '6px', left: '6px', backgroundColor: isKeep ? '#C24820' : '#1E8A82', color: '#fff', padding: '2px 6px', border: 'none', fontFamily: "'Space Mono', monospace", fontSize: '0.5rem', fontWeight: 700, zIndex: 5 }}>
           {isKeep ? 'Keep' : 'Borrow'}
         </div>
       </div>
-      <div style={{ padding: '15px' }}>
-        <h3 style={{ margin: 0, color: '#1C1610', fontSize: '16px', fontWeight: 600 }}>{item.item_name}</h3>
-        <p style={{ color: '#9A8878', fontSize: '11px', margin: '4px 0 12px', textTransform: 'uppercase' as const, fontWeight: 'bold' }}>{item.category} • {item.condition}</p>
-        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#4A3828', fontSize: '12px', borderTop: '1px solid rgba(28,22,16,0.08)', paddingTop: '10px' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><MapPin size={12} />{locationDisplay}</span>
+      <div style={{ padding: '10px 12px 12px' }}>
+        <h3 style={{ margin: 0, color: '#1C1610', fontSize: '0.9rem', fontWeight: 700, lineHeight: 1.2, fontFamily: "'Arvo', serif" }}>{item.item_name}</h3>
+        <p style={{ color: '#9A8878', fontSize: '0.65rem', margin: '4px 0 8px', textTransform: 'uppercase' as const, fontWeight: 'bold' }}>{item.category} • {item.condition}</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#4A3828', fontSize: '0.7rem', borderTop: '1px solid rgba(28,22,16,0.08)', paddingTop: '8px', gap: '6px' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '3px', overflow: 'hidden', whiteSpace: 'nowrap' as const, textOverflow: 'ellipsis' as const }}><MapPin size={10} style={{ flexShrink: 0 }} />{locationDisplay}</span>
           {item.profiles?.username ? (
-            <Link href={`/profile/${item.profiles.username}`} onClick={e => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#1E8A82', textDecoration: 'none' }}>
-              <User size={12} />{ownerName}
+            <Link href={`/profile/${item.profiles.username}`} onClick={e => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', gap: '3px', color: '#1E8A82', textDecoration: 'none', overflow: 'hidden', whiteSpace: 'nowrap' as const, textOverflow: 'ellipsis' as const }}>
+              <User size={10} style={{ flexShrink: 0 }} />{ownerName}
             </Link>
           ) : (
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><User size={12} />{ownerName}</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '3px', overflow: 'hidden', whiteSpace: 'nowrap' as const, textOverflow: 'ellipsis' as const }}><User size={10} style={{ flexShrink: 0 }} />{ownerName}</span>
           )}
         </div>
         {hasTerms && (
-          <div style={{ fontSize: '12px', color: '#9A8878', borderTop: '1px solid rgba(28,22,16,0.08)', paddingTop: '8px', marginTop: '6px' }}>
+          <div style={{ fontSize: '0.65rem', color: '#9A8878', borderTop: '1px solid rgba(28,22,16,0.08)', paddingTop: '6px', marginTop: '6px' }}>
             {item.return_by && <span>Return by {new Date(item.return_by).toLocaleDateString()}</span>}
             {item.return_terms && !item.return_by && <span>Has terms</span>}
           </div>
@@ -1019,7 +1023,19 @@ function CampListView({ item }: { item: any }) {
 // Camp items styles
 const campToggleGroupStyle: React.CSSProperties = { display: 'flex', border: '2px solid #1C1610', overflow: 'hidden' };
 const campToggleButtonStyle: React.CSSProperties = { border: 'none', padding: '6px 10px', cursor: 'pointer' };
-const campGridStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' };
+// Mirrors .fi-grid on /find-items so camp item cards match the browse-items
+// layout: 3 per row on mobile (portrait and landscape), same breakpoints.
+const campGridResponsiveCss = `
+  .camp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
+  @media (min-width: 1100px) { .camp-grid { grid-template-columns: repeat(5, 1fr); } }
+  @media (min-width:  860px) and (max-width: 1099px) { .camp-grid { grid-template-columns: repeat(4, 1fr); } }
+  @media (max-width: 859px) { .camp-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; } }
+  @media (max-width: 480px) { .camp-grid { gap: 8px; } }
+`;
 const campListContainerStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column' as const, backgroundColor: '#FDFAF4', border: '1.5px solid rgba(28,22,16,0.12)', overflowX: 'auto' as const };
 const campListHeaderStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: CAMP_LIST_COLS, gap: '10px', padding: '12px 15px', fontSize: '0.6rem', fontWeight: 700, color: '#4A3828', fontFamily: "'Space Mono', monospace", textTransform: 'uppercase' as const, letterSpacing: '0.08em', borderBottom: '1.5px solid rgba(28,22,16,0.12)', backgroundColor: '#EDE5D0' };
 const campSkeletonStyle: React.CSSProperties = { height: '280px', backgroundColor: '#EDE5D0' };

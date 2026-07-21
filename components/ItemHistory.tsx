@@ -42,7 +42,7 @@ export default function ItemHistory({ itemId, isOwner, createdAt }: Props) {
           .from('item_loans')
           .select('id, picked_up_at, returned_at, borrower:profiles!item_loans_borrower_id_fkey(username, preferred_name)')
           .eq('item_id', itemId)
-          .eq('status', 'complete'),
+          .not('picked_up_at', 'is', null),
         supabase
           .from('item_transfers')
           .select('id, completed_at, owner:profiles!item_transfers_owner_id_fkey(username, preferred_name)')

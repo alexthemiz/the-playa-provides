@@ -55,6 +55,13 @@ export default function TransferModal({ item, ownerId, onClose, onSuccess }: Pro
         .single()
       if (error) throw error
 
+      await supabase.from('notifications').insert({
+        type: 'transfer_initiated',
+        recipient_id: matched.id,
+        actor_id: ownerId,
+        item_id: item.id,
+      })
+
       await supabase.functions.invoke('send-transfer-notification', {
         body: { type: 'initiated', transfer_id: transfer.id },
       })

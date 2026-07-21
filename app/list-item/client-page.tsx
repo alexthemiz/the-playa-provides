@@ -395,13 +395,19 @@ function ListItemPageInner() {
                 <label style={labelStyle}>Lending Terms <span style={{ fontSize: '11px', color: '#aaa', fontWeight: '500', textTransform: 'none' as const, letterSpacing: '0' }}>— all optional but encouraged</span></label>
                 <p style={hintStyle}>Borrowers see this before they request. Set expectations upfront to avoid issues later.</p>
                 <div style={unifiedBoxStyle}>
+                  <style>{`
+                    .terms-tray { display: flex; gap: 10px; }
+                    @media (max-width: 940px) {
+                      .terms-tray { flex-direction: column; gap: 14px; }
+                    }
+                  `}</style>
                   <textarea
                     placeholder="e.g. Please clean before returning, no modifications."
                     style={unifiedTextareaStyle}
                     value={returnTerms}
                     onChange={e => setReturnTerms(e.target.value)}
                   />
-                  <div style={trayStyle}>
+                  <div style={trayStyle} className="terms-tray">
                     <div style={trayItemStyle}>
                       <div style={trayLabelStyle}>Return by</div>
                       <div style={trayHintStyle}>Gear must be back by:</div>
@@ -507,7 +513,7 @@ const radioLabelStyle: React.CSSProperties = { flex: 1, padding: '10px 12px', cu
 const detailsBoxStyle: React.CSSProperties = { marginTop: '10px', padding: '14px', backgroundColor: '#FDFAF4', border: '1.5px solid rgba(28,22,16,0.12)' };
 const unifiedBoxStyle: React.CSSProperties = { marginTop: '6px', backgroundColor: '#FDFAF4', border: '1.5px solid rgba(28,22,16,0.2)', overflow: 'hidden' };
 const unifiedTextareaStyle: React.CSSProperties = { display: 'block', width: '100%', minHeight: '80px', padding: '12px 14px', border: 'none', background: 'transparent', fontSize: '14px', color: '#1C1610', resize: 'vertical' as const, outline: 'none', boxSizing: 'border-box' as const, fontFamily: 'inherit' };
-const trayStyle: React.CSSProperties = { padding: '12px 14px', display: 'flex', gap: '10px', borderTop: '1px solid rgba(28,22,16,0.1)' };
+const trayStyle: React.CSSProperties = { padding: '12px 14px', borderTop: '1px solid rgba(28,22,16,0.1)' };
 const trayItemStyle: React.CSSProperties = { flex: 1, minWidth: 0 };
 const trayLabelStyle: React.CSSProperties = { fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', color: '#9A8878', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.04em' };
 const trayHintStyle: React.CSSProperties = { fontSize: '11px', color: '#9A8878', margin: '2px 0 4px', fontStyle: 'italic' as const };

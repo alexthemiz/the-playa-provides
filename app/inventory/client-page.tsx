@@ -44,9 +44,25 @@ export default function InventoryPage() {
   const [userLocations, setUserLocations] = useState<{ id: string; label: string }[]>([]);
   const [borrowerLocationIds, setBorrowerLocationIds] = useState<Record<string, string>>({});
   const [newLoanLocData, setNewLoanLocData] = useState<{ loanId: string | null; label: string; address_line_1: string; city: string; state: string; zip_code: string }>({ loanId: null, label: '', address_line_1: '', city: '', state: '', zip_code: '' });
+  const [reminderSentAt, setReminderSentAt] = useState<Record<string, number>>({});
+  const [sendingReminderKey, setSendingReminderKey] = useState<string | null>(null);
 
   useEffect(() => {
     fetchMyInventory();
+    // Hydrate reminder cooldowns from localStorage — this is a courtesy
+    // anti-spam guard, not a security boundary, so per-browser tracking
+    // (rather than a DB column) is good enough.
+    if (typeof window !== 'undefined') {
+      const stored: Record<string, number> = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.startsWith('tpp_reminder_')) {
+          const val = localStorage.getItem(key);
+          if (val) stored[key.slice('tpp_reminder_'.length)] = parseInt(val, 10);
+        }
+      }
+      setReminderSentAt(stored);
+    }
   }, []);
 
   // Close location dropdown on outside click
@@ -271,10 +287,29 @@ export default function InventoryPage() {
     if (!error) fetchMyInventory();
   }
 
+  const REMINDER_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+
+  function isReminderOnCooldown(key: string) {
+    const sentAt = reminderSentAt[key];
+    return !!sentAt && Date.now() - sentAt < REMINDER_COOLDOWN_MS;
+  }
+
   async function handleSendTransferReminder(transfer: any) {
-    await supabase.functions.invoke('send-transfer-notification', {
-      body: { type: 'owner_confirmed', transfer_id: transfer.id },
-    });
+    const key = `transfer_${transfer.id}`;
+    if (isReminderOnCooldown(key) || sendingReminderKey === key) return;
+    setSendingReminderKey(key);
+    try {
+      await supabase.functions.invoke('send-transfer-notification', {
+        body: { type: 'owner_confirmed', transfer_id: transfer.id },
+      });
+      const now = Date.now();
+      localStorage.setItem(`tpp_reminder_${key}`, String(now));
+      setReminderSentAt(prev => ({ ...prev, [key]: now }));
+    } catch (err) {
+      console.error('Send transfer reminder error:', err);
+    } finally {
+      setSendingReminderKey(null);
+    }
   }
 
   async function handleOwnerConfirmPickup(loan: any) {
@@ -305,9 +340,21 @@ export default function InventoryPage() {
   }
 
   async function handleSendLoanReminder(loan: any) {
-    await supabase.functions.invoke('send-loan-notification', {
-      body: { type: 'owner_confirmed_pickup', loan_id: loan.id },
-    });
+    const key = `loan_${loan.id}`;
+    if (isReminderOnCooldown(key) || sendingReminderKey === key) return;
+    setSendingReminderKey(key);
+    try {
+      await supabase.functions.invoke('send-loan-notification', {
+        body: { type: 'owner_confirmed_pickup', loan_id: loan.id },
+      });
+      const now = Date.now();
+      localStorage.setItem(`tpp_reminder_${key}`, String(now));
+      setReminderSentAt(prev => ({ ...prev, [key]: now }));
+    } catch (err) {
+      console.error('Send loan reminder error:', err);
+    } finally {
+      setSendingReminderKey(null);
+    }
   }
 
   async function handleSubmitDispute() {
@@ -474,11 +521,20 @@ export default function InventoryPage() {
     if (transfer) {
       const recipientName = transfer.recipient?.preferred_name || transfer.recipient?.username || 'recipient';
       if (transfer.owner_confirmed) {
+        const key = `transfer_${transfer.id}`;
+        const isSending = sendingReminderKey === key;
+        const onCooldown = isReminderOnCooldown(key);
         return (
           <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '4px' }}>
             <span style={pendingBadgeStyle}>Pending</span>
             <span style={{ fontSize: '0.75rem', color: '#888' }}>Waiting for {recipientName}…</span>
-            <button onClick={() => handleSendTransferReminder(transfer)} style={reminderButtonStyle}>Remind</button>
+            <button
+              onClick={() => handleSendTransferReminder(transfer)}
+              disabled={isSending || onCooldown}
+              style={{ ...reminderButtonStyle, opacity: (isSending || onCooldown) ? 0.5 : 1, cursor: (isSending || onCooldown) ? 'default' : 'pointer' }}
+            >
+              {isSending ? 'Sending…' : onCooldown ? 'Reminder Sent' : 'Remind'}
+            </button>
           </div>
         );
       }
@@ -496,11 +552,20 @@ export default function InventoryPage() {
     if (loan) {
       const borrowerName = loan.borrower?.preferred_name || loan.borrower?.username || 'borrower';
       if (loan.owner_confirmed_pickup) {
+        const key = `loan_${loan.id}`;
+        const isSending = sendingReminderKey === key;
+        const onCooldown = isReminderOnCooldown(key);
         return (
           <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '4px' }}>
             <span style={pendingBadgeStyle}>Pending</span>
             <span style={{ fontSize: '0.75rem', color: '#888' }}>Waiting for {borrowerName}…</span>
-            <button onClick={() => handleSendLoanReminder(loan)} style={reminderButtonStyle}>Remind</button>
+            <button
+              onClick={() => handleSendLoanReminder(loan)}
+              disabled={isSending || onCooldown}
+              style={{ ...reminderButtonStyle, opacity: (isSending || onCooldown) ? 0.5 : 1, cursor: (isSending || onCooldown) ? 'default' : 'pointer' }}
+            >
+              {isSending ? 'Sending…' : onCooldown ? 'Reminder Sent' : 'Remind'}
+            </button>
           </div>
         );
       }

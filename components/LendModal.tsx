@@ -70,6 +70,13 @@ export default function LendModal({ item, ownerId, onClose, onSuccess }: Props) 
         .single()
       if (error) throw error
 
+      await supabase.from('notifications').insert({
+        type: 'loan_initiated',
+        recipient_id: matched.id,
+        actor_id: ownerId,
+        item_id: item.id,
+      })
+
       await supabase.functions.invoke('send-loan-notification', {
         body: { type: 'initiated', loan_id: loan.id },
       })
