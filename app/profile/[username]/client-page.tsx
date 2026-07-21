@@ -506,21 +506,6 @@ export default function PublicProfilePage() {
   const locationStr = [profile.city, profile.state].filter(Boolean).join(', ');
 
   // Helper for returning status badge display
-  const returningBadge = (status: string | null) => {
-    if (!status) return null;
-    const cfg = {
-      yes:   { label: '✓ Returning',     bg: '#dcfce7', color: '#16a34a', border: '#86efac' },
-      maybe: { label: '? Maybe',          bg: '#fef9c3', color: '#92400e', border: '#fde68a' },
-      no:    { label: '✗ Not returning',  bg: '#fee2e2', color: '#dc2626', border: '#fca5a5' },
-    }[status as 'yes' | 'maybe' | 'no'];
-    if (!cfg) return null;
-    return (
-      <span style={{ fontSize: '11px', fontWeight: 600, padding: '2px 8px', borderRadius: '20px', backgroundColor: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}`, flexShrink: 0 }}>
-        {cfg.label}
-      </span>
-    );
-  };
-
   const attending2026Badge = (status: string | null) => {
     if (!status) return null;
     const cfg = {
@@ -968,7 +953,7 @@ export default function PublicProfilePage() {
             })()}
             {isEditing ? (
               <div>
-                <p style={{ ...subheadStyle, marginBottom: '8px' }}>Previous Years:</p>
+                <p style={{ ...subheadStyle, marginBottom: '8px' }}>Previous Years</p>
                 {draftAffiliations.map(draft => (
                   <div key={draft.tempId} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginBottom: '8px' }}>
                     <select
@@ -1020,30 +1005,32 @@ export default function PublicProfilePage() {
                   Add Year
                 </button>
               </div>
-            ) : affiliations.filter((a: any) => a.year !== 2026).length > 0 ? (
-              <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '6px' }}>
-                {affiliations.filter((aff: any) => aff.year !== 2026).map((aff: any) => {
-                  const campName = (aff.camps as any)?.display_name ?? null;
-                  const campSlug = (aff.camps as any)?.slug ?? null;
-                  return (
-                    <div key={aff.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#EDE5D0', border: '1.5px solid rgba(28,22,16,0.2)', padding: '3px 10px 3px 4px' }}>
-                      <span style={{ backgroundColor: '#D4A020', padding: '2px 8px', color: '#fff', fontSize: '0.72rem', fontWeight: 700, fontFamily: "'Space Mono', monospace", flexShrink: 0, letterSpacing: '0.04em' }}>
-                        {aff.year}
-                      </span>
-                      {aff.is_open_camping ? (
-                        <span style={{ fontSize: '0.8rem', color: '#9A8878', fontStyle: 'italic' as const }}>Open Camping</span>
-                      ) : campSlug ? (
-                        <a href={`/camps/${campSlug}`} style={{ fontSize: '0.8rem', color: '#1E8A82', textDecoration: 'none', fontWeight: 600 }}>{campName}</a>
-                      ) : campName ? (
-                        <span style={{ fontSize: '0.8rem', color: '#4A3828' }}>{campName}</span>
-                      ) : null}
-                      {aff.returning_status && returningBadge(aff.returning_status)}
-                    </div>
-                  );
-                })}
-              </div>
             ) : (
-              <span style={{ color: '#aaa', fontStyle: 'italic' as const, fontSize: '0.9rem' }}>No years listed yet.</span>
+              <div>
+                <p style={{ ...subheadStyle, marginBottom: '8px' }}>Previous Years</p>
+                {affiliations.filter((a: any) => a.year !== 2026).length > 0 ? (
+                  <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '14px' }}>
+                    {affiliations.filter((aff: any) => aff.year !== 2026).map((aff: any) => {
+                      const campName = (aff.camps as any)?.display_name ?? null;
+                      const campSlug = (aff.camps as any)?.slug ?? null;
+                      return (
+                        <div key={aff.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ ...subheadStyle, marginBottom: 0 }}>{aff.year}:</span>
+                          {aff.is_open_camping ? (
+                            <span style={camp2026OpenCampingStyle}>Open Camping</span>
+                          ) : campSlug ? (
+                            <a href={`/camps/${campSlug}`} style={{ ...camp2026ChipStyle, color: '#1E8A82', textDecoration: 'none' }}>{campName}</a>
+                          ) : campName ? (
+                            <span style={camp2026ChipStyle}>{campName}</span>
+                          ) : null}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <span style={{ color: '#aaa', fontStyle: 'italic' as const, fontSize: '0.9rem' }}>No years listed yet.</span>
+                )}
+              </div>
             )}
           </div>
 
