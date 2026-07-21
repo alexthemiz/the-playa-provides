@@ -912,6 +912,12 @@ export default function PublicProfilePage() {
                       </label>
                     </>
                   )}
+                  {draft2026.status === 'no' && (
+                    <>
+                      <span style={{ ...subheadStyle, marginBottom: 0 }}>Camp:</span>
+                      <span style={{ ...camp2026ChipStyle, opacity: 0.6 }}>N/A</span>
+                    </>
+                  )}
                 </div>
               </div>
             ) : (() => {
