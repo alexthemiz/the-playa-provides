@@ -407,7 +407,7 @@ export default function SettingsPage() {
             </label>
           </section>
 
-          <button onClick={handleSave} disabled={saving} style={{ ...buttonStyle, marginBottom: '40px' }}>
+          <button onClick={handleSave} disabled={saving} style={{ ...buttonStyle, marginBottom: '40px', justifySelf: 'center' as const }}>
             {saving ? 'Saving...' : 'Save Changes'}
           </button>
 
@@ -579,7 +579,7 @@ const errorStyle = { display: 'block', color: '#dc2626', fontSize: '0.72rem', ma
 const oauthNoteStyle = { color: '#9A8878', fontSize: '0.84rem', margin: '0' };
 const successMsgStyle = { color: '#16a34a', fontSize: '0.78rem', marginTop: '8px', marginBottom: '0' };
 const inputStyle = { width: '100%', padding: '9px 11px', backgroundColor: '#FDFAF4', border: '1.5px solid rgba(28,22,16,0.25)', color: '#1C1610', outline: 'none', boxSizing: 'border-box' as const, fontSize: '0.9rem', fontFamily: 'inherit' };
-const buttonStyle = { padding: '13px', backgroundColor: '#1E8A82', color: '#fff', fontWeight: 'bold' as const, border: '2px solid #1C1610', boxShadow: '3px 3px 0 #1C1610', cursor: 'pointer', width: '100%', fontFamily: 'inherit', fontSize: '0.9rem' };
-const smallButtonStyle = { width: '100%', padding: '10px', backgroundColor: '#EDE5D0', color: '#1C1610', border: '1.5px solid rgba(28,22,16,0.2)', cursor: 'pointer', fontSize: '0.84rem', fontFamily: 'inherit' };
+const buttonStyle = { padding: '14px 48px', backgroundColor: '#1E8A82', color: '#fff', fontWeight: 'bold' as const, border: '2px solid #1C1610', boxShadow: '3px 3px 0 #1C1610', cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.9rem' };
+const smallButtonStyle = { padding: '10px 24px', backgroundColor: '#EDE5D0', color: '#1C1610', border: '1.5px solid rgba(28,22,16,0.2)', cursor: 'pointer', fontSize: '0.84rem', fontFamily: 'inherit' };
 const addressCardStyle = { backgroundColor: '#EDE5D0', border: '1px solid rgba(28,22,16,0.12)', padding: '12px', marginBottom: '10px' };
 const deleteButtonStyle = { padding: '10px 24px', backgroundColor: '#fff0f0', color: '#cc0000', border: '1px solid #ffaaaa', cursor: 'pointer', fontWeight: '600' as const, fontSize: '0.9rem', fontFamily: 'inherit' };

@@ -208,9 +208,10 @@ export default function SubmitCampModal({ onClose }: SubmitCampModalProps) {
                 onMouseEnter={() => setHovered('submit')}
                 onMouseLeave={() => setHovered(null)}
                 style={{
-                  width: '100%', padding: '12px', backgroundColor: hovered === 'submit' && !loading ? '#166f68' : TEAL, color: '#fff',
+                  padding: '12px 40px', backgroundColor: hovered === 'submit' && !loading ? '#166f68' : TEAL, color: '#fff',
                   border: 'none', borderRadius: '16px', fontWeight: 700, fontSize: '0.875rem', textTransform: 'uppercase' as const,
                   cursor: loading ? 'default' : 'pointer', boxShadow: '0 4px 14px rgba(0,0,0,0.12)', transition: 'background-color 0.15s',
+                  alignSelf: 'center' as const,
                 }}
               >
                 {loading ? 'Submitting...' : 'Submit for Review'}

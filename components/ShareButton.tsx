@@ -32,8 +32,8 @@ export default function ShareButton({ itemId, itemName, style }: ShareButtonProp
 }
 
 const shareButtonStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '12px 28px',
+  width: 'auto',
+  padding: '10px 20px',
   marginTop: '8px',
   display: 'flex',
   alignItems: 'center',

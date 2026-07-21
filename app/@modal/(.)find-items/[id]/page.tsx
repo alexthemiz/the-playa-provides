@@ -217,27 +217,26 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
                   >
                     {returningItem ? 'Returning...' : 'Return Item'}
                   </button>
+                  <ShareButton itemId={item.id} itemName={item.item_name} style={{ ...shareInlineBtnStyle, marginLeft: 'auto' }} />
                 </div>
               ) : isBorrower && myLoan && myLoan.status === 'return_pending' ? (
-                <span style={{ ...disabledPillStyle, display: 'block', width: '100%', textAlign: 'center' as const, padding: '14px' }}>
-                  Return Pending — waiting on owner to confirm
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+                  <span style={disabledPillStyle}>Return Pending — waiting on owner to confirm</span>
+                </div>
               ) : isBorrower && myLoan && myLoan.status === 'pending_handover' ? (
-                <span style={{ ...disabledPillStyle, display: 'block', width: '100%', textAlign: 'center' as const, padding: '14px' }}>
-                  Pending handover — check your inventory
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+                  <span style={disabledPillStyle}>Pending handover — check your inventory</span>
+                </div>
               ) : (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
                   {item.is_on_loan ? (
-                    <span style={{ ...disabledPillStyle, display: 'block', width: '100%', textAlign: 'center' as const, padding: '14px' }}>
-                      Currently on loan
-                    </span>
+                    <span style={disabledPillStyle}>Currently on loan</span>
                   ) : session ? (
                     <button style={actionButtonStyle} onClick={() => setIsRequestOpen(true)}>
                       {isGift ? 'Request to Keep' : 'Request to Borrow'}
                     </button>
                   ) : (
-                    <a href="/login" style={{ ...actionButtonStyle, display: 'block', textAlign: 'center' as const, textDecoration: 'none' }}>
+                    <a href="/login" style={{ ...actionButtonStyle, textDecoration: 'none' }}>
                       Log In to Request
                     </a>
                   )}
@@ -299,7 +298,7 @@ const modalStyle: React.CSSProperties = {
 };
 
 const actionButtonStyle: React.CSSProperties = {
-  width: '100%', padding: '14px', border: `2px solid ${INK}`,
+  padding: '12px 28px', border: `2px solid ${INK}`,
   boxShadow: `3px 3px 0 ${INK}`, backgroundColor: TEAL, color: '#fff',
   fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem', fontFamily: 'Outfit, sans-serif',
 };

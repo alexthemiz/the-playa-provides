@@ -31,6 +31,8 @@ const MUSTARD  = '#D4A020'
 const MUSTARD_LT = '#F5F0D0'
 
 const disabledPillStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#f5f5f5', color: '#aaa', border: '2px solid #e0e0e0', fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' };
+const actionButtonStyle: React.CSSProperties = { padding: '12px 28px', border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`, backgroundColor: TEAL, color: '#fff', fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer', fontFamily: 'Outfit, sans-serif' };
+const shareInlineBtnStyle: React.CSSProperties = { width: 'auto', flex: '0 0 auto', padding: '10px 20px', marginTop: 0, border: `2px solid ${INK}`, backgroundColor: '#fff', fontSize: '13px', whiteSpace: 'nowrap' as const };
 
 const CATEGORY_EMOJI: Record<string, string> = {
   'Bikes & Transport':  '🚲',
@@ -707,11 +709,7 @@ export default function FindItemsPage() {
                     <>
                       <span style={disabledPillStyle}>Edit</span>
                       <span style={disabledPillStyle}>Transfer</span>
-                      <ShareButton
-                        itemId={selectedItem.id}
-                        itemName={selectedItem.item_name}
-                        style={{ width: 'auto', flex: '0 0 auto', padding: '10px 20px', marginTop: 0, border: `2px solid ${INK}`, backgroundColor: '#fff', fontSize: '13px', whiteSpace: 'nowrap' as const }}
-                      />
+                      <ShareButton itemId={selectedItem.id} itemName={selectedItem.item_name} style={shareInlineBtnStyle} />
                       <span style={{ ...disabledPillStyle, marginLeft: 'auto' }}>Delete</span>
                     </>
                   ) : (
@@ -728,11 +726,7 @@ export default function FindItemsPage() {
                       >
                         Transfer
                       </button>
-                      <ShareButton
-                        itemId={selectedItem.id}
-                        itemName={selectedItem.item_name}
-                        style={{ width: 'auto', flex: '0 0 auto', padding: '10px 20px', marginTop: 0, border: `2px solid ${INK}`, backgroundColor: '#fff', fontSize: '13px', whiteSpace: 'nowrap' as const }}
-                      />
+                      <ShareButton itemId={selectedItem.id} itemName={selectedItem.item_name} style={shareInlineBtnStyle} />
                       <button
                         onClick={() => setConfirmDeleteItem(true)}
                         style={{ marginLeft: 'auto', padding: '10px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '2px solid #cc0000', fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' }}
@@ -747,65 +741,42 @@ export default function FindItemsPage() {
                   <button
                     onClick={handleReturnItem}
                     disabled={returningItem}
-                    style={{
-                      width: '100%', padding: '14px',
-                      backgroundColor: '#16a34a', color: '#fff',
-                      border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,
-                      fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer',
-                      fontFamily: 'Outfit, sans-serif',
-                    }}
+                    style={{ ...actionButtonStyle, backgroundColor: '#16a34a' }}
                   >
                     {returningItem ? 'Returning...' : 'Return Item'}
                   </button>
+                  <ShareButton itemId={selectedItem.id} itemName={selectedItem.item_name} style={{ ...shareInlineBtnStyle, marginLeft: 'auto' }} />
                 </div>
               ) : myLoan && myLoan.borrower_id === userId && myLoan.status === 'return_pending' ? (
-                <span style={{ ...disabledPillStyle, display: 'block', width: '100%', textAlign: 'center' as const, padding: '14px' }}>
-                  Return Pending — waiting on owner to confirm
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+                  <span style={disabledPillStyle}>Return Pending — waiting on owner to confirm</span>
+                </div>
               ) : myLoan && myLoan.borrower_id === userId && myLoan.status === 'pending_handover' ? (
-                <span style={{ ...disabledPillStyle, display: 'block', width: '100%', textAlign: 'center' as const, padding: '14px' }}>
-                  Pending handover — check your inventory
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+                  <span style={disabledPillStyle}>Pending handover — check your inventory</span>
+                </div>
               ) : userId ? (
-                selectedItem.is_on_loan ? (
-                  <span style={{ ...disabledPillStyle, display: 'block', width: '100%', textAlign: 'center' as const, padding: '14px' }}>
-                    Currently on loan
-                  </span>
-                ) : (
-                  <button
-                    onClick={() => setShowRequestForm(true)}
-                    style={{
-                      width: '100%', padding: '14px',
-                      backgroundColor: TEAL, color: '#fff',
-                      border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,
-                      fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer',
-                      fontFamily: 'Outfit, sans-serif', transition: 'transform 0.1s, box-shadow 0.1s',
-                    }}
-                  >
-                    Request to {selectedItem.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'} →
-                  </button>
-                )
-              ) : selectedItem.is_on_loan ? (
-                <span style={{ ...disabledPillStyle, display: 'block', width: '100%', textAlign: 'center' as const, padding: '14px' }}>
-                  Currently on loan
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+                  {selectedItem.is_on_loan ? (
+                    <span style={disabledPillStyle}>Currently on loan</span>
+                  ) : (
+                    <button onClick={() => setShowRequestForm(true)} style={actionButtonStyle}>
+                      Request to {selectedItem.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'} →
+                    </button>
+                  )}
+                  <ShareButton itemId={selectedItem.id} itemName={selectedItem.item_name} style={{ ...shareInlineBtnStyle, marginLeft: 'auto' }} />
+                </div>
               ) : (
-                <a
-                  href="/login"
-                  style={{
-                    display: 'block', width: '100%', padding: '14px', textAlign: 'center' as const,
-                    backgroundColor: TEAL, color: '#fff',
-                    border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,
-                    fontWeight: 700, fontSize: '0.95rem', textDecoration: 'none',
-                    fontFamily: 'Outfit, sans-serif',
-                  }}
-                >
-                  Log In to Request →
-                </a>
-              )}
-
-              {!(userId && selectedItem.user_id === userId) && (
-                <ShareButton itemId={selectedItem.id} itemName={selectedItem.item_name} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+                  {selectedItem.is_on_loan ? (
+                    <span style={disabledPillStyle}>Currently on loan</span>
+                  ) : (
+                    <a href="/login" style={{ ...actionButtonStyle, textDecoration: 'none' }}>
+                      Log In to Request →
+                    </a>
+                  )}
+                  <ShareButton itemId={selectedItem.id} itemName={selectedItem.item_name} style={{ ...shareInlineBtnStyle, marginLeft: 'auto' }} />
+                </div>
               )}
 
               <ItemHistory itemId={selectedItem.id} isOwner={!!userId && selectedItem.user_id === userId} createdAt={selectedItem.created_at} />

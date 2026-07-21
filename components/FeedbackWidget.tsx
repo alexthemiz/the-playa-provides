@@ -202,8 +202,7 @@ export default function FeedbackWidget() {
                   onClick={handleSubmit}
                   disabled={submitting}
                   style={{
-                    width: '100%',
-                    padding: 10,
+                    padding: '10px 28px',
                     backgroundColor: '#1E8A82',
                     color: '#000',
                     border: 'none',
