@@ -499,6 +499,21 @@ export default function PublicProfilePage() {
     );
   };
 
+  const attending2026Badge = (status: string | null) => {
+    if (!status) return null;
+    const cfg = {
+      yes:   { label: 'Attending',       bg: '#dcfce7', color: '#16a34a', border: '#86efac' },
+      maybe: { label: 'Maybe Attending', bg: '#fef9c3', color: '#92400e', border: '#fde68a' },
+      no:    { label: 'Not Attending',   bg: '#fee2e2', color: '#dc2626', border: '#fca5a5' },
+    }[status as 'yes' | 'maybe' | 'no'];
+    if (!cfg) return null;
+    return (
+      <span style={{ fontSize: '0.85rem', fontWeight: 700, padding: '4px 12px', backgroundColor: cfg.bg, color: cfg.color, border: `1.5px solid ${cfg.border}`, flexShrink: 0 }}>
+        {cfg.label}
+      </span>
+    );
+  };
+
   return (
     <div style={{ backgroundColor: '#F6F1E8', minHeight: '100vh' }}>
       <style>{`
@@ -828,6 +843,31 @@ export default function PublicProfilePage() {
       <div style={{ paddingTop: '20px' }}>
         <div className="profile-bio-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
           <div className="profile-bio">
+            {!isEditing && (() => {
+              const aff2026 = affiliations.find((a: any) => a.year === 2026);
+              if (!aff2026?.returning_status) return null;
+              const campName2026 = (aff2026.camps as any)?.display_name ?? null;
+              const campSlug2026 = (aff2026.camps as any)?.slug ?? null;
+              return (
+                <div style={{ marginBottom: '20px', padding: '14px 16px', backgroundColor: '#FDFAF4', border: '2px solid #1C1610', boxShadow: '3px 3px 0 #1C1610' }}>
+                  <p style={{ margin: '0 0 8px', fontFamily: "'Space Mono', monospace", fontSize: '0.68rem', fontWeight: 700, color: '#4A3828', textTransform: 'uppercase' as const, letterSpacing: '0.08em' }}>
+                    Burning Man 2026
+                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' as const }}>
+                    {attending2026Badge(aff2026.returning_status)}
+                    {aff2026.returning_status !== 'no' && (
+                      aff2026.is_open_camping ? (
+                        <span style={{ fontSize: '0.95rem', color: '#9A8878', fontStyle: 'italic' as const }}>Open Camping</span>
+                      ) : campSlug2026 ? (
+                        <a href={`/camps/${campSlug2026}`} style={{ fontSize: '0.95rem', color: '#1E8A82', textDecoration: 'none', fontWeight: 700 }}>{campName2026}</a>
+                      ) : campName2026 ? (
+                        <span style={{ fontSize: '0.95rem', color: '#1C1610', fontWeight: 600 }}>{campName2026}</span>
+                      ) : null
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
             <h4 style={subheadStyle}>Playa History</h4>
             <p style={{ fontSize: '0.78rem', color: '#9A8878', margin: '0 0 12px', lineHeight: 1.5 }}>Add your camps to find and connect with campmates on the platform.</p>
             {isEditing ? (
@@ -947,9 +987,9 @@ export default function PublicProfilePage() {
                   Add Year
                 </button>
               </div>
-            ) : affiliations.length > 0 ? (
+            ) : affiliations.filter((a: any) => a.year !== 2026).length > 0 ? (
               <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '6px' }}>
-                {affiliations.map((aff: any) => {
+                {affiliations.filter((aff: any) => aff.year !== 2026).map((aff: any) => {
                   const campName = (aff.camps as any)?.display_name ?? null;
                   const campSlug = (aff.camps as any)?.slug ?? null;
                   return (
@@ -970,11 +1010,7 @@ export default function PublicProfilePage() {
                 })}
               </div>
             ) : (
-              <>
-                {affiliations.length === 0 && !draft2026.status && (
-                  <span style={{ color: '#aaa', fontStyle: 'italic' as const, fontSize: '0.9rem' }}>No years listed yet.</span>
-                )}
-              </>
+              <span style={{ color: '#aaa', fontStyle: 'italic' as const, fontSize: '0.9rem' }}>No years listed yet.</span>
             )}
           </div>
 
