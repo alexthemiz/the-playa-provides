@@ -846,6 +846,8 @@ export default function PublicProfilePage() {
       <div style={{ paddingTop: '20px' }}>
         <div className="profile-bio-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
           <div className="profile-bio">
+            <h4 style={subheadStyle}>Playa History</h4>
+            <p style={{ fontSize: '0.78rem', color: '#9A8878', margin: '0 0 12px', lineHeight: 1.5 }}>Find and connect with campmates past and present and see what they have or need.</p>
             {isEditing ? (
               <div style={{ marginBottom: '20px' }}>
                 <p style={{ ...subheadStyle, marginBottom: '8px' }}>Attending In 2026?</p>
@@ -918,25 +920,24 @@ export default function PublicProfilePage() {
               const campName2026 = (aff2026.camps as any)?.display_name ?? null;
               const campSlug2026 = (aff2026.camps as any)?.slug ?? null;
               return (
-                <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' as const }}>
-                  <span style={{ ...subheadStyle, marginBottom: 0 }}>Burning Man 2026:</span>
+                <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' as const }}>
+                  <span style={{ ...subheadStyle, marginBottom: 0 }}>2026:</span>
                   {attending2026Badge(aff2026.returning_status)}
-                  {aff2026.returning_status !== 'no' && (
-                    aff2026.is_open_camping ? (
-                      <span style={{ fontSize: '0.95rem', color: '#9A8878', fontStyle: 'italic' as const }}>Open Camping</span>
-                    ) : campSlug2026 ? (
-                      <a href={`/camps/${campSlug2026}`} style={{ fontSize: '0.95rem', color: '#1E8A82', textDecoration: 'none', fontWeight: 700 }}>{campName2026}</a>
-                    ) : campName2026 ? (
-                      <span style={{ fontSize: '0.95rem', color: '#1C1610', fontWeight: 600 }}>{campName2026}</span>
-                    ) : (
-                      <span style={{ fontSize: '0.95rem', color: '#9A8878', fontStyle: 'italic' as const }}>TBD</span>
-                    )
+                  <span style={{ ...subheadStyle, marginBottom: 0 }}>Camp:</span>
+                  {aff2026.returning_status === 'no' ? (
+                    <span style={{ fontSize: '0.95rem', color: '#9A8878', fontStyle: 'italic' as const }}>N/A</span>
+                  ) : aff2026.is_open_camping ? (
+                    <span style={{ fontSize: '0.95rem', color: '#9A8878', fontStyle: 'italic' as const }}>Open Camping</span>
+                  ) : campSlug2026 ? (
+                    <a href={`/camps/${campSlug2026}`} style={{ fontSize: '0.95rem', color: '#1E8A82', textDecoration: 'none', fontWeight: 700 }}>{campName2026}</a>
+                  ) : campName2026 ? (
+                    <span style={{ fontSize: '0.95rem', color: '#1C1610', fontWeight: 600 }}>{campName2026}</span>
+                  ) : (
+                    <span style={{ fontSize: '0.95rem', color: '#9A8878', fontStyle: 'italic' as const }}>TBD</span>
                   )}
                 </div>
               );
             })()}
-            <h4 style={subheadStyle}>Playa History</h4>
-            <p style={{ fontSize: '0.78rem', color: '#9A8878', margin: '0 0 12px', lineHeight: 1.5 }}>Find and connect with campmates past and present and see what they have or need.</p>
             {isEditing ? (
               <div>
                 <p style={{ fontSize: '0.8rem', color: '#999', margin: '0 0 10px' }}>
