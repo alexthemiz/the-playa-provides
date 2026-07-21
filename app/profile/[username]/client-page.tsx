@@ -569,7 +569,7 @@ export default function PublicProfilePage() {
             <div style={{ flex: 1, minWidth: 0 }}>
               {isEditing ? (
                 <input
-                  style={{ backgroundColor: '#fff', color: '#1C1610', border: '1px solid #ddd', fontSize: '1.5rem', width: '100%', padding: '5px' }}
+                  style={{ backgroundColor: '#fff', color: '#1C1610', border: '1px solid #ddd', fontSize: '1.5rem', width: '100%', maxWidth: '480px', padding: '5px', boxSizing: 'border-box' as const }}
                   value={profile.preferred_name || ''}
                   onChange={e => setProfile({ ...profile, preferred_name: e.target.value })}
                 />
