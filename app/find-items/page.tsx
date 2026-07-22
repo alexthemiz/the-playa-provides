@@ -30,9 +30,9 @@ const RUST_LT  = '#F5E0D8'
 const MUSTARD  = '#D4A020'
 const MUSTARD_LT = '#F5F0D0'
 
-const disabledPillStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#f5f5f5', color: '#aaa', border: '2px solid #e0e0e0', fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' };
+const disabledPillStyle: React.CSSProperties = { padding: '10px 10px', backgroundColor: '#f5f5f5', color: '#aaa', border: '2px solid #e0e0e0', fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif', textAlign: 'center' as const };
 const actionButtonStyle: React.CSSProperties = { padding: '12px 28px', border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`, backgroundColor: TEAL, color: '#fff', fontWeight: 700, fontSize: '0.95rem', cursor: 'pointer', fontFamily: 'Outfit, sans-serif' };
-const shareInlineBtnStyle: React.CSSProperties = { width: 'auto', flex: '0 0 auto', padding: '10px 20px', marginTop: 0, border: `2px solid ${INK}`, backgroundColor: '#fff', fontSize: '13px', whiteSpace: 'nowrap' as const };
+const shareInlineBtnStyle: React.CSSProperties = { width: 'auto', flex: '1 1 0', padding: '10px 10px', marginTop: 0, border: `2px solid ${INK}`, backgroundColor: '#fff', fontSize: '13px', whiteSpace: 'nowrap' as const };
 
 const CATEGORY_EMOJI: Record<string, string> = {
   'Bikes & Transport':  '🚲',
@@ -703,7 +703,7 @@ export default function FindItemsPage() {
               )}
 
               {/* CTA — wraps so the button row never overflows on narrow widths */}
-              <style>{`.fi-action-row { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px; width: 100%; }`}</style>
+              <style>{`.fi-action-row { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px; width: 100%; } .fi-action-row > * { flex: 1 1 0; text-align: center; }`}</style>
               {userId && selectedItem.user_id === userId ? (
                 <div className="fi-action-row">
                   {selectedItem.is_on_loan ? (
@@ -717,20 +717,20 @@ export default function FindItemsPage() {
                     <>
                       <a
                         href={`/list-item?edit=${selectedItem.id}`}
-                        style={{ padding: '10px 20px', backgroundColor: '#fff', color: TEAL, border: `2px solid ${TEAL}`, fontSize: '13px', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' }}
+                        style={{ padding: '10px 10px', backgroundColor: '#fff', color: TEAL, border: `2px solid ${TEAL}`, fontSize: '13px', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif', textAlign: 'center' as const }}
                       >
                         Edit
                       </a>
                       <button
                         onClick={() => setShowTransferFlow(true)}
-                        style={{ padding: '10px 20px', backgroundColor: '#fff', color: MUSTARD, border: `2px solid ${MUSTARD}`, fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' }}
+                        style={{ padding: '10px 10px', backgroundColor: '#fff', color: MUSTARD, border: `2px solid ${MUSTARD}`, fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' }}
                       >
                         Transfer
                       </button>
                       <ShareButton itemId={selectedItem.id} itemName={selectedItem.item_name} style={shareInlineBtnStyle} />
                       <button
                         onClick={() => setConfirmDeleteItem(true)}
-                        style={{ padding: '10px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '2px solid #cc0000', fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' }}
+                        style={{ padding: '10px 10px', backgroundColor: '#fff0f0', color: '#cc0000', border: '2px solid #cc0000', fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif', textAlign: 'center' as const }}
                       >
                         Delete
                       </button>

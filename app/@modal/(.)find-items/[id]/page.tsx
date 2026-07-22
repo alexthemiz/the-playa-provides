@@ -190,7 +190,7 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
               )}
 
               {/* CTA — wraps so the button row never overflows on narrow widths */}
-              <style>{`.fi-action-row { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px; width: 100%; }`}</style>
+              <style>{`.fi-action-row { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px; width: 100%; } .fi-action-row > * { flex: 1 1 0; text-align: center; }`}</style>
               {isOwner ? (
                 <div className="fi-action-row">
                   {item.is_on_loan ? (
@@ -303,11 +303,11 @@ const actionButtonStyle: React.CSSProperties = {
   boxShadow: `3px 3px 0 ${INK}`, backgroundColor: TEAL, color: '#fff',
   fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem', fontFamily: 'Outfit, sans-serif',
 };
-const editBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#fff', color: TEAL, border: `2px solid ${TEAL}`, fontSize: '13px', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' };
-const transferBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#fff', color: MUSTARD, border: `2px solid ${MUSTARD}`, fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' };
-const deleteBtnStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '2px solid #cc0000', fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' };
-const shareInlineBtnStyle: React.CSSProperties = { width: 'auto', flex: '0 0 auto', padding: '10px 20px', marginTop: 0, border: `2px solid ${INK}`, backgroundColor: '#fff', fontSize: '13px', whiteSpace: 'nowrap' as const };
-const disabledPillStyle: React.CSSProperties = { padding: '10px 20px', backgroundColor: '#f5f5f5', color: '#aaa', border: '2px solid #e0e0e0', fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' };
+const editBtnStyle: React.CSSProperties = { padding: '10px 10px', backgroundColor: '#fff', color: TEAL, border: `2px solid ${TEAL}`, fontSize: '13px', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif', textAlign: 'center' as const };
+const transferBtnStyle: React.CSSProperties = { padding: '10px 10px', backgroundColor: '#fff', color: MUSTARD, border: `2px solid ${MUSTARD}`, fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' };
+const deleteBtnStyle: React.CSSProperties = { padding: '10px 10px', backgroundColor: '#fff0f0', color: '#cc0000', border: '2px solid #cc0000', fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif', textAlign: 'center' as const };
+const shareInlineBtnStyle: React.CSSProperties = { width: 'auto', flex: '1 1 0', padding: '10px 10px', marginTop: 0, border: `2px solid ${INK}`, backgroundColor: '#fff', fontSize: '13px', whiteSpace: 'nowrap' as const };
+const disabledPillStyle: React.CSSProperties = { padding: '10px 10px', backgroundColor: '#f5f5f5', color: '#aaa', border: '2px solid #e0e0e0', fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif', textAlign: 'center' as const };
 
 const deleteOverlayStyle: React.CSSProperties = { position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100, padding: '20px' };
 const deleteModalStyle: React.CSSProperties = { backgroundColor: '#fff', padding: '24px', borderRadius: '16px', maxWidth: '400px', width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' };
