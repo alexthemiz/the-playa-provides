@@ -876,6 +876,15 @@ function memberGridStyle(editMode: boolean): React.CSSProperties {
     gridTemplateColumns: editMode
       ? 'minmax(140px, 180px) 110px 90px 80px minmax(300px, 1fr) auto'
       : 'minmax(140px, 180px) 110px 90px 80px minmax(300px, 1fr)',
+    // Explicit floor matching the column minimums above (180+110+90+80+300
+    // +gaps, plus a conservative ~150px for the Actions column in edit mode).
+    // Don't rely on the grid's intrinsic/auto width implicitly exceeding the
+    // viewport to trigger the parent's overflow-x:auto scrollbar — that
+    // depends on browser intrinsic-sizing behavior for grid items (like the
+    // wish-list cell, which now has its own overflow:hidden for the 2-row
+    // cap) that isn't reliable across engines. A hard minWidth forces the
+    // scrollbar deterministically instead.
+    minWidth: editMode ? '920px' : '760px',
     gap: '10px',
     alignItems: 'center',
   };
