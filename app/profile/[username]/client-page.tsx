@@ -1009,12 +1009,12 @@ export default function PublicProfilePage() {
               <div>
                 <p style={{ ...subheadStyle, marginBottom: '8px' }}>Previous Years</p>
                 {affiliations.filter((a: any) => a.year !== 2026).length > 0 ? (
-                  <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '14px' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap' as const, rowGap: '12px', columnGap: '22px' }}>
                     {affiliations.filter((aff: any) => aff.year !== 2026).map((aff: any) => {
                       const campName = (aff.camps as any)?.display_name ?? null;
                       const campSlug = (aff.camps as any)?.slug ?? null;
                       return (
-                        <div key={aff.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div key={aff.id} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                           <span style={{ ...subheadStyle, marginBottom: 0 }}>{aff.year}:</span>
                           {aff.is_open_camping ? (
                             <span style={camp2026OpenCampingStyle}>Open Camping</span>
