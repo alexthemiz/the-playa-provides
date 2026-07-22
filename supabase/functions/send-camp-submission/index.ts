@@ -66,10 +66,6 @@ serve(async (req: Request) => {
                 <td style="padding: 10px;">${formData.public_email || '—'}</td>
               </tr>
               <tr>
-                <td style="padding: 10px; font-weight: bold;">About the Camp</td>
-                <td style="padding: 10px;">${formData.about_camp || '—'}</td>
-              </tr>
-              <tr style="background: #f9f9f9;">
                 <td style="padding: 10px; font-weight: bold;">Accepting Campers?</td>
                 <td style="padding: 10px;">${formData.accepting_campers ? 'Yes' : 'No'}</td>
               </tr>

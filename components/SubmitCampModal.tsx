@@ -33,7 +33,6 @@ export default function SubmitCampModal({ onClose }: SubmitCampModalProps) {
     website: '',
     instagram: '',
     public_email: '',
-    about_camp: '',
     accepting_campers: false
   });
 
@@ -179,11 +178,6 @@ export default function SubmitCampModal({ onClose }: SubmitCampModalProps) {
                   <input type="checkbox" id="new_campers" checked={formData.accepting_campers} onChange={(e) => setFormData({ ...formData, accepting_campers: e.target.checked })} style={{ width: '15px', height: '15px', accentColor: TEAL, flexShrink: 0 }} />
                   <span style={labelStyle}>Accepting new campers?</span>
                 </label>
-              </div>
-
-              <div>
-                <label style={labelStyle}>About the Camp</label>
-                <textarea style={{ ...inputStyle, height: '64px', resize: 'vertical' as const }} value={formData.about_camp} onChange={field('about_camp')} placeholder="Brief history or camp mission..." />
               </div>
 
               {submitError && <p style={{ color: '#dc2626', fontSize: '0.85rem', textAlign: 'center' as const, margin: 0 }}>{submitError}</p>}
