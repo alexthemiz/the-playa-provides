@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
@@ -696,12 +696,16 @@ export default function CampPage() {
           <p style={{ color: '#9A8878', fontSize: '0.9rem', fontStyle: 'italic' as const }}>No members listed yet.</p>
         ) : (
           <div style={{ overflowX: 'auto' as const, backgroundColor: '#FDFAF4', border: '1.5px solid rgba(28,22,16,0.12)' }}>
-            {/* Shared width:max-content wrapper — sized to the widest row's
-                real content (header included). Every row inside uses
-                width:100% of THIS box (not the outer overflowX:auto box),
-                so the header's tan background stretches to match the widest
-                data row instead of stopping at its own shorter content. */}
-            <div style={{ width: 'max-content' as const }}>
+            {/* Shared wrapper — sized to the widest row's real content
+                (header included), but never narrower than the visible
+                scroll container (minWidth:100%). Every row inside uses
+                width:100% of THIS box (not the outer overflowX:auto box):
+                when content is narrower than the container, minWidth wins
+                and every row (header included) stretches to fill the
+                visible width; when content is wider, width:max-content
+                wins and the box — and the horizontal scroll it enables —
+                grows to match instead. */}
+            <div style={{ width: 'max-content' as const, minWidth: '100%' as const }}>
               {/* Header row */}
               <div style={{ ...memberGridStyle(editMode), padding: '12px 15px', fontSize: '0.6rem', fontWeight: 700, color: '#4A3828', textTransform: 'uppercase' as const, letterSpacing: '0.08em', fontFamily: "'Space Mono', monospace", borderBottom: '1.5px solid rgba(28,22,16,0.12)', backgroundColor: '#EDE5D0' }}>
                 <div>Name</div>
@@ -764,20 +768,8 @@ export default function CampPage() {
                     </div>
                   </div>
 
-                  {/* Wish List column — grid-auto-flow:column with exactly 3
-                      rows means tags fill top-to-bottom then start a new
-                      column, so it's ALWAYS exactly 3 rows tall (never 4+),
-                      and grows wider (more columns) to fit every tag rather
-                      than clipping any of them. The table's horizontal
-                      scroll (enabled by the shared width:max-content wrapper
-                      around the header + rows) is what makes that extra
-                      width reachable instead of just running off-screen. */}
-                  <div style={{ display: 'grid', gridTemplateRows: 'repeat(3, auto)', gridAutoFlow: 'column' as const, gridAutoColumns: 'max-content', gap: '4px', alignItems: 'center' }}>
-                    {wishList.length > 0
-                      ? wishList.map(tag => <span key={tag} style={wishTagStyle}>{tag}</span>)
-                      : <span style={{ fontSize: '12px', color: '#9A8878' }}>—</span>
-                    }
-                  </div>
+                  {/* Wish List column */}
+                  <WishListCell tags={wishList} />
 
                   {/* Actions column — only in edit mode, never for self */}
                   {editMode && (
@@ -917,6 +909,69 @@ const wishTagStyle: React.CSSProperties = {
   fontSize: '0.78rem', fontWeight: 600,
   fontFamily: "'Space Mono', monospace",
 };
+
+const WISH_GAP_PX = 4;
+const WISH_MIN_WIDTH_PX = 300;
+
+// Chips keep their own natural width (a short tag like "tent" never gets
+// stretched to match a long one) and flow left-to-right, wrapping like
+// text — the opposite of a CSS-grid column layout, which would lock every
+// chip in a shared column to that column's widest member. Row count is
+// capped at 3 by finding the SMALLEST column width that wraps this
+// member's chips into 3 lines or fewer (simulating the same greedy
+// line-break flex-wrap already does, in JS, off the DOM instead of via
+// repeated reflows) — never wider than necessary, so a short list stays
+// at 1 or 2 rows instead of being forced to 3. If that minimal width is
+// wider than the table can show, the table's existing horizontal scroll
+// (see the shared max-content wrapper around the header + rows) takes
+// over — the row stays visually 3 lines tall and simply extends sideways.
+function WishListCell({ tags }: { tags: string[] }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(WISH_MIN_WIDTH_PX);
+
+  useLayoutEffect(() => {
+    const el = containerRef.current;
+    if (!el || tags.length === 0) return;
+    const chipWidths = Array.from(el.children).map(c => (c as HTMLElement).getBoundingClientRect().width);
+    if (chipWidths.length === 0) return;
+
+    const linesAt = (w: number) => {
+      let lines = 1;
+      let cur = 0;
+      for (const cw of chipWidths) {
+        const next = cur === 0 ? cw : cur + WISH_GAP_PX + cw;
+        if (next > w && cur !== 0) { lines++; cur = cw; }
+        else { cur = next; }
+      }
+      return lines;
+    };
+
+    const maxChipWidth = Math.max(...chipWidths);
+    const totalWidth = chipWidths.reduce((a, b) => a + b, 0) + WISH_GAP_PX * (chipWidths.length - 1);
+
+    if (linesAt(WISH_MIN_WIDTH_PX) <= 3) {
+      setWidth(WISH_MIN_WIDTH_PX);
+      return;
+    }
+    let lo = maxChipWidth;
+    let hi = totalWidth;
+    while (lo < hi) {
+      const mid = Math.floor((lo + hi) / 2);
+      if (linesAt(mid) <= 3) hi = mid; else lo = mid + 1;
+    }
+    setWidth(Math.ceil(lo));
+  }, [tags]);
+
+  if (tags.length === 0) {
+    return <span style={{ fontSize: '12px', color: '#9A8878' }}>—</span>;
+  }
+
+  return (
+    <div ref={containerRef} style={{ display: 'flex', flexWrap: 'wrap' as const, gap: `${WISH_GAP_PX}px`, alignItems: 'center', width: `${width}px` }}>
+      {tags.map(tag => <span key={tag} style={wishTagStyle}>{tag}</span>)}
+    </div>
+  );
+}
 
 const mgmtBtnStyle: React.CSSProperties = {
   padding: '3px 10px', fontSize: '0.7rem', fontWeight: 600,
