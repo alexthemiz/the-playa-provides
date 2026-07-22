@@ -758,8 +758,12 @@ export default function CampPage() {
                     </div>
                   </div>
 
-                  {/* Wish List column */}
-                  <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '4px', alignItems: 'center' }}>
+                  {/* Wish List column — capped to 2 rows of tags; the column's
+                      300px min-width (memberGridStyle) is what keeps 2 rows
+                      comfortably fittable instead of squeezing to 1-per-line
+                      as the window narrows — the table scrolls horizontally
+                      before that width shrinks further. */}
+                  <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '4px', alignItems: 'center', maxHeight: '56px', overflow: 'hidden' }}>
                     {wishList.length > 0
                       ? wishList.map(tag => <span key={tag} style={wishTagStyle}>{tag}</span>)
                       : <span style={{ fontSize: '12px', color: '#9A8878' }}>—</span>
