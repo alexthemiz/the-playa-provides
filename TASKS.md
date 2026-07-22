@@ -1,6 +1,6 @@
 # The Playa Provides — Task List
 
-_Last updated: 2026-07-21_
+_Last updated: 2026-07-22_
 
 > **Note on this file's shape:** this is a living project-state document, not a changelog. It's meant to be uploaded as context (e.g. to a Claude Project) without dragging in months of session-by-session history — if you want the archaeology of *how* something was built, `git log -p TASKS.md` and the commit history have it. What lives here is: what's actually shipped and how it currently works, what's mid-flight, and what's next.
 
@@ -71,7 +71,8 @@ _Last updated: 2026-07-21_
 
 ### Camps
 - `camps` + `user_camp_affiliations` tables. Claim flow (`camp_claim_requests`, approve/deny only via service role — no client UPDATE policy). Camp pages at `/camps/[slug]` with member management, roles, editing. No `/camps` index route exists yet (404s) — see Ideas & Long Term.
-- Seeded from Burning Man's public camp-placement archives (2015–2025), ~5,300 camps.
+- Seeded from Burning Man's public camp-placement archives (2015–2025), ~5,300 camps; then synced with BM's live 2026 registered-camp roster via the public API (2026-07-21) — now ~5,460 camps, of which 1,199 are flagged `returning_2026 = true`.
+- **Two import scripts, different data sources:** `scripts/import-bm-camps.js` reads the post-event S3 archives (`bm-innovate.s3.amazonaws.com/archive/<year>/camps.json`) — historical only, one year lags. `scripts/import-bm-2026-camps.js` hits the live public API (`api.burningman.org/api/camp?year=2026`, `X-API-Key` header, key in `.env.local` as `BURNING_MAN_API_KEY`) for the current year. Both dedupe by normalized name (BM's `uid` is per-year so it can't be the join key across years) and never overwrite user-edited fields. The 2026 script is idempotent — safe to re-run.
 
 ### Design system
 - "Playful Field Guide" — see CLAUDE.md for the full token list. Shipped sitewide across all pages/components. No Tailwind utility classes remain in `app/` or `components/` as of 2026-07-20.
@@ -100,7 +101,8 @@ _Last updated: 2026-07-21_
 - [ ] **Camp-scoped gear sharing** — share with campmates only, via the existing `visibility` column.
 - [ ] **Inventory-first reframe** — lead site messaging with gear organization as the primary value prop, lending as a bonus. Touches homepage copy, onboarding, list-item form.
 - [ ] **Camps Phase 2** — campmates filter on find-items (partially done), self-serve claiming polish, camp gear inventory, resources-directory linking.
-- [ ] **BM API: 2026 camp placements** — hit the live BM API once 2026 placement is announced (~May 2026) to populate `playa_location`; also the 2026 S3 archive import (~March 2027) via `scripts/import-bm-camps.js`.
+- [ ] **BM API: 2026 camp placements** — the roster sync already ran (`scripts/import-bm-2026-camps.js`), but placement addresses (`location_string`) are still empty in the API. **Re-run that same script after BM publishes placement (~late August, once the Golden Spike is set)** to fill `camps.playa_location` in one pass — it's idempotent and will only touch the location field. Separately, the post-event 2026 S3 archive import (~March 2027) via `scripts/import-bm-camps.js` remains for the permanent historical record.
+- [ ] **Map the on-playa resources page** (deferred, revisit if resources-page interest grows) — BM's 2026 GIS data (github.com/burningmantech/innovate-GIS-data, `2026/GeoJSON/`: street_lines, street_outlines, city_blocks, plazas, toilets, trash_fence) can render a real BRC base map in the existing Leaflet setup, with a BRC-address→lat/lon geocoder (clock position + street-letter radius from the street geometry) to pin camps/resources. Camp placements come from the API (above), not the GIS repo. Terms allow community/non-commercial use — TPP qualifies.
 - [ ] **Camp edit page — duplicate notice** — small UI note pointing to camps@theplayaprovides.com.
 - [ ] **Camp page member chat** — real-time or async, members-only. Needs scoping.
 - [ ] **SEO noindex for restricted items** — campmates-only/followers-only listings should get a noindex meta tag; public ones stay indexable.
