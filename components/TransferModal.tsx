@@ -20,15 +20,19 @@ export default function TransferModal({ item, ownerId, onClose, onSuccess }: Pro
   const handleLookup = async () => {
     setLookupError('')
     setMatched(null)
-    if (!query.trim()) return
-    const isEmail = query.includes('@')
+    const q = query.trim().toLowerCase()
+    if (!q) return
+    const isEmail = q.includes('@')
     let profileQuery = supabase.from('profiles').select('id, username, preferred_name')
     if (isEmail) {
-      profileQuery = profileQuery.eq('contact_email', query.trim().toLowerCase())
+      // Match the account's login email (always set at signup) OR the optional
+      // contact_email. Most accounts never set contact_email, so matching only
+      // that field failed to find the majority of registered users by email.
+      profileQuery = profileQuery.or(`email.eq.${q},contact_email.eq.${q}`)
     } else {
-      profileQuery = profileQuery.eq('username', query.trim().toLowerCase())
+      profileQuery = profileQuery.eq('username', q)
     }
-    const { data } = await profileQuery.maybeSingle()
+    const { data } = await profileQuery.limit(1).maybeSingle()
     if (!data) {
       setLookupError("No account found. Make sure they're registered on The Playa Provides.")
     } else if (data.id === ownerId) {
