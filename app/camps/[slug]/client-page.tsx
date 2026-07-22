@@ -696,17 +696,23 @@ export default function CampPage() {
           <p style={{ color: '#9A8878', fontSize: '0.9rem', fontStyle: 'italic' as const }}>No members listed yet.</p>
         ) : (
           <div style={{ overflowX: 'auto' as const, backgroundColor: '#FDFAF4', border: '1.5px solid rgba(28,22,16,0.12)' }}>
-            {/* Header row */}
-            <div style={{ ...memberGridStyle(editMode), padding: '12px 15px', fontSize: '0.6rem', fontWeight: 700, color: '#4A3828', textTransform: 'uppercase' as const, letterSpacing: '0.08em', fontFamily: "'Space Mono', monospace", borderBottom: '1.5px solid rgba(28,22,16,0.12)', backgroundColor: '#EDE5D0' }}>
-              <div>Name</div>
-              <div>Location</div>
-              <div>Camp Years</div>
-              <div style={{ textAlign: 'center' as const, whiteSpace: 'nowrap' as const }}>2026 Camp?</div>
-              <div>Wish List</div>
-              {editMode && <div>Actions</div>}
-            </div>
+            {/* Shared width:max-content wrapper — sized to the widest row's
+                real content (header included). Every row inside uses
+                width:100% of THIS box (not the outer overflowX:auto box),
+                so the header's tan background stretches to match the widest
+                data row instead of stopping at its own shorter content. */}
+            <div style={{ width: 'max-content' as const }}>
+              {/* Header row */}
+              <div style={{ ...memberGridStyle(editMode), padding: '12px 15px', fontSize: '0.6rem', fontWeight: 700, color: '#4A3828', textTransform: 'uppercase' as const, letterSpacing: '0.08em', fontFamily: "'Space Mono', monospace", borderBottom: '1.5px solid rgba(28,22,16,0.12)', backgroundColor: '#EDE5D0' }}>
+                <div>Name</div>
+                <div>Location</div>
+                <div>Camp Years</div>
+                <div style={{ textAlign: 'center' as const, whiteSpace: 'nowrap' as const }}>2026 Camp?</div>
+                <div>Wish List</div>
+                {editMode && <div>Actions</div>}
+              </div>
 
-            {members.map(member => {
+              {members.map(member => {
               const isOwner = camp.page_owner_id === member.id;
               const isCurrentUser = member.id === currentUserId;
               const wishList: string[] = Array.isArray(member.wish_list) ? member.wish_list : [];
@@ -758,15 +764,15 @@ export default function CampPage() {
                     </div>
                   </div>
 
-                  {/* Wish List column — grid-auto-flow:column with exactly 2
+                  {/* Wish List column — grid-auto-flow:column with exactly 3
                       rows means tags fill top-to-bottom then start a new
-                      column, so it's ALWAYS exactly 2 rows tall (never 3+),
+                      column, so it's ALWAYS exactly 3 rows tall (never 4+),
                       and grows wider (more columns) to fit every tag rather
                       than clipping any of them. The table's horizontal
-                      scroll (memberGridStyle's width:max-content) is what
-                      makes that extra width reachable instead of just
-                      running off-screen. */}
-                  <div style={{ display: 'grid', gridTemplateRows: 'repeat(2, auto)', gridAutoFlow: 'column' as const, gridAutoColumns: 'max-content', gap: '4px', alignItems: 'center' }}>
+                      scroll (enabled by the shared width:max-content wrapper
+                      around the header + rows) is what makes that extra
+                      width reachable instead of just running off-screen. */}
+                  <div style={{ display: 'grid', gridTemplateRows: 'repeat(3, auto)', gridAutoFlow: 'column' as const, gridAutoColumns: 'max-content', gap: '4px', alignItems: 'center' }}>
                     {wishList.length > 0
                       ? wishList.map(tag => <span key={tag} style={wishTagStyle}>{tag}</span>)
                       : <span style={{ fontSize: '12px', color: '#9A8878' }}>—</span>
@@ -796,6 +802,7 @@ export default function CampPage() {
                 </div>
               );
             })}
+            </div>
           </div>
         )}
       </div>
@@ -883,14 +890,15 @@ function memberGridStyle(editMode: boolean): React.CSSProperties {
     gridTemplateColumns: editMode
       ? '160px 110px 90px 80px minmax(300px, max-content) auto'
       : '160px 110px 90px 80px minmax(300px, max-content)',
-    // width:max-content (not the default auto, which behaves like a plain
-    // block box and stretches/shrinks to fill the parent) makes the row's
-    // own box size to the sum of its columns' real content need — verified
-    // this is what makes the row reliably overflow (and scroll) whenever a
-    // member's wish list needs more width than the viewport, in a way
-    // that doesn't depend on browser-specific overflow-propagation
-    // behavior the way relying on plain auto-width overflow did.
-    width: 'max-content',
+    // width:100% of the shared max-content wrapper (see the JSX around the
+    // header/rows) — NOT the default auto, which behaves like a plain
+    // block box and just fills whatever parent it's given, and NOT an
+    // independent max-content per row either, which left the header (short
+    // label text) narrower than the widest data row, so its background
+    // color stopped short instead of spanning the whole table. Every row
+    // (header included) now stretches to match the widest row's real
+    // content width, deterministically, in every browser.
+    width: '100%',
     gap: '10px',
     alignItems: 'center',
   };
