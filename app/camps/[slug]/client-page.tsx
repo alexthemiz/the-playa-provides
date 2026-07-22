@@ -758,12 +758,15 @@ export default function CampPage() {
                     </div>
                   </div>
 
-                  {/* Wish List column — capped to 2 rows of tags; the column's
-                      300px min-width (memberGridStyle) is what keeps 2 rows
-                      comfortably fittable instead of squeezing to 1-per-line
-                      as the window narrows — the table scrolls horizontally
-                      before that width shrinks further. */}
-                  <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: '4px', alignItems: 'center', maxHeight: '56px', overflow: 'hidden' }}>
+                  {/* Wish List column — grid-auto-flow:column with exactly 2
+                      rows means tags fill top-to-bottom then start a new
+                      column, so it's ALWAYS exactly 2 rows tall (never 3+),
+                      and grows wider (more columns) to fit every tag rather
+                      than clipping any of them. The table's horizontal
+                      scroll (memberGridStyle's width:max-content) is what
+                      makes that extra width reachable instead of just
+                      running off-screen. */}
+                  <div style={{ display: 'grid', gridTemplateRows: 'repeat(2, auto)', gridAutoFlow: 'column' as const, gridAutoColumns: 'max-content', gap: '4px', alignItems: 'center' }}>
                     {wishList.length > 0
                       ? wishList.map(tag => <span key={tag} style={wishTagStyle}>{tag}</span>)
                       : <span style={{ fontSize: '12px', color: '#9A8878' }}>—</span>
@@ -867,24 +870,27 @@ const sectionHeadStyle: React.CSSProperties = {
 function memberGridStyle(editMode: boolean): React.CSSProperties {
   return {
     display: 'grid',
-    // Fixed-width columns first, wish list last so it absorbs all remaining space.
-    // Wish list's 300px floor forces horizontal scroll on phones instead of
-    // squeezing chips into a one-per-line stack.
-    // Header row and member rows are separate grid containers — they only stay
-    // aligned because every column except the last is a fixed width. Don't use
-    // auto/fit-content here or the header drifts from the rows.
+    // Fixed PIXEL widths (not minmax ranges) for every column except the
+    // last — since the header and every member row are independent grid
+    // containers (not one shared grid), a ranged column like
+    // minmax(140px,180px) can resolve to a DIFFERENT actual width per row
+    // depending on that row's own content, silently drifting columns out
+    // of alignment across rows. A flat number can't drift.
+    // Wish list is last and uses max-content (via the cell's own
+    // grid-auto-flow:column layout, see the Wish List cell below) with a
+    // 300px floor, so it's exactly as wide as that member's wish list
+    // needs — never wider than necessary, never clipping.
     gridTemplateColumns: editMode
-      ? 'minmax(140px, 180px) 110px 90px 80px minmax(300px, 1fr) auto'
-      : 'minmax(140px, 180px) 110px 90px 80px minmax(300px, 1fr)',
-    // Explicit floor matching the column minimums above (180+110+90+80+300
-    // +gaps, plus a conservative ~150px for the Actions column in edit mode).
-    // Don't rely on the grid's intrinsic/auto width implicitly exceeding the
-    // viewport to trigger the parent's overflow-x:auto scrollbar — that
-    // depends on browser intrinsic-sizing behavior for grid items (like the
-    // wish-list cell, which now has its own overflow:hidden for the 2-row
-    // cap) that isn't reliable across engines. A hard minWidth forces the
-    // scrollbar deterministically instead.
-    minWidth: editMode ? '920px' : '760px',
+      ? '160px 110px 90px 80px minmax(300px, max-content) auto'
+      : '160px 110px 90px 80px minmax(300px, max-content)',
+    // width:max-content (not the default auto, which behaves like a plain
+    // block box and stretches/shrinks to fill the parent) makes the row's
+    // own box size to the sum of its columns' real content need — verified
+    // this is what makes the row reliably overflow (and scroll) whenever a
+    // member's wish list needs more width than the viewport, in a way
+    // that doesn't depend on browser-specific overflow-propagation
+    // behavior the way relying on plain auto-width overflow did.
+    width: 'max-content',
     gap: '10px',
     alignItems: 'center',
   };
