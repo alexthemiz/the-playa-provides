@@ -189,27 +189,28 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
                 </div>
               )}
 
-              {/* CTA */}
+              {/* CTA — wraps so the button row never overflows on narrow widths */}
+              <style>{`.fi-action-row { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px; width: 100%; }`}</style>
               {isOwner ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+                <div className="fi-action-row">
                   {item.is_on_loan ? (
                     <>
                       <span style={disabledPillStyle}>Edit</span>
                       <span style={disabledPillStyle}>Transfer</span>
                       <ShareButton itemId={item.id} itemName={item.item_name} style={shareInlineBtnStyle} />
-                      <span style={{ ...disabledPillStyle, marginLeft: 'auto' }}>Delete</span>
+                      <span style={disabledPillStyle}>Delete</span>
                     </>
                   ) : (
                     <>
                       <a href={`/list-item?edit=${item.id}`} style={editBtnStyle}>Edit</a>
                       <button onClick={() => setShowTransferFlow(true)} style={transferBtnStyle}>Transfer</button>
                       <ShareButton itemId={item.id} itemName={item.item_name} style={shareInlineBtnStyle} />
-                      <button onClick={() => setConfirmDelete(true)} style={{ ...deleteBtnStyle, marginLeft: 'auto' }}>Delete</button>
+                      <button onClick={() => setConfirmDelete(true)} style={deleteBtnStyle}>Delete</button>
                     </>
                   )}
                 </div>
               ) : isBorrower && myLoan && myLoan.status === 'active' ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+                <div className="fi-action-row">
                   <button
                     onClick={handleReturnItem}
                     disabled={returningItem}
@@ -217,18 +218,18 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
                   >
                     {returningItem ? 'Returning...' : 'Return Item'}
                   </button>
-                  <ShareButton itemId={item.id} itemName={item.item_name} style={{ ...shareInlineBtnStyle, marginLeft: 'auto' }} />
+                  <ShareButton itemId={item.id} itemName={item.item_name} style={shareInlineBtnStyle} />
                 </div>
               ) : isBorrower && myLoan && myLoan.status === 'return_pending' ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+                <div className="fi-action-row">
                   <span style={disabledPillStyle}>Return Pending — waiting on owner to confirm</span>
                 </div>
               ) : isBorrower && myLoan && myLoan.status === 'pending_handover' ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+                <div className="fi-action-row">
                   <span style={disabledPillStyle}>Pending handover — check your inventory</span>
                 </div>
               ) : (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+                <div className="fi-action-row">
                   {item.is_on_loan ? (
                     <span style={disabledPillStyle}>Currently on loan</span>
                   ) : session ? (
@@ -240,7 +241,7 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
                       Log In to Request
                     </a>
                   )}
-                  <ShareButton itemId={item.id} itemName={item.item_name} style={{ ...shareInlineBtnStyle, marginLeft: 'auto' }} />
+                  <ShareButton itemId={item.id} itemName={item.item_name} style={shareInlineBtnStyle} />
                 </div>
               )}
 

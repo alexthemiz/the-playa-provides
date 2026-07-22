@@ -702,15 +702,16 @@ export default function FindItemsPage() {
                 </div>
               )}
 
-              {/* CTA */}
+              {/* CTA — wraps so the button row never overflows on narrow widths */}
+              <style>{`.fi-action-row { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px; width: 100%; }`}</style>
               {userId && selectedItem.user_id === userId ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+                <div className="fi-action-row">
                   {selectedItem.is_on_loan ? (
                     <>
                       <span style={disabledPillStyle}>Edit</span>
                       <span style={disabledPillStyle}>Transfer</span>
                       <ShareButton itemId={selectedItem.id} itemName={selectedItem.item_name} style={shareInlineBtnStyle} />
-                      <span style={{ ...disabledPillStyle, marginLeft: 'auto' }}>Delete</span>
+                      <span style={disabledPillStyle}>Delete</span>
                     </>
                   ) : (
                     <>
@@ -729,7 +730,7 @@ export default function FindItemsPage() {
                       <ShareButton itemId={selectedItem.id} itemName={selectedItem.item_name} style={shareInlineBtnStyle} />
                       <button
                         onClick={() => setConfirmDeleteItem(true)}
-                        style={{ marginLeft: 'auto', padding: '10px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '2px solid #cc0000', fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' }}
+                        style={{ padding: '10px 20px', backgroundColor: '#fff0f0', color: '#cc0000', border: '2px solid #cc0000', fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif' }}
                       >
                         Delete
                       </button>
@@ -737,7 +738,7 @@ export default function FindItemsPage() {
                   )}
                 </div>
               ) : myLoan && myLoan.borrower_id === userId && myLoan.status === 'active' ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+                <div className="fi-action-row">
                   <button
                     onClick={handleReturnItem}
                     disabled={returningItem}
@@ -745,18 +746,18 @@ export default function FindItemsPage() {
                   >
                     {returningItem ? 'Returning...' : 'Return Item'}
                   </button>
-                  <ShareButton itemId={selectedItem.id} itemName={selectedItem.item_name} style={{ ...shareInlineBtnStyle, marginLeft: 'auto' }} />
+                  <ShareButton itemId={selectedItem.id} itemName={selectedItem.item_name} style={shareInlineBtnStyle} />
                 </div>
               ) : myLoan && myLoan.borrower_id === userId && myLoan.status === 'return_pending' ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+                <div className="fi-action-row">
                   <span style={disabledPillStyle}>Return Pending — waiting on owner to confirm</span>
                 </div>
               ) : myLoan && myLoan.borrower_id === userId && myLoan.status === 'pending_handover' ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+                <div className="fi-action-row">
                   <span style={disabledPillStyle}>Pending handover — check your inventory</span>
                 </div>
               ) : userId ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+                <div className="fi-action-row">
                   {selectedItem.is_on_loan ? (
                     <span style={disabledPillStyle}>Currently on loan</span>
                   ) : (
@@ -764,10 +765,10 @@ export default function FindItemsPage() {
                       Request to {selectedItem.availability_status === 'Available to Keep' ? 'Keep' : 'Borrow'} →
                     </button>
                   )}
-                  <ShareButton itemId={selectedItem.id} itemName={selectedItem.item_name} style={{ ...shareInlineBtnStyle, marginLeft: 'auto' }} />
+                  <ShareButton itemId={selectedItem.id} itemName={selectedItem.item_name} style={shareInlineBtnStyle} />
                 </div>
               ) : (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+                <div className="fi-action-row">
                   {selectedItem.is_on_loan ? (
                     <span style={disabledPillStyle}>Currently on loan</span>
                   ) : (
@@ -775,7 +776,7 @@ export default function FindItemsPage() {
                       Log In to Request →
                     </a>
                   )}
-                  <ShareButton itemId={selectedItem.id} itemName={selectedItem.item_name} style={{ ...shareInlineBtnStyle, marginLeft: 'auto' }} />
+                  <ShareButton itemId={selectedItem.id} itemName={selectedItem.item_name} style={shareInlineBtnStyle} />
                 </div>
               )}
 

@@ -190,43 +190,45 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
             </div>
           )}
 
-          {/* Button row — centered, below text column */}
+          {/* Button row — centered, below text column. Wraps so it never
+              overflows on narrow/mobile widths (or when text renders larger). */}
+          <style>{`.fi-action-row { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px; width: 100%; }`}</style>
           <div style={{ display: 'flex', justifyContent: 'center' as const, gap: '10px', marginTop: '8px' }}>
             {isOwner ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+              <div className="fi-action-row">
                 {onLoan ? (
                   <>
                     <span style={disabledBtnStyle}>Edit Details</span>
                     <span style={disabledBtnStyle}>Transfer</span>
                     <ShareButton itemId={item.id} itemName={item.item_name} style={shareInlineBtnStyle} />
-                    <span style={{ ...disabledBtnStyle, marginLeft: 'auto' }}>Delete Listing</span>
+                    <span style={disabledBtnStyle}>Delete Listing</span>
                   </>
                 ) : (
                   <>
                     <a href={`/list-item?edit=${item.id}`} style={editDetailsBtnStyle}>Edit Details</a>
                     <button onClick={() => setShowTransferFlow(true)} style={transferBtnStyle}>Transfer</button>
                     <ShareButton itemId={item.id} itemName={item.item_name} style={shareInlineBtnStyle} />
-                    <button onClick={() => setConfirmDelete(true)} style={{ ...deleteListingBtnStyle, marginLeft: 'auto' }}>Delete Listing</button>
+                    <button onClick={() => setConfirmDelete(true)} style={deleteListingBtnStyle}>Delete Listing</button>
                   </>
                 )}
               </div>
             ) : isBorrower && myLoan && myLoan.status === 'active' ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+              <div className="fi-action-row">
                 <button style={returnItemBtnStyle} onClick={handleReturnItem} disabled={returningItem}>
                   {returningItem ? 'Returning...' : 'Return Item'}
                 </button>
-                <ShareButton itemId={item.id} itemName={item.item_name} style={{ ...shareInlineBtnStyle, marginLeft: 'auto' }} />
+                <ShareButton itemId={item.id} itemName={item.item_name} style={shareInlineBtnStyle} />
               </div>
             ) : isBorrower && myLoan && myLoan.status === 'return_pending' ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+              <div className="fi-action-row">
                 <span style={disabledBtnStyle}>Return Pending — waiting on owner to confirm</span>
               </div>
             ) : isBorrower && myLoan && myLoan.status === 'pending_handover' ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+              <div className="fi-action-row">
                 <span style={disabledBtnStyle}>Pending handover — check your <Link href="/inventory" style={{ color: '#1E8A82' }}>inventory</Link></span>
               </div>
             ) : session ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+              <div className="fi-action-row">
                 {onLoan ? (
                   <span style={disabledBtnStyle}>Currently on loan</span>
                 ) : (
@@ -234,10 +236,10 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
                     {requestLabel}
                   </button>
                 )}
-                <ShareButton itemId={item.id} itemName={item.item_name} style={{ ...shareInlineBtnStyle, marginLeft: 'auto' }} />
+                <ShareButton itemId={item.id} itemName={item.item_name} style={shareInlineBtnStyle} />
               </div>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}>
+              <div className="fi-action-row">
                 {onLoan ? (
                   <span style={disabledBtnStyle}>Currently on loan</span>
                 ) : (
@@ -245,7 +247,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
                     Log In to Request
                   </a>
                 )}
-                <ShareButton itemId={item.id} itemName={item.item_name} style={{ ...shareInlineBtnStyle, marginLeft: 'auto' }} />
+                <ShareButton itemId={item.id} itemName={item.item_name} style={shareInlineBtnStyle} />
               </div>
             )}
           </div>
