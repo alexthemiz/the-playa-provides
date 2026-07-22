@@ -34,17 +34,25 @@ export default function LendModal({ item, ownerId, onClose, onSuccess }: Props) 
     setMatched(null)
     const q = query.trim().toLowerCase()
     if (!q) return
-    const isEmail = q.includes('@')
-    let profileQuery = supabase.from('profiles').select('id, username, preferred_name')
-    if (isEmail) {
-      // Match the account's login email (always set at signup) OR the optional
-      // contact_email. Most accounts never set contact_email, so matching only
-      // that field failed to find the majority of registered users by email.
-      profileQuery = profileQuery.or(`email.eq.${q},contact_email.eq.${q}`)
+
+    let data: { id: string; username: string; preferred_name: string | null } | null = null
+
+    if (q.includes('@')) {
+      // contact_email is the address a user has explicitly opted to be found
+      // by (Settings: "Contact Email for Messaging") — once set, it fully
+      // replaces their login email for lookup purposes. Login email is only
+      // a fallback for accounts that never set one (treats '' as unset too).
+      const byContact = await supabase.from('profiles').select('id, username, preferred_name').ilike('contact_email', q).maybeSingle()
+      data = byContact.data
+      if (!data) {
+        const byLogin = await supabase.from('profiles').select('id, username, preferred_name').ilike('email', q).or('contact_email.is.null,contact_email.eq.').maybeSingle()
+        data = byLogin.data
+      }
     } else {
-      profileQuery = profileQuery.eq('username', q)
+      const byUsername = await supabase.from('profiles').select('id, username, preferred_name').eq('username', q).maybeSingle()
+      data = byUsername.data
     }
-    const { data } = await profileQuery.limit(1).maybeSingle()
+
     if (!data) {
       setLookupError("No account found. Make sure they're registered on The Playa Provides.")
     } else if (data.id === ownerId) {
