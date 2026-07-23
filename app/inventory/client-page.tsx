@@ -712,8 +712,8 @@ export default function InventoryPage() {
               <col style={{ width: '190px' }} />
               <col style={{ width: '100px' }} />
               <col style={{ width: '100px' }} />
-              <col style={{ width: '250px' }} />
-              <col style={{ width: '240px' }} />
+              <col style={{ width: '265px' }} />
+              <col style={{ width: '225px' }} />
               <col style={{ width: '180px' }} />
             </colgroup>
             <thead>
@@ -783,6 +783,14 @@ export default function InventoryPage() {
 
                     {/* STATUS TOGGLE */}
                     <td style={tdStyle}>
+                      {/* width:max-content (not fit-content — verified via
+                          repro that fit-content collapses a flex-wrap child
+                          down to its narrowest single item here, wrapping
+                          every button onto its own line) so the select
+                          below (width:100% of THIS wrapper, not the full
+                          table cell) hugs the actual rendered width of the
+                          3-button row instead of stretching wider than it. */}
+                      <div style={{ width: 'max-content' as const }}>
                       <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' as const }}>
                         {[
                           { value: 'Available to Borrow', label: 'To Borrow' },
@@ -825,6 +833,7 @@ export default function InventoryPage() {
                           >Following &amp; Campmates</option>
                         </select>
                       )}
+                      </div>
                     </td>
 
                     {/* ACTION BUTTON */}
