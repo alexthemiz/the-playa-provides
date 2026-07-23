@@ -897,7 +897,7 @@ export default function HomePage() {
         <style>{`
           .resources-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
           .resources-col { display: flex; flex-direction: column; }
-          .resources-btn { padding: 13px 28px; font-weight: 700; font-size: 0.9rem; border: 2px solid ${INK}; box-shadow: 3px 3px 0 ${INK}; white-space: nowrap; margin-top: auto; display: block; text-align: center; }
+          .resources-btn { padding: 13px 28px; font-weight: 700; font-size: 0.9rem; border: 2px solid ${INK}; box-shadow: 3px 3px 0 ${INK}; white-space: nowrap; margin-top: auto; align-self: flex-start; display: inline-block; text-align: center; }
           @media (max-width: 640px) {
             .resources-grid { grid-template-columns: 1fr; gap: 28px; }
           }
