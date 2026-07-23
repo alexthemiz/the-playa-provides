@@ -578,7 +578,7 @@ export default function HomePage() {
               }}>
                 Browse Gear →
               </Link>
-              <Link href="/list-item" style={{
+              <Link href="/add-item" style={{
                 padding: '13px 28px', backgroundColor: 'transparent', color: INK,
                 fontWeight: 700, fontSize: '0.95rem', textDecoration: 'none',
                 border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,

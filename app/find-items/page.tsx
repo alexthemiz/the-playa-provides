@@ -725,7 +725,7 @@ export default function FindItemsPage() {
                   ) : (
                     <>
                       <a
-                        href={`/list-item?edit=${selectedItem.id}`}
+                        href={`/add-item?edit=${selectedItem.id}`}
                         style={{ padding: '10px 10px', backgroundColor: '#fff', color: TEAL, border: `2px solid ${TEAL}`, fontSize: '13px', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', whiteSpace: 'nowrap' as const, fontFamily: 'Outfit, sans-serif', textAlign: 'center' as const }}
                       >
                         Edit

@@ -68,7 +68,7 @@ export default function WelcomeModal({ userId, onClose }: WelcomeModalProps) {
           <button onClick={() => goTo('/find-items')} style={secondaryBtnStyle}>
             Browse<br />Items
           </button>
-          <button onClick={() => goTo('/list-item')} style={secondaryBtnStyle}>
+          <button onClick={() => goTo('/add-item')} style={secondaryBtnStyle}>
             List<br />Items
           </button>
           {username && (

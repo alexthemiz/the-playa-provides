@@ -391,7 +391,7 @@ export default function Header() {
           <Link href="/resources" style={navLinkStyle('/resources')} className="hover-nav-link">On-Playa Resources</Link>
           <span style={pipeStyle}>|</span>
           <Link href="/find-items" style={navLinkStyle('/find-items')} className="hover-nav-link">Find Items</Link>
-          <Link href="/list-item" style={navLinkStyle('/list-item')} className="hover-nav-link">Add an Item</Link>
+          <Link href="/add-item" style={navLinkStyle('/add-item')} className="hover-nav-link">Add an Item</Link>
 
           {user ? (
             <>
@@ -432,7 +432,7 @@ export default function Header() {
             <Link href="/about"       onClick={() => setMenuOpen(false)} style={mobileNavLinkStyle('/about')}>About</Link>
             <Link href="/resources"   onClick={() => setMenuOpen(false)} style={mobileNavLinkStyle('/resources')}>On-Playa Resources</Link>
             <Link href="/find-items"  onClick={() => setMenuOpen(false)} style={mobileNavLinkStyle('/find-items')}>Find Items</Link>
-            <Link href="/list-item"   onClick={() => setMenuOpen(false)} style={mobileNavLinkStyle('/list-item')}>Add an Item</Link>
+            <Link href="/add-item"    onClick={() => setMenuOpen(false)} style={mobileNavLinkStyle('/add-item')}>Add an Item</Link>
             {user ? (
               <>
                 <Link href="/inventory"               onClick={() => setMenuOpen(false)} style={mobileNavLinkStyle('/inventory')}>My Inventory</Link>

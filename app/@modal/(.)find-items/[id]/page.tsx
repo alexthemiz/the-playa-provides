@@ -202,7 +202,7 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
                     </>
                   ) : (
                     <>
-                      <a href={`/list-item?edit=${item.id}`} style={editBtnStyle}>Edit</a>
+                      <a href={`/add-item?edit=${item.id}`} style={editBtnStyle}>Edit</a>
                       <button onClick={() => setShowTransferFlow(true)} style={transferBtnStyle}>Transfer</button>
                       <ShareButton itemId={item.id} itemName={item.item_name} style={shareInlineBtnStyle} />
                       <button onClick={() => setConfirmDelete(true)} style={deleteBtnStyle}>Delete</button>
