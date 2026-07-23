@@ -45,6 +45,15 @@ const CATEGORY_EMOJI: Record<string, string> = {
   'Miscellaneous':      '📦',
 }
 
+// 'Everyone' has no accent (falls back to chipStyle's plain ink-active
+// style) since it means "no relationship filter" — same role as
+// Category's 'All'.
+const RELATIONSHIP_ACCENTS: Record<string, string> = {
+  Following:  '#B84C7D', // berry
+  Followers:  '#3D7A5C', // forest green
+  Campmates:  '#5B6EAE', // indigo
+}
+
 
 export default function FindItemsPage() {
   const [items,               setItems]               = useState<any[]>([]);
@@ -318,7 +327,7 @@ export default function FindItemsPage() {
               <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: INK_LITE, whiteSpace: 'nowrap' as const }}>Show from:</span>
               {['Everyone', 'Following', 'Followers', 'Campmates'].map(opt => (
                 <button key={opt} onClick={() => toggleRelationship(opt)}
-                  style={chipStyle(relationshipFilters.includes(opt))}>
+                  style={chipStyle(relationshipFilters.includes(opt), RELATIONSHIP_ACCENTS[opt])}>
                   {opt}
                 </button>
               ))}
