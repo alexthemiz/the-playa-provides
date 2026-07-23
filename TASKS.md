@@ -126,6 +126,7 @@ _Last updated: 2026-07-22 (evening)_
 - [ ] **New user guidance flow** — tooltips/highlights walking through key features on first login, after the welcome modal. Scope TBD.
 - [ ] **FAQ page** — TBD whether it replaces or sits alongside `/about`.
 - [ ] **Dust storm hero effect** — see Next Session Priority, decision pending.
+- [ ] **Google Analytics data in daily admin report** — GA4 is already installed sitewide (`G-513K8Z20B4` in `app/layout.tsx`); the `send-daily-report` edge function could pull traffic stats (sessions/users/pageviews) via the GA4 Data API (`runReport`) and add them as another section. Not urgent. Real cost is a new external credential, not code: needs a Google Cloud service account granted Viewer on the GA4 property, its key stored as a Supabase secret, and hand-rolled OAuth JWT signing in Deno (Google's official client libraries don't run there) — roughly 40-60 lines. Worth doing if/when there's a specific want for anonymous-traffic visibility (visitors, top pages); the current report already covers logged-in-user activity (signups, items, loans) natively via Supabase, which doesn't overlap much with what GA would add.
 
 ---
 
