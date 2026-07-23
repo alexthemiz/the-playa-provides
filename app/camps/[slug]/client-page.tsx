@@ -873,7 +873,7 @@ const sectionHeadStyle: React.CSSProperties = {
 // wish list now simply gets a taller row, the same way GitHub/Notion/
 // Trello handle variable-length tag lists — see WishListCell below.
 // 160+110+90+80 fixed columns + 4×10px gaps + 15px×2 row padding + the
-// Wish List column's 300px floor. A plain constant, not measured — on a
+// Wish List column's 500px floor. A plain constant, not measured — on a
 // narrow phone, width:100% alone would shrink the row below what its
 // fixed columns need, and since grid tracks that aren't flexible can't
 // actually shrink, the rendered content would overflow the row's own box
@@ -882,14 +882,14 @@ const sectionHeadStyle: React.CSSProperties = {
 // from ever going below the size its content truly needs, so the row
 // (and the table's horizontal scroll) grows instead — and since the
 // header uses this exact same style, its background always matches.
-const MEMBER_ROW_MIN_WIDTH_PX = 160 + 110 + 90 + 80 + 10 * 4 + 15 * 2 + 300;
+const MEMBER_ROW_MIN_WIDTH_PX = 160 + 110 + 90 + 80 + 10 * 4 + 15 * 2 + 500;
 
 function memberGridStyle(editMode: boolean): React.CSSProperties {
   return {
     display: 'grid',
     gridTemplateColumns: editMode
-      ? '160px 110px 90px 80px minmax(300px, 1fr) auto'
-      : '160px 110px 90px 80px minmax(300px, 1fr)',
+      ? '160px 110px 90px 80px minmax(500px, 1fr) auto'
+      : '160px 110px 90px 80px minmax(500px, 1fr)',
     width: '100%',
     minWidth: `${MEMBER_ROW_MIN_WIDTH_PX}px`,
     // border-box — otherwise width:100% + this row's own padding adds up
@@ -925,7 +925,7 @@ const wishTagStyle: React.CSSProperties = {
 
 // Chips keep their own natural width (a short tag like "tent" never gets
 // stretched to match a long one) and wrap left-to-right like text, filling
-// whatever space the grid's minmax(300px, 1fr) column gives them. No row
+// whatever space the grid's minmax(500px, 1fr) column gives them. No row
 // cap: a member with a long wish list just gets a taller row. No JS.
 function WishListCell({ tags }: { tags: string[] }) {
   if (tags.length === 0) {
