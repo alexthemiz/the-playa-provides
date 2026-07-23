@@ -98,6 +98,7 @@ _Last updated: 2026-07-22 (evening)_
 ---
 
 ## 💡 Ideas & Long Term
+- [ ] **Open Camping as its own "camp" page — considered and rejected 2026-07-22, revisit only if the reasoning changes.** Idea: turn Open Camping into a real (unclaimed, no-details, icon-instead-of-banner) camp page — "2026" and "Previous Years" — by giving it real `camps` rows and repointing `is_open_camping` affiliations to them, reusing the existing members-table/items-grid infrastructure for free. Scrapped because of a real side effect: campmate status (used for gear visibility/filtering) is derived from sharing a `camp_id`, and the whole point of that trust signal is that camps are a real, vetted-by-membership group — open campers sharing a page aren't connected to each other in that way, so treating them as campmates would be misleading. If revisited, needs a different mechanism that doesn't imply that trust relationship (e.g. a browsable list/page that doesn't feed the campmates filter at all).
 - [ ] **/camps index page** — currently 404s; build as a searchable directory of all camps, claimed and unclaimed.
 - [ ] **/profile index page** — currently 404s; redirect logged-in users to their own profile, or build as a member directory.
 - [ ] **Shepherd.js product tour** — two single-page tours (profile, inventory); `onboarding_tours_seen` jsonb on profiles; build after UI stabilizes.
