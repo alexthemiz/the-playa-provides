@@ -86,15 +86,19 @@ export default function CampPage() {
           setExistingClaim(existingReq?.status ?? null);
         }
 
-        // Check membership for the logged-in user
+        // Check membership for the logged-in user. A member can have
+        // multiple affiliation rows for this camp (one per year, e.g.
+        // 2022 and 2026), so this must not use maybeSingle() — that
+        // throws once 2+ rows come back, silently null-ing affRows and
+        // making a genuine multi-year member look like a non-member.
         if (session) {
-          const { data: affRow } = await supabase
+          const { data: affRows } = await supabase
             .from('user_camp_affiliations')
             .select('id')
             .eq('camp_id', campData.id)
             .eq('user_id', session.user.id)
-            .maybeSingle();
-          setIsMember(!!affRow);
+            .limit(1);
+          setIsMember(!!affRows && affRows.length > 0);
         }
 
         // Fetch page owner profile if claimed
@@ -339,7 +343,11 @@ export default function CampPage() {
       .eq('id', camp.id);
     if (campErr) { setMemberActionError(campErr.message); return; }
 
-    // Demote the previous owner to 'member' in affiliations
+    // Demote the previous owner to 'member' in affiliations. Not
+    // maybeSingle() — a member can have multiple rows for this camp (one
+    // per year), which throws and would otherwise fall through to the
+    // insert branch below, creating a duplicate row instead of updating
+    // the existing ones. See the isMember check above for the same bug.
     const prevOwnerId = camp.page_owner_id;
     if (prevOwnerId) {
       const { data: existing } = await supabase
@@ -347,8 +355,8 @@ export default function CampPage() {
         .select('id')
         .eq('camp_id', camp.id)
         .eq('user_id', prevOwnerId)
-        .maybeSingle();
-      if (existing) {
+        .limit(1);
+      if (existing && existing.length > 0) {
         await supabase
           .from('user_camp_affiliations')
           .update({ role: 'member' })
