@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { geocodeZip } from '@/lib/geocodeZip';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Camera, CheckCircle2 } from 'lucide-react';
+import ShareButton from '@/components/ShareButton';
 
 const US_STATES = ["", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"];
 
@@ -37,6 +38,7 @@ function ListItemPageInner() {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [returnTerms, setReturnTerms] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [newItemId, setNewItemId] = useState<number | null>(null);
   const [followingIds, setFollowingIds] = useState<string[]>([]);
   const [campMateIds, setCampMateIds] = useState<string[]>([]);
   const [campDataLoaded, setCampDataLoaded] = useState(false);
@@ -211,6 +213,7 @@ function ListItemPageInner() {
           supabase.functions.invoke('send-follow-notification', {
             body: { item_id: newItem.id, poster_id: user.id },
           });
+          setNewItemId(newItem.id);
           setShowSuccessModal(true);
         }
       }
@@ -456,26 +459,69 @@ function ListItemPageInner() {
 
         {showSuccessModal && (
           <div style={modalOverlayStyle}>
-            <div style={modalContentStyle}>
-              <div style={checkCircleStyle}><CheckCircle2 size={40} color="#22c55e" /></div>
-              <h2 style={{ fontSize: '24px', color: '#111', margin: '0 0 8px 0' }}>
-                {editId ? 'Item Updated!' : 'Item Listed!'}
+            <div style={{ ...modalContentStyle, position: 'relative' as const, overflow: 'hidden' as const }}>
+              {/* Whimsical touch: little checkmarks rising and fading like
+                  bubbles, behind the actual content. Pure CSS, no library —
+                  each bubble is the same CheckCircle2 icon already used for
+                  the main badge, just staggered by position/delay/size. */}
+              {!editId && (
+                <>
+                  <style>{`
+                    @keyframes bubbleFloat {
+                      0% { transform: translateY(0) scale(0.7); opacity: 0; }
+                      15% { opacity: 0.7; }
+                      85% { opacity: 0.5; }
+                      100% { transform: translateY(-320px) scale(1); opacity: 0; }
+                    }
+                  `}</style>
+                  {bubbleConfigs.map((b, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        position: 'absolute' as const,
+                        left: b.left,
+                        bottom: 0,
+                        animation: `bubbleFloat ${b.duration}s ease-in ${b.delay}s infinite`,
+                        pointerEvents: 'none' as const,
+                      }}
+                    >
+                      <CheckCircle2 size={b.size} color="#22c55e" />
+                    </div>
+                  ))}
+                </>
+              )}
+              <div style={{ ...checkCircleStyle, position: 'relative' as const }}><CheckCircle2 size={40} color="#22c55e" /></div>
+              <h2 style={{ fontSize: '24px', color: '#111', margin: '0 0 8px 0', position: 'relative' as const }}>
+                {editId ? 'Item Updated!' : 'Item Added!'}
               </h2>
-              <p style={{ color: '#666', marginBottom: '24px' }}>
-                {editId ? 'Your changes have been saved.' : 'Gear is now in the system.'}
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '12px' }}>
-                {editId ? (
+              {editId && (
+                <p style={{ color: '#666', marginBottom: '24px' }}>
+                  Your changes have been saved.
+                </p>
+              )}
+              {editId ? (
+                <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '12px', position: 'relative' as const }}>
                   <button onClick={() => router.push(`/find-items/${editId}`)} style={primaryActionBtn}>
                     Back to Item
                   </button>
-                ) : (
+                  <button onClick={() => router.push('/inventory')} style={secondaryActionBtn}>Go to Inventory</button>
+                </div>
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '16px', position: 'relative' as const }}>
                   <button onClick={() => window.location.reload()} style={primaryActionBtn}>
                     Add Another Item
                   </button>
-                )}
-                <button onClick={() => router.push('/inventory')} style={secondaryActionBtn}>Go to Inventory</button>
-              </div>
+                  {newItemId && (
+                    <button onClick={() => router.push(`/find-items/${newItemId}`)} style={secondaryActionBtn}>
+                      View Item Page
+                    </button>
+                  )}
+                  {newItemId && (
+                    <ShareButton itemId={newItemId} itemName={itemName} style={secondaryActionBtn} />
+                  )}
+                  <button onClick={() => router.push('/inventory')} style={secondaryActionBtn}>Go to Inventory</button>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -539,5 +585,16 @@ const removePhotoBtn: React.CSSProperties = { position: 'absolute' as const, top
 const modalOverlayStyle: React.CSSProperties = { position: 'fixed' as const, top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 };
 const modalContentStyle: React.CSSProperties = { backgroundColor: '#FDFAF4', padding: '40px', width: '90%', maxWidth: '400px', textAlign: 'center' as const, border: '2px solid #1C1610', boxShadow: '6px 6px 0 #1C1610' };
 const checkCircleStyle: React.CSSProperties = { width: '70px', height: '70px', backgroundColor: '#f0fdf4', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto' };
+
+// Config for the success-modal bubble animation — left position, size, and
+// timing per bubble, staggered so they don't all rise in lockstep.
+const bubbleConfigs = [
+  { left: '8%',  size: 16, duration: 3.2, delay: 0 },
+  { left: '22%', size: 12, duration: 2.6, delay: 0.4 },
+  { left: '40%', size: 20, duration: 3.6, delay: 0.9 },
+  { left: '58%', size: 14, duration: 2.8, delay: 0.2 },
+  { left: '74%', size: 18, duration: 3.4, delay: 1.2 },
+  { left: '88%', size: 13, duration: 2.9, delay: 0.6 },
+];
 const primaryActionBtn: React.CSSProperties = { padding: '13px', backgroundColor: '#1E8A82', color: '#fff', border: '2px solid #1C1610', boxShadow: '3px 3px 0 #1C1610', fontWeight: 'bold', cursor: 'pointer', width: '100%' };
 const secondaryActionBtn: React.CSSProperties = { padding: '13px', backgroundColor: '#EDE5D0', color: '#4A3828', border: '1.5px solid rgba(28,22,16,0.2)', fontWeight: 'bold', cursor: 'pointer', width: '100%' };
