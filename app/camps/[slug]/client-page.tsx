@@ -52,6 +52,36 @@ export default function CampPage() {
 
   // Member management
   const [memberActionError, setMemberActionError] = useState('');
+  // Wish List column sizing. wishBudgetPx is the table's actual available
+  // width for that column right now (measured from the table container,
+  // not inferred by CSS — see the effect below for why). wishOverrides is
+  // a per-member explicit px width, only set once a specific member's tags
+  // genuinely don't fit in <=3 lines even using the full budget. Keyed by
+  // `${memberId}:${tags.join('|')}` so a tags change starts fresh instead
+  // of reusing a stale computed width. See WishListCell for the rest.
+  const [wishBudgetPx, setWishBudgetPx] = useState(WISH_MIN_PX);
+  const [wishOverrides, setWishOverrides] = useState<Record<string, number>>({});
+  const [wishMeasureTick, setWishMeasureTick] = useState(0);
+  const [wishFontsReady, setWishFontsReady] = useState(false);
+  const wishTableRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof document !== 'undefined' && 'fonts' in document) {
+      document.fonts.ready.then(() => setWishFontsReady(true));
+    } else {
+      setWishFontsReady(true);
+    }
+    const measureBudget = () => {
+      const el = wishTableRef.current;
+      if (!el) return;
+      const budget = el.clientWidth - MEMBER_FIXED_COLS_PX - MEMBER_COL_GAP_PX * MEMBER_COL_GAP_COUNT - MEMBER_ROW_PADDING_H_PX;
+      setWishBudgetPx(Math.max(WISH_MIN_PX, Math.floor(budget)));
+    };
+    measureBudget();
+    const bump = () => { measureBudget(); setWishMeasureTick(t => t + 1); };
+    window.addEventListener('resize', bump);
+    return () => window.removeEventListener('resize', bump);
+  }, [members.length]);
   // userId → 'yes'|'maybe'|'no'|'other' (different camp / open camping) | undefined (no 2026 row)
   const [returning2026Map, setReturning2026Map] = useState<Record<string, string>>({});
 
@@ -703,24 +733,20 @@ export default function CampPage() {
         {members.length === 0 ? (
           <p style={{ color: '#9A8878', fontSize: '0.9rem', fontStyle: 'italic' as const }}>No members listed yet.</p>
         ) : (
-          <div style={{ overflowX: 'auto' as const, backgroundColor: '#FDFAF4', border: '1.5px solid rgba(28,22,16,0.12)' }}>
-            {/* Shared wrapper — sized to the widest row's real content
-                (header included), but never narrower than the visible
-                scroll container (minWidth:100%). Every row inside uses
-                width:100% of THIS box (not the outer overflowX:auto box):
-                when content is narrower than the container, minWidth wins
-                and every row (header included) stretches to fill the
-                visible width; when content is wider, width:max-content
-                wins and the box — and the horizontal scroll it enables —
-                grows to match instead. */}
-            <div style={{ width: 'max-content' as const, minWidth: '100%' as const }}>
-              {/* Header row */}
+          <div ref={wishTableRef} style={{ overflowX: 'auto' as const, backgroundColor: '#FDFAF4', border: '1.5px solid rgba(28,22,16,0.12)' }}>
+              {/* Header row. Its own Wish List cell gets an explicit width
+                  matching the widest the column currently needs anywhere
+                  in the table (the shared budget, or a member's override
+                  if one needs more) — each row is otherwise independent
+                  (see memberGridStyle), so without this the header (just
+                  short label text) would size itself narrower than a
+                  data row and its tan background would stop short. */}
               <div style={{ ...memberGridStyle(editMode), padding: '12px 15px', fontSize: '0.6rem', fontWeight: 700, color: '#4A3828', textTransform: 'uppercase' as const, letterSpacing: '0.08em', fontFamily: "'Space Mono', monospace", borderBottom: '1.5px solid rgba(28,22,16,0.12)', backgroundColor: '#EDE5D0' }}>
                 <div>Name</div>
                 <div>Location</div>
                 <div>Camp Years</div>
                 <div style={{ textAlign: 'center' as const, whiteSpace: 'nowrap' as const }}>2026 Camp?</div>
-                <div>Wish List</div>
+                <div style={{ width: `${Math.max(wishBudgetPx, WISH_MIN_PX, ...Object.values(wishOverrides))}px` }}>Wish List</div>
                 {editMode && <div>Actions</div>}
               </div>
 
@@ -738,6 +764,8 @@ export default function CampPage() {
                 other: { symbol: '✗', bg: '#fee2e2', color: '#dc2626', border: '#fca5a5' },
               };
               const rc = ret2026 ? retCfg[ret2026] : null;
+              const wishKey = `${member.id}:${wishList.join('|')}`;
+              const wishOverridePx = wishOverrides[wishKey];
 
               return (
                 <div key={member.id} style={{ ...memberGridStyle(editMode), padding: '10px 15px', backgroundColor: '#FDFAF4', borderBottom: '1px solid rgba(28,22,16,0.06)', alignItems: 'center' }}>
@@ -777,7 +805,14 @@ export default function CampPage() {
                   </div>
 
                   {/* Wish List column */}
-                  <WishListCell tags={wishList} />
+                  <WishListCell
+                    tags={wishList}
+                    naturalWidthPx={wishBudgetPx}
+                    overridePx={wishOverridePx}
+                    fontsReady={wishFontsReady}
+                    measureTick={wishMeasureTick}
+                    onNeedsWidth={px => setWishOverrides(prev => prev[wishKey] === px ? prev : { ...prev, [wishKey]: px })}
+                  />
 
                   {/* Actions column — only in edit mode, never for self */}
                   {editMode && (
@@ -802,7 +837,6 @@ export default function CampPage() {
                 </div>
               );
             })}
-            </div>
           </div>
         )}
       </div>
@@ -873,32 +907,32 @@ const sectionHeadStyle: React.CSSProperties = {
   textTransform: 'uppercase' as const, letterSpacing: '0.08em', marginBottom: '12px',
 };
 
-// Returns a grid template for the members table; edit mode adds an Actions column
+// Fixed geometry the members table's Wish List budget is computed against
+// (see the wishBudgetPx effect above) — must match memberGridStyle's fixed
+// columns/gap and each row's own padding below.
+const WISH_MIN_PX = 300;
+const MEMBER_FIXED_COLS_PX = 160 + 110 + 90 + 80;
+const MEMBER_COL_GAP_PX = 10;
+const MEMBER_COL_GAP_COUNT = 4; // 5 columns → 4 gaps (edit mode's extra Actions column is ignored here, a small conservative underestimate)
+const MEMBER_ROW_PADDING_H_PX = 30; // padding: '10px 15px' → 15 left + 15 right
+
+// Returns a grid template for the members table; edit mode adds an Actions
+// column. The header and every member row are independent grid containers
+// (not one shared grid), so a ranged column like minmax(140px,180px) can
+// resolve to a DIFFERENT actual width per row depending on that row's own
+// content, silently drifting columns out of alignment across rows — fixed
+// PIXEL widths for every column except the last avoid that. The last
+// (Wish List) column is minmax(300px, max-content): its actual width comes
+// entirely from whatever explicit width the cell inside it sets (see
+// WishListCell) — never from CSS inferring it, which is what caused the
+// column to lock onto whichever row needed the most space (see git log).
 function memberGridStyle(editMode: boolean): React.CSSProperties {
   return {
     display: 'grid',
-    // Fixed PIXEL widths (not minmax ranges) for every column except the
-    // last — since the header and every member row are independent grid
-    // containers (not one shared grid), a ranged column like
-    // minmax(140px,180px) can resolve to a DIFFERENT actual width per row
-    // depending on that row's own content, silently drifting columns out
-    // of alignment across rows. A flat number can't drift.
-    // Wish list is last and uses max-content (via the cell's own
-    // grid-auto-flow:column layout, see the Wish List cell below) with a
-    // 300px floor, so it's exactly as wide as that member's wish list
-    // needs — never wider than necessary, never clipping.
     gridTemplateColumns: editMode
       ? '160px 110px 90px 80px minmax(300px, max-content) auto'
       : '160px 110px 90px 80px minmax(300px, max-content)',
-    // width:100% of the shared max-content wrapper (see the JSX around the
-    // header/rows) — NOT the default auto, which behaves like a plain
-    // block box and just fills whatever parent it's given, and NOT an
-    // independent max-content per row either, which left the header (short
-    // label text) narrower than the widest data row, so its background
-    // color stopped short instead of spanning the whole table. Every row
-    // (header included) now stretches to match the widest row's real
-    // content width, deterministically, in every browser.
-    width: '100%',
+    width: 'max-content' as const,
     gap: '10px',
     alignItems: 'center',
   };
@@ -919,63 +953,81 @@ const wishTagStyle: React.CSSProperties = {
 };
 
 const WISH_GAP_PX = 4;
-const WISH_MIN_WIDTH_PX = 300;
 
 // Chips keep their own natural width (a short tag like "tent" never gets
 // stretched to match a long one) and flow left-to-right, wrapping like
 // text — the opposite of a CSS-grid column layout, which would lock every
-// chip in a shared column to that column's widest member. Row count is
-// capped at 3 by finding the SMALLEST column width that wraps this
-// member's chips into 3 lines or fewer (simulating the same greedy
-// line-break flex-wrap already does, in JS, off the DOM instead of via
-// repeated reflows) — never wider than necessary, so a short list stays
-// at 1 or 2 rows instead of being forced to 3. If that minimal width is
-// wider than the table can show, the table's existing horizontal scroll
-// (see the shared max-content wrapper around the header + rows) takes
-// over — the row stays visually 3 lines tall and simply extends sideways.
-function WishListCell({ tags }: { tags: string[] }) {
+// chip in a shared column to that column's widest member.
+//
+// By default the cell renders at naturalWidthPx — the table's real,
+// currently-available width for this column, measured from the table
+// container by the parent (NOT inferred via CSS: a `1fr` grid column
+// here turned out to size itself off whichever ROW needed the most
+// single-line space and force every other row to match it, which is a
+// worse bug than the one this whole redesign set out to fix — see git
+// log). That naturally gives short lists fewer rows on a wide page and
+// more on a narrow one, no fixed target width. Only when the browser's
+// OWN flex-wrap at that width produces more than 3 lines do we step in:
+// measure each chip's real rendered width and binary-search for the
+// minimal explicit width that wraps them into <=3 lines (simulating the
+// same greedy line-break flex-wrap already does), then report that up so
+// the row switches to it. That's a one-way transition — once a member has
+// a computed override it keeps it — so there's no risk of it
+// flip-flopping back and forth on every resize.
+//
+// That measurement is only trustworthy once webfonts have finished
+// loading (fontsReady) — Space Mono loads async via a <link> tag, and
+// measuring chip widths against the fallback font would lock in a width
+// that's wrong (usually too narrow) once the real font swaps in, which is
+// exactly what caused rows to render 4 lines tall despite the 3-line cap.
+function WishListCell({ tags, naturalWidthPx, overridePx, fontsReady, measureTick, onNeedsWidth }: {
+  tags: string[];
+  naturalWidthPx: number;
+  overridePx?: number;
+  fontsReady: boolean;
+  measureTick: number;
+  onNeedsWidth: (px: number) => void;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState(WISH_MIN_WIDTH_PX);
 
   useLayoutEffect(() => {
+    if (!fontsReady || overridePx != null || tags.length === 0) return;
     const el = containerRef.current;
-    if (!el || tags.length === 0) return;
-    const chipWidths = Array.from(el.children).map(c => (c as HTMLElement).getBoundingClientRect().width);
-    if (chipWidths.length === 0) return;
+    if (!el) return;
+    const chipEls = Array.from(el.children) as HTMLElement[];
+    if (chipEls.length === 0) return;
 
+    const tops = new Set(chipEls.map(c => c.offsetTop));
+    if (tops.size <= 3) return; // fits within the current natural width already
+
+    const widths = chipEls.map(c => c.getBoundingClientRect().width);
     const linesAt = (w: number) => {
       let lines = 1;
       let cur = 0;
-      for (const cw of chipWidths) {
+      for (const cw of widths) {
         const next = cur === 0 ? cw : cur + WISH_GAP_PX + cw;
         if (next > w && cur !== 0) { lines++; cur = cw; }
         else { cur = next; }
       }
       return lines;
     };
-
-    const maxChipWidth = Math.max(...chipWidths);
-    const totalWidth = chipWidths.reduce((a, b) => a + b, 0) + WISH_GAP_PX * (chipWidths.length - 1);
-
-    if (linesAt(WISH_MIN_WIDTH_PX) <= 3) {
-      setWidth(WISH_MIN_WIDTH_PX);
-      return;
-    }
+    const maxChipWidth = Math.max(...widths);
+    const totalWidth = widths.reduce((a, b) => a + b, 0) + WISH_GAP_PX * (widths.length - 1);
     let lo = maxChipWidth;
     let hi = totalWidth;
     while (lo < hi) {
       const mid = Math.floor((lo + hi) / 2);
       if (linesAt(mid) <= 3) hi = mid; else lo = mid + 1;
     }
-    setWidth(Math.ceil(lo));
-  }, [tags]);
+    onNeedsWidth(Math.ceil(lo));
+  }, [tags, naturalWidthPx, overridePx, fontsReady, measureTick]);
 
   if (tags.length === 0) {
     return <span style={{ fontSize: '12px', color: '#9A8878' }}>—</span>;
   }
 
   return (
-    <div ref={containerRef} style={{ display: 'flex', flexWrap: 'wrap' as const, gap: `${WISH_GAP_PX}px`, alignItems: 'center', width: `${width}px` }}>
+    <div ref={containerRef} style={{ display: 'flex', flexWrap: 'wrap' as const, gap: `${WISH_GAP_PX}px`, alignItems: 'center', width: `${overridePx ?? naturalWidthPx}px` }}>
       {tags.map(tag => <span key={tag} style={wishTagStyle}>{tag}</span>)}
     </div>
   );
