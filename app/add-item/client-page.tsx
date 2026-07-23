@@ -450,7 +450,7 @@ function ListItemPageInner() {
           </div>
 
           <button type="submit" disabled={loading || uploading} style={submitButtonStyle}>
-            {loading ? 'Processing...' : editId ? 'Save Changes' : 'List Your Item'}
+            {loading ? 'Processing...' : editId ? 'Save Changes' : 'Add Your Item'}
           </button>
         </form>
 

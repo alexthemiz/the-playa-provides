@@ -45,9 +45,9 @@ const ITEMS = [
   },
   {
     key:   'listedItem' as const,
-    label: 'List an Item',
+    label: 'Add an Item',
     desc:  'Choose who can view it or to keep it private',
-    where: 'List Item',
+    where: 'Add Item',
     href:  (_: string | null) => '/add-item',
   },
   {

@@ -329,7 +329,7 @@ export default function AddItemModal({
           </div>
 
           <button type="submit" disabled={loading || uploading} style={submitBtnStyle}>
-            {uploading ? 'Uploading...' : loading ? 'Saving...' : itemToEdit ? 'Save Changes' : 'List Your Item'}
+            {uploading ? 'Uploading...' : loading ? 'Saving...' : itemToEdit ? 'Save Changes' : 'Add Your Item'}
           </button>
 
           {itemToEdit && (
