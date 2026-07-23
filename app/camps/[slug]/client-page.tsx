@@ -730,7 +730,7 @@ export default function CampPage() {
               const rc = ret2026 ? retCfg[ret2026] : null;
 
               return (
-                <div key={member.id} style={{ ...memberGridStyle(editMode), padding: '10px 15px', backgroundColor: '#FDFAF4', borderBottom: '1px solid rgba(28,22,16,0.06)', alignItems: 'center' }}>
+                <div key={member.id} style={{ ...memberGridStyle(editMode), padding: '10px 15px', backgroundColor: '#FDFAF4', borderBottom: '1px solid rgba(28,22,16,0.06)' }}>
 
                   {/* Name column */}
                   <Link href={`/profile/${member.username}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', minWidth: 0 }}>
@@ -898,7 +898,14 @@ function memberGridStyle(editMode: boolean): React.CSSProperties {
     // horizontal scrollbar even when nothing actually needs one.
     boxSizing: 'border-box' as const,
     gap: '10px',
-    alignItems: 'center',
+    // start, not center — a row's height is driven by its tallest cell
+    // (usually Wish List, since it's the only one that wraps), and on
+    // mobile that cell is scrolled off-screen: centering made the visible
+    // name/avatar float in the middle of a tall row with a mysterious gap
+    // above it. Top-aligning puts the name right after the previous row
+    // ends, with any extra height trailing below it instead — reads as a
+    // normal table row instead of a random gap.
+    alignItems: 'start' as const,
   };
 }
 
