@@ -124,7 +124,7 @@ Deno.serve(async (req) => {
 </div>`
 
     const emailBody: any = {
-      from: 'hello@theplayaprovides.com',
+      from: 'The Playa Provides <hello@theplayaprovides.com>',
       to: loan.borrower_email,
       subject: `${ownerNameRaw} lent you ${itemNameRaw}`,
       html,
