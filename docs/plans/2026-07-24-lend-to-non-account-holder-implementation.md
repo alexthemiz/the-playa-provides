@@ -4,7 +4,7 @@
 
 **Goal:** Let an owner log an informal, owner-tracked loan to someone without a TPP account (by name + optional email), with an optional claim-link path to upgrade it into a real, two-sided tracked loan if that person later creates or logs into an account.
 
-**Architecture:** A new `informal_loans` table, separate from `item_loans`, with its own simple `active`/`returned`/`cancelled`/`converted` status (no dual confirmation — the owner is the sole source of truth). Reuses the existing `gear_items.is_on_loan` flag (via a new trigger mirroring the existing one on `item_loans`) so every surface that already checks that flag works for free. A `SECURITY DEFINER` RPC (`claim_informal_loan`), modeled directly on the existing `confirm_transfer_receipt`, does the one-time conversion into a real `item_loans` row when/if the borrower claims it via a token-based link — no changes to `middleware.ts` or `app/auth/callback/route.ts`.
+**Architecture:** A new `informal_loans` table, separate from `item_loans`, with its own simple `active`/`returned`/`cancelled`/`converted` status (no dual confirmation — the owner is the sole source of truth). Reuses the existing `gear_items.is_on_loan` flag (via a new trigger mirroring the existing one on `item_loans`) so every surface that already checks that flag works for free. A `SECURITY DEFINER` RPC (`claim_informal_loan`), modeled directly on the existing `confirm_transfer_receipt`, does the one-time conversion into a real `item_loans` row when/if the borrower claims it via a token-based link. No changes to `app/auth/callback/route.ts`. `middleware.ts` gets one explicitly-authorized, minimal line (Task 9) adding `/loan-invite` to its existing public-route whitelist — required because the claim page's pre-auth preview would otherwise redirect logged-out visitors to `/login` before they ever see what they're being asked to claim.
 
 **Tech Stack:** Next.js 16 App Router, Supabase (Postgres + RLS + Edge Functions), `@supabase/ssr`, Resend for email. No automated test framework exists in this project (`package.json` has no test script/runner) — every task's "verify" step uses `npx tsc --noEmit` plus a concrete manual/SQL check instead of a test suite, matching how every other feature in this codebase has been verified.
 
@@ -962,7 +962,24 @@ git commit -m "feat: inventory — resend informal loan invite"
 **Files:**
 - Create: `app/loan-invite/[token]/page.tsx`
 - Create: `app/loan-invite/[token]/client-page.tsx`
+- Modify: `middleware.ts` — **authorized explicitly by Alex** for this specific one-line addition (this file is normally do-not-touch-without-discussion per CLAUDE.md). Without this, `middleware.ts`'s `isPublicRoute` whitelist doesn't include `/loan-invite`, so a logged-out visitor clicking the claim link gets redirected to `/login` before the page ever renders — breaking the pre-auth preview entirely.
 - Modify: `app/robots.ts` — this page should stay indexable/public (it's meant to be reached via an emailed link, not search, but doesn't contain anything sensitive since the preview RPC only returns the safe subset) — no change actually needed here; leave it out of the disallow list.
+
+**Step 0: Add `/loan-invite` to `middleware.ts`'s public-route whitelist**
+
+In `middleware.ts`, find:
+```ts
+  const isPublicRoute = ['/login', '/signup', '/'].includes(url.pathname) || url.pathname.startsWith('/auth') || url.pathname.startsWith('/resources') || url.pathname.startsWith('/about') || url.pathname.startsWith('/privacy') || url.pathname.startsWith('/terms') || url.pathname.startsWith('/find-items')
+```
+Change to:
+```ts
+  const isPublicRoute = ['/login', '/signup', '/'].includes(url.pathname) || url.pathname.startsWith('/auth') || url.pathname.startsWith('/resources') || url.pathname.startsWith('/about') || url.pathname.startsWith('/privacy') || url.pathname.startsWith('/terms') || url.pathname.startsWith('/find-items') || url.pathname.startsWith('/loan-invite')
+```
+This is the only change to this file — same pattern already used for `/find-items` etc., not a change to the redirect logic itself. Commit it separately from the page files so it's easy to review/revert in isolation if needed:
+```bash
+git add middleware.ts
+git commit -m "feat: middleware — allow logged-out access to /loan-invite (claim page preview)"
+```
 
 **Step 1: Server wrapper**
 
@@ -978,13 +995,21 @@ export default async function Page({ params }: { params: Promise<{ token: string
 
 **Step 2: Client page**
 
+This is a public, unauthenticated landing page — the first thing a potential new user sees when they click the link in the invite email. It should look like the rest of the site (the same "Playful Field Guide" design system every other page uses — Arvo headlines, ink/paper palette, offset-shadow buttons), not bare unstyled HTML. Styled here to match `app/login/page.tsx`'s existing centered-card pattern closely, reusing the same token values.
+
 `app/loan-invite/[token]/client-page.tsx`:
 ```tsx
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
+
+const INK      = '#1C1610'
+const INK_MID  = '#4A3828'
+const INK_LITE = '#9A8878'
+const PAPER    = '#F6F1E8'
+const PAPER_LT = '#FDFAF4'
+const TEAL     = '#1E8A82'
 
 interface Preview {
   item_name: string
@@ -998,7 +1023,6 @@ interface Preview {
 }
 
 export default function ClientPage({ token }: { token: string }) {
-  const router = useRouter()
   const [preview, setPreview] = useState<Preview | null>(null)
   const [loading, setLoading] = useState(true)
   const [session, setSession] = useState<any>(null)
@@ -1026,48 +1050,97 @@ export default function ClientPage({ token }: { token: string }) {
     }
   }
 
-  if (loading) return <div style={{ padding: '40px', textAlign: 'center' as const }}>Loading…</div>
-  if (!preview) return <div style={{ padding: '40px', textAlign: 'center' as const }}>This loan invite wasn&apos;t found.</div>
+  if (loading) {
+    return <div style={pageStyle}><div style={cardStyle}><p style={{ color: INK_MID }}>Loading…</p></div></div>
+  }
+
+  if (!preview) {
+    return (
+      <div style={pageStyle}>
+        <div style={cardStyle}>
+          <h1 style={h1Style}>Not found</h1>
+          <p style={{ color: INK_MID }}>This loan invite wasn&apos;t found.</p>
+        </div>
+      </div>
+    )
+  }
 
   if (claimed) {
     return (
-      <div style={{ padding: '40px', textAlign: 'center' as const }}>
-        <h1>You&apos;re all set!</h1>
-        <p>This loan is now linked to your account.</p>
-        <a href="/inventory">Go to your inventory →</a>
+      <div style={pageStyle}>
+        <div style={cardStyle}>
+          <h1 style={h1Style}>You&apos;re all <em style={{ fontStyle: 'italic', color: TEAL }}>set!</em></h1>
+          <p style={{ color: INK_MID, marginBottom: '20px' }}>This loan is now linked to your account.</p>
+          <a href="/inventory" style={primaryBtnStyle}>Go to your inventory →</a>
+        </div>
       </div>
     )
   }
 
   if (preview.status !== 'active') {
-    return <div style={{ padding: '40px', textAlign: 'center' as const }}>This loan invite is no longer available (it&apos;s already {preview.status}).</div>
+    return (
+      <div style={pageStyle}>
+        <div style={cardStyle}>
+          <h1 style={h1Style}>No longer available</h1>
+          <p style={{ color: INK_MID }}>This loan invite is no longer available (it&apos;s already {preview.status}).</p>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div style={{ maxWidth: '480px', margin: '0 auto', padding: '40px 20px' }}>
-      <h1>{preview.owner_display_name} lent you {preview.item_name}</h1>
-      {preview.item_image_url && <img src={preview.item_image_url} alt={preview.item_name} style={{ width: '100%', maxWidth: '300px' }} />}
-      <p>Handed over: {new Date(preview.handed_over_at).toLocaleDateString()}</p>
-      {preview.return_by && <p>Expected back: {new Date(preview.return_by).toLocaleDateString()}</p>}
-      {preview.damage_agreement != null && <p>If damaged: ${preview.damage_agreement}</p>}
-      {preview.loss_agreement != null && <p>If not returned: ${preview.loss_agreement}</p>}
+    <div style={pageStyle}>
+      <div style={cardStyle}>
+        <div style={eyebrowStyle}>You&apos;ve been lent something</div>
+        <h1 style={h1Style}>{preview.owner_display_name} lent you <em style={{ fontStyle: 'italic', color: TEAL }}>{preview.item_name}</em></h1>
 
-      {session ? (
-        <>
-          <p>Is this you? Claim this loan to link it to your account.</p>
-          <button onClick={handleClaim} disabled={claiming}>{claiming ? 'Claiming…' : 'Claim this loan'}</button>
-          {claimError && <p style={{ color: '#dc2626' }}>{claimError}</p>}
-        </>
-      ) : (
-        <>
-          <p>Log in or create an account, then come back to this page (or click the link in your email again) to claim this loan.</p>
-          <a href="/login">Log In</a>
-          <a href="/signup">Sign Up</a>
-        </>
-      )}
+        {preview.item_image_url && (
+          <img src={preview.item_image_url} alt={preview.item_name} style={{ width: '100%', maxHeight: '220px', objectFit: 'cover' as const, border: `2px solid ${INK}`, marginBottom: '16px' }} />
+        )}
+
+        <table style={{ width: '100%', borderCollapse: 'collapse' as const, fontSize: '0.9rem', marginBottom: '20px' }}>
+          <tbody>
+            <tr><td style={termLabelStyle}>Handed over</td><td style={termValueStyle}>{new Date(preview.handed_over_at).toLocaleDateString()}</td></tr>
+            {preview.return_by && <tr><td style={termLabelStyle}>Expected back</td><td style={termValueStyle}>{new Date(preview.return_by).toLocaleDateString()}</td></tr>}
+            {preview.damage_agreement != null && <tr><td style={termLabelStyle}>If damaged</td><td style={termValueStyle}>${preview.damage_agreement}</td></tr>}
+            {preview.loss_agreement != null && <tr><td style={termLabelStyle}>If not returned</td><td style={termValueStyle}>${preview.loss_agreement}</td></tr>}
+          </tbody>
+        </table>
+
+        {session ? (
+          <>
+            <p style={{ color: INK_MID, fontSize: '0.9rem', marginBottom: '14px' }}>Is this you? Claim this loan to link it to your account.</p>
+            <button
+              onClick={handleClaim}
+              disabled={claiming}
+              style={{ ...primaryBtnStyle, width: '100%', border: `2px solid ${INK}`, cursor: claiming ? 'not-allowed' : 'pointer', opacity: claiming ? 0.6 : 1, fontFamily: 'inherit' }}
+            >
+              {claiming ? 'Claiming…' : 'Claim this loan'}
+            </button>
+            {claimError && <p style={{ color: '#dc2626', fontSize: '0.85rem', marginTop: '10px' }}>{claimError}</p>}
+          </>
+        ) : (
+          <>
+            <p style={{ color: INK_MID, fontSize: '0.9rem', marginBottom: '14px' }}>Log in or create an account, then come back to this page (or click the link in your email again) to claim this loan.</p>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <a href="/login" style={{ ...secondaryBtnStyle, flex: 1, textAlign: 'center' as const }}>Log In</a>
+              <a href="/signup" style={{ ...primaryBtnStyle, flex: 1, textAlign: 'center' as const }}>Sign Up</a>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   )
 }
+
+const pageStyle: React.CSSProperties = { backgroundColor: PAPER, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px' }
+const cardStyle: React.CSSProperties = { width: '100%', maxWidth: '480px', backgroundColor: PAPER_LT, border: `2px solid ${INK}`, boxShadow: `5px 5px 0 ${INK}`, padding: '32px' }
+const eyebrowStyle: React.CSSProperties = { fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: INK_LITE, marginBottom: '8px' }
+const h1Style: React.CSSProperties = { fontFamily: "'Arvo', serif", fontSize: '1.6rem', fontWeight: 900, color: INK, margin: '0 0 20px', lineHeight: 1.15 }
+const termLabelStyle: React.CSSProperties = { padding: '6px 0', color: INK_LITE, borderBottom: '1px solid rgba(28,22,16,0.1)' }
+const termValueStyle: React.CSSProperties = { padding: '6px 0', color: INK, fontWeight: 700, textAlign: 'right' as const, borderBottom: '1px solid rgba(28,22,16,0.1)' }
+const primaryBtnStyle: React.CSSProperties = { display: 'inline-block', backgroundColor: TEAL, color: '#fff', padding: '13px', fontWeight: 700, border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`, fontSize: '0.95rem', textDecoration: 'none', fontFamily: 'Outfit, sans-serif', textAlign: 'center' as const }
+const secondaryBtnStyle: React.CSSProperties = { display: 'inline-block', backgroundColor: 'transparent', color: INK, padding: '13px', fontWeight: 700, border: `2px solid ${INK}`, fontSize: '0.95rem', textDecoration: 'none', fontFamily: 'Outfit, sans-serif', textAlign: 'center' as const }
 ```
 
 **Why no auto-redirect back after login/signup:** confirmed directly — `app/login/page.tsx` hardcodes its post-login destination to `/inventory` (both the password path via `router.push('/inventory')` and the Google OAuth path via `redirectTo: .../auth/callback?next=/inventory`), and `app/signup/page.tsx` does the same (`/profile/<username>` for password signup, `?next=/settings?setup=true` for Google). Neither reads a `next` value from its own incoming URL. `app/auth/callback/route.ts` itself is actually already generic (`searchParams.get('next') ?? '/'`) — it's not the bottleneck — but making login/signup forward a caller-supplied `next` means editing those two files' redirect logic, which is out of scope for this plan and starts creeping toward auth-flow changes this project treats cautiously. Simpler and fully in-scope: tell the user to come back to the link after they're done, a completely standard pattern for invite-link flows. This page already checks `session` on load and shows the Claim button whenever they land back here authenticated, so revisiting the link "just works" with zero changes to login/signup.
@@ -1077,7 +1150,7 @@ export default function ClientPage({ token }: { token: string }) {
 ```bash
 npx tsc --noEmit
 ```
-Manually: using the test informal loan's token from Task 3, visit `/loan-invite/<token>` while logged out — confirm the preview renders (item name, terms) and Log In/Sign Up links appear. Log in as a *different* test account than the loan's owner, revisit the same URL, click "Claim this loan," confirm success message appears, then check:
+Manually: using the test informal loan's token from Task 3, visit `/loan-invite/<token>` **while logged out, in a fresh/incognito session** — if Step 0's `middleware.ts` change didn't take effect, this will silently redirect to `/login` instead of showing the page at all, so check the actual URL in the address bar after loading, not just that *something* rendered. Confirm the preview renders (item name, terms) and Log In/Sign Up links appear. Log in as a *different* test account than the loan's owner, revisit the same URL, click "Claim this loan," confirm success message appears, then check:
 ```sql
 select status, converted_loan_id from informal_loans where invite_token = '<token>';
 select id, status, borrower_id from item_loans where id = '<converted_loan_id from above>';
@@ -1128,7 +1201,7 @@ git commit -m "feat: header — display informal_loan_claimed notifications"
 **Files:**
 - Modify: `TASKS.md`
 
-**Step 1:** Move the "Private owner-only note field..." — no wait, wrong entry. Find the informal-loans design entry logged earlier (search for "lending to non-account" or check Ideas & Long Term) and either remove it (superseded by this shipped feature) or convert it to a "Verify on prod" entry under Next Session Priority, following this project's End of Session Protocol: summarize what shipped, note what needs manual verification on production (the full flow: lend to a non-account email, receive the real email with working claim link and calendar attachment, claim it as a different account, confirm it converts).
+**Step 1:** There's no existing TASKS.md entry for this feature to update — the design/plan docs were the only place it was tracked before implementation. (Don't confuse this with the *unrelated* existing entry "Transfer/Lend on 'Keep Private' items" in Ideas & Long Term — that's a different, still-open question about a different feature; leave it alone.) Add a fresh bullet under **Next Session Priority**, following this project's End of Session Protocol: summarize what shipped (informal loans for non-account borrowers, the claim-link upgrade path, the calendar-invite email), and note what needs manual verification on production — the full flow end to end: lend to a real non-account email, receive the actual email with a working claim link and calendar attachment, claim it from a different real account, confirm it converts to a tracked loan and the original owner gets notified.
 
 **Step 2: Commit**
 
@@ -1142,6 +1215,6 @@ git commit -m "docs: TASKS.md — log lending to non-account holders feature"
 ## Notes for whoever executes this plan
 
 - Every SQL migration task includes a `mcp__supabase__apply_migration` step *and* a follow-up "save the file to `supabase/migrations/`" step — both are required per this project's migration-tracking convention; skipping the second one silently breaks reconstructability from git (this exact problem already happened once in this project's history).
-- `middleware.ts` and `app/auth/callback/route.ts` are explicitly flagged in this project as do-not-touch-without-discussion. Nothing in this plan touches either — confirmed while writing this plan that `app/login/page.tsx` and `app/signup/page.tsx` both hardcode their post-auth destination (not the callback route's fault — it's already generic), and rather than editing those two files to support a dynamic redirect, Task 9's claim page just asks the user to come back to the link after logging in/signing up. If a future change ever wants the auto-redirect, that's an edit to `app/login/page.tsx`/`app/signup/page.tsx` specifically, not the callback route.
+- `middleware.ts` and `app/auth/callback/route.ts` are explicitly flagged in this project as do-not-touch-without-discussion. `app/auth/callback/route.ts` is untouched by this plan entirely. `middleware.ts` gets exactly one line changed (Task 9, Step 0) — **this was surfaced to Alex directly during the final review pass and explicitly authorized**, not something to treat as pre-approved for future changes to this feature. It adds `/loan-invite` to the existing public-route whitelist, using the same pattern already there for `/find-items` etc. — without it, the claim page's core requirement (an unauthenticated visitor can preview what they're being asked to claim) silently breaks, since every non-whitelisted route redirects logged-out users to `/login` before rendering. Separately: `app/login/page.tsx` and `app/signup/page.tsx` both hardcode their post-auth destination (confirmed while writing this plan) — rather than editing those two files to support a dynamic redirect back to the claim page, Task 9 just asks the user to come back to the link after logging in/signing up. If a future change ever wants that auto-redirect, that's an edit to `app/login/page.tsx`/`app/signup/page.tsx` specifically, not the callback route, and would need its own authorization the same way the middleware change did.
 - No automated test suite exists in this project — every "verify" step above is a real, concrete manual or SQL check, not a placeholder. Don't skip them even though they're not `pytest`-style.
 - This plan went through an explicit adversarial review pass after the first draft (checking for security gaps, race conditions, and unverified assumptions) before execution began. Findings from that pass are folded into the tasks above rather than listed separately here — notably: the RLS insert policy verifies item ownership (not just self-attested `owner_id`), `claim_informal_loan` uses an atomic status-flip to close a double-claim race condition, the `is_on_loan` sync trigger (both the new one and the existing `item_loans` one, upgraded in place) computes the flag across both tables instead of blindly asserting per-row, and the calendar-invite base64 encoding is UTF-8-safe. Everything that was inferred rather than confirmed against the live schema or actual source files (the notifications check-constraint name, `header.tsx`'s exact case shape, whether login/signup support a redirect param) was individually verified before this plan was finalized — none of it was left as a guess.
