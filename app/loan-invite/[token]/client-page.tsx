@@ -31,33 +31,56 @@ interface Preview {
 export default function ClientPage({ token }: { token: string }) {
   const [preview, setPreview] = useState<Preview | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [session, setSession] = useState<any>(null)
   const [claiming, setClaiming] = useState(false)
   const [claimError, setClaimError] = useState('')
   const [claimed, setClaimed] = useState(false)
 
   useEffect(() => {
-    supabase.rpc('get_informal_loan_preview', { p_token: token }).then(({ data, error }) => {
-      if (!error && data && data.length > 0) setPreview(data[0])
-      setLoading(false)
-    })
+    supabase.rpc('get_informal_loan_preview', { p_token: token })
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('get_informal_loan_preview error:', error)
+          setLoadError(true)
+        } else if (data && data.length > 0) {
+          setPreview(data[0])
+        }
+      })
+      .catch(err => {
+        console.error('get_informal_loan_preview failed:', err)
+        setLoadError(true)
+      })
+      .finally(() => setLoading(false))
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session))
   }, [token])
 
   async function handleClaim() {
     setClaiming(true)
     setClaimError('')
-    const { error } = await supabase.rpc('claim_informal_loan', { p_token: token })
-    if (error) {
-      setClaimError(error.message)
-      setClaiming(false)
-    } else {
+    try {
+      const { error } = await supabase.rpc('claim_informal_loan', { p_token: token })
+      if (error) throw error
       setClaimed(true)
+    } catch (err: any) {
+      setClaimError(err?.message || 'Something went wrong. Please try again.')
+      setClaiming(false)
     }
   }
 
   if (loading) {
     return <div style={pageStyle}><div style={cardStyle}><p style={{ color: INK_MID }}>Loading…</p></div></div>
+  }
+
+  if (loadError) {
+    return (
+      <div style={pageStyle}>
+        <div style={cardStyle}>
+          <h1 style={h1Style}>Something went wrong</h1>
+          <p style={{ color: INK_MID }}>We couldn&apos;t load this loan invite. Check your connection and try reloading the page.</p>
+        </div>
+      </div>
+    )
   }
 
   if (!preview) {
