@@ -387,6 +387,24 @@ export default function InventoryPage() {
     }
   }
 
+  async function handleResendInformalLoanInvite(loan: any) {
+    const key = `informal_${loan.id}`;
+    if (isReminderOnCooldown(key) || sendingReminderKey === key) return;
+    setSendingReminderKey(key);
+    try {
+      await supabase.functions.invoke('send-informal-loan-invite', {
+        body: { informal_loan_id: loan.id },
+      });
+      const now = Date.now();
+      localStorage.setItem(`tpp_reminder_${key}`, String(now));
+      setReminderSentAt(prev => ({ ...prev, [key]: now }));
+    } catch (err) {
+      console.error('Resend informal loan invite error:', err);
+    } finally {
+      setSendingReminderKey(null);
+    }
+  }
+
   async function handleSubmitDispute() {
     if (!disputeLoan || !disputeMessage.trim()) return;
     setDisputeSubmitting(true);
@@ -958,6 +976,19 @@ export default function InventoryPage() {
                       <div style={{ display: 'flex', gap: '6px' }}>
                         <button onClick={() => handleMarkInformalLoanReturned(loan)} style={handsOverButtonStyle}>Mark Returned</button>
                         <button onClick={() => handleCancelInformalLoan(loan)} style={cancelActionButtonStyle}>Cancel</button>
+                        {loan.borrower_email && (() => {
+                          const key = `informal_${loan.id}`;
+                          const onCooldown = isReminderOnCooldown(key);
+                          return (
+                            <button
+                              onClick={() => handleResendInformalLoanInvite(loan)}
+                              disabled={sendingReminderKey === key || onCooldown}
+                              style={{ ...reminderButtonStyle, opacity: (sendingReminderKey === key || onCooldown) ? 0.5 : 1, cursor: (sendingReminderKey === key || onCooldown) ? 'default' : 'pointer' }}
+                            >
+                              {sendingReminderKey === key ? 'Sending…' : onCooldown ? 'Invite Sent' : 'Resend Invite'}
+                            </button>
+                          );
+                        })()}
                       </div>
                     </td>
                   </tr>
