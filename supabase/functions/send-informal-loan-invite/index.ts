@@ -5,7 +5,21 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const SITE_URL = 'https://theplayaprovides.com'
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+
+function escapeHtml(input: string): string {
+  return input
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
 
 function formatDate(d: string | null) {
   if (!d) return null
@@ -57,6 +71,10 @@ function buildIcs(uid: string, summary: string, description: string, dateStr: st
 }
 
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
   try {
     const { informal_loan_id } = await req.json()
 
@@ -68,11 +86,14 @@ Deno.serve(async (req) => {
 
     if (error || !loan) throw new Error(error?.message ?? 'Informal loan not found')
     if (!loan.borrower_email) {
-      return new Response(JSON.stringify({ ok: true, skipped: 'no email on file' }), { status: 200 })
+      return new Response(JSON.stringify({ ok: true, skipped: 'no email on file' }), { headers: corsHeaders, status: 200 })
     }
 
-    const ownerName = (loan.owner as any)?.preferred_name || (loan.owner as any)?.username || 'Someone'
-    const itemName = (loan.gear_items as any)?.item_name || 'an item'
+    const ownerNameRaw = (loan.owner as any)?.preferred_name || (loan.owner as any)?.username || 'Someone'
+    const itemNameRaw = (loan.gear_items as any)?.item_name || 'an item'
+    const ownerName = escapeHtml(ownerNameRaw)
+    const itemName = escapeHtml(itemNameRaw)
+    const notes = loan.notes ? escapeHtml(loan.notes) : ''
     const claimUrl = `${SITE_URL}/loan-invite/${loan.invite_token}`
     const returnByFormatted = formatDate(loan.return_by)
 
@@ -81,7 +102,7 @@ Deno.serve(async (req) => {
       returnByFormatted ? `<tr style="background:#f9f9f9;"><td style="padding:4px 8px;color:#555;">Expected back</td><td style="padding:4px 8px;font-weight:bold;">${returnByFormatted}</td></tr>` : '',
       loan.damage_agreement != null ? `<tr><td style="padding:4px 8px;color:#555;">If damaged</td><td style="padding:4px 8px;font-weight:bold;">$${loan.damage_agreement}</td></tr>` : '',
       loan.loss_agreement != null ? `<tr style="background:#f9f9f9;"><td style="padding:4px 8px;color:#555;">If not returned</td><td style="padding:4px 8px;font-weight:bold;">$${loan.loss_agreement}</td></tr>` : '',
-      loan.notes ? `<tr><td style="padding:4px 8px;color:#555;">Notes</td><td style="padding:4px 8px;">${loan.notes}</td></tr>` : '',
+      notes ? `<tr><td style="padding:4px 8px;color:#555;">Notes</td><td style="padding:4px 8px;">${notes}</td></tr>` : '',
     ].filter(Boolean).join('')
 
     const html = `
@@ -99,12 +120,12 @@ Deno.serve(async (req) => {
     const emailBody: any = {
       from: 'hello@theplayaprovides.com',
       to: loan.borrower_email,
-      subject: `${ownerName} lent you ${itemName}`,
+      subject: `${ownerNameRaw} lent you ${itemNameRaw}`,
       html,
     }
 
     if (returnByFormatted) {
-      const ics = buildIcs(loan.id, `Return ${itemName} to ${ownerName}`, `Via The Playa Provides: ${claimUrl}`, loan.return_by)
+      const ics = buildIcs(loan.id, `Return ${itemNameRaw} to ${ownerNameRaw}`, `Via The Playa Provides: ${claimUrl}`, loan.return_by)
       emailBody.attachments = [{
         filename: 'return-reminder.ics',
         content: toBase64(ics),
@@ -119,9 +140,9 @@ Deno.serve(async (req) => {
 
     if (!res.ok) throw new Error(`Resend error: ${await res.text()}`)
 
-    return new Response(JSON.stringify({ ok: true }), { status: 200 })
+    return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders, status: 200 })
   } catch (err) {
     console.error(err)
-    return new Response(JSON.stringify({ error: String(err) }), { status: 500 })
+    return new Response(JSON.stringify({ error: String(err) }), { headers: corsHeaders, status: 500 })
   }
 })
