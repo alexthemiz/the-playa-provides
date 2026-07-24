@@ -359,6 +359,11 @@ export default function InventoryPage() {
       .update({ availability_status: 'Not Available', visibility: 'private' })
       .eq('id', loan.item_id);
     setInformalLoans(prev => prev.filter(l => l.id !== loan.id));
+    setItems(prev => prev.map(i =>
+      i.id === loan.item_id
+        ? { ...i, availability_status: 'Not Available', visibility: 'private' }
+        : i
+    ));
   }
 
   async function handleCancelInformalLoan(loan: any) {
