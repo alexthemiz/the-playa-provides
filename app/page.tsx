@@ -76,6 +76,10 @@ export default function HomePage() {
   const [checklistState,     setChecklistState]     = useState<ChecklistState | null>(null)
   const [checklistDismissed, setChecklistDismissed] = useState<boolean>(false)
   const [checklistLoading,   setChecklistLoading]   = useState(true)
+  // Hero tagline: random per page load, no tracking. Defaults to 'A' so the
+  // initial client render matches the server-rendered HTML (avoiding a
+  // hydration mismatch), then flips randomly right after mount.
+  const [tagline, setTagline] = useState<'A' | 'B'>('A')
 
   // ── Game refs ──────────────────────────────────────────────────────────────
   const heroRightRef = useRef<HTMLDivElement>(null)
@@ -93,6 +97,10 @@ export default function HomePage() {
   })
 
   // ── Data fetching ──────────────────────────────────────────────────────────
+  useEffect(() => {
+    setTagline(Math.random() < 0.5 ? 'A' : 'B')
+  }, [])
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     if (params.get('deleted') === 'true') {
@@ -560,10 +568,20 @@ export default function HomePage() {
               fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.02em',
               color: INK, margin: '0 0 18px',
             }}>
-              Why let your stuff gather dust{' '}
-              <span style={{ color: RUST }}>in storage</span>{' '}
-              when it could be gathering dust{' '}
-              <span style={{ color: RUST }}>on playa?</span>
+              {tagline === 'A' ? (
+                <>
+                  Why let your stuff gather dust{' '}
+                  <span style={{ color: RUST }}>in storage</span>{' '}
+                  when it could be gathering dust{' '}
+                  <span style={{ color: RUST }}>on playa?</span>
+                </>
+              ) : (
+                <>
+                  Just because <span style={{ color: RUST }}>you're not going this year</span>{' '}
+                  doesn't mean{' '}
+                  <span style={{ color: RUST }}>your stuff can't.</span>
+                </>
+              )}
             </h1>
 
             <p style={{ fontSize: '1rem', color: INK_MID, lineHeight: 1.65, margin: '0 0 32px', fontWeight: 500 }}>
