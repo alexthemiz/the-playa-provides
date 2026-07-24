@@ -30,6 +30,7 @@ export default function InventoryPage() {
   // Transfer & Loan state
   const [activeTransfers, setActiveTransfers] = useState<any[]>([]);
   const [activeLoans, setActiveLoans] = useState<any[]>([]);
+  const [informalLoans, setInformalLoans] = useState<any[]>([]);
   const [inboundTransfers, setInboundTransfers] = useState<any[]>([]);
   const [inboundLoans, setInboundLoans] = useState<any[]>([]);
   const [givenAwayItems, setGivenAwayItems] = useState<any[]>([]);
@@ -123,6 +124,14 @@ export default function InventoryPage() {
           .eq('owner_id', user.id)
           .in('status', ['pending_handover', 'active', 'return_pending']);
         setActiveLoans(loanData || []);
+
+        // Fetch active informal loans (owner side) — no-account borrowers
+        const { data: informalLoanData } = await supabase
+          .from('informal_loans')
+          .select('id, item_id, borrower_name, borrower_email, handed_over_at, return_by, status, gear_items(item_name)')
+          .eq('owner_id', user.id)
+          .eq('status', 'active');
+        setInformalLoans(informalLoanData || []);
 
         // Inbound transfers (recipient side)
         const { data: inboundTransferData } = await supabase
@@ -337,6 +346,19 @@ export default function InventoryPage() {
       .update({ status: 'cancelled' })
       .eq('id', loan.id);
     if (!error) fetchMyInventory();
+  }
+
+  async function handleMarkInformalLoanReturned(loan: any) {
+    const { error } = await supabase
+      .from('informal_loans')
+      .update({ status: 'returned' })
+      .eq('id', loan.id);
+    if (error) return;
+    await supabase
+      .from('gear_items')
+      .update({ availability_status: 'Not Available', visibility: 'private' })
+      .eq('id', loan.item_id);
+    setInformalLoans(prev => prev.filter(l => l.id !== loan.id));
   }
 
   async function handleSendLoanReminder(loan: any) {
@@ -866,7 +888,7 @@ export default function InventoryPage() {
               </tr>
             </thead>
             <tbody>
-              {activeLoans.filter(l => ['active', 'return_pending'].includes(l.status)).length === 0 && (
+              {activeLoans.filter(l => ['active', 'return_pending'].includes(l.status)).length === 0 && informalLoans.length === 0 && (
                 <tr><td colSpan={6} style={{ ...tdStyle, color: '#9A8878', fontStyle: 'italic' as const }}>You don&apos;t have any items out on loan at this time.</td></tr>
               )}
               {activeLoans
@@ -906,6 +928,32 @@ export default function InventoryPage() {
                       </tr>
                     );
                   })}
+              {informalLoans.map(loan => {
+                const returnBy = loan.return_by ? new Date(loan.return_by).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+                const handedOverOn = new Date(loan.handed_over_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                const itemName = loan.gear_items?.item_name || items.find(i => i.id === loan.item_id)?.item_name || '—';
+                return (
+                  <tr key={`informal-${loan.id}`} style={rowStyle}>
+                    <td style={{ ...tdStyle, fontWeight: 600, color: '#1C1610' }}>
+                      {itemName}
+                      <a href={`/find-items/${loan.item_id}`} style={editLinkStyle}>View Item Details</a>
+                    </td>
+                    <td style={tdStyle}>
+                      {loan.borrower_name} <span style={{ color: '#9A8878', fontSize: '0.78rem' }}>(no account)</span>
+                    </td>
+                    <td style={tdStyle}>{handedOverOn}</td>
+                    <td style={tdStyle}>{returnBy}</td>
+                    <td style={tdStyle}>
+                      <span style={{ fontSize: '0.8rem', color: '#555' }}>Out on Loan</span>
+                    </td>
+                    <td style={tdActionStyle}>
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <button onClick={() => handleMarkInformalLoanReturned(loan)} style={handsOverButtonStyle}>Mark Returned</button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
