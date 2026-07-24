@@ -22,6 +22,10 @@ export default function LendModal({ item, ownerId, onClose, onSuccess }: Props) 
   const [query, setQuery] = useState('')
   const [matched, setMatched] = useState<{ id: string; username: string; preferred_name: string | null } | null>(null)
   const [lookupError, setLookupError] = useState('')
+  const [lastSearchWasEmail, setLastSearchWasEmail] = useState(false)
+  const [showInformalForm, setShowInformalForm] = useState(false)
+  const [informalName, setInformalName] = useState('')
+  const [handedOverAt, setHandedOverAt] = useState(new Date().toISOString().slice(0, 10))
   const [returnBy, setReturnBy] = useState(item.return_by || '')
   const [damageAgreement, setDamageAgreement] = useState(item.damage_price != null ? String(item.damage_price) : '')
   const [lossAgreement, setLossAgreement] = useState(item.loss_price != null ? String(item.loss_price) : '')
@@ -33,6 +37,7 @@ export default function LendModal({ item, ownerId, onClose, onSuccess }: Props) 
     setLookupError('')
     setMatched(null)
     const q = query.trim().toLowerCase()
+    setLastSearchWasEmail(q.includes('@'))
     if (!q) return
 
     let data: { id: string; username: string; preferred_name: string | null } | null = null
@@ -63,35 +68,60 @@ export default function LendModal({ item, ownerId, onClose, onSuccess }: Props) 
   }
 
   const handleConfirm = async () => {
-    if (!matched) return
+    if (!showInformalForm && !matched) return
+    if (showInformalForm && !informalName.trim()) return
     setSubmitting(true)
     setSubmitError('')
+    const sharedTerms = {
+      return_by: returnBy || null,
+      damage_agreement: damageAgreement ? parseFloat(damageAgreement) : null,
+      loss_agreement: lossAgreement ? parseFloat(lossAgreement) : null,
+      notes: notes || null,
+    }
     try {
-      const { data: loan, error } = await supabase
-        .from('item_loans')
-        .insert({
-          item_id: item.id,
-          owner_id: ownerId,
-          borrower_id: matched.id,
-          return_by: returnBy || null,
-          damage_agreement: damageAgreement ? parseFloat(damageAgreement) : null,
-          loss_agreement: lossAgreement ? parseFloat(lossAgreement) : null,
-          notes: notes || null,
+      if (showInformalForm) {
+        const { data: informalLoan, error } = await supabase
+          .from('informal_loans')
+          .insert({
+            item_id: item.id,
+            owner_id: ownerId,
+            borrower_name: informalName.trim(),
+            borrower_email: query.trim().toLowerCase(),
+            handed_over_at: handedOverAt,
+            ...sharedTerms,
+          })
+          .select()
+          .single()
+        if (error) throw error
+
+        await supabase.functions.invoke('send-informal-loan-invite', {
+          body: { informal_loan_id: informalLoan.id },
         })
-        .select()
-        .single()
-      if (error) throw error
+      } else {
+        if (!matched) return
+        const { data: loan, error } = await supabase
+          .from('item_loans')
+          .insert({
+            item_id: item.id,
+            owner_id: ownerId,
+            borrower_id: matched.id,
+            ...sharedTerms,
+          })
+          .select()
+          .single()
+        if (error) throw error
 
-      await supabase.from('notifications').insert({
-        type: 'loan_initiated',
-        recipient_id: matched.id,
-        actor_id: ownerId,
-        item_id: item.id,
-      })
+        await supabase.from('notifications').insert({
+          type: 'loan_initiated',
+          recipient_id: matched.id,
+          actor_id: ownerId,
+          item_id: item.id,
+        })
 
-      await supabase.functions.invoke('send-loan-notification', {
-        body: { type: 'initiated', loan_id: loan.id },
-      })
+        await supabase.functions.invoke('send-loan-notification', {
+          body: { type: 'initiated', loan_id: loan.id },
+        })
+      }
 
       onSuccess()
     } catch (err: any) {
@@ -99,6 +129,8 @@ export default function LendModal({ item, ownerId, onClose, onSuccess }: Props) 
       setSubmitting(false)
     }
   }
+
+  const isConfirmDisabled = (!showInformalForm && !matched) || (showInformalForm && !informalName.trim()) || submitting
 
   return (
     <div style={overlayStyle}>
@@ -111,17 +143,57 @@ export default function LendModal({ item, ownerId, onClose, onSuccess }: Props) 
         </p>
 
         {/* Lookup */}
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-          <input
-            value={query}
-            onChange={e => { setQuery(e.target.value); setMatched(null); setLookupError('') }}
-            onKeyDown={e => e.key === 'Enter' && handleLookup()}
-            placeholder="username or email"
-            style={inputStyle}
-          />
-          <button onClick={handleLookup} style={lookupButtonStyle}>Find</button>
-        </div>
-        {lookupError && <p style={errorStyle}>{lookupError}</p>}
+        {!showInformalForm && (
+          <>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+              <input
+                value={query}
+                onChange={e => { setQuery(e.target.value); setMatched(null); setLookupError('') }}
+                onKeyDown={e => e.key === 'Enter' && handleLookup()}
+                placeholder="username or email"
+                style={inputStyle}
+              />
+              <button onClick={handleLookup} style={lookupButtonStyle}>Find</button>
+            </div>
+            {lookupError && (
+              <div>
+                <p style={errorStyle}>{lookupError}</p>
+                {lastSearchWasEmail && (
+                  <button onClick={() => setShowInformalForm(true)} style={lendAnywayButtonStyle}>
+                    Lend to them anyway →
+                  </button>
+                )}
+              </div>
+            )}
+          </>
+        )}
+        {showInformalForm && (
+          <div style={{ marginBottom: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <span style={{ fontSize: '0.85rem', color: '#666' }}>Lending to <strong>{query}</strong> (no account)</span>
+              <button
+                onClick={() => { setShowInformalForm(false); setInformalName(''); setLookupError(''); }}
+                style={{ background: 'none', border: 'none', color: '#1E8A82', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
+              >
+                ← back to search
+              </button>
+            </div>
+            <label style={labelStyle}>Their name</label>
+            <input
+              value={informalName}
+              onChange={e => setInformalName(e.target.value)}
+              placeholder="e.g. Jamie"
+              style={inputStyle}
+            />
+            <label style={{ ...labelStyle, marginTop: '10px' }}>Handed over on</label>
+            <input
+              type="date"
+              value={handedOverAt}
+              onChange={e => setHandedOverAt(e.target.value)}
+              style={inputStyle}
+            />
+          </div>
+        )}
         {matched && (
           <div style={matchedBoxStyle}>
             <span style={{ color: '#1C1610', fontWeight: 600 }}>{matched.preferred_name || matched.username}</span>
@@ -164,10 +236,10 @@ export default function LendModal({ item, ownerId, onClose, onSuccess }: Props) 
           <button onClick={onClose} style={cancelButtonStyle}>Cancel</button>
           <button
             onClick={handleConfirm}
-            disabled={!matched || submitting}
-            style={{ ...confirmButtonStyle, opacity: (!matched || submitting) ? 0.5 : 1 }}
+            disabled={isConfirmDisabled}
+            style={{ ...confirmButtonStyle, opacity: isConfirmDisabled ? 0.5 : 1 }}
           >
-            {submitting ? 'Sending...' : 'Confirm Loan'}
+            {submitting ? 'Sending...' : showInformalForm ? 'Lend Item' : 'Confirm Loan'}
           </button>
         </div>
       </div>
@@ -182,6 +254,7 @@ const inputStyle: React.CSSProperties = { width: '100%', padding: '10px', border
 const lookupButtonStyle: React.CSSProperties = { padding: '10px 16px', backgroundColor: '#1C1610', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem', whiteSpace: 'nowrap' as const }
 const matchedBoxStyle: React.CSSProperties = { backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '10px 14px', marginBottom: '4px' }
 const errorStyle: React.CSSProperties = { color: '#dc2626', fontSize: '0.85rem', margin: '4px 0' }
+const lendAnywayButtonStyle: React.CSSProperties = { marginTop: '6px', padding: '8px 14px', backgroundColor: 'transparent', color: '#1E8A82', border: '1.5px solid #1E8A82', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }
 const cancelButtonStyle: React.CSSProperties = { padding: '10px 18px', backgroundColor: '#f0f0f0', color: '#666', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }
 const confirmButtonStyle: React.CSSProperties = { padding: '10px 18px', backgroundColor: '#1E8A82', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }
 const termsGridStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }

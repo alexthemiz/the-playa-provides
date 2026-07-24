@@ -296,6 +296,7 @@ export default function Header() {
                 case 'loan_return_pending':   return { text: `says they've returned ${itemName} — confirm receipt`, href: '/inventory' }
                 case 'loan_initiated':        return { text: `agreed to lend you ${itemName} — pending handover`, href: '/inventory' }
                 case 'transfer_initiated':    return { text: `is giving you ${itemName} — pending handover`,      href: '/inventory' }
+                case 'informal_loan_claimed': return { text: `claimed ${itemName} — it's now a tracked loan`,    href: '/inventory' }
                 case 'camp_member_removed':   return { text: `You have been removed from ${campName}`,      href: '/' }
                 case 'wish_list_match': {
                   const items     = (n.meta as any)?.items
