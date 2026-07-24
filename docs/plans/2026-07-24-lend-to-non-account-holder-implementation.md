@@ -42,24 +42,39 @@ create unique index informal_loans_invite_token_idx on public.informal_loans(inv
 
 alter table public.informal_loans enable row level security;
 
--- Owner-only access. The claim flow (a non-owner, possibly unauthenticated
--- visitor) never touches this table directly — see the get_informal_loan_preview
--- and claim_informal_loan SECURITY DEFINER functions in a later migration,
--- which read/write on the caller's behalf without needing a table grant here.
+-- Owner-only access — AND the row's item_id must actually belong to the
+-- caller. Without the exists() check, `owner_id = auth.uid()` alone is
+-- self-attested: anyone could insert a row naming someone ELSE's item_id
+-- while setting owner_id to themselves, and the sync trigger below would
+-- then falsely mark that other person's item as on-loan. The claim flow (a
+-- non-owner, possibly unauthenticated visitor) never touches this table
+-- directly — see the get_informal_loan_preview and claim_informal_loan
+-- SECURITY DEFINER functions in a later migration, which read/write on the
+-- caller's behalf without needing a table grant here.
 create policy "owner_can_manage_own_informal_loans" on public.informal_loans
 for all
 using (owner_id = auth.uid())
-with check (owner_id = auth.uid());
+with check (
+  owner_id = auth.uid()
+  and exists (select 1 from public.gear_items where id = item_id and user_id = auth.uid())
+);
 
 grant select on public.informal_loans to anon;
 grant select, insert, update, delete on public.informal_loans to authenticated;
 grant select, insert, update, delete on public.informal_loans to service_role;
 
--- Mirrors the existing item_loans_sync_gear_flag trigger (see
--- 20260717200252_add_gear_items_is_on_loan_flag.sql) so an active informal
--- loan marks the item on-loan exactly like a real one, with no new UI logic
--- needed anywhere that already checks gear_items.is_on_loan.
-create or replace function public.sync_gear_item_informal_loan_flag()
+-- Sync gear_items.is_on_loan from BOTH loan tables' current state, not just
+-- "did the row that just fired this trigger become active/inactive." A
+-- blind `set is_on_loan = (new.status = 'active')` — mirroring the ORIGINAL
+-- naive version of the existing item_loans trigger — has a cross-table
+-- clobber risk: if a real loan and an informal loan ever both touch the
+-- same item (shouldn't happen via the UI's is_on_loan gating, but nothing
+-- at the DB level currently prevents it — see the defensive check added
+-- below), whichever trigger fires last would blindly overwrite the flag
+-- based on only its own table, potentially clearing it while the OTHER
+-- loan is still genuinely active. Computing it as an OR across both tables
+-- makes each trigger self-correcting regardless of fire order.
+create or replace function public.sync_gear_item_loan_flag()
 returns trigger
 language plpgsql
 security definer
@@ -67,16 +82,58 @@ set search_path = public
 as $$
 begin
   update public.gear_items
-  set is_on_loan = (new.status = 'active')
+  set is_on_loan = (
+    exists (select 1 from public.item_loans where item_id = new.item_id and status in ('pending_handover', 'active', 'return_pending'))
+    or exists (select 1 from public.informal_loans where item_id = new.item_id and status = 'active')
+  )
   where id = new.item_id;
   return new;
 end;
 $$;
 
+-- Re-point the EXISTING item_loans trigger at the same updated (OR-based)
+-- function — it already existed as sync_gear_item_loan_flag before this
+-- migration (see 20260717200252_add_gear_items_is_on_loan_flag.sql); we're
+-- upgrading its body in place via create-or-replace above, so this
+-- create-trigger is a no-op confirmation, not a new trigger. Listed here
+-- for clarity that it now depends on the OR-based version too.
+drop trigger if exists item_loans_sync_gear_flag on public.item_loans;
+create trigger item_loans_sync_gear_flag
+  after insert or update of status on public.item_loans
+  for each row
+  execute function public.sync_gear_item_loan_flag();
+
 create trigger informal_loans_sync_gear_flag
   after insert or update of status on public.informal_loans
   for each row
-  execute function public.sync_gear_item_informal_loan_flag();
+  execute function public.sync_gear_item_loan_flag();
+
+-- Defense-in-depth against creating an informal loan for an item that's
+-- already on loan (real or informal). The inventory UI's "Lend To" button
+-- (renderActionButton) currently only checks for a *pending* real loan
+-- before showing itself — it does NOT check for an already-active one, a
+-- pre-existing gap found while writing this plan (out of scope to fix
+-- here, but worth knowing about). This trigger closes that gap for
+-- informal loans specifically at the data layer, regardless of what the
+-- UI does or doesn't gate correctly.
+create or replace function public.prevent_informal_loan_on_active_item()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.status = 'active' and exists (select 1 from public.gear_items where id = new.item_id and is_on_loan = true) then
+    raise exception 'This item is already on loan';
+  end if;
+  return new;
+end;
+$$;
+
+create trigger informal_loans_prevent_double_loan
+  before insert on public.informal_loans
+  for each row
+  execute function public.prevent_informal_loan_on_active_item();
 ```
 
 **Step 2: Apply it**
@@ -93,12 +150,15 @@ order by ordinal_position;
 ```
 Expected: 14 rows matching the columns above, `borrower_name`/`owner_id`/`item_id`/`status` as `NO` (not nullable).
 
-Then confirm RLS is on and the trigger exists:
+Then confirm RLS is on and both triggers exist:
 ```sql
 select relrowsecurity from pg_class where relname = 'informal_loans';
 select tgname from pg_trigger where tgrelid = 'public.informal_loans'::regclass;
+select tgname from pg_trigger where tgrelid = 'public.item_loans'::regclass;
 ```
-Expected: `relrowsecurity = true`; trigger `informal_loans_sync_gear_flag` listed.
+Expected: `relrowsecurity = true`; `informal_loans` has both `informal_loans_sync_gear_flag` and `informal_loans_prevent_double_loan`; `item_loans` still has `item_loans_sync_gear_flag` (now pointing at the upgraded OR-based function body).
+
+Also confirm the ownership check actually blocks a mismatched insert — as a second test account (or via a query with a mismatched item_id/owner_id pair), verify an insert naming an item_id you don't own gets rejected by RLS, and that inserting a second informal loan for an item that's already `is_on_loan = true` raises the "already on loan" exception from the new trigger.
 
 **Step 4: Save the migration file**
 
@@ -120,7 +180,11 @@ git commit -m "feat: add informal_loans table for lending to non-account holders
 
 **Step 1: Write the migration SQL**
 
-Postgres can't `ALTER ... ADD VALUE` cleanly inside a transaction alongside other changes when the constraint is a plain `CHECK`, not a native enum — this project uses a `CHECK` constraint (confirmed via the existing `notifications_type_check`), so this is a drop-and-recreate:
+Postgres can't `ALTER ... ADD VALUE` cleanly inside a transaction alongside other changes when the constraint is a plain `CHECK`, not a native enum — this project uses a `CHECK` constraint, not a native Postgres enum type. Confirmed directly against the live database (not just inferred from the design doc) via:
+```sql
+select conname, pg_get_constraintdef(oid) from pg_constraint where conrelid = 'public.notifications'::regclass and contype = 'c';
+```
+which returns exactly one row, `conname = notifications_type_check`, with a definition matching the 18 existing values listed below. So this is a drop-and-recreate:
 
 ```sql
 alter table public.notifications drop constraint notifications_type_check;
@@ -203,6 +267,15 @@ $$;
 -- trust boundary: the caller never gets a direct table grant on
 -- informal_loans for this — this function does the sensitive read/write on
 -- their behalf, scoped strictly to the one row matching the token.
+--
+-- The status flip IS the concurrency check (`where ... and status =
+-- 'active'`), not a separate select-then-update — two people clicking the
+-- same claim link near-simultaneously must not both be able to pass a
+-- read-only check before either commits. Only one concurrent caller can
+-- ever successfully flip a given row's status away from 'active'; the
+-- loser's UPDATE simply matches zero rows, so v_informal.id comes back
+-- null for them and they get a clean "no longer available" error instead
+-- of a duplicate item_loans row being created.
 create or replace function public.claim_informal_loan(p_token uuid)
 returns uuid
 language plpgsql
@@ -217,27 +290,24 @@ begin
     raise exception 'Must be logged in to claim a loan';
   end if;
 
-  select * into v_informal from informal_loans where invite_token = p_token;
+  if exists (select 1 from informal_loans where invite_token = p_token and owner_id = auth.uid()) then
+    raise exception 'You can''t claim your own loan';
+  end if;
+
+  update informal_loans
+  set status = 'converted', updated_at = now()
+  where invite_token = p_token and status = 'active'
+  returning * into v_informal;
 
   if v_informal.id is null then
-    raise exception 'Loan invite not found';
-  end if;
-
-  if v_informal.status != 'active' then
-    raise exception 'This loan is no longer available to claim (status: %)', v_informal.status;
-  end if;
-
-  if v_informal.owner_id = auth.uid() then
-    raise exception 'You can''t claim your own loan';
+    raise exception 'This loan is no longer available to claim';
   end if;
 
   insert into item_loans (item_id, owner_id, borrower_id, status, return_by, damage_agreement, loss_agreement, notes)
   values (v_informal.item_id, v_informal.owner_id, auth.uid(), 'pending_handover', v_informal.return_by, v_informal.damage_agreement, v_informal.loss_agreement, v_informal.notes)
   returning id into v_new_loan_id;
 
-  update informal_loans
-  set status = 'converted', converted_loan_id = v_new_loan_id, updated_at = now()
-  where id = v_informal.id;
+  update informal_loans set converted_loan_id = v_new_loan_id where id = v_informal.id;
 
   insert into notifications (recipient_id, actor_id, type, item_id)
   values (v_informal.owner_id, auth.uid(), 'informal_loan_claimed', v_informal.item_id);
@@ -246,6 +316,8 @@ begin
 end;
 $$;
 ```
+
+**A note on why the self-claim check runs before the atomic update, as a separate read:** if it ran after (checking `v_informal.owner_id = auth.uid()` post-update), an owner accidentally clicking their own claim link would still be safe — an unhandled `raise exception` in PL/pgSQL rolls back everything the function did up to that point, including the status flip — but checking first avoids wastefully flipping and rolling back a row's status for a request that was always going to fail.
 
 **Step 2: Apply it** via `mcp__supabase__apply_migration`.
 
@@ -267,7 +339,9 @@ Note the returned `invite_token`, then:
 ```sql
 select * from get_informal_loan_preview('<that token>');
 ```
-Expected: one row with the item's real name/photo and the terms just inserted. This confirms the preview function works before wiring up the UI. Leave this test row in place for Task 9's manual verification, or delete it now with `delete from informal_loans where id = '<id>'` if you'd rather start clean later.
+Expected: one row with the item's real name/photo and the terms just inserted. This confirms the preview function works before wiring up the UI.
+
+Then, as an authenticated call (via the Supabase dashboard SQL editor running `set role authenticated; set request.jwt.claim.sub = '<a different test account's user id>';` or more simply by testing this end-to-end once the claim page exists in Task 9), call `select claim_informal_loan('<that token>');` **twice in a row**. Expected: the first call succeeds and returns a new `item_loans` id; the second call raises "This loan is no longer available to claim" — confirming the atomic status-flip actually prevents a double-claim rather than just happening to work once. Leave this test row in place for Task 9's manual verification, or delete it now with `delete from informal_loans where id = '<id>'` if you'd rather start clean later.
 
 **Step 4: Save the migration file** to `supabase/migrations/<version>_add_informal_loan_claim_functions.sql`.
 
@@ -308,26 +382,61 @@ In `handleLookup`, right after `const q = query.trim().toLowerCase()`, add:
     setLastSearchWasEmail(q.includes('@'))
 ```
 
-**Step 3: Add the fallback button and informal form**
+**Step 3: Add the fallback button and informal form, and hide the lookup box while in informal mode**
 
-Replace the existing lookup-error block:
+This step matters more than it looks: once `showInformalForm` is true, the original lookup box **must** stop being usable. Without this, a user could trigger the informal flow, then successfully search again and get a real `matched` user set — but `handleConfirm` branches on `showInformalForm`, not on whether `matched` is set, so it would silently create an *informal* loan even though a real account was just found. Hiding the lookup box (rather than just leaving it inert) also gives a clear "back to search" escape hatch.
+
+Replace the existing lookup block (the `<div>` containing the input + Find button) and the error block together:
 ```tsx
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+          <input
+            value={query}
+            onChange={e => { setQuery(e.target.value); setMatched(null); setLookupError('') }}
+            onKeyDown={e => e.key === 'Enter' && handleLookup()}
+            placeholder="username or email"
+            style={inputStyle}
+          />
+          <button onClick={handleLookup} style={lookupButtonStyle}>Find</button>
+        </div>
         {lookupError && <p style={errorStyle}>{lookupError}</p>}
 ```
 with:
 ```tsx
-        {lookupError && (
-          <div>
-            <p style={errorStyle}>{lookupError}</p>
-            {lastSearchWasEmail && !showInformalForm && (
-              <button onClick={() => setShowInformalForm(true)} style={lendAnywayButtonStyle}>
-                Lend to them anyway →
-              </button>
+        {!showInformalForm && (
+          <>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+              <input
+                value={query}
+                onChange={e => { setQuery(e.target.value); setMatched(null); setLookupError('') }}
+                onKeyDown={e => e.key === 'Enter' && handleLookup()}
+                placeholder="username or email"
+                style={inputStyle}
+              />
+              <button onClick={handleLookup} style={lookupButtonStyle}>Find</button>
+            </div>
+            {lookupError && (
+              <div>
+                <p style={errorStyle}>{lookupError}</p>
+                {lastSearchWasEmail && (
+                  <button onClick={() => setShowInformalForm(true)} style={lendAnywayButtonStyle}>
+                    Lend to them anyway →
+                  </button>
+                )}
+              </div>
             )}
-          </div>
+          </>
         )}
         {showInformalForm && (
-          <div style={{ marginTop: '8px' }}>
+          <div style={{ marginBottom: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <span style={{ fontSize: '0.85rem', color: '#666' }}>Lending to <strong>{query}</strong> (no account)</span>
+              <button
+                onClick={() => { setShowInformalForm(false); setInformalName(''); setLookupError(''); }}
+                style={{ background: 'none', border: 'none', color: '#1E8A82', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
+              >
+                ← back to search
+              </button>
+            </div>
             <label style={labelStyle}>Their name</label>
             <input
               value={informalName}
@@ -345,6 +454,8 @@ with:
           </div>
         )}
 ```
+
+Note this also removes the old standalone `{matched && (...)}` block's redundancy with the lookup box's visibility — that block should stay as-is (it's already conditional on `matched`, which can now only be truthy when the lookup box is visible, i.e. `!showInformalForm`, since `setMatched(null)` fires on every query edit and the informal path never sets it).
 
 **Step 4: Add the `lendAnywayButtonStyle` constant**
 
@@ -495,20 +606,45 @@ function formatDate(d: string | null) {
   return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
 }
 
+// btoa() throws on any character outside Latin1 — a real risk here since
+// itemName/ownerName come from user-entered profile/item data and this is a
+// Burning Man community app (accented characters, emoji in names are
+// plausible). Route through TextEncoder first so the base64 is built from
+// actual UTF-8 bytes instead of raw JS string code units.
+function toBase64(str: string) {
+  const bytes = new TextEncoder().encode(str)
+  let binary = ''
+  bytes.forEach(b => { binary += String.fromCharCode(b) })
+  return btoa(binary)
+}
+
+// ICS text values need commas/semicolons/backslashes/newlines escaped per
+// RFC 5545 — without this, an item name or owner name containing e.g. a
+// comma could produce a malformed calendar file some clients reject.
+function icsEscape(text: string) {
+  return text.replace(/\\/g, '\\\\').replace(/,/g, '\\,').replace(/;/g, '\\;').replace(/\n/g, '\\n')
+}
+
 // Minimal single-event ICS — no library needed, this is just a text format.
-function buildIcs(summary: string, description: string, dateStr: string) {
+// UID reuses informal_loan_id (already a stable, unique UUID) rather than
+// generating a fresh random one — that makes a resent invite update the
+// SAME calendar event in the recipient's calendar app instead of creating
+// a duplicate, and avoids introducing crypto.randomUUID() as a new,
+// unverified-in-this-codebase API for something that already has a
+// perfectly good stable ID available.
+function buildIcs(uid: string, summary: string, description: string, dateStr: string) {
   const d = dateStr.replace(/-/g, '')
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
     'PRODID:-//The Playa Provides//EN',
     'BEGIN:VEVENT',
-    `UID:${crypto.randomUUID()}@theplayaprovides.com`,
+    `UID:${uid}@theplayaprovides.com`,
     `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
     `DTSTART;VALUE=DATE:${d}`,
     `DTEND;VALUE=DATE:${d}`,
-    `SUMMARY:${summary}`,
-    `DESCRIPTION:${description}`,
+    `SUMMARY:${icsEscape(summary)}`,
+    `DESCRIPTION:${icsEscape(description)}`,
     'END:VEVENT',
     'END:VCALENDAR',
   ].join('\r\n')
@@ -562,10 +698,10 @@ Deno.serve(async (req) => {
     }
 
     if (returnByFormatted) {
-      const ics = buildIcs(`Return ${itemName} to ${ownerName}`, `Via The Playa Provides: ${claimUrl}`, loan.return_by)
+      const ics = buildIcs(loan.id, `Return ${itemName} to ${ownerName}`, `Via The Playa Provides: ${claimUrl}`, loan.return_by)
       emailBody.attachments = [{
         filename: 'return-reminder.ics',
-        content: btoa(ics),
+        content: toBase64(ics),
       }]
     }
 
@@ -597,7 +733,7 @@ curl -X POST 'https://bklycpitofjrjhizttny.supabase.co/functions/v1/send-informa
   -H 'Content-Type: application/json' \
   -d '{"informal_loan_id": "<the test row id>"}'
 ```
-Expected: `{"ok":true}` and an email arrives at the test address with the item name, terms, claim link, and (if `return_by` was set) an `.ics` attachment that opens correctly in a calendar app.
+Expected: `{"ok":true}` and an email arrives at the test address with the item name, terms, claim link, and (if `return_by` was set) an `.ics` attachment that opens correctly in a calendar app. Note: this project has no prior example of a Resend attachment anywhere in its edge functions, so the `attachments: [{filename, content}]` shape above is based on Resend's documented API rather than in-codebase precedent — this manual send-and-open-the-ics-file check is what actually confirms it works, don't skip it.
 
 **Step 4: Commit**
 
@@ -635,6 +771,8 @@ Near the existing loan fetch (around line 119-125), add immediately after `setAc
 
 **Step 2: Add the Mark Returned handler**
 
+The real loan flow's `handleOwnerConfirmReturn` (line 370-381) doesn't just close out the loan — it also resets the item to `Not Available`/`private` afterward, so the owner has to consciously re-list it rather than it silently popping back to whatever availability it had mid-loan. Mark Returned should match that, not just clear `is_on_loan` (which the trigger from Task 1 already handles automatically on the status update — this second query is specifically for the availability/visibility reset, which nothing else does for you).
+
 Near `handleCancelLoan` (line 334), add:
 ```tsx
   async function handleMarkInformalLoanReturned(loan: any) {
@@ -642,7 +780,12 @@ Near `handleCancelLoan` (line 334), add:
       .from('informal_loans')
       .update({ status: 'returned' })
       .eq('id', loan.id);
-    if (!error) setInformalLoans(prev => prev.filter(l => l.id !== loan.id));
+    if (error) return;
+    await supabase
+      .from('gear_items')
+      .update({ availability_status: 'Not Available', visibility: 'private' })
+      .eq('id', loan.item_id);
+    setInformalLoans(prev => prev.filter(l => l.id !== loan.id));
   }
 ```
 
@@ -697,7 +840,7 @@ npx tsc --noEmit
 ```
 Expected: no new errors.
 
-Manually: insert a test `informal_loans` row (as in Task 3 Step 3) for an item you own, reload `/inventory`, confirm it appears in "Items Out on Loan" labeled "(no account)", and that clicking **Mark Returned** removes it from the list and (`select is_on_loan from gear_items where id = <item_id>`) confirms the flag flipped back to `false` via the trigger from Task 1.
+Manually: insert a test `informal_loans` row (as in Task 3 Step 3) for an item you own, reload `/inventory`, confirm it appears in "Items Out on Loan" labeled "(no account)", and that clicking **Mark Returned** removes it from the list and (`select is_on_loan, availability_status, visibility from gear_items where id = <item_id>`) confirms `is_on_loan = false` (via the trigger), `availability_status = 'Not Available'`, and `visibility = 'private'` (via this handler's second update).
 
 **Step 5: Commit**
 
@@ -917,9 +1060,9 @@ export default function ClientPage({ token }: { token: string }) {
         </>
       ) : (
         <>
-          <p>Log in or create an account to claim this loan.</p>
-          <a href={`/login?next=/loan-invite/${token}`}>Log In</a>
-          <a href={`/signup?next=/loan-invite/${token}`}>Sign Up</a>
+          <p>Log in or create an account, then come back to this page (or click the link in your email again) to claim this loan.</p>
+          <a href="/login">Log In</a>
+          <a href="/signup">Sign Up</a>
         </>
       )}
     </div>
@@ -927,7 +1070,7 @@ export default function ClientPage({ token }: { token: string }) {
 }
 ```
 
-**Note:** check whether `/login` and `/signup` already support a `?next=` redirect param before wiring those links — grep `app/login` and `app/signup` for `next` or `redirectTo` handling. If they don't, the simplest fix within scope is to store the token in `sessionStorage` before navigating to login/signup, then check for it on this page's `useEffect` after the user returns authenticated — note this as a follow-up if `?next=` isn't already supported, rather than modifying the login/signup pages as part of this plan (keep this task scoped to the claim page itself).
+**Why no auto-redirect back after login/signup:** confirmed directly — `app/login/page.tsx` hardcodes its post-login destination to `/inventory` (both the password path via `router.push('/inventory')` and the Google OAuth path via `redirectTo: .../auth/callback?next=/inventory`), and `app/signup/page.tsx` does the same (`/profile/<username>` for password signup, `?next=/settings?setup=true` for Google). Neither reads a `next` value from its own incoming URL. `app/auth/callback/route.ts` itself is actually already generic (`searchParams.get('next') ?? '/'`) — it's not the bottleneck — but making login/signup forward a caller-supplied `next` means editing those two files' redirect logic, which is out of scope for this plan and starts creeping toward auth-flow changes this project treats cautiously. Simpler and fully in-scope: tell the user to come back to the link after they're done, a completely standard pattern for invite-link flows. This page already checks `session` on load and shows the Claim button whenever they land back here authenticated, so revisiting the link "just works" with zero changes to login/signup.
 
 **Step 3: Verify**
 
@@ -955,16 +1098,14 @@ git commit -m "feat: add /loan-invite/[token] claim page"
 **Files:**
 - Modify: `components/header.tsx`
 
-**Step 1: Find the existing notification-type switch**
+**Step 1: Add the new case**
 
-Every notification type has a matching `case` for display text + link (per this project's established pattern). Find the switch/case block handling types like `loan_initiated` and add a sibling case:
+Confirmed the exact shape directly from `components/header.tsx` (lines 281-298): a switch inside `notifications.map(n => ...)` returning `{ text, href }` (not `link`), where `itemName` is already resolved above the switch via `const itemName = (n.item as any)?.item_name || 'an item'` — this comes from a *generic* join (`item:gear_items!notifications_item_id_fkey(item_name)`) already present in the notifications fetch query, keyed off `item_id` for any notification type, so it works for the new type automatically with no query changes needed. Every existing loan/transfer-related case links to `/inventory`, not the item's own detail page — matching that convention (rather than the `/find-items/${n.item_id}` pattern used only by `new_item`, which is a different kind of notification).
 
+Add, next to `case 'transfer_initiated':` (line 298):
 ```tsx
-    case 'informal_loan_claimed':
-      return { text: 'claimed the item you lent them — it\'s now a tracked loan', link: `/find-items/${n.item_id}` }
+                case 'informal_loan_claimed':  return { text: `claimed ${itemName} — it's now a tracked loan`, href: '/inventory' }
 ```
-
-Match the exact shape (object with `text`/`link`, or however the existing cases are structured — read the surrounding code first since this plan can't see the exact current switch structure) used by the neighboring cases (e.g. `loan_initiated`) so the new case fits the existing pattern precisely rather than guessing a different shape.
 
 **Step 2: Verify**
 
@@ -1001,5 +1142,6 @@ git commit -m "docs: TASKS.md — log lending to non-account holders feature"
 ## Notes for whoever executes this plan
 
 - Every SQL migration task includes a `mcp__supabase__apply_migration` step *and* a follow-up "save the file to `supabase/migrations/`" step — both are required per this project's migration-tracking convention; skipping the second one silently breaks reconstructability from git (this exact problem already happened once in this project's history).
-- `middleware.ts` and `app/auth/callback/route.ts` are explicitly flagged in this project as do-not-touch-without-discussion. Nothing in this plan should require touching either — if executing this plan seems to need a change there (e.g. for the `?next=` redirect in Task 9), stop and flag it rather than editing those files directly.
+- `middleware.ts` and `app/auth/callback/route.ts` are explicitly flagged in this project as do-not-touch-without-discussion. Nothing in this plan touches either — confirmed while writing this plan that `app/login/page.tsx` and `app/signup/page.tsx` both hardcode their post-auth destination (not the callback route's fault — it's already generic), and rather than editing those two files to support a dynamic redirect, Task 9's claim page just asks the user to come back to the link after logging in/signing up. If a future change ever wants the auto-redirect, that's an edit to `app/login/page.tsx`/`app/signup/page.tsx` specifically, not the callback route.
 - No automated test suite exists in this project — every "verify" step above is a real, concrete manual or SQL check, not a placeholder. Don't skip them even though they're not `pytest`-style.
+- This plan went through an explicit adversarial review pass after the first draft (checking for security gaps, race conditions, and unverified assumptions) before execution began. Findings from that pass are folded into the tasks above rather than listed separately here — notably: the RLS insert policy verifies item ownership (not just self-attested `owner_id`), `claim_informal_loan` uses an atomic status-flip to close a double-claim race condition, the `is_on_loan` sync trigger (both the new one and the existing `item_loans` one, upgraded in place) computes the flag across both tables instead of blindly asserting per-row, and the calendar-invite base64 encoding is UTF-8-safe. Everything that was inferred rather than confirmed against the live schema or actual source files (the notifications check-constraint name, `header.tsx`'s exact case shape, whether login/signup support a redirect param) was individually verified before this plan was finalized — none of it was left as a guess.
