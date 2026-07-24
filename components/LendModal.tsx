@@ -72,6 +72,12 @@ export default function LendModal({ item, ownerId, onClose, onSuccess }: Props) 
     if (showInformalForm && !informalName.trim()) return
     setSubmitting(true)
     setSubmitError('')
+    const sharedTerms = {
+      return_by: returnBy || null,
+      damage_agreement: damageAgreement ? parseFloat(damageAgreement) : null,
+      loss_agreement: lossAgreement ? parseFloat(lossAgreement) : null,
+      notes: notes || null,
+    }
     try {
       if (showInformalForm) {
         const { data: informalLoan, error } = await supabase
@@ -82,10 +88,7 @@ export default function LendModal({ item, ownerId, onClose, onSuccess }: Props) 
             borrower_name: informalName.trim(),
             borrower_email: query.trim().toLowerCase(),
             handed_over_at: handedOverAt,
-            return_by: returnBy || null,
-            damage_agreement: damageAgreement ? parseFloat(damageAgreement) : null,
-            loss_agreement: lossAgreement ? parseFloat(lossAgreement) : null,
-            notes: notes || null,
+            ...sharedTerms,
           })
           .select()
           .single()
@@ -102,10 +105,7 @@ export default function LendModal({ item, ownerId, onClose, onSuccess }: Props) 
             item_id: item.id,
             owner_id: ownerId,
             borrower_id: matched.id,
-            return_by: returnBy || null,
-            damage_agreement: damageAgreement ? parseFloat(damageAgreement) : null,
-            loss_agreement: lossAgreement ? parseFloat(lossAgreement) : null,
-            notes: notes || null,
+            ...sharedTerms,
           })
           .select()
           .single()
@@ -129,6 +129,8 @@ export default function LendModal({ item, ownerId, onClose, onSuccess }: Props) 
       setSubmitting(false)
     }
   }
+
+  const isConfirmDisabled = (!showInformalForm && !matched) || (showInformalForm && !informalName.trim()) || submitting
 
   return (
     <div style={overlayStyle}>
@@ -234,8 +236,8 @@ export default function LendModal({ item, ownerId, onClose, onSuccess }: Props) 
           <button onClick={onClose} style={cancelButtonStyle}>Cancel</button>
           <button
             onClick={handleConfirm}
-            disabled={(!showInformalForm && !matched) || (showInformalForm && !informalName.trim()) || submitting}
-            style={{ ...confirmButtonStyle, opacity: ((!showInformalForm && !matched) || (showInformalForm && !informalName.trim()) || submitting) ? 0.5 : 1 }}
+            disabled={isConfirmDisabled}
+            style={{ ...confirmButtonStyle, opacity: isConfirmDisabled ? 0.5 : 1 }}
           >
             {submitting ? 'Sending...' : showInformalForm ? 'Lend Item' : 'Confirm Loan'}
           </button>
