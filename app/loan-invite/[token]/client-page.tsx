@@ -38,20 +38,23 @@ export default function ClientPage({ token }: { token: string }) {
   const [claimed, setClaimed] = useState(false)
 
   useEffect(() => {
-    supabase.rpc('get_informal_loan_preview', { p_token: token })
-      .then(({ data, error }) => {
+    async function loadPreview() {
+      try {
+        const { data, error } = await supabase.rpc('get_informal_loan_preview', { p_token: token })
         if (error) {
           console.error('get_informal_loan_preview error:', error)
           setLoadError(true)
         } else if (data && data.length > 0) {
           setPreview(data[0])
         }
-      })
-      .catch(err => {
+      } catch (err) {
         console.error('get_informal_loan_preview failed:', err)
         setLoadError(true)
-      })
-      .finally(() => setLoading(false))
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadPreview()
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session))
   }, [token])
 
