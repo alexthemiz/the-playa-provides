@@ -361,6 +361,14 @@ export default function InventoryPage() {
     setInformalLoans(prev => prev.filter(l => l.id !== loan.id));
   }
 
+  async function handleCancelInformalLoan(loan: any) {
+    const { error } = await supabase
+      .from('informal_loans')
+      .update({ status: 'cancelled' })
+      .eq('id', loan.id);
+    if (!error) setInformalLoans(prev => prev.filter(l => l.id !== loan.id));
+  }
+
   async function handleSendLoanReminder(loan: any) {
     const key = `loan_${loan.id}`;
     if (isReminderOnCooldown(key) || sendingReminderKey === key) return;
@@ -949,6 +957,7 @@ export default function InventoryPage() {
                     <td style={tdActionStyle}>
                       <div style={{ display: 'flex', gap: '6px' }}>
                         <button onClick={() => handleMarkInformalLoanReturned(loan)} style={handsOverButtonStyle}>Mark Returned</button>
+                        <button onClick={() => handleCancelInformalLoan(loan)} style={cancelActionButtonStyle}>Cancel</button>
                       </div>
                     </td>
                   </tr>
