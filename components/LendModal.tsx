@@ -156,14 +156,19 @@ export default function LendModal({ item, ownerId, onClose, onSuccess }: Props) 
               <button onClick={handleLookup} style={lookupButtonStyle}>Find</button>
             </div>
             {lookupError && (
-              <div>
-                <p style={errorStyle}>{lookupError}</p>
-                {lastSearchWasEmail && (
+              lastSearchWasEmail ? (
+                <div style={noAccountBoxStyle}>
+                  <p style={{ ...errorStyle, margin: 0 }}>{lookupError}</p>
+                  <p style={{ margin: '6px 0 10px', fontSize: '0.85rem', color: '#666' }}>
+                    Want to lend it to them anyway? We&apos;ll email them the details and an invite to join.
+                  </p>
                   <button onClick={() => setShowInformalForm(true)} style={lendAnywayButtonStyle}>
                     Lend to them anyway →
                   </button>
-                )}
-              </div>
+                </div>
+              ) : (
+                <p style={errorStyle}>{lookupError}</p>
+              )
             )}
           </>
         )}
@@ -254,7 +259,8 @@ const inputStyle: React.CSSProperties = { width: '100%', padding: '10px', border
 const lookupButtonStyle: React.CSSProperties = { padding: '10px 16px', backgroundColor: '#1C1610', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem', whiteSpace: 'nowrap' as const }
 const matchedBoxStyle: React.CSSProperties = { backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '10px 14px', marginBottom: '4px' }
 const errorStyle: React.CSSProperties = { color: '#dc2626', fontSize: '0.85rem', margin: '4px 0' }
-const lendAnywayButtonStyle: React.CSSProperties = { marginTop: '6px', padding: '8px 14px', backgroundColor: 'transparent', color: '#1E8A82', border: '1.5px solid #1E8A82', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }
+const noAccountBoxStyle: React.CSSProperties = { backgroundColor: '#fef6f6', border: '1px solid #fecaca', borderRadius: '8px', padding: '12px 14px', marginBottom: '12px' }
+const lendAnywayButtonStyle: React.CSSProperties = { width: '100%', padding: '9px 14px', backgroundColor: 'transparent', color: '#1E8A82', border: '1.5px solid #1E8A82', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem' }
 const cancelButtonStyle: React.CSSProperties = { padding: '10px 18px', backgroundColor: '#f0f0f0', color: '#666', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }
 const confirmButtonStyle: React.CSSProperties = { padding: '10px 18px', backgroundColor: '#1E8A82', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }
 const termsGridStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }
