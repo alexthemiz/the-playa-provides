@@ -10,6 +10,13 @@ const PAPER    = '#F6F1E8'
 const PAPER_LT = '#FDFAF4'
 const TEAL     = '#1E8A82'
 
+// `date` columns come back as 'YYYY-MM-DD' — parsing that directly with
+// `new Date(...)` treats it as UTC midnight, which renders a day early in
+// any timezone behind UTC. Anchoring to local noon avoids the shift.
+function formatDate(d: string) {
+  return new Date(d + 'T12:00:00').toLocaleDateString()
+}
+
 interface Preview {
   item_name: string
   item_image_url: string | null
@@ -99,8 +106,8 @@ export default function ClientPage({ token }: { token: string }) {
 
         <table style={{ width: '100%', borderCollapse: 'collapse' as const, fontSize: '0.9rem', marginBottom: '20px' }}>
           <tbody>
-            <tr><td style={termLabelStyle}>Handed over</td><td style={termValueStyle}>{new Date(preview.handed_over_at).toLocaleDateString()}</td></tr>
-            {preview.return_by && <tr><td style={termLabelStyle}>Expected back</td><td style={termValueStyle}>{new Date(preview.return_by).toLocaleDateString()}</td></tr>}
+            <tr><td style={termLabelStyle}>Handed over</td><td style={termValueStyle}>{formatDate(preview.handed_over_at)}</td></tr>
+            {preview.return_by && <tr><td style={termLabelStyle}>Expected back</td><td style={termValueStyle}>{formatDate(preview.return_by)}</td></tr>}
             {preview.damage_agreement != null && <tr><td style={termLabelStyle}>If damaged</td><td style={termValueStyle}>${preview.damage_agreement}</td></tr>}
             {preview.loss_agreement != null && <tr><td style={termLabelStyle}>If not returned</td><td style={termValueStyle}>${preview.loss_agreement}</td></tr>}
           </tbody>
