@@ -348,12 +348,24 @@ export default function InventoryPage() {
     if (!error) fetchMyInventory();
   }
 
+  // Guarding on status='active' makes this the same kind of atomic
+  // status-flip claim_informal_loan uses — if the borrower claimed this
+  // loan (flipping it to 'converted') right before the owner clicked Mark
+  // Returned/Cancel here, this update matches zero rows instead of
+  // silently overwriting the now-real, now-converted loan.
   async function handleMarkInformalLoanReturned(loan: any) {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('informal_loans')
       .update({ status: 'returned' })
-      .eq('id', loan.id);
+      .eq('id', loan.id)
+      .eq('status', 'active')
+      .select();
     if (error) return;
+    if (!data || data.length === 0) {
+      alert('This loan was just claimed by the borrower and is now a tracked loan — refreshing.');
+      fetchMyInventory();
+      return;
+    }
     await supabase
       .from('gear_items')
       .update({ availability_status: 'Not Available', visibility: 'private' })
@@ -367,11 +379,19 @@ export default function InventoryPage() {
   }
 
   async function handleCancelInformalLoan(loan: any) {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('informal_loans')
       .update({ status: 'cancelled' })
-      .eq('id', loan.id);
-    if (!error) setInformalLoans(prev => prev.filter(l => l.id !== loan.id));
+      .eq('id', loan.id)
+      .eq('status', 'active')
+      .select();
+    if (error) return;
+    if (!data || data.length === 0) {
+      alert('This loan was just claimed by the borrower and is now a tracked loan — refreshing.');
+      fetchMyInventory();
+      return;
+    }
+    setInformalLoans(prev => prev.filter(l => l.id !== loan.id));
   }
 
   async function handleSendLoanReminder(loan: any) {
