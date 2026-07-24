@@ -601,7 +601,7 @@ export default function HomePage() {
                 fontWeight: 700, fontSize: '0.95rem', textDecoration: 'none',
                 border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`,
               }}>
-                List Your Stuff
+                List Your Items
               </Link>
             </div>
 
