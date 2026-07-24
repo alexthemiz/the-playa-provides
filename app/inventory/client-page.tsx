@@ -651,6 +651,21 @@ export default function InventoryPage() {
       );
     }
 
+    // An active informal loan doesn't touch availability_status, so without
+    // this check the item would still show a clickable Lend To/Transfer To
+    // here even while it's out with a no-account borrower — DB-level
+    // triggers now block that double-booking too, but hiding the button
+    // avoids the owner hitting that error in normal use.
+    const informalLoan = informalLoans.find(l => l.item_id === item.id);
+    if (informalLoan) {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '4px' }}>
+          <span style={{ fontSize: '0.8rem', color: '#555' }}>Out on Loan</span>
+          <span style={{ fontSize: '0.75rem', color: '#9A8878' }}>{informalLoan.borrower_name} (no account)</span>
+        </div>
+      );
+    }
+
     if (status === 'Available to Borrow') return <button onClick={() => setLendItem(item)} style={lendButtonStyle}>Lend To</button>;
     if (status === 'Available to Keep') return <button onClick={() => setTransferItem(item)} style={transferButtonStyle}>Transfer To</button>;
     return <span style={{ color: '#bbb', fontSize: '0.8rem' }}>N/A</span>;

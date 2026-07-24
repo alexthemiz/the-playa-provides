@@ -80,11 +80,17 @@ Deno.serve(async (req) => {
 
     const { data: loan, error } = await supabase
       .from('informal_loans')
-      .select('id, invite_token, borrower_name, borrower_email, handed_over_at, return_by, damage_agreement, loss_agreement, notes, gear_items(item_name, image_urls), owner:profiles!informal_loans_owner_id_fkey(preferred_name, username)')
+      .select('id, invite_token, borrower_name, borrower_email, handed_over_at, return_by, damage_agreement, loss_agreement, notes, status, gear_items(item_name, image_urls), owner:profiles!informal_loans_owner_id_fkey(preferred_name, username)')
       .eq('id', informal_loan_id)
       .single()
 
     if (error || !loan) throw new Error(error?.message ?? 'Informal loan not found')
+    // Guards both a stale Resend Invite click (loan already returned/cancelled)
+    // and a claimed loan (invite_token would still resolve, but the claim link
+    // is no longer meaningful once it's a real, converted item_loans row).
+    if (loan.status !== 'active') {
+      return new Response(JSON.stringify({ ok: true, skipped: `loan is ${loan.status}, not active` }), { headers: corsHeaders, status: 200 })
+    }
     if (!loan.borrower_email) {
       return new Response(JSON.stringify({ ok: true, skipped: 'no email on file' }), { headers: corsHeaders, status: 200 })
     }
