@@ -59,7 +59,7 @@ export default function ClientPage() {
   }, [])
 
   useEffect(() => {
-    if (!query.trim()) { setResults([]); return }
+    if (!query.trim()) { setResults([]); setSearching(false); return }
     let cancelled = false
     setSearching(true)
     const handle = setTimeout(async () => {
