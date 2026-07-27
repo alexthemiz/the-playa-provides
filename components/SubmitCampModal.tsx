@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { X, Send, ChevronDown } from 'lucide-react';
 
@@ -13,30 +13,84 @@ const TEAL     = '#1E8A82';
 
 interface SubmitCampModalProps {
   onClose: () => void;
+  lockedCamp?: { id: string; display_name: string; homebase: string | null; social_links: Record<string, string> | null; bm_homepage_url: string | null; description: string | null; playa_location: string | null };
 }
 
-export default function SubmitCampModal({ onClose }: SubmitCampModalProps) {
+export default function SubmitCampModal({ onClose, lockedCamp }: SubmitCampModalProps) {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
+  function autofillFromCamp(camp: NonNullable<SubmitCampModalProps['lockedCamp']>) {
+    return {
+      camp_id: camp.id,
+      camp_name: camp.display_name,
+      homebase: camp.homebase || '',
+      // Strip protocol — the Website field renders its own "https://" prefix label,
+      // and bm_homepage_url (unlike social_links.website) is stored as a full URL.
+      website: (camp.social_links?.website || camp.bm_homepage_url || '').replace(/^https?:\/\//, ''),
+      instagram: camp.social_links?.instagram || '',
+      location_address: camp.playa_location || 'TBD',
+      camp_description: camp.description || '',
+    };
+  }
+
   const [formData, setFormData] = useState({
-    camp_name: '',
+    camp_id: lockedCamp?.id || null as string | null,
+    camp_name: lockedCamp?.display_name || '',
     submitter_name: '',
     contact_email: '',
     offering_category: 'Compost',
-    location_address: 'TBD',
+    location_address: lockedCamp?.playa_location || 'TBD',
     description: '',
-    homebase_city: '',
-    homebase_state: '',
-    homebase_zip: '',
-    website: '',
-    instagram: '',
+    camp_description: lockedCamp?.description || '',
+    homebase: lockedCamp?.homebase || '',
+    website: (lockedCamp?.social_links?.website || lockedCamp?.bm_homepage_url || '').replace(/^https?:\/\//, ''),
+    instagram: lockedCamp?.social_links?.instagram || '',
     public_email: '',
     accepting_campers: false
   });
 
-  const states = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"];
+  const [campQuery, setCampQuery] = useState(lockedCamp?.display_name || '');
+  const [campResults, setCampResults] = useState<any[]>([]);
+  const [campSearching, setCampSearching] = useState(false);
+  const [showCampResults, setShowCampResults] = useState(false);
+  // Tracks the name last synced via a selection (not every keystroke) so the
+  // effect below can tell "just selected, don't re-search" apart from
+  // "user is typing" — see fix note below.
+  const lastSyncedNameRef = useRef(lockedCamp?.display_name || '');
+
+  useEffect(() => {
+    if (lockedCamp) return; // camp already fixed, no search needed
+    if (!campQuery.trim() || campQuery === lastSyncedNameRef.current) { setCampResults([]); setCampSearching(false); return; }
+    let cancelled = false;
+    setCampSearching(true);
+    const handle = setTimeout(async () => {
+      const { data } = await supabase.from('camps').select('id, display_name, homebase, social_links, bm_homepage_url, description, playa_location').ilike('display_name', `%${campQuery.trim()}%`).limit(8);
+      if (!cancelled) { setCampResults(data || []); setCampSearching(false); }
+    }, 250);
+    return () => { cancelled = true; clearTimeout(handle); };
+  }, [campQuery, lockedCamp]);
+
+  function selectCamp(camp: any) {
+    const filled = autofillFromCamp(camp);
+    setFormData(prev => ({
+      ...prev,
+      camp_id: filled.camp_id,
+      camp_name: filled.camp_name,
+      // Only fill fields the submitter hasn't already touched.
+      homebase: prev.homebase || filled.homebase,
+      website: prev.website || filled.website,
+      instagram: prev.instagram || filled.instagram,
+      location_address: prev.location_address === 'TBD' ? filled.location_address : prev.location_address,
+      camp_description: prev.camp_description || filled.camp_description,
+    }));
+    setCampQuery(filled.camp_name);
+    // Mark this name as "synced" so the search effect doesn't immediately
+    // re-fire and flash results right after picking one.
+    lastSyncedNameRef.current = filled.camp_name;
+    setShowCampResults(false);
+  }
 
   const categories = ["Compost", "Donations", "Mental Health", "Recycling", "Tools/Repair", "Other"].sort((a, b) => (a === "Other" ? 1 : b === "Other" ? -1 : a.localeCompare(b)));
 
@@ -96,9 +150,39 @@ export default function SubmitCampModal({ onClose }: SubmitCampModalProps) {
             </div>
           ) : (
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column' as const, gap: '14px' }}>
-              <div>
+              <div style={{ position: 'relative' as const }}>
                 <label style={labelStyle}>Camp Name *</label>
-                <input required style={inputStyle} value={formData.camp_name} onChange={field('camp_name')} placeholder="e.g. Camp Dust-Off" />
+                {lockedCamp ? (
+                  <input required disabled style={{ ...inputStyle, backgroundColor: PAPER_DK, color: INK_LITE, cursor: 'not-allowed' }} value={formData.camp_name} readOnly />
+                ) : (
+                  <>
+                    <input
+                      required
+                      style={inputStyle}
+                      value={campQuery}
+                      onChange={e => {
+                        setCampQuery(e.target.value);
+                        setFormData(prev => ({ ...prev, camp_id: null, camp_name: e.target.value }));
+                        setShowCampResults(true);
+                      }}
+                      onFocus={() => setShowCampResults(true)}
+                      placeholder="Search for your camp, or type a new name"
+                    />
+                    {campSearching && <p style={fieldNoteStyle}>Searching…</p>}
+                    {showCampResults && campResults.length > 0 && (
+                      <div style={campResultsDropdownStyle}>
+                        {campResults.map(c => (
+                          <button key={c.id} type="button" onClick={() => selectCamp(c)} style={campResultRowStyle}>
+                            {c.display_name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {formData.camp_id && (
+                      <p style={fieldNoteStyle}>Linked to this camp&apos;s page on The Playa Provides.</p>
+                    )}
+                  </>
+                )}
               </div>
 
               <div style={twoColStyle}>
@@ -134,22 +218,14 @@ export default function SubmitCampModal({ onClose }: SubmitCampModalProps) {
                 <textarea required style={{ ...inputStyle, height: '64px', resize: 'vertical' as const }} value={formData.description} onChange={field('description')} placeholder="e.g. Accepting aluminum cans daily from 2-4pm" />
               </div>
 
-              <div style={homebaseRowStyle}>
-                <div style={{ flex: '2 1 160px' }}>
-                  <label style={labelStyle}>Homebase City</label>
-                  <input style={inputStyle} value={formData.homebase_city} onChange={field('homebase_city')} placeholder="San Francisco" />
-                </div>
-                <div style={{ flex: '1 1 70px' }}>
-                  <label style={labelStyle}>State</label>
-                  <select style={{ ...inputStyle, cursor: 'pointer' }} value={formData.homebase_state} onChange={field('homebase_state')}>
-                    <option value="">--</option>
-                    {states.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </div>
-                <div style={{ flex: '1 1 80px' }}>
-                  <label style={labelStyle}>Zip</label>
-                  <input style={inputStyle} value={formData.homebase_zip} onChange={field('homebase_zip')} placeholder="94110" />
-                </div>
+              <div>
+                <label style={labelStyle}>Camp Description</label>
+                <textarea style={{ ...inputStyle, height: '64px', resize: 'vertical' as const }} value={formData.camp_description} onChange={field('camp_description')} placeholder="Who you are as a camp" />
+              </div>
+
+              <div>
+                <label style={labelStyle}>Homebase</label>
+                <input style={inputStyle} value={formData.homebase} onChange={field('homebase')} placeholder="San Francisco, CA" />
               </div>
 
               <div style={twoColStyle}>
@@ -215,7 +291,8 @@ const labelStyle: React.CSSProperties = { display: 'block', fontFamily: "'Space 
 const fieldNoteStyle: React.CSSProperties = { color: INK_LITE, fontSize: '0.68rem', margin: '0 0 0 1px', lineHeight: 1.4 };
 const inputStyle: React.CSSProperties = { width: '100%', padding: '9px 11px', backgroundColor: PAPER_LT, border: '1.5px solid rgba(28,22,16,0.25)', color: INK, outline: 'none', boxSizing: 'border-box' as const, fontSize: '0.9rem', fontFamily: 'inherit' };
 const twoColStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' };
-const homebaseRowStyle: React.CSSProperties = { display: 'flex', flexWrap: 'wrap' as const, gap: '10px' };
+const campResultsDropdownStyle: React.CSSProperties = { position: 'absolute' as const, top: '100%', left: 0, right: 0, zIndex: 10, backgroundColor: PAPER_LT, border: '1.5px solid rgba(28,22,16,0.25)', maxHeight: '200px', overflowY: 'auto' as const };
+const campResultRowStyle: React.CSSProperties = { display: 'block', width: '100%', textAlign: 'left' as const, padding: '8px 11px', backgroundColor: 'transparent', border: 'none', borderBottom: '1px solid rgba(28,22,16,0.08)', color: INK, fontSize: '0.9rem', cursor: 'pointer', fontFamily: 'inherit' };
 const prefixInputWrapStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', border: '1.5px solid rgba(28,22,16,0.25)', backgroundColor: PAPER_LT };
 const prefixLabelStyle: React.CSSProperties = { paddingLeft: '10px', paddingRight: '2px', color: INK_LITE, fontSize: '0.9rem', userSelect: 'none' as const };
 const prefixInputStyle: React.CSSProperties = { flex: 1, padding: '9px 8px 9px 2px', color: INK, outline: 'none', fontSize: '0.9rem', backgroundColor: 'transparent', border: 'none', minWidth: 0, fontFamily: 'inherit' };
