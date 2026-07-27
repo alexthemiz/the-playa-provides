@@ -35,18 +35,20 @@ export default function SubmitCampModal({ onClose, lockedCamp }: SubmitCampModal
     };
   }
 
+  const lockedCampDefaults = lockedCamp ? autofillFromCamp(lockedCamp) : null;
+
   const [formData, setFormData] = useState({
-    camp_id: lockedCamp?.id || null as string | null,
-    camp_name: lockedCamp?.display_name || '',
+    camp_id: lockedCampDefaults?.camp_id || null as string | null,
+    camp_name: lockedCampDefaults?.camp_name || '',
     submitter_name: '',
     contact_email: '',
     offering_category: 'Compost',
-    location_address: lockedCamp?.playa_location || 'TBD',
+    location_address: lockedCampDefaults?.location_address || 'TBD',
     description: '',
-    camp_description: lockedCamp?.description || '',
-    homebase: lockedCamp?.homebase || '',
-    website: (lockedCamp?.social_links?.website || lockedCamp?.bm_homepage_url || '').replace(/^https?:\/\//, ''),
-    instagram: lockedCamp?.social_links?.instagram || '',
+    camp_description: lockedCampDefaults?.camp_description || '',
+    homebase: lockedCampDefaults?.homebase || '',
+    website: lockedCampDefaults?.website || '',
+    instagram: lockedCampDefaults?.instagram || '',
     public_email: '',
     accepting_campers: false
   });
