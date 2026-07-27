@@ -397,6 +397,7 @@ export default function Header() {
           {user ? (
             <>
               <Link href="/inventory" style={navLinkStyle('/inventory')} className="hover-nav-link">My Inventory</Link>
+              <Link href="/camps" style={navLinkStyle('/camps')} className="hover-nav-link">My Camps</Link>
               {username && (
                 <Link href={`/profile/${username}`} style={navLinkStyle(`/profile/${username}`)} className="hover-nav-link">My Profile</Link>
               )}
@@ -437,6 +438,7 @@ export default function Header() {
             {user ? (
               <>
                 <Link href="/inventory"               onClick={() => setMenuOpen(false)} style={mobileNavLinkStyle('/inventory')}>My Inventory</Link>
+                <Link href="/camps"                   onClick={() => setMenuOpen(false)} style={mobileNavLinkStyle('/camps')}>My Camps</Link>
                 {username && <Link href={`/profile/${username}`} onClick={() => setMenuOpen(false)} style={mobileNavLinkStyle(`/profile/${username}`)}>My Profile</Link>}
                 <Link href="/settings"                onClick={() => setMenuOpen(false)} style={mobileNavLinkStyle('/settings')}>Settings</Link>
                 <button onClick={() => { setMenuOpen(false); handleSignOut(); }} style={mobileLogoutStyle}>Logout</button>
