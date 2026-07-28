@@ -18,9 +18,10 @@ type CampSummary = { id: string; display_name: string; homebase: string | null; 
 interface SubmitCampModalProps {
   onClose: () => void;
   lockedCamp?: CampSummary;
+  existingResource?: any;
 }
 
-export default function SubmitCampModal({ onClose, lockedCamp }: SubmitCampModalProps) {
+export default function SubmitCampModal({ onClose, lockedCamp, existingResource }: SubmitCampModalProps) {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -42,19 +43,19 @@ export default function SubmitCampModal({ onClose, lockedCamp }: SubmitCampModal
   const lockedCampDefaults = lockedCamp ? autofillFromCamp(lockedCamp) : null;
 
   const [formData, setFormData] = useState({
-    camp_id: lockedCampDefaults?.camp_id || null as string | null,
-    camp_name: lockedCampDefaults?.camp_name || '',
-    submitter_name: '',
-    contact_email: '',
-    offering_category: 'Compost',
-    location_address: lockedCampDefaults?.location_address || 'TBD',
-    description: '',
-    camp_description: lockedCampDefaults?.camp_description || '',
-    homebase: lockedCampDefaults?.homebase || '',
-    website: lockedCampDefaults?.website || '',
-    instagram: lockedCampDefaults?.instagram || '',
-    public_email: '',
-    accepting_campers: false
+    camp_id: existingResource?.camp_id ?? lockedCampDefaults?.camp_id ?? null as string | null,
+    camp_name: existingResource?.camp_name ?? lockedCampDefaults?.camp_name ?? '',
+    submitter_name: existingResource?.submitter_name ?? '',
+    contact_email: existingResource?.contact_email ?? '',
+    offering_category: existingResource?.offering_category ?? 'Compost',
+    location_address: existingResource?.location_address ?? lockedCampDefaults?.location_address ?? 'TBD',
+    description: existingResource?.description ?? '',
+    camp_description: existingResource?.camp_description ?? lockedCampDefaults?.camp_description ?? '',
+    homebase: existingResource?.homebase ?? lockedCampDefaults?.homebase ?? '',
+    website: existingResource?.website ?? lockedCampDefaults?.website ?? '',
+    instagram: existingResource?.instagram ?? lockedCampDefaults?.instagram ?? '',
+    public_email: existingResource?.public_email ?? '',
+    accepting_campers: existingResource?.accepting_campers ?? false
   });
 
   const [campQuery, setCampQuery] = useState(lockedCamp?.display_name || '');
@@ -105,11 +106,19 @@ export default function SubmitCampModal({ onClose, lockedCamp }: SubmitCampModal
     setLoading(true);
     setSubmitError('');
     try {
-      const { error } = await supabase.from('playa_resources').insert([{ ...formData, is_verified: false }]);
-      if (error) throw error;
+      if (existingResource) {
+        // Editing resets is_verified — a changed listing should go back
+        // through review rather than keep showing as verified with stale
+        // (now-unreviewed) content.
+        const { error } = await supabase.from('playa_resources').update({ ...formData, is_verified: false }).eq('id', existingResource.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('playa_resources').insert([{ ...formData, is_verified: false }]);
+        if (error) throw error;
 
-      // Fire notification email — non-blocking, ignore errors so the user still gets success
-      supabase.functions.invoke('send-camp-submission', { body: formData }).catch(() => {});
+        // Fire notification email — non-blocking, ignore errors so the user still gets success
+        supabase.functions.invoke('send-camp-submission', { body: formData }).catch(() => {});
+      }
 
       setSubmitted(true);
     } catch (err) {
@@ -142,17 +151,19 @@ export default function SubmitCampModal({ onClose, lockedCamp }: SubmitCampModal
               <div style={{ width: '56px', height: '56px', backgroundColor: '#dcfce7', border: `2px solid #16a34a`, borderRadius: '999px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
                 <Send style={{ width: '26px', height: '26px', color: '#16a34a' }} />
               </div>
-              <h3 style={{ fontFamily: "'Arvo', serif", fontSize: '1.15rem', fontWeight: 700, color: INK, marginBottom: '8px' }}>Submission Received!</h3>
-              <p style={{ color: INK_MID, fontSize: '0.9rem', marginBottom: '24px', lineHeight: 1.5 }}>We&apos;ll review your camp and add it to the directory once approved.</p>
+              <h3 style={{ fontFamily: "'Arvo', serif", fontSize: '1.15rem', fontWeight: 700, color: INK, marginBottom: '8px' }}>{existingResource ? 'Listing Updated!' : 'Submission Received!'}</h3>
+              <p style={{ color: INK_MID, fontSize: '0.9rem', marginBottom: '24px', lineHeight: 1.5 }}>{existingResource ? "We'll review your changes before they go back live." : "We'll review your camp and add it to the directory once approved."}</p>
 
-              <div style={{ backgroundColor: PAPER_DK, border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`, padding: '16px', textAlign: 'left' as const }}>
-                <p style={{ fontFamily: "'Arvo', serif", fontSize: '0.95rem', fontWeight: 700, color: INK, margin: '0 0 4px' }}>Want to list your gear too?</p>
-                <p style={{ fontSize: '0.8rem', color: INK_MID, margin: '0 0 14px', lineHeight: 1.5 }}>Create an account to share and borrow gear with the community.</p>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <a href="/signup" style={primaryLinkStyle}>Sign Up</a>
-                  <a href="/login" style={secondaryLinkStyle}>Log In</a>
+              {!lockedCamp && (
+                <div style={{ backgroundColor: PAPER_DK, border: `2px solid ${INK}`, boxShadow: `3px 3px 0 ${INK}`, padding: '16px', textAlign: 'left' as const }}>
+                  <p style={{ fontFamily: "'Arvo', serif", fontSize: '0.95rem', fontWeight: 700, color: INK, margin: '0 0 4px' }}>Want to list your gear too?</p>
+                  <p style={{ fontSize: '0.8rem', color: INK_MID, margin: '0 0 14px', lineHeight: 1.5 }}>Create an account to share and borrow gear with the community.</p>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <a href="/signup" style={primaryLinkStyle}>Sign Up</a>
+                    <a href="/login" style={secondaryLinkStyle}>Log In</a>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           ) : (
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column' as const, gap: '14px' }}>

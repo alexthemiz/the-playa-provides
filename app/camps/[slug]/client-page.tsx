@@ -8,6 +8,7 @@ import type React from 'react';
 import { Pencil } from 'lucide-react';
 import { useCampItems } from '@/lib/useCampItems';
 import CampItemsTable from '@/components/CampItemsTable';
+import SubmitCampModal from '@/components/SubmitCampModal';
 
 export default function CampPage() {
   const params = useParams();
@@ -38,6 +39,9 @@ export default function CampPage() {
   const [editFoundedYear, setEditFoundedYear] = useState('');
   const [editHomebase, setEditHomebase] = useState('');
   const [editSocialLinks, setEditSocialLinks] = useState<Record<string, string>>({});
+  const [campResources, setCampResources] = useState<any[]>([]);
+  const [showResourcesForm, setShowResourcesForm] = useState(false);
+  const [editingResource, setEditingResource] = useState<any | null>(null);
   const [editReturning2026, setEditReturning2026] = useState<boolean | null>(null);
   const [editSaving, setEditSaving] = useState(false);
   const [editError, setEditError] = useState('');
@@ -162,6 +166,16 @@ export default function CampPage() {
 
   const memberIds = members.map((m: any) => m.id);
   const { items: campItems, loading: campItemsLoading } = useCampItems(memberIds);
+
+  const fetchCampResources = async () => {
+    if (!camp?.id) return;
+    const { data } = await supabase.from('playa_resources').select('*').eq('camp_id', camp.id);
+    setCampResources(data || []);
+  };
+
+  useEffect(() => {
+    fetchCampResources();
+  }, [camp?.id]);
 
   if (loading) return <div style={{ padding: '40px', backgroundColor: '#F6F1E8', minHeight: '100vh' }}>Loading...</div>;
   if (!camp) return <div style={{ padding: '40px', backgroundColor: '#F6F1E8', minHeight: '100vh' }}>Camp not found.</div>;
@@ -648,6 +662,26 @@ export default function CampPage() {
             </div>
           </div>
 
+          {/* On-Playa Resources */}
+          <div style={{ marginBottom: '14px' }}>
+            <label style={editLabelStyle}>On-Playa Resources</label>
+            {campResources.length === 0 ? (
+              <p style={{ color: '#9A8878', fontSize: '0.85rem', margin: '0 0 8px' }}>Not listed yet.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '6px', marginBottom: '8px' }}>
+                {campResources.map(r => (
+                  <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', backgroundColor: '#FDFAF4', border: '1px solid rgba(28,22,16,0.12)' }}>
+                    <span style={{ fontSize: '0.85rem', color: '#1C1610' }}>{r.offering_category}{!r.is_verified && ' (pending review)'}</span>
+                    <button type="button" onClick={() => { setEditingResource(r); setShowResourcesForm(true); }} style={{ background: 'none', border: 'none', color: '#1E8A82', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}>Edit</button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <button type="button" onClick={() => { setEditingResource(null); setShowResourcesForm(true); }} style={listOfferingButtonStyle}>
+              List an on-playa offering →
+            </button>
+          </div>
+
           {editError && <p style={{ color: '#cc0000', fontSize: '0.85rem', margin: 0 }}>{editError}</p>}
         </div>
       )}
@@ -767,6 +801,14 @@ export default function CampPage() {
       </div>
 
       </div>{/* end PAGE CONTENT */}
+
+      {showResourcesForm && (
+        <SubmitCampModal
+          onClose={() => { setShowResourcesForm(false); setEditingResource(null); fetchCampResources(); }}
+          lockedCamp={camp}
+          existingResource={editingResource}
+        />
+      )}
     </div>
   );
 }
@@ -876,6 +918,11 @@ const editInputStyle: React.CSSProperties = {
 const uploadBtnStyle: React.CSSProperties = {
   padding: '7px 16px', backgroundColor: '#FDFAF4', color: '#1C1610',
   border: '1.5px solid rgba(28,22,16,0.25)', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer',
+};
+
+const listOfferingButtonStyle: React.CSSProperties = {
+  padding: '8px 14px', backgroundColor: 'transparent', color: '#1E8A82',
+  border: '1.5px solid #1E8A82', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem',
 };
 
 const socialPillStyle: React.CSSProperties = {
