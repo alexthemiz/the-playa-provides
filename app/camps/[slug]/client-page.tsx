@@ -42,6 +42,7 @@ export default function CampPage() {
   const [campResources, setCampResources] = useState<any[]>([]);
   const [showResourcesForm, setShowResourcesForm] = useState(false);
   const [editingResource, setEditingResource] = useState<any | null>(null);
+  const [removingResourceId, setRemovingResourceId] = useState<string | null>(null);
   const [editReturning2026, setEditReturning2026] = useState<boolean | null>(null);
   const [editSaving, setEditSaving] = useState(false);
   const [editError, setEditError] = useState('');
@@ -173,9 +174,26 @@ export default function CampPage() {
     setCampResources(data || []);
   };
 
+  // Anyone can submit a resource listing linked to any camp (that's the
+  // intended public-submission flow -- a random attendee can vouch for a
+  // camp they don't own), so a bad-faith or mistaken listing can end up
+  // attached to a camp its real owner never approved. This is the owner's
+  // only way to remove it -- there was previously no way to undo an
+  // unwanted listing short of asking an admin to delete it directly.
+  const handleRemoveResource = async (resourceId: string) => {
+    const { error } = await supabase.from('playa_resources').delete().eq('id', resourceId);
+    if (!error) setCampResources(prev => prev.filter(r => r.id !== resourceId));
+    setRemovingResourceId(null);
+  };
+
   useEffect(() => {
-    fetchCampResources();
-  }, [camp?.id]);
+    // Only fetch for the camp's own owner -- this data includes submitter
+    // contact info that's only ever displayed in the owner-only edit panel
+    // below, and there's no reason to send it to every visitor's browser
+    // (especially now that this page is reachable while logged out).
+    const isOwner = !!(currentUserId && camp?.is_claimed && camp?.page_owner_id === currentUserId);
+    if (isOwner) fetchCampResources();
+  }, [camp?.id, camp?.is_claimed, camp?.page_owner_id, currentUserId]);
 
   if (loading) return <div style={{ padding: '40px', backgroundColor: '#F6F1E8', minHeight: '100vh' }}>Loading...</div>;
   if (!camp) return <div style={{ padding: '40px', backgroundColor: '#F6F1E8', minHeight: '100vh' }}>Camp not found.</div>;
@@ -672,7 +690,18 @@ export default function CampPage() {
                 {campResources.map(r => (
                   <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', backgroundColor: '#FDFAF4', border: '1px solid rgba(28,22,16,0.12)' }}>
                     <span style={{ fontSize: '0.85rem', color: '#1C1610' }}>{r.offering_category}{!r.is_verified && ' (pending review)'}</span>
-                    <button type="button" onClick={() => { setEditingResource(r); setShowResourcesForm(true); }} style={{ background: 'none', border: 'none', color: '#1E8A82', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}>Edit</button>
+                    {removingResourceId === r.id ? (
+                      <span style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '0.8rem', color: '#C24820' }}>
+                        Remove?
+                        <button type="button" onClick={() => handleRemoveResource(r.id)} style={{ background: 'none', border: 'none', color: '#C24820', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 700 }}>Yes</button>
+                        <button type="button" onClick={() => setRemovingResourceId(null)} style={{ background: 'none', border: 'none', color: '#4A3828', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}>Cancel</button>
+                      </span>
+                    ) : (
+                      <div style={{ display: 'flex', gap: '12px' }}>
+                        <button type="button" onClick={() => { setEditingResource(r); setShowResourcesForm(true); }} style={{ background: 'none', border: 'none', color: '#1E8A82', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}>Edit</button>
+                        <button type="button" onClick={() => setRemovingResourceId(r.id)} style={{ background: 'none', border: 'none', color: '#C24820', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}>Remove</button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

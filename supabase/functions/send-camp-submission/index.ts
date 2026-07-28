@@ -14,6 +14,7 @@ serve(async (req: Request) => {
   try {
     const formData = await req.json()
     const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
+    const isEdit = !!formData.is_edit
 
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -25,11 +26,11 @@ serve(async (req: Request) => {
         from: 'The Playa Provides <hello@theplayaprovides.com>',
         to: ['contact@theplayaprovides.com'],
         reply_to: [formData.contact_email],
-        subject: `New Camp Submission: ${formData.camp_name} — reply to ${formData.contact_email}`,
+        subject: `${isEdit ? 'Updated' : 'New'} Camp Submission: ${formData.camp_name} — reply to ${formData.contact_email}`,
         html: `
           <div style="font-family: sans-serif; color: #333; max-width: 600px;">
-            <h1 style="color: #C08261;">New Camp Submission</h1>
-            <p>A new camp has been submitted for review on The Playa Provides.</p>
+            <h1 style="color: #C08261;">${isEdit ? 'Camp Submission Updated' : 'New Camp Submission'}</h1>
+            <p>A camp submission on The Playa Provides ${isEdit ? 'was just edited and needs re-review' : 'has been submitted for review'}.</p>
 
             <div style="background: #fdf3ec; border: 1px solid #f0d8c8; border-radius: 8px; padding: 14px 16px; margin-bottom: 16px;">
               <p style="margin: 0 0 4px;"><strong>Submitted by:</strong> ${formData.submitter_name}</p>

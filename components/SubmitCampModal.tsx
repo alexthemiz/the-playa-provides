@@ -112,6 +112,11 @@ export default function SubmitCampModal({ onClose, lockedCamp, existingResource 
         // (now-unreviewed) content.
         const { error } = await supabase.from('playa_resources').update({ ...formData, is_verified: false }).eq('id', existingResource.id);
         if (error) throw error;
+
+        // An edited listing needs review just as much as a new one — without
+        // this, an update silently drops back to unverified with nothing
+        // prompting anyone to actually re-review it.
+        supabase.functions.invoke('send-camp-submission', { body: { ...formData, is_edit: true } }).catch(() => {});
       } else {
         const { error } = await supabase.from('playa_resources').insert([{ ...formData, is_verified: false }]);
         if (error) throw error;
