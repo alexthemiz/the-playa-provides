@@ -586,7 +586,7 @@ export default function HomePage() {
             </h1>
 
             <p style={{ fontSize: '1rem', color: INK_MID, lineHeight: 1.65, margin: '0 0 32px', fontWeight: 500 }}>
-              Lend what you&apos;ve got, borrow what you need, and keep your money away from Amazon.
+              Lend what you&apos;ve got, borrow what you need, and cut down on all those online purchases.
             </p>
 
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
