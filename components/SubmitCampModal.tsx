@@ -11,9 +11,13 @@ const PAPER_DK = '#EDE5D0';
 const PAPER_LT = '#FDFAF4';
 const TEAL     = '#1E8A82';
 
+// Shared by lockedCamp (a caller-supplied camp) and campResults (search
+// matches) -- both are the same subset of the camps table's columns.
+type CampSummary = { id: string; display_name: string; homebase: string | null; social_links: Record<string, string> | null; bm_homepage_url: string | null; description: string | null; playa_location: string | null };
+
 interface SubmitCampModalProps {
   onClose: () => void;
-  lockedCamp?: { id: string; display_name: string; homebase: string | null; social_links: Record<string, string> | null; bm_homepage_url: string | null; description: string | null; playa_location: string | null };
+  lockedCamp?: CampSummary;
 }
 
 export default function SubmitCampModal({ onClose, lockedCamp }: SubmitCampModalProps) {
@@ -21,7 +25,7 @@ export default function SubmitCampModal({ onClose, lockedCamp }: SubmitCampModal
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
-  function autofillFromCamp(camp: NonNullable<SubmitCampModalProps['lockedCamp']>) {
+  function autofillFromCamp(camp: CampSummary) {
     return {
       camp_id: camp.id,
       camp_name: camp.display_name,
@@ -54,12 +58,12 @@ export default function SubmitCampModal({ onClose, lockedCamp }: SubmitCampModal
   });
 
   const [campQuery, setCampQuery] = useState(lockedCamp?.display_name || '');
-  const [campResults, setCampResults] = useState<any[]>([]);
+  const [campResults, setCampResults] = useState<CampSummary[]>([]);
   const [campSearching, setCampSearching] = useState(false);
   const [showCampResults, setShowCampResults] = useState(false);
-  // Tracks the name last synced via a selection (not every keystroke) so the
-  // effect below can tell "just selected, don't re-search" apart from
-  // "user is typing" — see fix note below.
+  // Tracks the name last synced via a selection (not every keystroke), so the
+  // check below (campQuery === lastSyncedNameRef.current) can tell "just
+  // selected, don't re-search" apart from "user is typing a new query."
   const lastSyncedNameRef = useRef(lockedCamp?.display_name || '');
 
   useEffect(() => {
@@ -74,7 +78,7 @@ export default function SubmitCampModal({ onClose, lockedCamp }: SubmitCampModal
     return () => { cancelled = true; clearTimeout(handle); };
   }, [campQuery, lockedCamp]);
 
-  function selectCamp(camp: any) {
+  function selectCamp(camp: CampSummary) {
     const filled = autofillFromCamp(camp);
     setFormData(prev => ({
       ...prev,
@@ -168,13 +172,18 @@ export default function SubmitCampModal({ onClose, lockedCamp }: SubmitCampModal
                         setShowCampResults(true);
                       }}
                       onFocus={() => setShowCampResults(true)}
+                      // Delayed so a result row's onMouseDown (which fires
+                      // before blur) still gets to run selectCamp() first —
+                      // matches the same pattern already used for the camp
+                      // search on the profile page's Playa History editor.
+                      onBlur={() => setTimeout(() => setShowCampResults(false), 150)}
                       placeholder="Search for your camp, or type a new name"
                     />
                     {campSearching && <p style={fieldNoteStyle}>Searching…</p>}
                     {showCampResults && campResults.length > 0 && (
                       <div style={campResultsDropdownStyle}>
                         {campResults.map(c => (
-                          <button key={c.id} type="button" onClick={() => selectCamp(c)} style={campResultRowStyle}>
+                          <button key={c.id} type="button" onMouseDown={() => selectCamp(c)} style={campResultRowStyle}>
                             {c.display_name}
                           </button>
                         ))}
