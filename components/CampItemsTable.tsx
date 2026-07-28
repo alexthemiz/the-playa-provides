@@ -8,23 +8,39 @@ import PolaroidPhoto from '@/components/PolaroidPhoto'
 interface Props {
   items: any[]
   loading: boolean
+  // Uncontrolled by default (owns its own toggle, rendered above the
+  // table). Pass both to let a caller place the toggle itself -- e.g. on
+  // the same row as a heading -- instead of on its own row.
+  viewMode?: 'grid' | 'list'
+  onViewModeChange?: (mode: 'grid' | 'list') => void
 }
 
-export default function CampItemsTable({ items, loading }: Props) {
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
+export function CampViewToggle({ viewMode, onChange }: { viewMode: 'grid' | 'list'; onChange: (mode: 'grid' | 'list') => void }) {
+  return (
+    <div style={campToggleGroupStyle}>
+      <button onClick={() => onChange('grid')} style={{ ...campToggleButtonStyle, backgroundColor: viewMode === 'grid' ? '#1C1610' : 'transparent' }}>
+        <LayoutGrid size={18} color={viewMode === 'grid' ? '#fff' : '#4A3828'} />
+      </button>
+      <button onClick={() => onChange('list')} style={{ ...campToggleButtonStyle, backgroundColor: viewMode === 'list' ? '#1C1610' : 'transparent' }}>
+        <List size={18} color={viewMode === 'list' ? '#fff' : '#4A3828'} />
+      </button>
+    </div>
+  )
+}
+
+export default function CampItemsTable({ items, loading, viewMode: controlledViewMode, onViewModeChange }: Props) {
+  const [internalViewMode, setInternalViewMode] = useState<'grid' | 'list'>('list')
+  const isControlled = controlledViewMode !== undefined
+  const viewMode = isControlled ? controlledViewMode : internalViewMode
+  const setViewMode = isControlled ? onViewModeChange! : setInternalViewMode
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
-        <div style={campToggleGroupStyle}>
-          <button onClick={() => setViewMode('grid')} style={{ ...campToggleButtonStyle, backgroundColor: viewMode === 'grid' ? '#1C1610' : 'transparent' }}>
-            <LayoutGrid size={18} color={viewMode === 'grid' ? '#fff' : '#4A3828'} />
-          </button>
-          <button onClick={() => setViewMode('list')} style={{ ...campToggleButtonStyle, backgroundColor: viewMode === 'list' ? '#1C1610' : 'transparent' }}>
-            <List size={18} color={viewMode === 'list' ? '#fff' : '#4A3828'} />
-          </button>
+      {!isControlled && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+          <CampViewToggle viewMode={viewMode} onChange={setViewMode} />
         </div>
-      </div>
+      )}
 
       {loading ? (
         <>

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
 import { useCampItems } from '@/lib/useCampItems'
-import CampItemsTable from '@/components/CampItemsTable'
+import CampItemsTable, { CampViewToggle } from '@/components/CampItemsTable'
 
 const INK      = '#1C1610'
 const INK_MID  = '#4A3828'
@@ -27,6 +27,7 @@ interface SearchResult {
 
 export default function ClientPage() {
   const [myCamps, setMyCamps] = useState<MyCamp[]>([])
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SearchResult[]>([])
@@ -36,6 +37,7 @@ export default function ClientPage() {
     async function fetchMyCamps() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { setLoading(false); return }
+      setCurrentUserId(session.user.id)
 
       const { data: affRows } = await supabase
         .from('user_camp_affiliations')
@@ -74,11 +76,18 @@ export default function ClientPage() {
   }, [query])
 
   return (
-    <div style={{ backgroundColor: PAPER, minHeight: '100vh', padding: '40px 20px' }}>
-      <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-        <div style={eyebrowStyle}>Camps</div>
-        <h1 style={h1Style}>Your <em style={{ fontStyle: 'italic', color: TEAL }}>Camps.</em></h1>
+    <div style={{ backgroundColor: PAPER, minHeight: '100vh' }}>
+      {/* Page header band */}
+      <div style={{ backgroundColor: PAPER_LT, borderBottom: `2px solid ${INK}`, padding: '28px 0' }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 20px' }}>
+          <h1 style={h1Style}>Your <em style={{ fontStyle: 'italic', color: TEAL }}>Camps.</em></h1>
+          <p style={{ fontSize: '0.9rem', color: INK_MID, lineHeight: 1.65, margin: 0 }}>
+            Every camp you belong to, and what your campmates have to share.
+          </p>
+        </div>
+      </div>
 
+      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '24px 20px 40px' }}>
         {loading ? (
           <p style={{ color: INK_MID }}>Loading…</p>
         ) : myCamps.length === 0 ? (
@@ -90,7 +99,7 @@ export default function ClientPage() {
             </p>
           </div>
         ) : (
-          myCamps.map(camp => <CampSection key={camp.id} camp={camp} />)
+          myCamps.map(camp => <CampSection key={camp.id} camp={camp} currentUserId={currentUserId} />)
         )}
 
         <div style={{ marginTop: '48px' }}>
@@ -124,8 +133,9 @@ export default function ClientPage() {
   )
 }
 
-function CampSection({ camp }: { camp: MyCamp }) {
+function CampSection({ camp, currentUserId }: { camp: MyCamp; currentUserId: string | null }) {
   const [memberIds, setMemberIds] = useState<string[]>([])
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
 
   useEffect(() => {
     async function fetchMemberIds() {
@@ -133,27 +143,34 @@ function CampSection({ camp }: { camp: MyCamp }) {
         .from('user_camp_affiliations')
         .select('user_id')
         .eq('camp_id', camp.id)
-      setMemberIds([...new Set((data || []).map((r: any) => r.user_id))])
+      // Excludes the viewer's own items -- this list is for discovering
+      // what OTHER members have, not a mirror of your own inventory.
+      // Matches the same exclusion /find-items already applies for its
+      // campmates filter.
+      const ids = [...new Set((data || []).map((r: any) => r.user_id))].filter(id => id !== currentUserId)
+      setMemberIds(ids)
     }
     fetchMemberIds()
-  }, [camp.id])
+  }, [camp.id, currentUserId])
 
   const { items, loading } = useCampItems(memberIds)
 
   return (
     <div style={{ marginBottom: '40px' }}>
-      <h2 style={sectionHeadStyle}>
-        <Link href={`/camps/${camp.slug}`} style={{ color: INK, textDecoration: 'none' }}>
-          {camp.display_name} →
-        </Link>
-      </h2>
-      <CampItemsTable items={items} loading={loading} />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+        <h2 style={{ ...sectionHeadStyle, margin: 0 }}>
+          <Link href={`/camps/${camp.slug}`} style={{ color: INK, textDecoration: 'none' }}>
+            {camp.display_name} →
+          </Link>
+        </h2>
+        <CampViewToggle viewMode={viewMode} onChange={setViewMode} />
+      </div>
+      <CampItemsTable items={items} loading={loading} viewMode={viewMode} onViewModeChange={setViewMode} />
     </div>
   )
 }
 
-const eyebrowStyle: React.CSSProperties = { fontFamily: "'Space Mono', monospace", fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: INK_LITE, marginBottom: '8px' }
-const h1Style: React.CSSProperties = { fontFamily: "'Arvo', serif", fontSize: '2rem', fontWeight: 900, color: INK, margin: '0 0 28px', lineHeight: 1.1 }
+const h1Style: React.CSSProperties = { fontFamily: "'Arvo', serif", fontSize: '1.9rem', fontWeight: 900, color: INK, margin: '0 0 12px', lineHeight: 1.05 }
 const sectionHeadStyle: React.CSSProperties = { fontFamily: "'Arvo', serif", fontSize: '1.2rem', fontWeight: 700, color: INK, margin: '0 0 14px' }
 const emptyStateStyle: React.CSSProperties = { backgroundColor: PAPER_LT, border: `1.5px solid rgba(28,22,16,0.15)`, padding: '20px', marginBottom: '20px' }
 const searchInputStyle: React.CSSProperties = { width: '100%', maxWidth: '400px', padding: '10px 12px', border: `1.5px solid rgba(28,22,16,0.25)`, backgroundColor: PAPER_LT, color: INK, outline: 'none', boxSizing: 'border-box' as const, fontSize: '0.9rem' }

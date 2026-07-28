@@ -7,7 +7,7 @@ import Link from 'next/link';
 import type React from 'react';
 import { Pencil } from 'lucide-react';
 import { useCampItems } from '@/lib/useCampItems';
-import CampItemsTable from '@/components/CampItemsTable';
+import CampItemsTable, { CampViewToggle } from '@/components/CampItemsTable';
 import SubmitCampModal from '@/components/SubmitCampModal';
 
 export default function CampPage() {
@@ -43,6 +43,7 @@ export default function CampPage() {
   const [showResourcesForm, setShowResourcesForm] = useState(false);
   const [editingResource, setEditingResource] = useState<any | null>(null);
   const [removingResourceId, setRemovingResourceId] = useState<string | null>(null);
+  const [campItemsViewMode, setCampItemsViewMode] = useState<'grid' | 'list'>('list');
   const [editReturning2026, setEditReturning2026] = useState<boolean | null>(null);
   const [editSaving, setEditSaving] = useState(false);
   const [editError, setEditError] = useState('');
@@ -92,6 +93,7 @@ export default function CampPage() {
         // 2022 and 2026), so this must not use maybeSingle() — that
         // throws once 2+ rows come back, silently null-ing affRows and
         // making a genuine multi-year member look like a non-member.
+        let isMemberNow = false;
         if (session) {
           const { data: affRows } = await supabase
             .from('user_camp_affiliations')
@@ -99,7 +101,8 @@ export default function CampPage() {
             .eq('camp_id', campData.id)
             .eq('user_id', session.user.id)
             .limit(1);
-          setIsMember(!!affRows && affRows.length > 0);
+          isMemberNow = !!affRows && affRows.length > 0;
+          setIsMember(isMemberNow);
         }
 
         // Fetch page owner profile if claimed
@@ -113,48 +116,54 @@ export default function CampPage() {
         }
 
         // Fetch affiliations with member profiles (including role and wish_list)
-        const { data: affData } = await supabase
-          .from('user_camp_affiliations')
-          .select('year, role, profiles(id, username, preferred_name, avatar_url, wish_list, city, state)')
-          .eq('camp_id', campData.id)
-          .order('year', { ascending: false });
-
-        // Group by user, aggregate years; take 'admin' role if any row has it
-        const memberMap = new Map<string, any>();
-        for (const aff of affData || []) {
-          const profile = aff.profiles as any;
-          if (!profile) continue;
-          if (!memberMap.has(profile.id)) {
-            memberMap.set(profile.id, { ...profile, years: [], role: aff.role });
-          } else {
-            // Promote to admin if any row says admin
-            if (aff.role === 'admin') memberMap.get(profile.id)!.role = 'admin';
-          }
-          memberMap.get(profile.id)!.years.push(aff.year);
-        }
-        const memberList = Array.from(memberMap.values())
-          .sort((a, b) => Math.max(...b.years) - Math.max(...a.years));
-        setMembers(memberList);
-
-        // Fetch each member's 2026 returning status for this specific camp
-        if (memberList.length > 0) {
-          const memberIds = memberList.map((m: any) => m.id);
-          const { data: ret2026 } = await supabase
+        // -- only for actual members. This includes wish lists and
+        // city/state, which shouldn't reach a non-member's browser at all,
+        // and especially not an anonymous one now that this page is
+        // reachable while logged out.
+        if (isMemberNow) {
+          const { data: affData } = await supabase
             .from('user_camp_affiliations')
-            .select('user_id, returning_status, camp_id, is_open_camping')
-            .in('user_id', memberIds)
-            .eq('year', 2026);
-          const rmap: Record<string, string> = {};
-          for (const row of ret2026 || []) {
-            if (row.camp_id === campData.id) {
-              // Affiliation is for THIS camp — use returning_status directly
-              rmap[row.user_id] = row.returning_status || 'none';
-            } else if (!rmap[row.user_id]) {
-              // Has a 2026 row but for a different camp / open camping → show ✗
-              rmap[row.user_id] = 'other';
+            .select('year, role, profiles(id, username, preferred_name, avatar_url, wish_list, city, state)')
+            .eq('camp_id', campData.id)
+            .order('year', { ascending: false });
+
+          // Group by user, aggregate years; take 'admin' role if any row has it
+          const memberMap = new Map<string, any>();
+          for (const aff of affData || []) {
+            const profile = aff.profiles as any;
+            if (!profile) continue;
+            if (!memberMap.has(profile.id)) {
+              memberMap.set(profile.id, { ...profile, years: [], role: aff.role });
+            } else {
+              // Promote to admin if any row says admin
+              if (aff.role === 'admin') memberMap.get(profile.id)!.role = 'admin';
             }
+            memberMap.get(profile.id)!.years.push(aff.year);
           }
-          setReturning2026Map(rmap);
+          const memberList = Array.from(memberMap.values())
+            .sort((a, b) => Math.max(...b.years) - Math.max(...a.years));
+          setMembers(memberList);
+
+          // Fetch each member's 2026 returning status for this specific camp
+          if (memberList.length > 0) {
+            const memberIds = memberList.map((m: any) => m.id);
+            const { data: ret2026 } = await supabase
+              .from('user_camp_affiliations')
+              .select('user_id, returning_status, camp_id, is_open_camping')
+              .in('user_id', memberIds)
+              .eq('year', 2026);
+            const rmap: Record<string, string> = {};
+            for (const row of ret2026 || []) {
+              if (row.camp_id === campData.id) {
+                // Affiliation is for THIS camp — use returning_status directly
+                rmap[row.user_id] = row.returning_status || 'none';
+              } else if (!rmap[row.user_id]) {
+                // Has a 2026 row but for a different camp / open camping → show ✗
+                rmap[row.user_id] = 'other';
+              }
+            }
+            setReturning2026Map(rmap);
+          }
         }
       } catch (err) {
         console.error('fetchCamp error:', err);
@@ -165,7 +174,10 @@ export default function CampPage() {
     if (slug) fetchCamp();
   }, [slug]);
 
-  const memberIds = members.map((m: any) => m.id);
+  // Excludes the viewer's own items — this list is for discovering what
+  // OTHER members have, not a mirror of your own inventory. Matches the
+  // same exclusion /find-items already applies for its campmates filter.
+  const memberIds = members.map((m: any) => m.id).filter(id => id !== currentUserId);
   const { items: campItems, loading: campItemsLoading } = useCampItems(memberIds);
 
   const fetchCampResources = async () => {
@@ -717,7 +729,13 @@ export default function CampPage() {
 
       {/* Member list */}
       <div style={{ marginTop: '36px' }}>
-        <h2 style={sectionHeadStyle}>Members ({members.length})</h2>
+        <h2 style={sectionHeadStyle}>Members{isMember ? ` (${members.length})` : ''}</h2>
+        {!isMember ? (
+          <p style={{ color: '#9A8878', fontSize: '0.9rem', fontStyle: 'italic' as const }}>
+            Only members of this camp can view the roster.
+          </p>
+        ) : (
+        <>
         {memberActionError && (
           <p style={{ color: '#cc0000', fontSize: '0.85rem', marginBottom: '8px' }}>{memberActionError}</p>
         )}
@@ -815,17 +833,22 @@ export default function CampPage() {
             })}
           </div>
         )}
+        </>
+        )}
       </div>
 
       {/* Camp items section */}
       <div style={{ marginTop: '48px' }}>
-        <h2 style={{ ...sectionHeadStyle, marginBottom: '10px' }}>Items from Camp Members</h2>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+          <h2 style={{ ...sectionHeadStyle, marginBottom: 0 }}>Items from Camp Members</h2>
+          {isMember && <CampViewToggle viewMode={campItemsViewMode} onChange={setCampItemsViewMode} />}
+        </div>
         {!isMember ? (
           <p style={{ color: '#9A8878', fontSize: '0.9rem', fontStyle: 'italic' as const }}>
             Only members of this camp can view this list.
           </p>
         ) : (
-          <CampItemsTable items={campItems} loading={campItemsLoading} />
+          <CampItemsTable items={campItems} loading={campItemsLoading} viewMode={campItemsViewMode} onViewModeChange={setCampItemsViewMode} />
         )}
       </div>
 
