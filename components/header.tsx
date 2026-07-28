@@ -387,8 +387,6 @@ export default function Header() {
 
         {/* Desktop nav — hidden below 1024px */}
         <nav style={navStyle} className="header-desktop-nav">
-          <Link href="/about" style={navLinkStyle('/about')} className="hover-nav-link">About</Link>
-          <span style={pipeStyle}>|</span>
           <Link href="/resources" style={navLinkStyle('/resources')} className="hover-nav-link">On-Playa Resources</Link>
           <span style={pipeStyle}>|</span>
           <Link href="/find-items" style={navLinkStyle('/find-items')} className="hover-nav-link">Find Items</Link>
@@ -432,7 +430,6 @@ export default function Header() {
         <>
           <div onClick={() => setMenuOpen(false)} style={{ position: 'fixed' as const, inset: 0, zIndex: 49 }} />
           <div style={mobileMenuStyle}>
-            <Link href="/about"       onClick={() => setMenuOpen(false)} style={mobileNavLinkStyle('/about')}>About</Link>
             <Link href="/resources"   onClick={() => setMenuOpen(false)} style={mobileNavLinkStyle('/resources')}>On-Playa Resources</Link>
             <Link href="/find-items"  onClick={() => setMenuOpen(false)} style={mobileNavLinkStyle('/find-items')}>Find Items</Link>
             <Link href="/add-item"    onClick={() => setMenuOpen(false)} style={mobileNavLinkStyle('/add-item')}>Add an Item</Link>
