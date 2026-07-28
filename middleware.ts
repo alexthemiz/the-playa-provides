@@ -31,7 +31,12 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   const url = request.nextUrl.clone()
-  const isPublicRoute = ['/login', '/signup', '/'].includes(url.pathname) || url.pathname.startsWith('/auth') || url.pathname.startsWith('/resources') || url.pathname.startsWith('/about') || url.pathname.startsWith('/privacy') || url.pathname.startsWith('/terms') || url.pathname.startsWith('/find-items') || url.pathname.startsWith('/loan-invite')
+  // Note: '/camps/' (trailing slash) whitelists individual camp pages
+  // (e.g. /camps/garden-of-hedons) for logged-out visitors reaching them via
+  // the /resources "View camp page" link, but deliberately does NOT match
+  // the bare '/camps' path — the "My Camps" personal dashboard stays gated,
+  // since it has no content relevant to a logged-out visitor.
+  const isPublicRoute = ['/login', '/signup', '/'].includes(url.pathname) || url.pathname.startsWith('/auth') || url.pathname.startsWith('/resources') || url.pathname.startsWith('/about') || url.pathname.startsWith('/privacy') || url.pathname.startsWith('/terms') || url.pathname.startsWith('/find-items') || url.pathname.startsWith('/loan-invite') || url.pathname.startsWith('/camps/')
 
   console.log(`📡 PATH: ${url.pathname} | AUTH: ${user ? 'YES' : 'NO'}`)
 
