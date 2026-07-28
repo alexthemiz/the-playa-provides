@@ -18,6 +18,8 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [loading,  setLoading]  = useState(false)
   const [message,  setMessage]  = useState('')
+  const [mode,      setMode]      = useState<'login' | 'forgot'>('login')
+  const [resetSent, setResetSent] = useState(false)
   const router = useRouter()
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
@@ -30,6 +32,21 @@ export default function Login() {
     } catch { setMessage('An unexpected error occurred.') }
     finally { setLoading(false) }
   }
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true); setMessage('')
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
+      })
+      if (error) { setMessage(`Error: ${error.message}`) }
+      else { setResetSent(true) }
+    } catch { setMessage('An unexpected error occurred.') }
+    finally { setLoading(false) }
+  }
+
+  const backToSignIn = () => { setMode('login'); setResetSent(false); setMessage('') }
 
   const handleGoogleSignIn = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
@@ -44,42 +61,76 @@ export default function Login() {
       <div style={{ width: '100%', maxWidth: '360px', backgroundColor: PAPER_LT, border: `2px solid ${INK}`, boxShadow: `5px 5px 0 ${INK}`, padding: '32px' }}>
 
         <div style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: INK_LITE, marginBottom: '8px' }}>
-          Welcome back
+          {mode === 'login' ? 'Welcome back' : 'Password reset'}
         </div>
         <h1 style={{ fontFamily: "'Arvo', serif", fontSize: '1.8rem', fontWeight: 900, color: INK, margin: '0 0 24px', lineHeight: 1.1 }}>
-          Sign <em style={{ fontStyle: 'italic', color: TEAL }}>In.</em>
+          {mode === 'login'
+            ? <>Sign <em style={{ fontStyle: 'italic', color: TEAL }}>In.</em></>
+            : <>Reset <em style={{ fontStyle: 'italic', color: TEAL }}>Password.</em></>
+          }
         </h1>
 
-        {/* Google */}
-        <button onClick={handleGoogleSignIn} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', border: `1.5px solid rgba(28,22,16,0.2)`, backgroundColor: PAPER_LT, color: INK, padding: '12px', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem', fontFamily: 'inherit', marginBottom: '6px' }}>
-          <GoogleIcon />
-          Continue with Google
-        </button>
-        <p style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', color: INK_LITE, textAlign: 'center' as const, marginBottom: '20px', letterSpacing: '0.04em' }}>
-          by continuing you agree to our community terms
-        </p>
+        {mode === 'login' && (
+          <>
+            {/* Google */}
+            <button onClick={handleGoogleSignIn} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', border: `1.5px solid rgba(28,22,16,0.2)`, backgroundColor: PAPER_LT, color: INK, padding: '12px', fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem', fontFamily: 'inherit', marginBottom: '6px' }}>
+              <GoogleIcon />
+              Continue with Google
+            </button>
+            <p style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', color: INK_LITE, textAlign: 'center' as const, marginBottom: '20px', letterSpacing: '0.04em' }}>
+              by continuing you agree to our community terms
+            </p>
 
-        {/* Divider */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-          <div style={{ flex: 1, borderTop: `1px solid rgba(28,22,16,0.12)` }} />
-          <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', color: INK_LITE, textTransform: 'uppercase' as const, letterSpacing: '0.08em' }}>or email</span>
-          <div style={{ flex: 1, borderTop: `1px solid rgba(28,22,16,0.12)` }} />
-        </div>
+            {/* Divider */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+              <div style={{ flex: 1, borderTop: `1px solid rgba(28,22,16,0.12)` }} />
+              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: '0.55rem', color: INK_LITE, textTransform: 'uppercase' as const, letterSpacing: '0.08em' }}>or email</span>
+              <div style={{ flex: 1, borderTop: `1px solid rgba(28,22,16,0.12)` }} />
+            </div>
 
-        <form onSubmit={handlePasswordLogin} style={{ display: 'flex', flexDirection: 'column' as const, gap: '14px' }}>
-          <div>
-            <label style={labelStyle}>Email</label>
-            <input type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} required style={inputStyle} />
-          </div>
-          <div>
-            <label style={labelStyle}>Password</label>
-            <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required style={inputStyle} />
-          </div>
+            <form onSubmit={handlePasswordLogin} style={{ display: 'flex', flexDirection: 'column' as const, gap: '14px' }}>
+              <div>
+                <label style={labelStyle}>Email</label>
+                <input type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} required style={inputStyle} />
+              </div>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <label style={labelStyle}>Password</label>
+                  <button type="button" onClick={() => { setMode('forgot'); setMessage('') }} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.78rem', color: TEAL, fontWeight: 600, fontFamily: 'inherit' }}>
+                    Forgot password?
+                  </button>
+                </div>
+                <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required style={inputStyle} />
+              </div>
 
-          <button type="submit" disabled={loading} style={{ ...ctaStyle, opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer', marginTop: '4px' }}>
-            {loading ? 'Signing in…' : 'Sign In →'}
-          </button>
-        </form>
+              <button type="submit" disabled={loading} style={{ ...ctaStyle, opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer', marginTop: '4px' }}>
+                {loading ? 'Signing in…' : 'Sign In →'}
+              </button>
+            </form>
+          </>
+        )}
+
+        {mode === 'forgot' && (
+          resetSent ? (
+            <p style={{ fontSize: '0.9rem', color: INK_MID, lineHeight: 1.6, textAlign: 'center' as const }}>
+              If an account exists for <strong>{email}</strong>, a password reset link is on its way. Check your email.
+            </p>
+          ) : (
+            <form onSubmit={handleForgotPassword} style={{ display: 'flex', flexDirection: 'column' as const, gap: '14px' }}>
+              <p style={{ fontSize: '0.84rem', color: INK_MID, lineHeight: 1.5, margin: 0 }}>
+                Enter your email and we'll send you a link to reset your password.
+              </p>
+              <div>
+                <label style={labelStyle}>Email</label>
+                <input type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} required style={inputStyle} />
+              </div>
+
+              <button type="submit" disabled={loading} style={{ ...ctaStyle, opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer', marginTop: '4px' }}>
+                {loading ? 'Sending…' : 'Send Reset Link →'}
+              </button>
+            </form>
+          )
+        )}
 
         {message && (
           <p style={{ marginTop: '14px', textAlign: 'center' as const, fontSize: '0.84rem', fontWeight: 500, color: message.includes('Error') ? '#ef4444' : TEAL }}>
@@ -87,12 +138,20 @@ export default function Login() {
           </p>
         )}
 
-        <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: `1px solid rgba(28,22,16,0.1)`, textAlign: 'center' as const }}>
-          <p style={{ fontSize: '0.84rem', color: INK_LITE, marginBottom: '8px' }}>Don't have an account?</p>
-          <Link href="/signup" style={{ fontSize: '0.84rem', color: TEAL, fontWeight: 700, textDecoration: 'none' }}>
-            Create an Account →
-          </Link>
-        </div>
+        {mode === 'forgot' ? (
+          <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: `1px solid rgba(28,22,16,0.1)`, textAlign: 'center' as const }}>
+            <button type="button" onClick={backToSignIn} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: '0.84rem', color: TEAL, fontWeight: 700, fontFamily: 'inherit' }}>
+              ← Back to Sign In
+            </button>
+          </div>
+        ) : (
+          <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: `1px solid rgba(28,22,16,0.1)`, textAlign: 'center' as const }}>
+            <p style={{ fontSize: '0.84rem', color: INK_LITE, marginBottom: '8px' }}>Don't have an account?</p>
+            <Link href="/signup" style={{ fontSize: '0.84rem', color: TEAL, fontWeight: 700, textDecoration: 'none' }}>
+              Create an Account →
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   )
