@@ -83,7 +83,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ id: strin
   }
 
   if (loading) return <div style={containerStyle}><p>Loading gear...</p></div>;
-  if (!item) return <div style={containerStyle}><p>This item isn't available, or you may need to log in to view it.</p></div>;
+  if (!item) return <div style={containerStyle}><p>{session ? "This item isn't available, or was made private by its owner." : "This item isn't available, or you may need to log in to view it."}</p></div>;
 
   const isGift = item.availability_status === 'Available to Keep';
   const requestLabel = isGift ? 'Request to Keep' : 'Request to Borrow';

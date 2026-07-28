@@ -249,7 +249,7 @@ export default function ItemModal({ params }: { params: Promise<{ id: string }> 
             </div>
           </div>
         ) : (
-          <p style={{ color: INK_MID, padding: '40px 28px' }}>This item isn't available, or you may need to log in to view it.</p>
+          <p style={{ color: INK_MID, padding: '40px 28px' }}>{session ? "This item isn't available, or was made private by its owner." : "This item isn't available, or you may need to log in to view it."}</p>
         )}
       </div>
 

@@ -23,11 +23,19 @@ serve(async (req: Request) => {
     // Fetch the item and poster
     const { data: item, error: itemErr } = await admin
       .from('gear_items')
-      .select('item_name, user_id, profiles!gear_items_user_id_fkey(username, preferred_name)')
+      .select('item_name, user_id, availability_status, visibility, profiles!gear_items_user_id_fkey(username, preferred_name)')
       .eq('id', item_id)
       .single()
 
     if (itemErr || !item) throw new Error('Item not found')
+
+    // Don't email followers about items they can't actually see
+    if (item.availability_status === 'Not Available' || !['public', 'followers', 'followers_and_campmates'].includes(item.visibility)) {
+      return new Response(JSON.stringify({ ok: true, skipped: 'item not visible to followers' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      })
+    }
 
     const poster = (item as any).profiles
     const posterName = poster?.preferred_name || poster?.username || 'Someone'
