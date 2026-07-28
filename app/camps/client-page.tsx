@@ -82,7 +82,8 @@ export default function ClientPage() {
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 20px' }}>
           <h1 style={h1Style}>Your <em style={{ fontStyle: 'italic', color: TEAL }}>Camps.</em></h1>
           <p style={{ fontSize: '0.9rem', color: INK_MID, lineHeight: 1.65, margin: 0 }}>
-            Every camp you belong to, and what your campmates have to share.
+            Every camp you belong to, and what your campmates have to share.{' '}
+            <Link href="/settings" style={{ color: TEAL }}>Update your Playa History on your profile →</Link>
           </p>
         </div>
       </div>
@@ -124,10 +125,6 @@ export default function ClientPage() {
             <p style={{ color: INK_LITE, fontSize: '0.85rem', marginTop: '8px' }}>No camps found matching &quot;{query}&quot;.</p>
           )}
         </div>
-
-        <p style={{ marginTop: '32px', fontSize: '0.9rem' }}>
-          <Link href="/settings" style={{ color: TEAL }}>Update your Playa History on your profile →</Link>
-        </p>
       </div>
     </div>
   )
