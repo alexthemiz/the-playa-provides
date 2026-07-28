@@ -19,6 +19,7 @@ const TEAL     = '#1E8A82'
 const RUST     = '#C24820'
 const RUST_LT  = '#F5E0D8'
 const MUSTARD  = '#D4A020'
+const TRIPTYCH_MIN_HEIGHT = '430px'
 
 const CATEGORY_EMOJI: Record<string, string> = {
   'Bikes & Transport':  '🚲',
@@ -550,7 +551,7 @@ export default function HomePage() {
         display: 'grid',
         gridTemplateColumns: '60% 40%',
         borderBottom: `2px solid ${INK}`,
-        minHeight: '420px',
+        minHeight: TRIPTYCH_MIN_HEIGHT,
       }}>
 
         {/* Left */}
@@ -834,7 +835,7 @@ export default function HomePage() {
       <hr style={{ border: 'none', borderTop: `1.5px solid ${INK}`, margin: 0 }} />
 
       {/* ── FEATURES / WHY ───────────────────────────────────────────────── */}
-      <section className="rsp-px" style={{ backgroundColor: PAPER_LT, paddingTop: '52px', paddingBottom: '52px', borderBottom: `2px solid ${INK}` }}>
+      <section className="rsp-px" style={{ backgroundColor: PAPER_LT, paddingTop: '52px', paddingBottom: '52px', borderBottom: `2px solid ${INK}`, minHeight: TRIPTYCH_MIN_HEIGHT, display: 'flex', flexDirection: 'column' as const, justifyContent: 'center' }}>
         <div style={{ maxWidth: '960px', margin: '0 auto' }}>
 
           {/* Header row */}
@@ -911,7 +912,7 @@ export default function HomePage() {
       <hr style={{ border: 'none', borderTop: `1.5px solid ${INK}`, margin: 0 }} />
 
       {/* ── RESOURCES ────────────────────────────────────────────────────── */}
-      <section className="rsp-px" style={{ backgroundColor: PAPER_DK, paddingTop: '56px', paddingBottom: '64px' }}>
+      <section className="rsp-px" style={{ backgroundColor: PAPER_DK, paddingTop: '56px', paddingBottom: '64px', minHeight: TRIPTYCH_MIN_HEIGHT, display: 'flex', flexDirection: 'column' as const, justifyContent: 'center' }}>
         <style>{`
           .resources-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
           .resources-col { display: flex; flex-direction: column; }
@@ -926,7 +927,7 @@ export default function HomePage() {
           </h2>
           <div className="resources-grid">
             <div className="resources-col">
-              <p style={{ color: INK_MID, fontSize: '0.92rem', margin: '0 0 16px', lineHeight: 1.6 }}>
+              <p style={{ color: INK_MID, fontSize: '1rem', margin: '0 0 16px', lineHeight: 1.65, fontWeight: 500 }}>
                 Camps providing services (like collecting compost, taking donations, fixing bikes, etc.) at the 2026 Burn.
               </p>
               <Link href="/resources" className="resources-btn" style={{
@@ -936,7 +937,7 @@ export default function HomePage() {
               </Link>
             </div>
             <div className="resources-col">
-              <p style={{ color: INK_MID, fontSize: '0.92rem', margin: '0 0 16px', lineHeight: 1.6 }}>
+              <p style={{ color: INK_MID, fontSize: '1rem', margin: '0 0 16px', lineHeight: 1.65, fontWeight: 500 }}>
                 Is that you? Are you providing some form of community service at the 2026 Burn?
               </p>
               <button onClick={() => setSubmitCampOpen(true)} className="resources-btn" style={{
