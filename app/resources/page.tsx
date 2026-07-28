@@ -38,11 +38,11 @@ export default function ResourcesPage() {
   useEffect(() => {
     async function fetchResources() {
       try {
-        const { data, error } = await supabase.from('playa_resources').select('*').eq('is_verified', true).order('camp_name', { ascending: true });
+        const { data, error } = await supabase.from('playa_resources').select('*, camps(slug)').eq('is_verified', true).order('camp_name', { ascending: true });
         if (error) {
           if (error.code === 'PGRST301' || error.message?.includes('JWT') || error.message?.includes('token')) {
             await supabase.auth.signOut({ scope: 'local' });
-            const { data: retryData, error: retryError } = await supabase.from('playa_resources').select('*').eq('is_verified', true).order('camp_name', { ascending: true });
+            const { data: retryData, error: retryError } = await supabase.from('playa_resources').select('*, camps(slug)').eq('is_verified', true).order('camp_name', { ascending: true });
             if (!retryError && retryData) setResources(retryData);
             else setFetchError(true);
           } else { setFetchError(true); }
@@ -98,7 +98,7 @@ export default function ResourcesPage() {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
             {resources.map(res => {
-              const homebase = [res.homebase_city, res.homebase_state].filter(Boolean).join(', ');
+              const homebase = res.homebase;
               const catStyle = CATEGORY_STYLES[res.offering_category] || DEFAULT_CAT;
               return (
                 <div key={res.id} style={{ backgroundColor: PAPER_LT, border: `1.5px solid rgba(28,22,16,0.12)`, boxShadow: `3px 3px 0 rgba(28,22,16,0.08)`, padding: '18px', display: 'flex', flexDirection: 'column' as const }}>
@@ -115,6 +115,12 @@ export default function ResourcesPage() {
                   <div style={{ fontFamily: "'Arvo', serif", fontWeight: 700, color: INK, fontSize: '1rem', marginBottom: '8px', lineHeight: 1.25 }}>
                     {res.camp_name}
                   </div>
+
+                  {res.camps?.slug && (
+                    <a href={`/camps/${res.camps.slug}`} style={{ fontSize: '0.75rem', color: TEAL, textDecoration: 'none', marginBottom: '10px', display: 'inline-block' }}>
+                      View camp page →
+                    </a>
+                  )}
 
                   {/* Description */}
                   {res.description && (
