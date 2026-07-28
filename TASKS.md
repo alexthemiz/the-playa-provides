@@ -95,6 +95,7 @@ _Last updated: 2026-07-27_
 - Email/password + Google OAuth. Google OAuth users with an incomplete profile get redirected to `/settings?setup=true`.
 - Delete Account (in Settings) — two-step confirmation, `delete-account` edge function scrubs PII, marks gear `owner_deleted` + private, unlinks camps, deletes follows/notifications/affiliations/loans/transfers, then deletes the auth user.
 - Magic link login was removed — Gmail's link pre-fetching burns single-use tokens. Password + Google OAuth only.
+- Forgot-password flow (2026-07-28) — inline "Forgot password?" toggle on `/login` calls `supabase.auth.resetPasswordForEmail()`, redirects through the existing `/auth/callback` route (no changes needed there or to `middleware.ts`) to `/reset-password`, which sets the new password via `supabase.auth.updateUser()`. Uses Supabase's **default** password-recovery email, not a custom Resend template like the rest of the app's transactional emails — plain/unbranded. Revisit if that's undesirable: either customize the template in Supabase Dashboard → Auth → Email Templates, or build a dedicated edge function to match the others.
 
 ---
 
