@@ -396,6 +396,7 @@ export default function Header() {
 
           {user ? (
             <>
+              <span style={pipeStyle}>|</span>
               <Link href="/inventory" style={navLinkStyle('/inventory')} className="hover-nav-link">My Inventory</Link>
               <Link href="/camps" style={navLinkStyle('/camps')} className="hover-nav-link">My Camps</Link>
               {username && (
