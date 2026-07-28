@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { geocodeZip } from '@/lib/geocodeZip';
 import { Camera } from 'lucide-react';
+
+const US_STATES = ["", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"];
 
 const CATEGORIES = [
   "Bikes & Transport",
@@ -32,6 +35,7 @@ export default function AddItemModal({
   const [visibility, setVisibility] = useState('public');
   const [locations, setLocations] = useState<Location[]>([]);
   const [selectedLocationId, setSelectedLocationId] = useState('');
+  const [newLocData, setNewLocData] = useState({ label: '', address_line_1: '', city: '', state: '', zip_code: '' });
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [returnTerms, setReturnTerms] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -53,8 +57,12 @@ export default function AddItemModal({
         if (data) {
           setLocations(data);
           if (!itemToEdit) {
-            const defaultLoc = data.find((l: any) => l.is_default);
-            if (defaultLoc) setSelectedLocationId(defaultLoc.id);
+            if (data.length === 0) {
+              setSelectedLocationId('__new__');
+            } else {
+              const defaultLoc = data.find((l: any) => l.is_default);
+              if (defaultLoc) setSelectedLocationId(defaultLoc.id);
+            }
           }
         }
         const [followingRes, campRes] = await Promise.all([
@@ -131,11 +139,26 @@ export default function AddItemModal({
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setLoading(false); return; }
 
+    // If user is adding a new location inline, insert it first
+    let resolvedLocationId: string | null = selectedLocationId || null;
+    if (selectedLocationId === '__new__') {
+      if (!newLocData.label) { showToast("Please give your new location a label (e.g. Home).", true); setLoading(false); return; }
+      const coords = await geocodeZip(newLocData.zip_code);
+      const { data: newLoc, error: locErr } = await supabase
+        .from('locations')
+        .insert({ ...newLocData, user_id: user.id, ...(coords ?? {}) })
+        .select('id')
+        .single();
+      if (locErr || !newLoc) { showToast(`Error saving location: ${locErr?.message}`, true); setLoading(false); return; }
+      resolvedLocationId = newLoc.id;
+      setLocations(prev => [...prev, { id: newLoc.id, label: newLocData.label }]);
+    }
+
     const payload = {
       item_name: formData.get('item_name'),
       category: formData.get('category'),
       condition: formData.get('condition'),
-      location_id: selectedLocationId || null,
+      location_id: resolvedLocationId,
       availability_status: availability,
       visibility: availability === 'Not Available' ? 'private' : visibility,
       description: formData.get('description'),
@@ -194,9 +217,27 @@ export default function AddItemModal({
               <select value={selectedLocationId} onChange={e => setSelectedLocationId(e.target.value)} style={inputStyle} required>
                 <option value="" disabled>— Location —</option>
                 {locations.map(loc => <option key={loc.id} value={loc.id}>{loc.label}</option>)}
+                <option value="__new__">+ Add new location</option>
               </select>
             </div>
           </div>
+
+          {selectedLocationId === '__new__' && (
+            <div style={{ padding: '12px', backgroundColor: '#f9f9f9', borderRadius: '10px', border: '1px solid #eee', display: 'flex', flexDirection: 'column' as const, gap: '8px' }}>
+              <p style={{ margin: '0 0 4px', fontSize: '11px', color: '#888', fontWeight: 600, textTransform: 'uppercase' as const }}>New Location — saved to your settings</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <input style={inputStyle} placeholder="Label (e.g. Home)" value={newLocData.label} onChange={e => setNewLocData({ ...newLocData, label: e.target.value })} />
+                <input style={inputStyle} placeholder="Street Address" value={newLocData.address_line_1} onChange={e => setNewLocData({ ...newLocData, address_line_1: e.target.value })} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '8px' }}>
+                <input style={inputStyle} placeholder="City" value={newLocData.city} onChange={e => setNewLocData({ ...newLocData, city: e.target.value })} />
+                <select style={inputStyle} value={newLocData.state} onChange={e => setNewLocData({ ...newLocData, state: e.target.value })}>
+                  {US_STATES.map(s => <option key={s} value={s}>{s || 'State'}</option>)}
+                </select>
+                <input style={inputStyle} placeholder="Zip" value={newLocData.zip_code} onChange={e => setNewLocData({ ...newLocData, zip_code: e.target.value })} />
+              </div>
+            </div>
+          )}
 
           {/* DESCRIPTION */}
           <div style={sectionStyle}>
