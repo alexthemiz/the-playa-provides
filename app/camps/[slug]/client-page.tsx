@@ -677,7 +677,7 @@ export default function CampPage() {
                 ))}
               </div>
             )}
-            <button type="button" onClick={() => { setEditingResource(null); setShowResourcesForm(true); }} style={listOfferingButtonStyle}>
+            <button type="button" onClick={() => { setEditingResource(null); setShowResourcesForm(true); }} style={listOfferingBtnStyle}>
               List an on-playa offering →
             </button>
           </div>
@@ -920,7 +920,7 @@ const uploadBtnStyle: React.CSSProperties = {
   border: '1.5px solid rgba(28,22,16,0.25)', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer',
 };
 
-const listOfferingButtonStyle: React.CSSProperties = {
+const listOfferingBtnStyle: React.CSSProperties = {
   padding: '8px 14px', backgroundColor: 'transparent', color: '#1E8A82',
   border: '1.5px solid #1E8A82', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem',
 };
