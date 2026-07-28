@@ -619,7 +619,7 @@ export default function HomePage() {
                 alignItems: 'center', gap: '4px',
               }}
             >
-              🚲 <span style={{ marginLeft: '4px' }}>play</span>
+              <span style={{ fontSize: '0.85rem' }}>🚲</span> <span style={{ marginLeft: '4px' }}>play</span>
             </button>}
           </div>
 
@@ -747,7 +747,7 @@ export default function HomePage() {
                   display: 'flex', alignItems: 'center', gap: '4px',
                 }}
               >
-                🚲
+                <span style={{ fontSize: '0.85rem' }}>🚲</span>
               </button>
             </div>
             {showChecklist && (
