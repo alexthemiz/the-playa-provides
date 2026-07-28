@@ -42,16 +42,24 @@ serve(async (req: Request) => {
                 <td style="padding: 10px;">${formData.camp_name}</td>
               </tr>
               <tr>
+                <td style="padding: 10px; font-weight: bold;">Linked Camp</td>
+                <td style="padding: 10px;">${formData.camp_id ? `Yes (camp_id: ${formData.camp_id})` : 'No match found'}</td>
+              </tr>
+              <tr style="background: #f9f9f9;">
                 <td style="padding: 10px; font-weight: bold;">Category</td>
                 <td style="padding: 10px;">${formData.offering_category}</td>
               </tr>
-              <tr style="background: #f9f9f9;">
+              <tr>
                 <td style="padding: 10px; font-weight: bold;">Description</td>
                 <td style="padding: 10px;">${formData.description}</td>
               </tr>
+              <tr style="background: #f9f9f9;">
+                <td style="padding: 10px; font-weight: bold;">Camp Description</td>
+                <td style="padding: 10px;">${formData.camp_description || '—'}</td>
+              </tr>
               <tr>
                 <td style="padding: 10px; font-weight: bold;">Homebase</td>
-                <td style="padding: 10px;">${[formData.homebase_city, formData.homebase_state, formData.homebase_zip].filter(Boolean).join(', ') || '—'}</td>
+                <td style="padding: 10px;">${formData.homebase || '—'}</td>
               </tr>
               <tr style="background: #f9f9f9;">
                 <td style="padding: 10px; font-weight: bold;">Website</td>
