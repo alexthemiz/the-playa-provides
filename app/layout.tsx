@@ -13,13 +13,11 @@ export const metadata = {
     siteName: 'The Playa Provides',
     title: 'The Playa Provides',
     description: 'Peer-to-peer gear sharing for the Burning Man community.',
-    images: [{ url: '/TPP_logo1.png', width: 1200, height: 630, alt: 'The Playa Provides' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'The Playa Provides',
     description: 'Peer-to-peer gear sharing for the Burning Man community.',
-    images: ['/TPP_logo1.png'],
   },
 }
 

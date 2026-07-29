@@ -36,7 +36,7 @@ export async function middleware(request: NextRequest) {
   // the /resources "View camp page" link, but deliberately does NOT match
   // the bare '/camps' path — the "My Camps" personal dashboard stays gated,
   // since it has no content relevant to a logged-out visitor.
-  const isPublicRoute = ['/login', '/signup', '/'].includes(url.pathname) || url.pathname.startsWith('/auth') || url.pathname.startsWith('/resources') || url.pathname.startsWith('/about') || url.pathname.startsWith('/privacy') || url.pathname.startsWith('/terms') || url.pathname.startsWith('/find-items') || url.pathname.startsWith('/loan-invite') || url.pathname.startsWith('/camps/')
+  const isPublicRoute = ['/login', '/signup', '/'].includes(url.pathname) || url.pathname.startsWith('/auth') || url.pathname.startsWith('/resources') || url.pathname.startsWith('/about') || url.pathname.startsWith('/privacy') || url.pathname.startsWith('/terms') || url.pathname.startsWith('/find-items') || url.pathname.startsWith('/loan-invite') || url.pathname.startsWith('/camps/') || url.pathname.startsWith('/opengraph-image') || url.pathname.startsWith('/twitter-image')
 
   console.log(`📡 PATH: ${url.pathname} | AUTH: ${user ? 'YES' : 'NO'}`)
 
