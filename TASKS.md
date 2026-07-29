@@ -91,6 +91,8 @@ _Last updated: 2026-07-29_
 
 ### Design system
 - "Playful Field Guide" — see CLAUDE.md for the full token list. Shipped sitewide across all pages/components. No Tailwind utility classes remain in `app/` or `components/` as of 2026-07-20.
+- **Current logo (`public/TPP_logo1.png`) doesn't match the design system at all** — Alex's words: "doesn't connect to the website design, doesn't mean or stand for anything." Four on-brand concept directions were mocked up 2026-07-29 (radial Black Rock City map, borrow/gift color-coded loop, split shade-structure, sun-and-hands) — not yet decided, revisit before building real vector art.
+- **Social share preview (`og:image`) fixed 2026-07-29** independent of the logo decision above — `app/opengraph-image.tsx` generates a real 1200×630 card at request time via Next's built-in `next/og` (Arvo wordmark, lime rule, Outfit tagline, faint radial-rings watermark), replacing the old `TPP_logo1.png` reference. Required adding `/opengraph-image` (+ `/twitter-image`, unused today) to `middleware.ts`'s public-route whitelist — link-preview crawlers carry no session cookie and were getting redirected to `/login` instead of the image. **LinkedIn/Facebook cache previews per-URL** — after this ships, re-scrape via LinkedIn's Post Inspector (linkedin.com/post-inspector) or Facebook's Sharing Debugger before re-testing, or the old cached image will still show.
 
 ### Auth & account
 - Email/password + Google OAuth. Google OAuth users with an incomplete profile get redirected to `/settings?setup=true`.
