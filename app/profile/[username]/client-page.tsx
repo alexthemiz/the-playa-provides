@@ -358,7 +358,7 @@ export default function PublicProfilePage() {
         if (draft2026.isOpenCamping) {
           is_open_camping = true;
         } else if (draft2026.campInput.trim()) {
-          camp_id = draft2026.campId || await findOrCreateCamp(draft2026.campInput);
+          camp_id = draft2026.campId || await findOrCreateCamp(draft2026.campInput, true);
         }
       }
       desiredRows.push({ matchId: existingMatch2026 ? existingMatch2026.id : null, year: 2026, is_open_camping, camp_id, returning_status: draft2026.status });
@@ -429,9 +429,17 @@ export default function PublicProfilePage() {
     return name.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
   }
 
-  async function findOrCreateCamp(name: string): Promise<string | null> {
-    const { data: exact } = await supabase.from('camps').select('id').ilike('display_name', name.trim()).maybeSingle();
-    if (exact) return exact.id;
+  async function findOrCreateCamp(name: string, restrictToReturning: boolean = false): Promise<string | null> {
+    const trimmed = name.trim();
+    if (restrictToReturning) {
+      const { data: allowedExact } = await supabase.from('camps').select('id').ilike('display_name', trimmed).or('returning_2026.is.null,returning_2026.neq.false').maybeSingle();
+      if (allowedExact) return allowedExact.id;
+      const { data: anyExact } = await supabase.from('camps').select('id').ilike('display_name', trimmed).maybeSingle();
+      if (anyExact) return null; // camp exists but is marked not returning in 2026 — don't select it or create a duplicate
+    } else {
+      const { data: exact } = await supabase.from('camps').select('id').ilike('display_name', trimmed).maybeSingle();
+      if (exact) return exact.id;
+    }
     let slug = toSlug(name);
     const { data: slugRows } = await supabase.from('camps').select('slug').ilike('slug', `${slug}%`);
     const slugSet = new Set((slugRows || []).map((c: any) => c.slug));
@@ -441,9 +449,11 @@ export default function PublicProfilePage() {
     return newCamp.id;
   }
 
-  async function searchCampsDB(query: string): Promise<any[]> {
+  async function searchCampsDB(query: string, restrictToReturning: boolean = false): Promise<any[]> {
     if (!query.trim()) return [];
-    const { data } = await supabase.from('camps').select('id, display_name, slug').ilike('display_name', `%${query.trim()}%`).limit(8);
+    let campsQuery = supabase.from('camps').select('id, display_name, slug').ilike('display_name', `%${query.trim()}%`);
+    if (restrictToReturning) campsQuery = campsQuery.or('returning_2026.is.null,returning_2026.neq.false');
+    const { data } = await campsQuery.limit(8);
     return data || [];
   }
 
@@ -483,7 +493,7 @@ export default function PublicProfilePage() {
   const handle2026CampInputChange = async (value: string) => {
     setDraft2026(prev => ({ ...prev, campInput: value, campId: null, isOpenCamping: false, isTBD: false, showDropdown: !!value.trim() }));
     if (value.trim()) {
-      const results = await searchCampsDB(value);
+      const results = await searchCampsDB(value, true);
       setDraft2026(prev => ({ ...prev, searchResults: results, showDropdown: true }));
     } else {
       setDraft2026(prev => ({ ...prev, searchResults: [], showDropdown: false }));
