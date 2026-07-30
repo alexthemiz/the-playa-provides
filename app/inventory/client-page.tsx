@@ -136,15 +136,18 @@ export default function InventoryPage() {
         // Inbound transfers (recipient side)
         const { data: inboundTransferData } = await supabase
           .from('item_transfers')
-          .select('id, item_id, status, owner_id, owner_confirmed, recipient_confirmed, owner:profiles!item_transfers_owner_id_fkey(preferred_name, username), gear_items(item_name)')
+          .select('id, item_id, status, owner_id, owner_confirmed, recipient_confirmed, owner:profiles!item_transfers_owner_id_fkey(preferred_name, username), gear_items(item_name, category)')
           .eq('recipient_id', user.id)
           .in('status', ['pending_handover']);
         setInboundTransfers(inboundTransferData || []);
 
-        // Inbound loans (borrower side)
+        // Inbound loans (borrower side) — return_terms/damage_price/loss_price
+        // are needed directly in this select (unlike the owner-side tables,
+        // there's no local `items` array of the lender's items to fall back
+        // to for a borrower).
         const { data: inboundLoanData } = await supabase
           .from('item_loans')
-          .select('id, item_id, owner_id, status, owner_confirmed_pickup, borrower_confirmed_pickup, borrower_confirmed_return, return_by, picked_up_at, borrower_location_id, owner:profiles!item_loans_owner_id_fkey(preferred_name, username), gear_items(item_name, category)')
+          .select('id, item_id, owner_id, status, owner_confirmed_pickup, borrower_confirmed_pickup, borrower_confirmed_return, return_by, picked_up_at, borrower_location_id, owner:profiles!item_loans_owner_id_fkey(preferred_name, username), gear_items(item_name, category, return_terms, damage_price, loss_price)')
           .eq('borrower_id', user.id)
           .in('status', ['pending_handover', 'active', 'return_pending']);
         setInboundLoans(inboundLoanData || []);
@@ -182,7 +185,7 @@ export default function InventoryPage() {
           currentOwner: t.gear_items?.user_id ? currentOwnerMap[t.gear_items.user_id] : null,
           // Whether the live gear_items row resolved at all under normal
           // visibility RLS — same signal that gates "Current Owner", reused
-          // to decide whether "View Listing" is a real link or a dead end.
+          // to decide whether "View Item Details" is a real link or omitted.
           itemVisible: !!t.gear_items,
         })));
 
@@ -592,6 +595,29 @@ export default function InventoryPage() {
     return matchesSearch && matchesCategory && matchesLocation && !isOutOnLoan;
   });
 
+  // Compact, read-only lending-terms display shared by every table that
+  // shows a loaned item. Terms live on the item listing itself (edited via
+  // the normal Edit Item flow) — this never offers inline editing, so who's
+  // allowed to change them mid-loan never comes up here.
+  function renderTerms(source: { return_terms?: string | null; damage_price?: number | null; loss_price?: number | null } | undefined | null) {
+    if (!source) return <span style={{ color: '#c8bca8' }}>—</span>;
+    const hasPrice = source.damage_price != null || source.loss_price != null;
+    if (!source.return_terms && !hasPrice) return <span style={{ color: '#c8bca8' }}>—</span>;
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '2px' }}>
+        {source.return_terms && <span style={clampTwoLinesStyle}>{source.return_terms}</span>}
+        {hasPrice && (
+          <span style={{ fontSize: '0.75rem', color: '#9A8878' }}>
+            {[
+              source.damage_price != null ? `Damage $${source.damage_price}` : null,
+              source.loss_price != null ? `Loss $${source.loss_price}` : null,
+            ].filter(Boolean).join(' · ')}
+          </span>
+        )}
+      </div>
+    );
+  }
+
   function renderActionButton(item: any) {
     const status = item.availability_status;
 
@@ -857,7 +883,7 @@ export default function InventoryPage() {
 
                     {/* DESCRIPTION */}
                     <td style={{ ...tdStyle, fontSize: '0.8rem' }}>
-                      {item.description || '—'}
+                      <span style={clampTwoLinesStyle}>{item.description || '—'}</span>
                     </td>
 
                     {/* STATUS TOGGLE */}
@@ -941,12 +967,13 @@ export default function InventoryPage() {
                 <th style={thStyle}>Borrower</th>
                 <th style={thStyle}>Picked Up On</th>
                 <th style={thStyle}>Return By</th>
+                <th style={thStyle}>Terms</th>
                 <th style={thActionStyle}>Action</th>
               </tr>
             </thead>
             <tbody>
               {activeLoans.filter(l => ['active', 'return_pending'].includes(l.status)).length === 0 && informalLoans.length === 0 && (
-                <tr><td colSpan={6} style={{ ...tdStyle, color: '#9A8878', fontStyle: 'italic' as const }}>You don&apos;t have any items out on loan at this time.</td></tr>
+                <tr><td colSpan={7} style={{ ...tdStyle, color: '#9A8878', fontStyle: 'italic' as const }}>You don&apos;t have any items out on loan at this time.</td></tr>
               )}
               {activeLoans
                 .filter(l => ['active', 'return_pending'].includes(l.status))
@@ -971,6 +998,7 @@ export default function InventoryPage() {
                         </td>
                         <td style={tdStyle}>{pickedUpOn}</td>
                         <td style={tdStyle}>{returnBy}</td>
+                        <td style={tdStyle}>{renderTerms(items.find(i => i.id === loan.item_id))}</td>
                         <td style={tdActionStyle}>
                           {loan.status === 'return_pending' && (
                             <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '4px' }}>
@@ -1002,6 +1030,7 @@ export default function InventoryPage() {
                     </td>
                     <td style={tdStyle}>{handedOverOn}</td>
                     <td style={tdStyle}>{returnBy}</td>
+                    <td style={tdStyle}>{renderTerms(items.find(i => i.id === loan.item_id))}</td>
                     <td style={tdActionStyle}>
                       <div style={{ display: 'flex', gap: '6px' }}>
                         <button onClick={() => handleMarkInformalLoanReturned(loan)} style={handsOverButtonStyle}>Mark Returned</button>
@@ -1029,58 +1058,8 @@ export default function InventoryPage() {
         </div>
       </div>
 
-      {/* ITEMS BEING TRANSFERRED TO ME */}
-      <div style={{ marginTop: '40px' }}>
-        <h2 style={{ color: '#1C1610', fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
-          Items Being Transferred to Me
-        </h2>
-          <div style={tableContainerStyle}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const }}>
-              <thead>
-                <tr style={headerRowStyle}>
-                  <th style={thStyle}>Item</th>
-                  <th style={thStyle}>From</th>
-                  <th style={thStyle}>Status</th>
-                  <th style={thActionStyle}>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {inboundTransfers.length === 0 && (
-                  <tr><td colSpan={4} style={{ ...tdStyle, color: '#9A8878', fontStyle: 'italic' as const }}>No items are being transferred to you at this time.</td></tr>
-                )}
-                {inboundTransfers.map(transfer => {
-                  const ownerName = transfer.owner?.preferred_name || transfer.owner?.username || '—';
-                  const itemName = transfer.gear_items?.item_name || '—';
-                  return (
-                    <tr key={transfer.id} style={rowStyle}>
-                      <td style={{ ...tdStyle, fontWeight: 600, color: '#1C1610' }}>{itemName}</td>
-                      <td style={tdStyle}>{ownerName}</td>
-                      <td style={tdStyle}>
-                        <span style={{ fontSize: '0.8rem', color: '#555' }}>
-                          {transfer.owner_confirmed ? 'Handed over — confirm receipt' : 'Pending handover'}
-                        </span>
-                      </td>
-                      <td style={tdActionStyle}>
-                        <div style={{ display: 'flex', gap: '6px' }}>
-                          {transfer.owner_confirmed && (
-                            <button onClick={() => handleRecipientConfirmTransfer(transfer)} style={handsOverButtonStyle}>
-                              Got It
-                            </button>
-                          )}
-                          <button onClick={() => handleRecipientDeclineTransfer(transfer)} style={cancelActionButtonStyle}>
-                            Decline
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-      {/* ITEMS I'M BORROWING */}
+      {/* ITEMS I'M BORROWING — active/return_pending only; pending_handover
+          loans live in "Items I've Requested to Borrow or Keep" below */}
       <div style={{ marginTop: '40px' }}>
         <h2 style={{ color: '#1C1610', fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
           Items I&apos;m Borrowing
@@ -1090,20 +1069,22 @@ export default function InventoryPage() {
               <thead>
                 <tr style={headerRowStyle}>
                   <th style={thStyle}>Item</th>
-                  <th style={thStyle}>From</th>
                   <th style={thStyle}>Category</th>
+                  <th style={thStyle}>From</th>
                   <th style={thStyle}>Picked Up On</th>
                   <th style={thStyle}>Return By</th>
                   <th style={thStyle}>My Location</th>
-                  <th style={thStyle}>Status</th>
+                  <th style={thStyle}>Terms</th>
                   <th style={thActionStyle}>Action</th>
                 </tr>
               </thead>
               <tbody>
-                {inboundLoans.length === 0 && (
+                {inboundLoans.filter(l => ['active', 'return_pending'].includes(l.status)).length === 0 && (
                   <tr><td colSpan={8} style={{ ...tdStyle, color: '#9A8878', fontStyle: 'italic' as const }}>You&apos;re not borrowing anything at this time.</td></tr>
                 )}
-                {inboundLoans.map(loan => {
+                {inboundLoans
+                  .filter(l => ['active', 'return_pending'].includes(l.status))
+                  .map(loan => {
                   const ownerName = loan.owner?.preferred_name || loan.owner?.username || '—';
                   const ownerUsername = loan.owner?.username;
                   const itemName = loan.gear_items?.item_name || '—';
@@ -1118,12 +1099,12 @@ export default function InventoryPage() {
                         {itemName}
                         <a href={`/find-items/${loan.item_id}`} style={editLinkStyle}>View Item Details</a>
                       </td>
+                      <td style={tdStyle}>{category}</td>
                       <td style={tdStyle}>
                         {ownerUsername
                           ? <Link href={`/profile/${ownerUsername}`} style={{ color: '#1E8A82', textDecoration: 'none', fontWeight: 500 }}>{ownerName}</Link>
                           : ownerName}
                       </td>
-                      <td style={tdStyle}>{category}</td>
                       <td style={tdStyle}>{pickedUpOn}</td>
                       <td style={tdStyle}>{returnBy}</td>
                       <td style={tdStyle}>
@@ -1155,23 +1136,108 @@ export default function InventoryPage() {
                           </div>
                         )}
                       </td>
-                      <td style={tdStyle}>
-                        <span style={{ fontSize: '0.8rem', color: '#555' }}>
-                          {loan.status === 'pending_handover'
-                            ? loan.owner_confirmed_pickup ? 'Confirm you have it' : 'Waiting for handover'
-                            : 'Active loan'}
-                        </span>
-                      </td>
+                      <td style={tdStyle}>{renderTerms(loan.gear_items)}</td>
                       <td style={tdActionStyle}>
-                        {loan.status === 'pending_handover' && loan.owner_confirmed_pickup && (
-                          <button onClick={() => handleBorrowerConfirmPickup(loan)} style={handsOverButtonStyle}>Got It</button>
-                        )}
                         {loan.status === 'active' && (
                           <button onClick={() => handleBorrowerConfirmReturn(loan)} style={cancelActionButtonStyle}>Return Item</button>
                         )}
                         {loan.status === 'return_pending' && (
                           <span style={{ fontSize: '0.75rem', color: '#aaa', fontStyle: 'italic' as const }}>Return Pending</span>
                         )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      {/* ITEMS I'VE REQUESTED TO BORROW OR KEEP — pending_handover loans and
+          transfers merged into one table, since both are just "waiting on
+          the other person to hand it over," whichever kind. */}
+      <div style={{ marginTop: '40px' }}>
+        <h2 style={{ color: '#1C1610', fontSize: '1.1rem', fontWeight: 700, marginBottom: '16px' }}>
+          Items I&apos;ve Requested to Borrow or Keep
+        </h2>
+          <div style={tableContainerStyle}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const }}>
+              <thead>
+                <tr style={headerRowStyle}>
+                  <th style={thStyle}>Item</th>
+                  <th style={thStyle}>Category</th>
+                  <th style={thStyle}>From</th>
+                  <th style={thStyle}>Return By</th>
+                  <th style={thStyle}>Terms</th>
+                  <th style={thActionStyle}>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {inboundLoans.filter(l => l.status === 'pending_handover').length === 0 && inboundTransfers.length === 0 && (
+                  <tr><td colSpan={6} style={{ ...tdStyle, color: '#9A8878', fontStyle: 'italic' as const }}>You haven&apos;t requested to borrow or keep anything at this time.</td></tr>
+                )}
+                {inboundLoans
+                  .filter(l => l.status === 'pending_handover')
+                  .map(loan => {
+                    const ownerName = loan.owner?.preferred_name || loan.owner?.username || '—';
+                    const ownerUsername = loan.owner?.username;
+                    const itemName = loan.gear_items?.item_name || '—';
+                    const category = loan.gear_items?.category || '—';
+                    const returnBy = loan.return_by ? new Date(loan.return_by).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+                    return (
+                      <tr key={`loan-${loan.id}`} style={rowStyle}>
+                        <td style={{ ...tdStyle, fontWeight: 600, color: '#1C1610' }}>
+                          {itemName}
+                          <a href={`/find-items/${loan.item_id}`} style={editLinkStyle}>View Item Details</a>
+                        </td>
+                        <td style={tdStyle}>{category}</td>
+                        <td style={tdStyle}>
+                          {ownerUsername
+                            ? <Link href={`/profile/${ownerUsername}`} style={{ color: '#1E8A82', textDecoration: 'none', fontWeight: 500 }}>{ownerName}</Link>
+                            : ownerName}
+                        </td>
+                        <td style={tdStyle}>{returnBy}</td>
+                        <td style={tdStyle}>{renderTerms(loan.gear_items)}</td>
+                        <td style={tdActionStyle}>
+                          <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '4px' }}>
+                            <span style={{ fontSize: '0.75rem', color: '#555' }}>
+                              {loan.owner_confirmed_pickup ? 'Confirm you have it' : 'Waiting for handover'}
+                            </span>
+                            {loan.owner_confirmed_pickup && (
+                              <button onClick={() => handleBorrowerConfirmPickup(loan)} style={handsOverButtonStyle}>Got It</button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                {inboundTransfers.map(transfer => {
+                  const ownerName = transfer.owner?.preferred_name || transfer.owner?.username || '—';
+                  const itemName = transfer.gear_items?.item_name || '—';
+                  const category = transfer.gear_items?.category || '—';
+                  return (
+                    <tr key={`transfer-${transfer.id}`} style={rowStyle}>
+                      <td style={{ ...tdStyle, fontWeight: 600, color: '#1C1610' }}>{itemName}</td>
+                      <td style={tdStyle}>{category}</td>
+                      <td style={tdStyle}>{ownerName}</td>
+                      <td style={tdStyle}>—</td>
+                      <td style={tdStyle}><span style={{ color: '#9A8878', fontStyle: 'italic' as const }}>To Keep</span></td>
+                      <td style={tdActionStyle}>
+                        <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '4px' }}>
+                          <span style={{ fontSize: '0.75rem', color: '#555' }}>
+                            {transfer.owner_confirmed ? 'Handed over — confirm receipt' : 'Pending handover'}
+                          </span>
+                          <div style={{ display: 'flex', gap: '6px' }}>
+                            {transfer.owner_confirmed && (
+                              <button onClick={() => handleRecipientConfirmTransfer(transfer)} style={handsOverButtonStyle}>
+                                Got It
+                              </button>
+                            )}
+                            <button onClick={() => handleRecipientDeclineTransfer(transfer)} style={cancelActionButtonStyle}>
+                              Decline
+                            </button>
+                          </div>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -1193,13 +1259,12 @@ export default function InventoryPage() {
                   <th style={thStyle}>Item</th>
                   <th style={thStyle}>Given To</th>
                   <th style={thStyle}>Transfer Date</th>
-                  <th style={thStyle}>Current Owner</th>
-                  <th style={thActionStyle}>View Listing</th>
+                  <th style={thActionStyle}>Current Owner</th>
                 </tr>
               </thead>
               <tbody>
                 {givenAwayItems.length === 0 && (
-                  <tr><td colSpan={5} style={{ ...tdStyle, color: '#9A8878', fontStyle: 'italic' as const }}>You haven&apos;t given any items away yet.</td></tr>
+                  <tr><td colSpan={4} style={{ ...tdStyle, color: '#9A8878', fontStyle: 'italic' as const }}>You haven&apos;t given any items away yet.</td></tr>
                 )}
                 {givenAwayItems.map(transfer => {
                   const recipientName = transfer.recipient?.preferred_name || transfer.recipient?.username || '—';
@@ -1211,14 +1276,19 @@ export default function InventoryPage() {
                   const givenOn = transfer.completed_at ? new Date(transfer.completed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
                   return (
                     <tr key={transfer.id} style={rowStyle}>
-                      <td style={{ ...tdStyle, fontWeight: 600, color: '#2D241E' }}>{transfer.item_name || '—'}</td>
+                      <td style={{ ...tdStyle, fontWeight: 600, color: '#2D241E' }}>
+                        {transfer.item_name || '—'}
+                        {transfer.itemVisible && (
+                          <a href={`/find-items/${transfer.item_id}`} style={editLinkStyle}>View Item Details</a>
+                        )}
+                      </td>
                       <td style={tdStyle}>
                         {recipientUsername
                           ? <Link href={`/profile/${recipientUsername}`} style={{ color: '#1E8A82', textDecoration: 'none', fontWeight: 500 }}>{recipientName}</Link>
                           : recipientName}
                       </td>
                       <td style={tdStyle}>{givenOn}</td>
-                      <td style={tdStyle}>
+                      <td style={tdActionStyle}>
                         {stillWithRecipient ? (
                           <span style={{ color: '#9A8878', fontStyle: 'italic' as const, fontSize: '0.85rem' }}>Still with {recipientName}</span>
                         ) : currentOwnerName ? (
@@ -1226,11 +1296,6 @@ export default function InventoryPage() {
                         ) : (
                           <span style={{ color: '#9A8878', fontStyle: 'italic' as const, fontSize: '0.85rem' }}>Not visible to you</span>
                         )}
-                      </td>
-                      <td style={tdActionStyle}>
-                        {transfer.itemVisible
-                          ? <Link href={`/find-items/${transfer.item_id}`} style={{ color: '#1E8A82', textDecoration: 'none', fontWeight: 500, fontSize: '0.85rem' }}>View Listing</Link>
-                          : <span style={{ color: '#c8bca8', fontSize: '0.85rem' }}>N/A</span>}
                       </td>
                     </tr>
                   );
@@ -1371,6 +1436,7 @@ const thStyle: React.CSSProperties = { padding: '15px', fontFamily: "'Space Mono
 const thActionStyle: React.CSSProperties = { padding: '15px 15px 15px 32px', fontFamily: "'Space Mono', monospace", color: '#4A3828', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.08em', whiteSpace: 'nowrap' as const, width: '1%' };
 const tdStyle: React.CSSProperties = { padding: '10px 15px', verticalAlign: 'middle', color: '#4A3828', fontSize: '0.9rem' };
 const tdActionStyle: React.CSSProperties = { ...tdStyle, padding: '10px 15px 10px 32px' };
+const clampTwoLinesStyle: React.CSSProperties = { display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden' };
 const rowStyle: React.CSSProperties = { borderBottom: '1px solid rgba(28,22,16,0.06)' };
 const thumbnailStyle: React.CSSProperties = { width: '50px', height: '50px', backgroundColor: '#EDE5D0', overflow: 'hidden', flexShrink: 0, border: '1px solid rgba(28,22,16,0.12)' };
 const editLinkStyle: React.CSSProperties = { background: 'none', border: 'none', color: '#1E8A82', fontSize: '0.75rem', padding: 0, cursor: 'pointer', textDecoration: 'underline', marginTop: '4px', display: 'block' };

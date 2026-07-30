@@ -85,7 +85,8 @@ serve(async (req: Request) => {
               <p style="margin: 0 0 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #999;">Message</p>
               <div style="border: 1px solid #e5ddd0; background: #FBF8F2; padding: 16px; margin-bottom: 20px; white-space: pre-wrap; font-size: 13px; line-height: 1.6; color: #4A3828; font-family: 'Courier New', monospace;">${safeMessage}</div>
 
-              ${requesterEmail ? `<p style="margin: 0; font-size: 13px; color: #888;">Reply directly to this email to get in touch.</p>` : ''}
+              ${requesterEmail ? `<p style="margin: 0 0 12px; font-size: 13px; color: #888;">Reply directly to this email to get in touch.</p>` : ''}
+              <p style="margin: 0; font-size: 12px; color: #aaa; line-height: 1.5;">If you and ${safeRequesterName} agree on different terms than what's on the listing, update the listing before handing the item over.</p>
             </div>
             <p style="font-size: 12px; color: #aaa; margin: 16px 4px 0;">
               Sent via <a href="https://theplayaprovides.com" style="color: #1E8A82;">The Playa Provides</a>
