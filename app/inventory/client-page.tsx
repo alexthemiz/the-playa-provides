@@ -583,7 +583,13 @@ export default function InventoryPage() {
     const matchesSearch = item.item_name?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
     const matchesLocation = selectedLocations.length === 0 || selectedLocations.includes(itemLocation);
-    return matchesSearch && matchesCategory && matchesLocation;
+    // Items actively out on loan (real or informal) live exclusively in the
+    // "Items Out on Loan" table below -- not pending_handover/pending
+    // transfers, which still belong here since the owner hasn't handed them
+    // over yet.
+    const isOutOnLoan = activeLoans.some(l => l.item_id === item.id && ['active', 'return_pending'].includes(l.status))
+      || informalLoans.some(l => l.item_id === item.id);
+    return matchesSearch && matchesCategory && matchesLocation && !isOutOnLoan;
   });
 
   function renderActionButton(item: any) {
@@ -647,21 +653,6 @@ export default function InventoryPage() {
           <span style={pendingBadgeStyle}>Pending</span>
           <button onClick={() => handleOwnerConfirmPickup(loan)} style={handsOverButtonStyle}>I've Handed It Over</button>
           <button onClick={() => handleCancelLoan(loan)} style={cancelActionButtonStyle}>Cancel</button>
-        </div>
-      );
-    }
-
-    // An active informal loan doesn't touch availability_status, so without
-    // this check the item would still show a clickable Lend To/Transfer To
-    // here even while it's out with a no-account borrower — DB-level
-    // triggers now block that double-booking too, but hiding the button
-    // avoids the owner hitting that error in normal use.
-    const informalLoan = informalLoans.find(l => l.item_id === item.id);
-    if (informalLoan) {
-      return (
-        <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '4px' }}>
-          <span style={{ fontSize: '0.8rem', color: '#555' }}>Out on Loan</span>
-          <span style={{ fontSize: '0.75rem', color: '#9A8878' }}>{informalLoan.borrower_name} (no account)</span>
         </div>
       );
     }
@@ -946,10 +937,10 @@ export default function InventoryPage() {
             <thead>
               <tr style={headerRowStyle}>
                 <th style={thStyle}>Item</th>
+                <th style={thStyle}>Category</th>
                 <th style={thStyle}>Borrower</th>
                 <th style={thStyle}>Picked Up On</th>
                 <th style={thStyle}>Return By</th>
-                <th style={thStyle}>Status</th>
                 <th style={thActionStyle}>Action</th>
               </tr>
             </thead>
@@ -965,12 +956,14 @@ export default function InventoryPage() {
                     const returnBy = loan.return_by ? new Date(loan.return_by).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
                     const pickedUpOn = loan.picked_up_at ? new Date(loan.picked_up_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
                     const itemName = loan.gear_items?.item_name || items.find(i => i.id === loan.item_id)?.item_name || '—';
+                    const category = loan.gear_items?.category || items.find(i => i.id === loan.item_id)?.category || '—';
                     return (
                       <tr key={loan.id} style={rowStyle}>
                         <td style={{ ...tdStyle, fontWeight: 600, color: '#1C1610' }}>
                           {itemName}
                           <a href={`/find-items/${loan.item_id}`} style={editLinkStyle}>View Item Details</a>
                         </td>
+                        <td style={tdStyle}>{category}</td>
                         <td style={tdStyle}>
                           {borrowerUsername
                             ? <a href={`/profile/${borrowerUsername}`} style={{ color: '#1E8A82', textDecoration: 'none', fontWeight: 500 }}>{borrowerName}</a>
@@ -978,16 +971,14 @@ export default function InventoryPage() {
                         </td>
                         <td style={tdStyle}>{pickedUpOn}</td>
                         <td style={tdStyle}>{returnBy}</td>
-                        <td style={tdStyle}>
-                          <span style={{ fontSize: '0.8rem', color: loan.status === 'return_pending' ? '#92400e' : '#555' }}>
-                            {loan.status === 'return_pending' ? 'Return Pending' : 'Out on Loan'}
-                          </span>
-                        </td>
                         <td style={tdActionStyle}>
                           {loan.status === 'return_pending' && (
-                            <div style={{ display: 'flex', gap: '6px' }}>
-                              <button onClick={() => handleOwnerConfirmReturn(loan)} style={handsOverButtonStyle}>Confirm Return</button>
-                              <button onClick={() => setDisputeLoan(loan)} style={cancelActionButtonStyle}>Dispute</button>
+                            <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '4px' }}>
+                              <span style={{ fontSize: '0.75rem', color: '#92400e', fontWeight: 600 }}>Return Pending</span>
+                              <div style={{ display: 'flex', gap: '6px' }}>
+                                <button onClick={() => handleOwnerConfirmReturn(loan)} style={handsOverButtonStyle}>Confirm Return</button>
+                                <button onClick={() => setDisputeLoan(loan)} style={cancelActionButtonStyle}>Dispute</button>
+                              </div>
                             </div>
                           )}
                         </td>
@@ -998,20 +989,19 @@ export default function InventoryPage() {
                 const returnBy = loan.return_by ? new Date(loan.return_by).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
                 const handedOverOn = new Date(loan.handed_over_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                 const itemName = loan.gear_items?.item_name || items.find(i => i.id === loan.item_id)?.item_name || '—';
+                const category = loan.gear_items?.category || items.find(i => i.id === loan.item_id)?.category || '—';
                 return (
                   <tr key={`informal-${loan.id}`} style={rowStyle}>
                     <td style={{ ...tdStyle, fontWeight: 600, color: '#1C1610' }}>
                       {itemName}
                       <a href={`/find-items/${loan.item_id}`} style={editLinkStyle}>View Item Details</a>
                     </td>
+                    <td style={tdStyle}>{category}</td>
                     <td style={tdStyle}>
                       {loan.borrower_name} <span style={{ color: '#9A8878', fontSize: '0.78rem' }}>(no account)</span>
                     </td>
                     <td style={tdStyle}>{handedOverOn}</td>
                     <td style={tdStyle}>{returnBy}</td>
-                    <td style={tdStyle}>
-                      <span style={{ fontSize: '0.8rem', color: '#555' }}>Out on Loan</span>
-                    </td>
                     <td style={tdActionStyle}>
                       <div style={{ display: 'flex', gap: '6px' }}>
                         <button onClick={() => handleMarkInformalLoanReturned(loan)} style={handsOverButtonStyle}>Mark Returned</button>
