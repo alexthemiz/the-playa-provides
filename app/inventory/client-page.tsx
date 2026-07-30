@@ -812,7 +812,7 @@ export default function InventoryPage() {
         <p style={{ color: '#888', textAlign: 'center', padding: '40px' }}>Loading your gear...</p>
       ) : (
         <div style={tableContainerStyle}>
-          <table style={{ width: `${W_ITEM + W_CATEGORY + W_LOCATION + W_DESCRIPTION + W_AVAILABILITY + W_VISIBILITY + W_ACTION}px`, borderCollapse: 'collapse', textAlign: 'left' as const, tableLayout: 'fixed' as const }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const, tableLayout: 'fixed' as const }}>
             <colgroup>
               <col style={{ width: `${W_ITEM}px` }} />
               <col style={{ width: `${W_CATEGORY}px` }} />
@@ -935,7 +935,7 @@ export default function InventoryPage() {
           Items Out on Loan
         </h2>
         <div style={tableContainerStyle}>
-          <table style={{ width: `${W_ITEM + W_CATEGORY + W_PERSON + W_DATE * 2 + W_TERMS + W_ACTION}px`, borderCollapse: 'collapse', textAlign: 'left' as const, tableLayout: 'fixed' as const }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const, tableLayout: 'fixed' as const }}>
             <colgroup>
               <col style={{ width: `${W_ITEM}px` }} />
               <col style={{ width: `${W_CATEGORY}px` }} />
@@ -1050,7 +1050,7 @@ export default function InventoryPage() {
           Items I&apos;m Borrowing
         </h2>
           <div style={tableContainerStyle}>
-            <table style={{ width: `${W_ITEM + W_CATEGORY + W_PERSON + W_DATE * 2 + W_LOCATION + W_TERMS + W_ACTION}px`, borderCollapse: 'collapse', textAlign: 'left' as const, tableLayout: 'fixed' as const }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const, tableLayout: 'fixed' as const }}>
               <colgroup>
                 <col style={{ width: `${W_ITEM}px` }} />
                 <col style={{ width: `${W_CATEGORY}px` }} />
@@ -1156,7 +1156,7 @@ export default function InventoryPage() {
           Items I&apos;ve Requested to Borrow or Keep
         </h2>
           <div style={tableContainerStyle}>
-            <table style={{ width: `${W_ITEM + W_CATEGORY + W_PERSON + W_DATE + W_TERMS + W_ACTION}px`, borderCollapse: 'collapse', textAlign: 'left' as const, tableLayout: 'fixed' as const }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const, tableLayout: 'fixed' as const }}>
               <colgroup>
                 <col style={{ width: `${W_ITEM}px` }} />
                 <col style={{ width: `${W_CATEGORY}px` }} />
@@ -1256,7 +1256,7 @@ export default function InventoryPage() {
           Items I&apos;ve Given Away
         </h2>
           <div style={tableContainerStyle}>
-            <table style={{ width: `${W_ITEM + W_PERSON + W_DATE + W_CURRENT_OWNER}px`, borderCollapse: 'collapse', textAlign: 'left' as const, tableLayout: 'fixed' as const }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const, tableLayout: 'fixed' as const }}>
               <colgroup>
                 <col style={{ width: `${W_ITEM}px` }} />
                 <col style={{ width: `${W_PERSON}px` }} />
