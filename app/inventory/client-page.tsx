@@ -2,10 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { geocodeZip } from '@/lib/geocodeZip';
 import Link from 'next/link';
-
-const US_STATES = ["", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"];
 import AddItemModal from '@/components/AddItemModal';
 import WelcomeModal from '@/components/WelcomeModal';
 import ImportSpreadsheetModal from '@/components/ImportSpreadsheetModal';
@@ -42,9 +39,6 @@ export default function InventoryPage() {
   const [disputeSuccess, setDisputeSuccess] = useState(false);
   const [followingIds, setFollowingIds] = useState<string[]>([]);
   const [campMateIds, setCampMateIds] = useState<string[]>([]);
-  const [userLocations, setUserLocations] = useState<{ id: string; label: string }[]>([]);
-  const [borrowerLocationIds, setBorrowerLocationIds] = useState<Record<string, string>>({});
-  const [newLoanLocData, setNewLoanLocData] = useState<{ loanId: string | null; label: string; address_line_1: string; city: string; state: string; zip_code: string }>({ loanId: null, label: '', address_line_1: '', city: '', state: '', zip_code: '' });
   const [reminderSentAt, setReminderSentAt] = useState<Record<string, number>>({});
   const [sendingReminderKey, setSendingReminderKey] = useState<string | null>(null);
 
@@ -147,7 +141,7 @@ export default function InventoryPage() {
         // to for a borrower).
         const { data: inboundLoanData } = await supabase
           .from('item_loans')
-          .select('id, item_id, owner_id, status, owner_confirmed_pickup, borrower_confirmed_pickup, borrower_confirmed_return, return_by, picked_up_at, borrower_location_id, owner:profiles!item_loans_owner_id_fkey(preferred_name, username), gear_items(item_name, category, return_terms, damage_price, loss_price)')
+          .select('id, item_id, owner_id, status, owner_confirmed_pickup, borrower_confirmed_pickup, borrower_confirmed_return, return_by, picked_up_at, owner:profiles!item_loans_owner_id_fkey(preferred_name, username), gear_items(item_name, category, return_terms, damage_price, loss_price)')
           .eq('borrower_id', user.id)
           .in('status', ['pending_handover', 'active', 'return_pending']);
         setInboundLoans(inboundLoanData || []);
@@ -188,20 +182,6 @@ export default function InventoryPage() {
           // to decide whether "View Item Details" is a real link or omitted.
           itemVisible: !!t.gear_items,
         })));
-
-        // User's saved locations (for borrower location dropdown)
-        const { data: locData } = await supabase
-          .from('locations')
-          .select('id, label')
-          .eq('user_id', user.id);
-        setUserLocations(locData || []);
-
-        // Initialise borrowerLocationIds from fetched loan data
-        const initialLoanLocs: Record<string, string> = {};
-        (inboundLoanData || []).forEach((l: any) => {
-          if (l.borrower_location_id) initialLoanLocs[l.id] = l.borrower_location_id;
-        });
-        setBorrowerLocationIds(initialLoanLocs);
       }
     } catch (err) {
       console.error('fetchMyInventory error:', err);
@@ -506,33 +486,6 @@ export default function InventoryPage() {
     if (!error) fetchMyInventory();
   }
 
-  async function handleLoanLocationChange(loanId: string, locationId: string) {
-    setBorrowerLocationIds(prev => ({ ...prev, [loanId]: locationId }));
-    if (locationId === '__new__') {
-      setNewLoanLocData({ loanId, label: '', address_line_1: '', city: '', state: '', zip_code: '' });
-    } else {
-      await supabase.from('item_loans').update({ borrower_location_id: locationId || null }).eq('id', loanId);
-    }
-  }
-
-  async function handleSaveNewLoanLocation() {
-    if (!newLoanLocData.loanId || !newLoanLocData.label) return;
-    const { data: { session } } = await supabase.auth.getSession();
-    const uid = session?.user?.id;
-    if (!uid) return;
-    const coords = await geocodeZip(newLoanLocData.zip_code);
-    const { data: newLoc, error } = await supabase
-      .from('locations')
-      .insert({ label: newLoanLocData.label, address_line_1: newLoanLocData.address_line_1, city: newLoanLocData.city, state: newLoanLocData.state, zip_code: newLoanLocData.zip_code, user_id: uid, ...(coords ?? {}) })
-      .select('id')
-      .single();
-    if (newLoc && !error) {
-      setUserLocations(prev => [...prev, { id: newLoc.id, label: newLoanLocData.label }]);
-      setBorrowerLocationIds(prev => ({ ...prev, [newLoanLocData.loanId!]: newLoc.id }));
-      await supabase.from('item_loans').update({ borrower_location_id: newLoc.id }).eq('id', newLoanLocData.loanId!);
-      setNewLoanLocData({ loanId: null, label: '', address_line_1: '', city: '', state: '', zip_code: '' });
-    }
-  }
 
   async function handleBorrowerConfirmReturn(loan: any) {
     const { error } = await supabase
@@ -1057,7 +1010,6 @@ export default function InventoryPage() {
                 <col style={{ width: `${W_PERSON}px` }} />
                 <col style={{ width: `${W_DATE}px` }} />
                 <col style={{ width: `${W_DATE}px` }} />
-                <col style={{ width: `${W_LOCATION}px` }} />
                 <col style={{ width: `${W_TERMS}px` }} />
                 <col style={{ width: `${W_ACTION}px` }} />
               </colgroup>
@@ -1065,17 +1017,16 @@ export default function InventoryPage() {
                 <tr style={headerRowStyle}>
                   <th style={thStyle}>Item</th>
                   <th style={thStyle}>Category</th>
-                  <th style={thStyle}>From</th>
+                  <th style={thStyle}>Owner</th>
                   <th style={thStyle}>Picked Up On</th>
                   <th style={thStyle}>Return By</th>
-                  <th style={thStyle}>My Location</th>
                   <th style={thStyle}>Terms</th>
                   <th style={thActionStyle}>Action</th>
                 </tr>
               </thead>
               <tbody>
                 {inboundLoans.filter(l => ['active', 'return_pending'].includes(l.status)).length === 0 && (
-                  <tr><td colSpan={8} style={{ ...tdStyle, color: '#9A8878', fontStyle: 'italic' as const }}>You&apos;re not borrowing anything at this time.</td></tr>
+                  <tr><td colSpan={7} style={{ ...tdStyle, color: '#9A8878', fontStyle: 'italic' as const }}>You&apos;re not borrowing anything at this time.</td></tr>
                 )}
                 {inboundLoans
                   .filter(l => ['active', 'return_pending'].includes(l.status))
@@ -1086,8 +1037,6 @@ export default function InventoryPage() {
                   const category = loan.gear_items?.category || '—';
                   const pickedUpOn = loan.picked_up_at ? new Date(loan.picked_up_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
                   const returnBy = loan.return_by ? new Date(loan.return_by).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
-                  const selectedLocId = borrowerLocationIds[loan.id] ?? '';
-                  const isAddingNew = newLoanLocData.loanId === loan.id;
                   return (
                     <tr key={loan.id} style={rowStyle}>
                       <td style={{ ...tdStyle, fontWeight: 600, color: '#1C1610' }}>
@@ -1102,35 +1051,6 @@ export default function InventoryPage() {
                       </td>
                       <td style={tdStyle}>{pickedUpOn}</td>
                       <td style={tdStyle}>{returnBy}</td>
-                      <td style={tdStyle}>
-                        <select
-                          value={selectedLocId || ''}
-                          onChange={e => handleLoanLocationChange(loan.id, e.target.value)}
-                          style={loanLocationSelectStyle}
-                        >
-                          <option value="" disabled>— Location —</option>
-                          {userLocations.map(loc => (
-                            <option key={loc.id} value={loc.id}>{loc.label}</option>
-                          ))}
-                          <option value="__new__">+ Add new location</option>
-                        </select>
-                        {isAddingNew && (
-                          <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column' as const, gap: '6px' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
-                              <input style={loanLocInputStyle} placeholder="Label (e.g. Home)" value={newLoanLocData.label} onChange={e => setNewLoanLocData(d => ({ ...d, label: e.target.value }))} />
-                              <input style={loanLocInputStyle} placeholder="Street Address" value={newLoanLocData.address_line_1} onChange={e => setNewLoanLocData(d => ({ ...d, address_line_1: e.target.value }))} />
-                            </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '6px' }}>
-                              <input style={loanLocInputStyle} placeholder="City" value={newLoanLocData.city} onChange={e => setNewLoanLocData(d => ({ ...d, city: e.target.value }))} />
-                              <select style={loanLocInputStyle} value={newLoanLocData.state} onChange={e => setNewLoanLocData(d => ({ ...d, state: e.target.value }))}>
-                                {US_STATES.map(s => <option key={s} value={s}>{s || 'State'}</option>)}
-                              </select>
-                              <input style={loanLocInputStyle} placeholder="Zip" value={newLoanLocData.zip_code} onChange={e => setNewLoanLocData(d => ({ ...d, zip_code: e.target.value }))} />
-                            </div>
-                            <button onClick={handleSaveNewLoanLocation} style={saveLocButtonStyle}>Save Location</button>
-                          </div>
-                        )}
-                      </td>
                       <td style={tdStyle}>{renderTerms(loan.gear_items)}</td>
                       <td style={tdActionStyle}>
                         {loan.status === 'active' && (
@@ -1162,7 +1082,13 @@ export default function InventoryPage() {
                 <col style={{ width: `${W_CATEGORY}px` }} />
                 <col style={{ width: `${W_PERSON}px` }} />
                 <col style={{ width: `${W_DATE}px` }} />
-                <col style={{ width: `${W_TERMS}px` }} />
+                {/* This table has no Picked Up On column (nothing's been
+                    picked up yet), so Terms absorbs that column's width --
+                    keeps this table's total in step with Items Out on Loan /
+                    Items I'm Borrowing, which is what keeps Item/Category/
+                    From/Owner aligned with those two tables under
+                    tableLayout:fixed's proportional stretch. */}
+                <col style={{ width: `${W_TERMS + W_DATE}px` }} />
                 <col style={{ width: `${W_ACTION}px` }} />
               </colgroup>
               <thead>
@@ -1466,6 +1392,3 @@ const handsOverButtonStyle: React.CSSProperties = { height: '28px', padding: '0 
 const reminderButtonStyle: React.CSSProperties = { height: '24px', padding: '0 8px', fontSize: '0.7rem', backgroundColor: '#EDE5D0', color: '#4A3828', border: '1px solid rgba(28,22,16,0.2)', cursor: 'pointer', whiteSpace: 'nowrap' as const };
 const cancelActionButtonStyle: React.CSSProperties = { height: '24px', padding: '0 8px', fontSize: '0.7rem', backgroundColor: '#FDFAF4', color: '#dc2626', border: '1px solid #fca5a5', cursor: 'pointer', whiteSpace: 'nowrap' as const };
 const visibilitySelectStyle: React.CSSProperties = { width: '100%', padding: '5px 6px', fontSize: '0.78rem', border: '1px solid rgba(28,22,16,0.2)', backgroundColor: '#FDFAF4', color: '#4A3828', cursor: 'pointer' };
-const loanLocationSelectStyle: React.CSSProperties = { width: '100%', padding: '5px 8px', fontSize: '0.8rem', border: '1.5px solid rgba(28,22,16,0.25)', color: '#1C1610', backgroundColor: '#FDFAF4', cursor: 'pointer' };
-const loanLocInputStyle: React.CSSProperties = { width: '100%', padding: '5px 8px', fontSize: '0.75rem', border: '1.5px solid rgba(28,22,16,0.25)', color: '#1C1610', backgroundColor: '#FDFAF4', boxSizing: 'border-box' as const };
-const saveLocButtonStyle: React.CSSProperties = { padding: '5px 12px', fontSize: '0.75rem', backgroundColor: '#1E8A82', color: '#fff', border: '1.5px solid #1C1610', cursor: 'pointer', fontWeight: 600 };
