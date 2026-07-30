@@ -60,7 +60,7 @@ const SECTIONS = [
         <p style={pStyle}><strong style={{ color: INK }}>Ugh, another vibe coded website?</strong><br />I know, I know. Such a cliche. But rest assured: while I built this site using Claude Code, I did all the writing and designing myself. Besides, if it wasn&rsquo;t for vibe coding, the site wouldn&rsquo;t have been built at all, and you wouldn&rsquo;t be saving money on lag bolts and air mattresses and unicorn onesies.</p>
         <p style={{ ...pStyle, marginBottom: 0 }}>
           Anyway, I&rsquo;m Alex, and I feel strongly that there&rsquo;s too much stuff. If you have an event coming up, consider hiring{' '}
-          <a href="https://www.smoreslab.com" target="_blank" rel="noopener noreferrer" style={linkStyle}>The S&rsquo;mores Lab</a>.
+          <a href="https://www.thesmoreslab.com" target="_blank" rel="noopener noreferrer" style={linkStyle}>The S&rsquo;mores Lab</a>.
           Or if you&rsquo;re looking for a communications manager or copywriter, consider{' '}
           <a href="https://www.alexmizrahi.com/" target="_blank" rel="noopener noreferrer" style={linkStyle}>hiring me</a>!
         </p>
