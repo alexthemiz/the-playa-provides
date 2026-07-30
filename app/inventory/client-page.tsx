@@ -812,14 +812,15 @@ export default function InventoryPage() {
         <p style={{ color: '#888', textAlign: 'center', padding: '40px' }}>Loading your gear...</p>
       ) : (
         <div style={tableContainerStyle}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const, tableLayout: 'fixed' as const }}>
+          <table style={{ width: `${W_ITEM + W_CATEGORY + W_LOCATION + W_DESCRIPTION + W_AVAILABILITY + W_VISIBILITY + W_ACTION}px`, borderCollapse: 'collapse', textAlign: 'left' as const, tableLayout: 'fixed' as const }}>
             <colgroup>
-              <col style={{ width: '190px' }} />
-              <col style={{ width: '100px' }} />
-              <col style={{ width: '100px' }} />
-              <col style={{ width: '265px' }} />
-              <col style={{ width: '225px' }} />
-              <col style={{ width: '180px' }} />
+              <col style={{ width: `${W_ITEM}px` }} />
+              <col style={{ width: `${W_CATEGORY}px` }} />
+              <col style={{ width: `${W_LOCATION}px` }} />
+              <col style={{ width: `${W_DESCRIPTION}px` }} />
+              <col style={{ width: `${W_AVAILABILITY}px` }} />
+              <col style={{ width: `${W_VISIBILITY}px` }} />
+              <col style={{ width: `${W_ACTION}px` }} />
             </colgroup>
             <thead>
               <tr style={headerRowStyle}>
@@ -828,50 +829,34 @@ export default function InventoryPage() {
                 <th style={thStyle}>Location</th>
                 <th style={thStyle}>Description</th>
                 <th style={thStyle}>Availability</th>
+                <th style={thStyle}>Make Visible To</th>
                 <th style={thActionStyle}>Action</th>
               </tr>
             </thead>
             <tbody>
               {filteredItems.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ padding: '40px', textAlign: 'center' as const, color: '#888', fontSize: '0.9rem' }}>
+                  <td colSpan={7} style={{ padding: '40px', textAlign: 'center' as const, color: '#888', fontSize: '0.9rem' }}>
                     No items found. Add something to your inventory!
                   </td>
                 </tr>
               ) : (
                 filteredItems.map(item => (
                   <tr key={item.id} style={rowStyle}>
-                    {/* ITEM NAME + THUMBNAIL */}
+                    {/* ITEM NAME */}
                     <td style={tdStyle}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                        <div style={thumbnailStyle}>
-                          {item.image_urls && item.image_urls.length > 0 ? (
-                            <img
-                              src={item.image_urls[0]}
-                              alt=""
-                              style={{ width: '100%', height: '100%', objectFit: 'cover' as const }}
-                            />
-                          ) : (
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#ccc', fontSize: '0.6rem' }}>
-                              NO PIX
-                            </div>
-                          )}
-                        </div>
-                        <div>
-                          <div style={{ fontWeight: 'bold', color: '#1C1610' }}>{item.item_name}</div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
-                            <a href={`/find-items/${item.id}`} style={inlineRowLinkStyle}>View</a>
-                            <span style={rowLinkDividerStyle}>·</span>
-                            <button
-                              onClick={() => { setEditingItem(item); setIsModalOpen(true); }}
-                              style={inlineRowLinkStyle}
-                            >
-                              Edit
-                            </button>
-                            <span style={rowLinkDividerStyle}>·</span>
-                            <ShareLink itemId={item.id} itemName={item.item_name} style={inlineRowLinkStyle} />
-                          </div>
-                        </div>
+                      <div style={{ fontWeight: 'bold', color: '#1C1610' }}>{item.item_name}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+                        <a href={`/find-items/${item.id}`} style={inlineRowLinkStyle}>View</a>
+                        <span style={rowLinkDividerStyle}>·</span>
+                        <button
+                          onClick={() => { setEditingItem(item); setIsModalOpen(true); }}
+                          style={inlineRowLinkStyle}
+                        >
+                          Edit
+                        </button>
+                        <span style={rowLinkDividerStyle}>·</span>
+                        <ShareLink itemId={item.id} itemName={item.item_name} style={inlineRowLinkStyle} />
                       </div>
                     </td>
 
@@ -886,59 +871,50 @@ export default function InventoryPage() {
                       <span style={clampTwoLinesStyle}>{item.description || '—'}</span>
                     </td>
 
-                    {/* STATUS TOGGLE */}
+                    {/* AVAILABILITY */}
                     <td style={tdStyle}>
-                      {/* width:max-content (not fit-content — verified via
-                          repro that fit-content collapses a flex-wrap child
-                          down to its narrowest single item here, wrapping
-                          every button onto its own line) so the select
-                          below (width:100% of THIS wrapper, not the full
-                          table cell) hugs the actual rendered width of the
-                          3-button row instead of stretching wider than it. */}
-                      <div style={{ width: 'max-content' as const }}>
-                      <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' as const }}>
-                        {[
-                          { value: 'Available to Borrow', label: 'To Borrow' },
-                          { value: 'Available to Keep', label: 'To Keep' },
-                          { value: 'Not Available', label: 'Private' },
-                        ].map(opt => (
-                          <button
-                            key={opt.value}
-                            onClick={() => updateStatus(item.id, opt.value)}
-                            style={getStatusToggleStyle(opt.value, item.availability_status)}
-                          >
-                            {opt.label}
-                          </button>
-                        ))}
-                      </div>
-                      {item.availability_status !== 'Not Available' && (
+                      <select
+                        value={item.availability_status}
+                        onChange={e => updateStatus(item.id, e.target.value)}
+                        style={visibilitySelectStyle}
+                      >
+                        <option value="Available to Borrow">To Borrow</option>
+                        <option value="Available to Keep">To Keep</option>
+                        <option value="Not Available">Unlist/Keep Private</option>
+                      </select>
+                    </td>
+
+                    {/* MAKE VISIBLE TO */}
+                    <td style={tdStyle}>
+                      {item.availability_status === 'Not Available' ? (
+                        <span style={{ color: '#c8bca8' }}>—</span>
+                      ) : (
                         <select
                           value={item.visibility || 'public'}
                           onChange={e => updateVisibility(item.id, e.target.value)}
                           style={visibilitySelectStyle}
                         >
-                          <option value="public">Everyone</option>
-                          <option
-                            value="followers"
-                            disabled={followingIds.length === 0}
-                            style={{ color: followingIds.length === 0 ? '#bbb' : 'inherit' }}
-                            title={followingIds.length === 0 ? 'Follow users to unlock this' : undefined}
-                          >People you follow</option>
+                          <option value="public">Public</option>
                           <option
                             value="campmates"
                             disabled={campMateIds.length === 0}
                             style={{ color: campMateIds.length === 0 ? '#bbb' : 'inherit' }}
                             title={campMateIds.length === 0 ? 'Add a camp to your profile to unlock this' : undefined}
-                          >Campmates only</option>
+                          >Campmates Only</option>
+                          <option
+                            value="followers"
+                            disabled={followingIds.length === 0}
+                            style={{ color: followingIds.length === 0 ? '#bbb' : 'inherit' }}
+                            title={followingIds.length === 0 ? 'Follow users to unlock this' : undefined}
+                          >People you Follow</option>
                           <option
                             value="followers_and_campmates"
                             disabled={followingIds.length === 0 || campMateIds.length === 0}
                             style={{ color: followingIds.length === 0 || campMateIds.length === 0 ? '#bbb' : 'inherit' }}
                             title={followingIds.length === 0 || campMateIds.length === 0 ? 'Follow users or join a camp to unlock this' : undefined}
-                          >Following &amp; Campmates</option>
+                          >Campmates &amp; Following</option>
                         </select>
                       )}
-                      </div>
                     </td>
 
                     {/* ACTION BUTTON */}
@@ -959,7 +935,16 @@ export default function InventoryPage() {
           Items Out on Loan
         </h2>
         <div style={tableContainerStyle}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const }}>
+          <table style={{ width: `${W_ITEM + W_CATEGORY + W_PERSON + W_DATE * 2 + W_TERMS + W_ACTION}px`, borderCollapse: 'collapse', textAlign: 'left' as const, tableLayout: 'fixed' as const }}>
+            <colgroup>
+              <col style={{ width: `${W_ITEM}px` }} />
+              <col style={{ width: `${W_CATEGORY}px` }} />
+              <col style={{ width: `${W_PERSON}px` }} />
+              <col style={{ width: `${W_DATE}px` }} />
+              <col style={{ width: `${W_DATE}px` }} />
+              <col style={{ width: `${W_TERMS}px` }} />
+              <col style={{ width: `${W_ACTION}px` }} />
+            </colgroup>
             <thead>
               <tr style={headerRowStyle}>
                 <th style={thStyle}>Item</th>
@@ -1065,7 +1050,17 @@ export default function InventoryPage() {
           Items I&apos;m Borrowing
         </h2>
           <div style={tableContainerStyle}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const }}>
+            <table style={{ width: `${W_ITEM + W_CATEGORY + W_PERSON + W_DATE * 2 + W_LOCATION + W_TERMS + W_ACTION}px`, borderCollapse: 'collapse', textAlign: 'left' as const, tableLayout: 'fixed' as const }}>
+              <colgroup>
+                <col style={{ width: `${W_ITEM}px` }} />
+                <col style={{ width: `${W_CATEGORY}px` }} />
+                <col style={{ width: `${W_PERSON}px` }} />
+                <col style={{ width: `${W_DATE}px` }} />
+                <col style={{ width: `${W_DATE}px` }} />
+                <col style={{ width: `${W_LOCATION}px` }} />
+                <col style={{ width: `${W_TERMS}px` }} />
+                <col style={{ width: `${W_ACTION}px` }} />
+              </colgroup>
               <thead>
                 <tr style={headerRowStyle}>
                   <th style={thStyle}>Item</th>
@@ -1161,7 +1156,15 @@ export default function InventoryPage() {
           Items I&apos;ve Requested to Borrow or Keep
         </h2>
           <div style={tableContainerStyle}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const }}>
+            <table style={{ width: `${W_ITEM + W_CATEGORY + W_PERSON + W_DATE + W_TERMS + W_ACTION}px`, borderCollapse: 'collapse', textAlign: 'left' as const, tableLayout: 'fixed' as const }}>
+              <colgroup>
+                <col style={{ width: `${W_ITEM}px` }} />
+                <col style={{ width: `${W_CATEGORY}px` }} />
+                <col style={{ width: `${W_PERSON}px` }} />
+                <col style={{ width: `${W_DATE}px` }} />
+                <col style={{ width: `${W_TERMS}px` }} />
+                <col style={{ width: `${W_ACTION}px` }} />
+              </colgroup>
               <thead>
                 <tr style={headerRowStyle}>
                   <th style={thStyle}>Item</th>
@@ -1253,7 +1256,13 @@ export default function InventoryPage() {
           Items I&apos;ve Given Away
         </h2>
           <div style={tableContainerStyle}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' as const }}>
+            <table style={{ width: `${W_ITEM + W_PERSON + W_DATE + W_CURRENT_OWNER}px`, borderCollapse: 'collapse', textAlign: 'left' as const, tableLayout: 'fixed' as const }}>
+              <colgroup>
+                <col style={{ width: `${W_ITEM}px` }} />
+                <col style={{ width: `${W_PERSON}px` }} />
+                <col style={{ width: `${W_DATE}px` }} />
+                <col style={{ width: `${W_CURRENT_OWNER}px` }} />
+              </colgroup>
               <thead>
                 <tr style={headerRowStyle}>
                   <th style={thStyle}>Item</th>
@@ -1412,17 +1421,21 @@ export default function InventoryPage() {
   );
 }
 
-// --- STATUS TOGGLE STYLE ---
-function getStatusToggleStyle(optionValue: string, currentStatus: string): React.CSSProperties {
-  const isActive = optionValue === currentStatus;
-  if (optionValue === 'Available to Borrow') {
-    return { padding: '3px 8px', fontSize: '0.7rem', cursor: 'pointer', fontWeight: isActive ? 'bold' : 'normal', border: '1px solid #1E8A82', backgroundColor: isActive ? '#1E8A82' : '#FDFAF4', color: isActive ? '#fff' : '#1E8A82', whiteSpace: 'nowrap' as const };
-  }
-  if (optionValue === 'Available to Keep') {
-    return { padding: '3px 8px', fontSize: '0.7rem', cursor: 'pointer', fontWeight: isActive ? 'bold' : 'normal', border: '1px solid #C24820', backgroundColor: isActive ? '#C24820' : '#FDFAF4', color: isActive ? '#fff' : '#C24820', whiteSpace: 'nowrap' as const };
-  }
-  return { padding: '3px 8px', fontSize: '0.7rem', cursor: 'pointer', fontWeight: isActive ? 'bold' : 'normal', border: '1px solid #9A8878', backgroundColor: isActive ? '#EDE5D0' : '#FDFAF4', color: isActive ? '#1C1610' : '#9A8878', whiteSpace: 'nowrap' as const };
-}
+// --- SHARED COLUMN WIDTHS ---
+// Reused verbatim across every table's colgroup so Item/Category/person/date
+// columns line up at the same X position as you scroll down the page,
+// regardless of which table they're in.
+const W_ITEM = 200;
+const W_CATEGORY = 120;
+const W_LOCATION = 130;      // Location / My Location
+const W_DESCRIPTION = 210;   // main table only
+const W_AVAILABILITY = 150;  // main table only
+const W_VISIBILITY = 170;    // main table only ("Make Visible To")
+const W_PERSON = 140;        // Borrower / From / Given To
+const W_DATE = 110;          // Picked Up On / Return By / Transfer Date
+const W_TERMS = 180;
+const W_ACTION = 180;
+const W_CURRENT_OWNER = 150; // Given Away only
 
 // --- STYLES ---
 const addButtonStyle: React.CSSProperties = { backgroundColor: '#1E8A82', color: '#fff', padding: '10px 20px', border: '2px solid #1C1610', boxShadow: '3px 3px 0 #1C1610', fontWeight: 'bold', cursor: 'pointer', whiteSpace: 'nowrap' as const, fontSize: '0.9rem' };
@@ -1433,12 +1446,11 @@ const inputStyle: React.CSSProperties = { width: '100%', padding: '10px', backgr
 const tableContainerStyle: React.CSSProperties = { overflowX: 'auto', backgroundColor: '#FDFAF4', border: '1.5px solid rgba(28,22,16,0.12)' };
 const headerRowStyle: React.CSSProperties = { borderBottom: '1.5px solid rgba(28,22,16,0.12)', backgroundColor: '#EDE5D0' };
 const thStyle: React.CSSProperties = { padding: '15px', fontFamily: "'Space Mono', monospace", color: '#4A3828', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.08em' };
-const thActionStyle: React.CSSProperties = { padding: '15px 15px 15px 32px', fontFamily: "'Space Mono', monospace", color: '#4A3828', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.08em', whiteSpace: 'nowrap' as const, width: '1%' };
+const thActionStyle: React.CSSProperties = { padding: '15px 20px 15px 32px', fontFamily: "'Space Mono', monospace", color: '#4A3828', fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.08em', whiteSpace: 'nowrap' as const };
 const tdStyle: React.CSSProperties = { padding: '10px 15px', verticalAlign: 'middle', color: '#4A3828', fontSize: '0.9rem' };
 const tdActionStyle: React.CSSProperties = { ...tdStyle, padding: '10px 15px 10px 32px' };
 const clampTwoLinesStyle: React.CSSProperties = { display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden' };
 const rowStyle: React.CSSProperties = { borderBottom: '1px solid rgba(28,22,16,0.06)' };
-const thumbnailStyle: React.CSSProperties = { width: '50px', height: '50px', backgroundColor: '#EDE5D0', overflow: 'hidden', flexShrink: 0, border: '1px solid rgba(28,22,16,0.12)' };
 const editLinkStyle: React.CSSProperties = { background: 'none', border: 'none', color: '#1E8A82', fontSize: '0.75rem', padding: 0, cursor: 'pointer', textDecoration: 'underline', marginTop: '4px', display: 'block' };
 const inlineRowLinkStyle: React.CSSProperties = { background: 'none', border: 'none', color: '#1E8A82', fontSize: '0.75rem', padding: 0, cursor: 'pointer', textDecoration: 'underline', display: 'inline' };
 const rowLinkDividerStyle: React.CSSProperties = { color: '#c8bca8', fontSize: '0.7rem' };
@@ -1453,7 +1465,7 @@ const pendingBadgeStyle: React.CSSProperties = { display: 'inline-block', paddin
 const handsOverButtonStyle: React.CSSProperties = { height: '28px', padding: '0 10px', fontSize: '0.7rem', backgroundColor: '#16a34a', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' as const };
 const reminderButtonStyle: React.CSSProperties = { height: '24px', padding: '0 8px', fontSize: '0.7rem', backgroundColor: '#EDE5D0', color: '#4A3828', border: '1px solid rgba(28,22,16,0.2)', cursor: 'pointer', whiteSpace: 'nowrap' as const };
 const cancelActionButtonStyle: React.CSSProperties = { height: '24px', padding: '0 8px', fontSize: '0.7rem', backgroundColor: '#FDFAF4', color: '#dc2626', border: '1px solid #fca5a5', cursor: 'pointer', whiteSpace: 'nowrap' as const };
-const visibilitySelectStyle: React.CSSProperties = { marginTop: '6px', width: '100%', padding: '3px 6px', fontSize: '0.7rem', border: '1px solid rgba(28,22,16,0.2)', backgroundColor: '#FDFAF4', color: '#4A3828', cursor: 'pointer' };
+const visibilitySelectStyle: React.CSSProperties = { width: '100%', padding: '5px 6px', fontSize: '0.78rem', border: '1px solid rgba(28,22,16,0.2)', backgroundColor: '#FDFAF4', color: '#4A3828', cursor: 'pointer' };
 const loanLocationSelectStyle: React.CSSProperties = { width: '100%', padding: '5px 8px', fontSize: '0.8rem', border: '1.5px solid rgba(28,22,16,0.25)', color: '#1C1610', backgroundColor: '#FDFAF4', cursor: 'pointer' };
 const loanLocInputStyle: React.CSSProperties = { width: '100%', padding: '5px 8px', fontSize: '0.75rem', border: '1.5px solid rgba(28,22,16,0.25)', color: '#1C1610', backgroundColor: '#FDFAF4', boxSizing: 'border-box' as const };
 const saveLocButtonStyle: React.CSSProperties = { padding: '5px 12px', fontSize: '0.75rem', backgroundColor: '#1E8A82', color: '#fff', border: '1.5px solid #1C1610', cursor: 'pointer', fontWeight: 600 };
