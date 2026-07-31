@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og'
+import { RadialPlayaMotif } from '@/components/RadialPlayaMotif'
 
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
@@ -45,21 +46,10 @@ export default async function Image() {
           position: 'relative',
         }}
       >
-        {/* Faint radial motif — echoes Black Rock City's concentric layout */}
-        <svg
-          width="820"
-          height="820"
-          viewBox="0 0 120 120"
-          style={{ position: 'absolute', top: -80, left: 190, opacity: 0.1 }}
-        >
-          <circle cx="60" cy="60" r="52" fill="none" stroke={INK} strokeWidth="1.2" />
-          <circle cx="60" cy="60" r="36" fill="none" stroke={INK} strokeWidth="1" />
-          <circle cx="60" cy="60" r="20" fill="none" stroke={INK} strokeWidth="1" />
-          <line x1="60" y1="8" x2="60" y2="112" stroke={INK} strokeWidth="1" />
-          <line x1="8" y1="60" x2="112" y2="60" stroke={INK} strokeWidth="1" />
-          <line x1="23" y1="23" x2="97" y2="97" stroke={INK} strokeWidth="1" />
-          <line x1="97" y1="23" x2="23" y2="97" stroke={INK} strokeWidth="1" />
-        </svg>
+        {/* Faint radial motif — echoes Black Rock City's real layout, gap and all */}
+        <div style={{ display: 'flex', position: 'absolute', width: 820, height: 820, top: -80, left: 190, opacity: 0.1 }}>
+          <RadialPlayaMotif color={INK} />
+        </div>
 
         <div style={{ display: 'flex', fontSize: 88, fontWeight: 700, lineHeight: 1.05 }}>
           <span style={{ fontFamily: 'Arvo', color: INK }}>On-Playa&nbsp;</span>
