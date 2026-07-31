@@ -78,10 +78,6 @@ export default function HomePage() {
   const [checklistState,     setChecklistState]     = useState<ChecklistState | null>(null)
   const [checklistDismissed, setChecklistDismissed] = useState<boolean>(false)
   const [checklistLoading,   setChecklistLoading]   = useState(true)
-  // Hero tagline: random per page load, no tracking. Defaults to 'A' so the
-  // initial client render matches the server-rendered HTML (avoiding a
-  // hydration mismatch), then flips randomly right after mount.
-  const [tagline, setTagline] = useState<'A' | 'B'>('A')
 
   // ── Game refs ──────────────────────────────────────────────────────────────
   const heroRightRef = useRef<HTMLDivElement>(null)
@@ -99,10 +95,6 @@ export default function HomePage() {
   })
 
   // ── Data fetching ──────────────────────────────────────────────────────────
-  useEffect(() => {
-    setTagline(Math.random() < 0.5 ? 'A' : 'B')
-  }, [])
-
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     if (params.get('deleted') === 'true') {
@@ -570,20 +562,8 @@ export default function HomePage() {
               fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.02em',
               color: INK, margin: '0 0 18px',
             }}>
-              {tagline === 'A' ? (
-                <>
-                  Why let your stuff gather dust{' '}
-                  <span style={{ color: RUST }}>in storage</span>{' '}
-                  when it could be gathering dust{' '}
-                  <span style={{ color: RUST }}>on playa?</span>
-                </>
-              ) : (
-                <>
-                  Just because <span style={{ color: RUST }}>you're not going this year</span>{' '}
-                  doesn't mean{' '}
-                  <span style={{ color: RUST }}>your stuff can't.</span>
-                </>
-              )}
+              But the playa can only provide because{' '}
+              <span style={{ color: RUST }}>people provide.</span>
             </h1>
 
             <p style={{ fontSize: '1rem', color: INK_MID, lineHeight: 1.65, margin: '0 0 32px', fontWeight: 500 }}>
@@ -840,10 +820,7 @@ export default function HomePage() {
         <div style={{ maxWidth: '960px', margin: '0 auto' }}>
 
           {/* Header row */}
-          <div className="home-tab-row" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '24px', gap: '20px' }}>
-            <h2 style={{ fontFamily: "'Arvo', serif", fontSize: '1.3rem', fontWeight: 700, fontStyle: 'italic', color: INK }}>
-              The playa can only provide because people provide.
-            </h2>
+          <div className="home-tab-row" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-start', marginBottom: '24px', gap: '20px' }}>
             <div style={{ display: 'flex', border: `2px solid ${INK}`, flexShrink: 0 }}>
               {(['how', 'why'] as const).map((tab, i) => (
                 <button key={tab} onClick={() => setFeatureTab(tab)} style={{
@@ -890,7 +867,7 @@ export default function HomePage() {
                 { n: 'I',   title: 'Radical Interdependence',      body: 'Others may have what you need. You may have what others need. Turns out that\'s enough.' },
                 { n: 'II',  title: 'A Decommodification Modification',  body: 'Make it a year-round thing. Every shared item is one less online purchase.' },
                 { n: 'III', title: 'Lending is a Type of Gifting', body: 'You don\'t have to give it away. Let someone borrow it, and get it back after.' },
-                { n: 'IV',  title: 'Not Going This Year?',         body: 'Your gear still can. It\'s not meant to sit around in storage, let it be put to good use.' },
+                { n: 'IV',  title: 'Not Going This Year?',         body: 'Just because you\'re not doesn\'t mean your stuff can\'t. It does nobody any good in storage, let it be put to use.' },
               ].map(({ n, title, body }, i) => (
                 <div key={i} style={{
                   padding: '28px 26px', position: 'relative',
