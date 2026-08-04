@@ -27,6 +27,7 @@ Deno.serve(async (req) => {
         { count: feedbackSubmitted },
         { count: campClaims },
         recentLogins,
+        newSignupsList,
       ] = await Promise.all([
         // New signups, via auth.users.created_at (profiles has no created_at of its own)
         supabase.rpc('get_recent_signup_count', { since_time: iso }),
@@ -50,6 +51,8 @@ Deno.serve(async (req) => {
         supabase.from('camp_claim_requests').select('*', { count: 'exact', head: true }).gte('created_at', iso),
         // Recent logins via auth.users
         supabase.rpc('get_recent_login_count', { since_time: iso }),
+        // New signups' profiles, for linking out to them below the table
+        supabase.rpc('get_recent_signups', { since_time: iso }),
       ])
 
       // Tally visibility breakdown
@@ -72,6 +75,7 @@ Deno.serve(async (req) => {
         feedbackSubmitted: feedbackSubmitted ?? 0,
         campClaims: campClaims ?? 0,
         recentLogins: recentLogins.data ?? 0,
+        newSignupsList: newSignupsList.data ?? [],
       }
     }
 
@@ -90,6 +94,15 @@ Deno.serve(async (req) => {
   <tr style="background:#f9f9f9;"><td style="padding:4px 8px;color:#555;">Feedback submitted</td><td style="padding:4px 8px;font-weight:bold;">${stats.feedbackSubmitted}</td></tr>
   <tr><td style="padding:4px 8px;color:#555;">Camp claim requests</td><td style="padding:4px 8px;font-weight:bold;">${stats.campClaims}</td></tr>
 </table>
+${stats.newSignupsList.length > 0 ? `
+<p style="font-size:12px;color:#888;margin:8px 0 2px;">New signups:</p>
+<ul style="margin:0 0 8px;padding-left:18px;font-size:13px;">
+  ${stats.newSignupsList.map((u) =>
+    u.username
+      ? `<li><a href="https://theplayaprovides.com/profile/${u.username}" style="color:#1E8A82;">${u.username}</a></li>`
+      : `<li>${u.full_name ?? 'unnamed user'} (no username set)</li>`
+  ).join('')}
+</ul>` : ''}
 <p style="font-size:12px;color:#888;margin-top:8px;">
   Currently active loans: ${stats.loansActive} &nbsp;|&nbsp;
   Item visibility snapshot — public: ${vis['public'] ?? 0}, followers: ${vis['followers'] ?? 0}, campmates: ${vis['campmates'] ?? 0}, private: ${vis['private'] ?? 0}
