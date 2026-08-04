@@ -29,20 +29,28 @@ Deno.serve(async (req) => {
   try {
     const { user_id } = await req.json()
 
-    const { data: profile, error } = await supabase
+    // Atomic claim: the conditional UPDATE (only matches rows where
+    // welcome_email_sent_at is still null) doubles as the profile fetch.
+    // A plain select-then-later-update has a check-then-act race — two
+    // concurrent requests for the same user_id could both read null and
+    // both send. Postgres serializes concurrent UPDATEs to the same row,
+    // so only one caller can ever win this claim.
+    const { data: claimed, error: claimErr } = await supabase
       .from('profiles')
-      .select('username, preferred_name, email, contact_email, welcome_email_sent_at')
+      .update({ welcome_email_sent_at: new Date().toISOString() })
       .eq('id', user_id)
-      .single()
+      .is('welcome_email_sent_at', null)
+      .select('username, preferred_name, email, contact_email')
+      .maybeSingle()
 
-    if (error || !profile) throw new Error(error?.message ?? 'Profile not found')
-    if (profile.welcome_email_sent_at) {
+    if (claimErr) throw claimErr
+    if (!claimed) {
       return new Response(JSON.stringify({ ok: true, skipped: 'already sent' }), { headers: corsHeaders, status: 200 })
     }
 
-    const usernameRaw = profile.username
-    const displayNameRaw = profile.preferred_name || profile.username
-    const contactEmailRaw = profile.contact_email || profile.email
+    const usernameRaw = claimed.username
+    const displayNameRaw = claimed.preferred_name || claimed.username
+    const contactEmailRaw = claimed.contact_email || claimed.email
 
     const username = escapeHtml(usernameRaw)
     const displayName = escapeHtml(displayNameRaw)
@@ -147,24 +155,32 @@ Deno.serve(async (req) => {
   </table>
 </div>`
 
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        from: 'The Playa Provides <hello@theplayaprovides.com>',
-        to: contactEmailRaw,
-        reply_to: 'alex@theplayaprovides.com',
-        subject: 'Welcome to The Playa Provides!',
-        html,
-      }),
-    })
+    try {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: 'The Playa Provides <hello@theplayaprovides.com>',
+          to: contactEmailRaw,
+          reply_to: 'alex@theplayaprovides.com',
+          subject: 'Welcome to The Playa Provides!',
+          html,
+        }),
+      })
 
-    if (!res.ok) throw new Error(`Resend error: ${await res.text()}`)
-
-    await supabase
-      .from('profiles')
-      .update({ welcome_email_sent_at: new Date().toISOString() })
-      .eq('id', user_id)
+      if (!res.ok) throw new Error(`Resend error: ${await res.text()}`)
+    } catch (sendErr) {
+      // The claim already flipped welcome_email_sent_at to non-null above.
+      // If the send itself failed, roll that back to null so a legitimate
+      // retry (e.g. signup flow retrying after a transient Resend outage)
+      // isn't permanently locked out by this attempt's failure.
+      const { error: rollbackErr } = await supabase
+        .from('profiles')
+        .update({ welcome_email_sent_at: null })
+        .eq('id', user_id)
+      if (rollbackErr) console.error('send-welcome-email: failed to roll back welcome_email_sent_at claim', rollbackErr)
+      throw sendErr
+    }
 
     return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders, status: 200 })
   } catch (err) {
