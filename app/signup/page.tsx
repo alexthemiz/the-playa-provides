@@ -40,13 +40,20 @@ export default function SignUpPage() {
     const { data: existing } = await supabase.from('profiles').select('id').eq('username', username.toLowerCase().trim()).maybeSingle();
     if (existing) { setUsernameError('This username is already taken.'); setLoading(false); return; }
 
-    const { error } = await supabase.auth.signUp({
+    const referredBy = new URLSearchParams(window.location.search).get('ref');
+
+    const { data, error } = await supabase.auth.signUp({
       email, password,
-      options: { data: { username: username.toLowerCase().trim(), preferred_name: preferredName, full_name: fullName.trim(), email } },
+      options: { data: { username: username.toLowerCase().trim(), preferred_name: preferredName, full_name: fullName.trim(), email, referred_by: referredBy } },
     });
 
     if (error) { setMessage(`Error: ${error.message}`); setLoading(false); }
-    else { setMessage('Account created! Redirecting…'); setTimeout(() => { window.location.href = '/profile/' + username.toLowerCase().trim(); }, 1500); }
+    else {
+      if (data.user?.id) {
+        supabase.functions.invoke('send-welcome-email', { body: { user_id: data.user.id } }).catch(() => {});
+      }
+      setMessage('Account created! Redirecting…'); setTimeout(() => { window.location.href = '/profile/' + username.toLowerCase().trim(); }, 1500);
+    }
   };
 
   return (
