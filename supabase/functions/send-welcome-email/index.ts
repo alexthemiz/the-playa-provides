@@ -31,11 +31,14 @@ Deno.serve(async (req) => {
 
     const { data: profile, error } = await supabase
       .from('profiles')
-      .select('username, preferred_name, email, contact_email')
+      .select('username, preferred_name, email, contact_email, welcome_email_sent_at')
       .eq('id', user_id)
       .single()
 
     if (error || !profile) throw new Error(error?.message ?? 'Profile not found')
+    if (profile.welcome_email_sent_at) {
+      return new Response(JSON.stringify({ ok: true, skipped: 'already sent' }), { headers: corsHeaders, status: 200 })
+    }
 
     const usernameRaw = profile.username
     const displayNameRaw = profile.preferred_name || profile.username
@@ -157,6 +160,11 @@ Deno.serve(async (req) => {
     })
 
     if (!res.ok) throw new Error(`Resend error: ${await res.text()}`)
+
+    await supabase
+      .from('profiles')
+      .update({ welcome_email_sent_at: new Date().toISOString() })
+      .eq('id', user_id)
 
     return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders, status: 200 })
   } catch (err) {
