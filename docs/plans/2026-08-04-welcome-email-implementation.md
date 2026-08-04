@@ -81,8 +81,8 @@ git commit -m "feat: add referred_by column for lean signup referral attribution
 **Step 1: Copy the already-generated PNGs into the repo**
 
 These were already generated during design (via a throwaway `next/og` route reusing `components/RadialPlayaMotif.tsx`, matching the pattern in `app/opengraph-image.tsx`) and are sitting in the scratchpad at:
-- `C:\Users\alexm\AppData\Local\Temp\claude\C--Users-alexm-Documents-the-playa-provides\5cd765bf-5fa3-4bde-b8b3-43ed9388ca8b\scratchpad\email-header.png` (600×150, paper background, ink/teal wordmark)
-- `C:\Users\alexm\AppData\Local\Temp\claude\C--Users-alexm-Documents-the-playa-provides\5cd765bf-5fa3-4bde-b8b3-43ed9388ca8b\scratchpad\email-footer.png` (600×120, dark ink background, paper/teal wordmark)
+- `C:/Users/alexm/AppData/Local/Temp/claude/C--Users-alexm-Documents-the-playa-provides/5cd765bf-5fa3-4bde-b8b3-43ed9388ca8b/scratchpad/email-header.png` (600×150, paper background, ink/teal wordmark)
+- `C:/Users/alexm/AppData/Local/Temp/claude/C--Users-alexm-Documents-the-playa-provides/5cd765bf-5fa3-4bde-b8b3-43ed9388ca8b/scratchpad/email-footer.png` (600×120, dark ink background, paper/teal wordmark)
 
 If this plan is executed in a fresh session/worktree where that scratchpad path no longer exists, regenerate them: create a temporary `app/temp-email-header/route.tsx` and `app/temp-email-footer/route.tsx` using `next/og`'s `ImageResponse` (copy the pattern from `app/opengraph-image.tsx`, importing `RadialPlayaMotif`), temporarily whitelist the route path in `middleware.ts`'s `isPublicRoute` (get explicit confirmation first — `middleware.ts` is a protected file per CLAUDE.md), `curl` the route to save the PNG, then **immediately revert** the `middleware.ts` change and delete the temp route.
 
