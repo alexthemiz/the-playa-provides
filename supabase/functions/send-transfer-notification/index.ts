@@ -7,6 +7,15 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+function escapeHtml(input: string): string {
+  return input
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -20,6 +29,25 @@ serve(async (req: Request) => {
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+
+    // Both notification types are owner actions — caller must be the
+    // transfer's owner. This endpoint runs with verify_jwt off, so the
+    // auth check has to happen in code.
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      })
+    }
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user: callerUser }, error: jwtError } = await admin.auth.getUser(token)
+    if (jwtError || !callerUser) {
+      return new Response(JSON.stringify({ error: 'Invalid or expired token' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      })
+    }
 
     // Fetch transfer with related data
     const { data: transfer, error } = await admin
@@ -35,8 +63,15 @@ serve(async (req: Request) => {
 
     if (error || !transfer) throw new Error('Transfer not found')
 
-    const ownerName = transfer.owner?.preferred_name || transfer.owner?.username || 'Someone'
-    const itemName = transfer.gear_items?.item_name || 'an item'
+    if (callerUser.id !== transfer.owner_id) {
+      return new Response(JSON.stringify({ error: 'Unauthorized: caller is not the transfer owner' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 403,
+      })
+    }
+
+    const ownerName = escapeHtml(transfer.owner?.preferred_name || transfer.owner?.username || 'Someone')
+    const itemName = escapeHtml(transfer.gear_items?.item_name || 'an item')
 
     // Resolve recipient email
     let recipientEmail = transfer.recipient?.contact_email

@@ -7,18 +7,45 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+function escapeHtml(input: string): string {
+  return input
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const { item_id, poster_id } = await req.json()
+    const { item_id } = await req.json()
 
     const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+
+    // Caller must be the item's actual owner — this endpoint runs with
+    // verify_jwt off, so the auth check has to happen in code.
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      })
+    }
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user: callerUser }, error: jwtError } = await admin.auth.getUser(token)
+    if (jwtError || !callerUser) {
+      return new Response(JSON.stringify({ error: 'Invalid or expired token' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      })
+    }
 
     // Fetch the item and poster
     const { data: item, error: itemErr } = await admin
@@ -29,6 +56,18 @@ serve(async (req: Request) => {
 
     if (itemErr || !item) throw new Error('Item not found')
 
+    if (callerUser.id !== item.user_id) {
+      return new Response(JSON.stringify({ error: 'Unauthorized: caller does not own this item' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 403,
+      })
+    }
+
+    // Followers are looked up against the item's actual owner (never a
+    // client-supplied poster_id) so this can't be used to mass-email an
+    // arbitrary user's follower list.
+    const poster_id = item.user_id
+
     // Don't email followers about items they can't actually see
     if (item.availability_status === 'Not Available' || !['public', 'followers', 'followers_and_campmates'].includes(item.visibility)) {
       return new Response(JSON.stringify({ ok: true, skipped: 'item not visible to followers' }), {
@@ -38,8 +77,8 @@ serve(async (req: Request) => {
     }
 
     const poster = (item as any).profiles
-    const posterName = poster?.preferred_name || poster?.username || 'Someone'
-    const itemName = item.item_name || 'a new item'
+    const posterName = escapeHtml(poster?.preferred_name || poster?.username || 'Someone')
+    const itemName = escapeHtml(item.item_name || 'a new item')
 
     // Fetch followers who have email opt-in enabled
     const { data: followers, error: followErr } = await admin

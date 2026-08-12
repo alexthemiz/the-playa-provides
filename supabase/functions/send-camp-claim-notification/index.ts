@@ -7,6 +7,15 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+function escapeHtml(input: string): string {
+  return input
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -19,6 +28,30 @@ serve(async (req: Request) => {
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+
+    // Caller must be the claimant they claim to be — this endpoint runs
+    // with verify_jwt off, so the auth check has to happen in code.
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      })
+    }
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user: callerUser }, error: jwtError } = await admin.auth.getUser(token)
+    if (jwtError || !callerUser) {
+      return new Response(JSON.stringify({ error: 'Invalid or expired token' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      })
+    }
+    if (callerUser.id !== user_id) {
+      return new Response(JSON.stringify({ error: 'Unauthorized: user_id mismatch' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 403,
+      })
+    }
 
     // Fetch the camp
     const { data: camp, error: campErr } = await admin
@@ -63,9 +96,9 @@ serve(async (req: Request) => {
         html: `
           <div style="font-family: sans-serif; color: #333; max-width: 600px;">
             <h1 style="color: #C08261;">New Camp Claim Request</h1>
-            <p><strong>${claimantName}</strong> (${claimantEmail || 'no email'}) has requested to claim <strong>${campName}</strong>.</p>
-            ${role ? `<p><strong>Role:</strong> ${role}</p>` : ''}
-            ${years ? `<p><strong>Years attended:</strong> ${years}</p>` : ''}
+            <p><strong>${escapeHtml(claimantName)}</strong> (${escapeHtml(claimantEmail || 'no email')}) has requested to claim <strong>${escapeHtml(campName)}</strong>.</p>
+            ${role ? `<p><strong>Role:</strong> ${escapeHtml(role)}</p>` : ''}
+            ${years ? `<p><strong>Years attended:</strong> ${escapeHtml(years)}</p>` : ''}
             <p>
               <a href="https://supabase.com/dashboard/project/bklycpitofjrjhizttny/editor" style="color: #C08261;">
                 Review in Supabase dashboard →

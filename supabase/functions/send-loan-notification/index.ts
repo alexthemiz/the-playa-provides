@@ -7,6 +7,15 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+function escapeHtml(input: string): string {
+  return input
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -21,6 +30,25 @@ serve(async (req: Request) => {
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
+    // This endpoint runs with verify_jwt off, so the auth check has to
+    // happen in code — who's allowed to trigger it depends on `type`,
+    // checked once the loan (and its owner/borrower ids) is loaded below.
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      })
+    }
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user: callerUser }, error: jwtError } = await admin.auth.getUser(token)
+    if (jwtError || !callerUser) {
+      return new Response(JSON.stringify({ error: 'Invalid or expired token' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      })
+    }
+
     const { data: loan, error } = await admin
       .from('item_loans')
       .select(`
@@ -34,9 +62,17 @@ serve(async (req: Request) => {
 
     if (error || !loan) throw new Error('Loan not found')
 
-    const ownerName = loan.owner?.preferred_name || loan.owner?.username || 'Someone'
-    const borrowerName = loan.borrower?.preferred_name || loan.borrower?.username || 'Someone'
-    const itemName = loan.gear_items?.item_name || 'an item'
+    const expectedCaller = type === 'borrower_confirmed_return' ? loan.borrower_id : loan.owner_id
+    if (callerUser.id !== expectedCaller) {
+      return new Response(JSON.stringify({ error: 'Unauthorized: caller is not the expected party for this notification' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 403,
+      })
+    }
+
+    const ownerName = escapeHtml(loan.owner?.preferred_name || loan.owner?.username || 'Someone')
+    const borrowerName = escapeHtml(loan.borrower?.preferred_name || loan.borrower?.username || 'Someone')
+    const itemName = escapeHtml(loan.gear_items?.item_name || 'an item')
 
     const formatDate = (d: string | null) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Not specified'
 
@@ -45,7 +81,7 @@ serve(async (req: Request) => {
         <tr><td style="padding: 6px 0; color: #888; font-size: 0.85em;">Return by</td><td style="padding: 6px 0;">${formatDate(loan.return_by)}</td></tr>
         <tr><td style="padding: 6px 0; color: #888; font-size: 0.85em;">Damage fee</td><td style="padding: 6px 0;">${loan.damage_agreement != null ? `$${loan.damage_agreement}` : 'Not specified'}</td></tr>
         <tr><td style="padding: 6px 0; color: #888; font-size: 0.85em;">Loss fee</td><td style="padding: 6px 0;">${loan.loss_agreement != null ? `$${loan.loss_agreement}` : 'Not specified'}</td></tr>
-        ${loan.notes ? `<tr><td style="padding: 6px 0; color: #888; font-size: 0.85em;">Notes</td><td style="padding: 6px 0;">${loan.notes}</td></tr>` : ''}
+        ${loan.notes ? `<tr><td style="padding: 6px 0; color: #888; font-size: 0.85em;">Notes</td><td style="padding: 6px 0;">${escapeHtml(loan.notes)}</td></tr>` : ''}
       </table>
     `
 

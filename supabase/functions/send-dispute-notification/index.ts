@@ -7,6 +7,15 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+function escapeHtml(input: string): string {
+  return input
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -19,6 +28,24 @@ serve(async (req: Request) => {
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+
+    // Caller must be a party to the loan — this endpoint runs with
+    // verify_jwt off, so the auth check has to happen in code.
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      })
+    }
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user: callerUser }, error: jwtError } = await admin.auth.getUser(token)
+    if (jwtError || !callerUser) {
+      return new Response(JSON.stringify({ error: 'Invalid or expired token' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      })
+    }
 
     const { data: loan, error } = await admin
       .from('item_loans')
@@ -33,9 +60,16 @@ serve(async (req: Request) => {
 
     if (error || !loan) throw new Error('Loan not found')
 
-    const ownerName = loan.owner?.preferred_name || loan.owner?.username || 'Unknown'
-    const borrowerName = loan.borrower?.preferred_name || loan.borrower?.username || 'Unknown'
-    const itemName = loan.gear_items?.item_name || 'an item'
+    if (callerUser.id !== loan.owner_id && callerUser.id !== loan.borrower_id) {
+      return new Response(JSON.stringify({ error: 'Unauthorized: caller is not a party to this loan' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 403,
+      })
+    }
+
+    const ownerName = escapeHtml(loan.owner?.preferred_name || loan.owner?.username || 'Unknown')
+    const borrowerName = escapeHtml(loan.borrower?.preferred_name || loan.borrower?.username || 'Unknown')
+    const itemName = escapeHtml(loan.gear_items?.item_name || 'an item')
 
     const html = `
       <div style="font-family: sans-serif; color: #333; max-width: 600px;">
@@ -48,7 +82,7 @@ serve(async (req: Request) => {
         </table>
         <div style="background: #fef2f2; border: 1px solid #fecaca; padding: 16px; border-radius: 8px; margin: 16px 0;">
           <p style="margin: 0; font-size: 0.9em; color: #7f1d1d;"><strong>Dispute message:</strong></p>
-          <p style="margin: 8px 0 0; white-space: pre-wrap;">${dispute_message}</p>
+          <p style="margin: 8px 0 0; white-space: pre-wrap;">${escapeHtml(dispute_message || '')}</p>
         </div>
         <p style="font-size: 0.8em; color: #999; margin-top: 24px;">Sent via <a href="https://theplayaprovides.com" style="color: #C08261;">The Playa Provides</a></p>
       </div>

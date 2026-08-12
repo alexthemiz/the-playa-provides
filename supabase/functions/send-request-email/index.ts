@@ -23,15 +23,49 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { ownerId, message, itemName, requesterName, requesterUsername, requesterEmail } = await req.json()
+    const { ownerId, requesterId, message, itemName, requesterEmail } = await req.json()
 
     const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
-    // 2. Look up owner's contact email from their profile
     const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
+    // Caller must be the requester they claim to be — this endpoint runs
+    // with verify_jwt off, so the auth check has to happen in code.
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      })
+    }
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user: callerUser }, error: jwtError } = await adminClient.auth.getUser(token)
+    if (jwtError || !callerUser) {
+      return new Response(JSON.stringify({ error: 'Invalid or expired token' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      })
+    }
+    if (callerUser.id !== requesterId) {
+      return new Response(JSON.stringify({ error: 'Unauthorized: requesterId mismatch' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 403,
+      })
+    }
+
+    // Requester display name/username come from their own profile, never
+    // from the request body — prevents identity spoofing in the email.
+    const { data: requesterProfile } = await adminClient
+      .from('profiles')
+      .select('username, preferred_name')
+      .eq('id', requesterId)
+      .single()
+    const requesterName = requesterProfile?.preferred_name || requesterProfile?.username || 'A community member'
+    const requesterUsername = requesterProfile?.username || ''
+
+    // 2. Look up owner's contact email from their profile
     const { data: ownerProfile } = await adminClient
       .from('profiles')
       .select('contact_email, preferred_name')

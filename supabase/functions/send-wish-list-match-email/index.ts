@@ -7,13 +7,22 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+function escapeHtml(input: string): string {
+  return input
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const { recipientId, senderName, senderUsername, senderId, selectedWishItems, note, inventoryItems: rawInventoryItems } = await req.json()
+    const { recipientId, senderId, selectedWishItems, note, inventoryItems: rawInventoryItems } = await req.json()
     const inventoryItems = rawInventoryItems || []
 
     const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
@@ -21,6 +30,30 @@ serve(async (req: Request) => {
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
     const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+
+    // Caller must be the sender they claim to be — this endpoint runs with
+    // verify_jwt off, so the auth check has to happen in code.
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      })
+    }
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user: callerUser }, error: jwtError } = await adminClient.auth.getUser(token)
+    if (jwtError || !callerUser) {
+      return new Response(JSON.stringify({ error: 'Invalid or expired token' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      })
+    }
+    if (callerUser.id !== senderId) {
+      return new Response(JSON.stringify({ error: 'Unauthorized: senderId mismatch' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 403,
+      })
+    }
 
     // Look up recipient's contact email and name
     const { data: recipientProfile } = await adminClient
@@ -30,7 +63,7 @@ serve(async (req: Request) => {
       .single()
 
     let recipientEmail = recipientProfile?.contact_email
-    const recipientName = recipientProfile?.preferred_name || 'there'
+    const recipientName = escapeHtml(recipientProfile?.preferred_name || 'there')
 
     // Fall back to auth email
     if (!recipientEmail) {
@@ -42,10 +75,13 @@ serve(async (req: Request) => {
       throw new Error('Could not find recipient email')
     }
 
+    // Sender display info comes from their own profile, never from the
+    // request body — a caller who's authenticated as senderId still
+    // shouldn't be able to put arbitrary text in the "From" line.
     let senderEmail: string | undefined
     const { data: senderProfileData } = await adminClient
       .from('profiles')
-      .select('contact_email')
+      .select('contact_email, username, preferred_name')
       .eq('id', senderId)
       .single()
     senderEmail = senderProfileData?.contact_email
@@ -53,10 +89,12 @@ serve(async (req: Request) => {
       const { data: { user: senderUser } } = await adminClient.auth.admin.getUserById(senderId)
       senderEmail = senderUser?.email
     }
+    const senderName = escapeHtml(senderProfileData?.preferred_name || senderProfileData?.username || 'Someone')
+    const senderUsername = escapeHtml(senderProfileData?.username || '')
 
     const wishListHtml = (selectedWishItems as { name: string; term: string }[])
       .map(({ name, term }) =>
-        `<li style="margin: 4px 0;">${name} - To ${term}</li>`
+        `<li style="margin: 4px 0;">${escapeHtml(name)} - To ${escapeHtml(term)}</li>`
       ).join('')
 
     const inventoryHtml = (inventoryItems as { name: string; url: string; availStatus: string }[])
@@ -64,13 +102,14 @@ serve(async (req: Request) => {
         const label = availStatus === 'Available to Borrow' ? 'To borrow'
           : availStatus === 'Available to Keep' ? 'To keep'
           : '';
-        return `<li style="margin: 4px 0;"><a href="${url}" style="color: #C08261; font-weight: bold;">${name}</a>${label ? ` - ${label}` : ''}</li>`;
+        const safeUrl = typeof url === 'string' && url.startsWith('https://theplayaprovides.com/') ? url : 'https://theplayaprovides.com/find-items'
+        return `<li style="margin: 4px 0;"><a href="${safeUrl}" style="color: #C08261; font-weight: bold;">${escapeHtml(name)}</a>${label ? ` - ${label}` : ''}</li>`;
       }).join('')
 
     const noteHtml = note
       ? `<div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 16px 0;">
            <p style="margin: 0;"><strong>Their note:</strong></p>
-           <p style="margin: 8px 0 0; font-style: italic;">"${note}"</p>
+           <p style="margin: 8px 0 0; font-style: italic;">"${escapeHtml(note)}"</p>
          </div>`
       : ''
 
