@@ -33,8 +33,8 @@ export default function TransferModal({ item, ownerId, onClose, onSuccess }: Pro
       const byContact = await supabase.from('profiles').select('id, username, preferred_name').ilike('contact_email', q).maybeSingle()
       data = byContact.data
       if (!data) {
-        const byLogin = await supabase.from('profiles').select('id, username, preferred_name').ilike('email', q).or('contact_email.is.null,contact_email.eq.').maybeSingle()
-        data = byLogin.data
+        const byLogin = await supabase.rpc('find_profile_by_login_email', { p_email: q }).maybeSingle()
+        data = byLogin.data as { id: string; username: string; preferred_name: string | null } | null
       }
     } else {
       const byUsername = await supabase.from('profiles').select('id, username, preferred_name').eq('username', q).maybeSingle()

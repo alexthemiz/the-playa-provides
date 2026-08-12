@@ -57,7 +57,7 @@ export default function SettingsPage() {
         const activeUser = session?.user;
         if (activeUser) {
           setUser(activeUser);
-          const { data: pData } = await supabase.from('profiles').select('*').eq('id', activeUser.id).maybeSingle();
+          const { data: pData } = await supabase.from('profiles').select('id, full_name, preferred_name, username, pronouns, contact_email, city, state, zip_code, notify_new_items_email, has_seen_welcome').eq('id', activeUser.id).maybeSingle();
           if (pData) setProfile({ ...pData });
           const { data: lData } = await supabase.from('locations').select('*').eq('user_id', activeUser.id).order('created_at', { ascending: true });
           if (lData) setLocations(lData);
