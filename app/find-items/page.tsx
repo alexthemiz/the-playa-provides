@@ -158,7 +158,8 @@ export default function FindItemsPage() {
     setLoading(true);
     try {
       const { data: gear, error: gearError } = await supabase
-        .from('gear_items').select('*').eq('owner_deleted', false);
+        .from('gear_items').select('*').eq('owner_deleted', false)
+        .order('created_at', { ascending: false });
       if (gearError) throw gearError;
       const userIds     = [...new Set(gear.map((i: any) => i.user_id))];
       const locationIds = [...new Set(gear.map((i: any) => i.location_id).filter((id: any) => id))];
