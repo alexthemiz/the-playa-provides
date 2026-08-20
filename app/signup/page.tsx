@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import TurnstileWidget, { TurnstileWidgetHandle } from '@/components/TurnstileWidget';
 
 const INK      = '#1C1610'
 const INK_LITE = '#9A8878'
@@ -23,6 +24,8 @@ export default function SignUpPage() {
   const [message,        setMessage]        = useState('');
   const [usernameError,  setUsernameError]  = useState('');
   const [acceptedTerms,  setAcceptedTerms]  = useState(false);
+  const [captchaToken,   setCaptchaToken]   = useState('');
+  const turnstileRef = useRef<TurnstileWidgetHandle>(null);
 
   const handleGoogleSignIn = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
@@ -35,6 +38,7 @@ export default function SignUpPage() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!acceptedTerms) { setMessage('Error: You must accept the terms to continue.'); return; }
+    if (!captchaToken) { setMessage('Error: Please complete the verification check.'); return; }
     setLoading(true); setMessage(''); setUsernameError('');
 
     const { data: existing } = await supabase.from('profiles').select('id').eq('username', username.toLowerCase().trim()).maybeSingle();
@@ -44,10 +48,16 @@ export default function SignUpPage() {
 
     const { data, error } = await supabase.auth.signUp({
       email, password,
-      options: { data: { username: username.toLowerCase().trim(), preferred_name: preferredName, full_name: fullName.trim(), email, referred_by: referredBy } },
+      options: {
+        data: { username: username.toLowerCase().trim(), preferred_name: preferredName, full_name: fullName.trim(), email, referred_by: referredBy },
+        captchaToken,
+      },
     });
 
-    if (error) { setMessage(`Error: ${error.message}`); setLoading(false); }
+    if (error) {
+      setMessage(`Error: ${error.message}`); setLoading(false);
+      setCaptchaToken(''); turnstileRef.current?.reset();
+    }
     else {
       if (data.user?.id) {
         supabase.functions.invoke('send-welcome-email', { body: { user_id: data.user.id } }).catch(() => {});
@@ -130,10 +140,12 @@ export default function SignUpPage() {
             </label>
           </div>
 
+          <TurnstileWidget ref={turnstileRef} onVerify={setCaptchaToken} onExpire={() => setCaptchaToken('')} />
+
           <button
             type="submit"
-            disabled={loading || !acceptedTerms}
-            style={{ ...ctaStyle, opacity: loading || !acceptedTerms ? 0.4 : 1, cursor: loading || !acceptedTerms ? 'not-allowed' : 'pointer' }}
+            disabled={loading || !acceptedTerms || !captchaToken}
+            style={{ ...ctaStyle, opacity: loading || !acceptedTerms || !captchaToken ? 0.4 : 1, cursor: loading || !acceptedTerms || !captchaToken ? 'not-allowed' : 'pointer' }}
           >
             {loading ? 'Creating Account…' : 'Sign Up →'}
           </button>

@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import TurnstileWidget, { TurnstileWidgetHandle } from '@/components/TurnstileWidget'
 
 const INK      = '#1C1610'
 const INK_MID  = '#4A3828'
@@ -20,33 +21,38 @@ export default function Login() {
   const [message,  setMessage]  = useState('')
   const [mode,      setMode]      = useState<'login' | 'forgot'>('login')
   const [resetSent, setResetSent] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState('')
+  const turnstileRef = useRef<TurnstileWidgetHandle>(null)
   const router = useRouter()
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!captchaToken) { setMessage('Error: Please complete the verification check.'); return }
     setLoading(true); setMessage('')
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) { setMessage(`Error: ${error.message}`) }
+      const { error } = await supabase.auth.signInWithPassword({ email, password, options: { captchaToken } })
+      if (error) { setMessage(`Error: ${error.message}`); setCaptchaToken(''); turnstileRef.current?.reset() }
       else { router.refresh(); setTimeout(() => router.push('/inventory'), 150) }
-    } catch { setMessage('An unexpected error occurred.') }
+    } catch { setMessage('An unexpected error occurred.'); setCaptchaToken(''); turnstileRef.current?.reset() }
     finally { setLoading(false) }
   }
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!captchaToken) { setMessage('Error: Please complete the verification check.'); return }
     setLoading(true); setMessage('')
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
+        captchaToken,
       })
-      if (error) { setMessage(`Error: ${error.message}`) }
+      if (error) { setMessage(`Error: ${error.message}`); setCaptchaToken(''); turnstileRef.current?.reset() }
       else { setResetSent(true) }
-    } catch { setMessage('An unexpected error occurred.') }
+    } catch { setMessage('An unexpected error occurred.'); setCaptchaToken(''); turnstileRef.current?.reset() }
     finally { setLoading(false) }
   }
 
-  const backToSignIn = () => { setMode('login'); setResetSent(false); setMessage('') }
+  const backToSignIn = () => { setMode('login'); setResetSent(false); setMessage(''); setCaptchaToken('') }
 
   const handleGoogleSignIn = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
@@ -103,7 +109,9 @@ export default function Login() {
                 <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required style={inputStyle} />
               </div>
 
-              <button type="submit" disabled={loading} style={{ ...ctaStyle, opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer', marginTop: '4px' }}>
+              <TurnstileWidget ref={turnstileRef} onVerify={setCaptchaToken} onExpire={() => setCaptchaToken('')} />
+
+              <button type="submit" disabled={loading || !captchaToken} style={{ ...ctaStyle, opacity: loading || !captchaToken ? 0.6 : 1, cursor: loading || !captchaToken ? 'not-allowed' : 'pointer', marginTop: '4px' }}>
                 {loading ? 'Signing in…' : 'Sign In →'}
               </button>
             </form>
@@ -125,7 +133,9 @@ export default function Login() {
                 <input type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} required style={inputStyle} />
               </div>
 
-              <button type="submit" disabled={loading} style={{ ...ctaStyle, opacity: loading ? 0.6 : 1, cursor: loading ? 'not-allowed' : 'pointer', marginTop: '4px' }}>
+              <TurnstileWidget ref={turnstileRef} onVerify={setCaptchaToken} onExpire={() => setCaptchaToken('')} />
+
+              <button type="submit" disabled={loading || !captchaToken} style={{ ...ctaStyle, opacity: loading || !captchaToken ? 0.6 : 1, cursor: loading || !captchaToken ? 'not-allowed' : 'pointer', marginTop: '4px' }}>
                 {loading ? 'Sending…' : 'Send Reset Link →'}
               </button>
             </form>
