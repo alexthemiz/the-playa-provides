@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
-import SubmitCampModal from '@/components/SubmitCampModal'
 import ChecklistBox, { type ChecklistState } from '@/components/ChecklistBox'
 
 // ── Design tokens ────────────────────────────────────────────────────────────
@@ -20,7 +19,6 @@ const RUST     = '#C24820'
 const RUST_LT  = '#F5E0D8'
 const MUSTARD  = '#D4A020'
 const TRIPTYCH_MIN_HEIGHT = '430px'
-const RESOURCES_MIN_HEIGHT = '387px'
 
 const CATEGORY_EMOJI: Record<string, string> = {
   'Bikes & Transport':  '🚲',
@@ -72,7 +70,6 @@ export default function HomePage() {
   const [gameRunning,     setGameRunning]     = useState(false)
   const [showDeletedBanner, setShowDeletedBanner] = useState(false)
   const [featureTab,      setFeatureTab]      = useState<'how' | 'why'>('how')
-  const [submitCampOpen,  setSubmitCampOpen]  = useState(false)
   const [currentUsername, setCurrentUsername] = useState<string | null>(null)
   const [currentUserId,      setCurrentUserId]      = useState<string | null>(null)
   const [checklistState,     setChecklistState]     = useState<ChecklistState | null>(null)
@@ -886,49 +883,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── SECTION RULE ─────────────────────────────────────────────────── */}
-      <hr style={{ border: 'none', borderTop: `1.5px solid ${INK}`, margin: 0 }} />
-
-      {/* ── RESOURCES ────────────────────────────────────────────────────── */}
-      <section className="rsp-px" style={{ backgroundColor: PAPER_DK, paddingTop: '48px', paddingBottom: '52px', minHeight: RESOURCES_MIN_HEIGHT, display: 'flex', flexDirection: 'column' as const, justifyContent: 'center' }}>
-        <style>{`
-          .resources-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
-          .resources-col { display: flex; flex-direction: column; align-items: center; }
-          .resources-btn { width: 190px; box-sizing: border-box; padding: 13px 12px; font-weight: 700; font-size: 0.9rem; border: 2px solid ${INK}; box-shadow: 3px 3px 0 ${INK}; white-space: nowrap; margin-top: auto; display: inline-block; text-align: center; }
-          @media (max-width: 640px) {
-            .resources-grid { grid-template-columns: 1fr; gap: 28px; }
-          }
-        `}</style>
-        <div style={{ maxWidth: '780px', margin: '0 auto' }}>
-          <h2 style={{ fontFamily: "'Arvo', serif", fontSize: '1.5rem', fontWeight: 700, fontStyle: 'italic', color: INK, marginBottom: '24px', textAlign: 'center' as const }}>
-            2026 On-Playa Resources
-          </h2>
-          <div className="resources-grid">
-            <div className="resources-col">
-              <p style={{ color: INK_MID, fontSize: '1rem', margin: '0 0 16px', lineHeight: 1.65, fontWeight: 500 }}>
-                Camps providing services like compost collection, bike repair, can crushing, etc.
-              </p>
-              <Link href="/resources" className="resources-btn" style={{
-                backgroundColor: PAPER_LT, color: INK, textDecoration: 'none', display: 'inline-block',
-              }}>
-                Browse Directory →
-              </Link>
-            </div>
-            <div className="resources-col">
-              <p style={{ color: INK_MID, fontSize: '1rem', margin: '0 0 16px', lineHeight: 1.65, fontWeight: 500 }}>
-                Is that you? Are you providing some form of community service at this year?
-              </p>
-              <button onClick={() => setSubmitCampOpen(true)} className="resources-btn" style={{
-                backgroundColor: TEAL, color: '#fff', cursor: 'pointer', fontFamily: 'inherit',
-              }}>
-                Submit Your Camp →
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {submitCampOpen && <SubmitCampModal onClose={() => setSubmitCampOpen(false)} />}
     </div>
   )
 }
