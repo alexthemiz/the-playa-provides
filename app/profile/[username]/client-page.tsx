@@ -1033,9 +1033,13 @@ export default function PublicProfilePage() {
               </div>
             ) : (
               <div>
-                {affiliations.filter((a: any) => a.year !== 2027).length > 0 ? (
+                {/* A camp-less row (e.g. a past year's "no"/"maybe" attending answer
+                    with no camp ever chosen) has no chip to show here, so it's
+                    excluded entirely rather than rendering a dangling "YEAR:" label
+                    with nothing next to it. */}
+                {affiliations.filter((a: any) => a.year !== 2027 && (a.camp_id || a.is_open_camping)).length > 0 ? (
                   <div style={{ display: 'flex', flexWrap: 'wrap' as const, rowGap: '12px', columnGap: '22px' }}>
-                    {affiliations.filter((aff: any) => aff.year !== 2027).map((aff: any) => {
+                    {affiliations.filter((aff: any) => aff.year !== 2027 && (aff.camp_id || aff.is_open_camping)).map((aff: any) => {
                       const campName = (aff.camps as any)?.display_name ?? null;
                       const campSlug = (aff.camps as any)?.slug ?? null;
                       return (
