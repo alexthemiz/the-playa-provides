@@ -379,8 +379,20 @@ export default function PublicProfilePage() {
         .map(r => r.matchId as string)
     );
 
-    // Delete every existing row that's either removed entirely or changed (changed ones get reinserted below).
-    const idsToDelete = affiliations.filter((a: any) => !unchangedIds.has(a.id)).map((a: any) => a.id);
+    // Rows this form actually manages: the year=2027 slot (always draft2027's, even
+    // camp-less — "no"/TBD are valid 2027 answers) plus any row with a camp or open
+    // camping (what "Previous Years" can represent). A camp-less non-2027 row (e.g. an
+    // old year=2026 "yes/maybe/no" answer with no camp ever chosen) has no shape this
+    // form can produce, so it's excluded here — never a delete candidate, left as
+    // untouched historical data instead of being wiped on every unrelated save.
+    const manageableIds = new Set(
+      affiliations
+        .filter((a: any) => a.year === 2027 || a.camp_id || a.is_open_camping)
+        .map((a: any) => a.id)
+    );
+
+    // Delete every existing managed row that's either removed entirely or changed (changed ones get reinserted below).
+    const idsToDelete = affiliations.filter((a: any) => manageableIds.has(a.id) && !unchangedIds.has(a.id)).map((a: any) => a.id);
     if (idsToDelete.length > 0) {
       await supabase.from('user_camp_affiliations').delete().in('id', idsToDelete);
     }
@@ -626,7 +638,12 @@ export default function PublicProfilePage() {
                             });
                             setDraftAffiliations(
                               affiliations
-                                .filter((a: any) => a.year !== 2027)
+                                // Excludes camp-less legacy rows (e.g. a past year's "yes/maybe/no"
+                                // returning-status answer with no camp ever chosen) — the Previous
+                                // Years form has no field for that shape, so loading one in would
+                                // show a confusing blank row and, on save, silently delete it (see
+                                // the matching exclusion in handleSave's idsToDelete below).
+                                .filter((a: any) => a.year !== 2027 && (a.camp_id || a.is_open_camping))
                                 .map((a: any) => ({
                                   tempId: a.id,
                                   year: a.year,
