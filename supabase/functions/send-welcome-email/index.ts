@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
     </p>
 
     <table style="border-collapse:collapse;width:100%;font-size:14px;margin:0 0 20px;">
-      <tr><td style="padding:4px 8px;color:#555;">&#9744;</td><td style="padding:4px 8px;">Add your <a href="${profileUrl}" style="color:#1C1610;text-decoration:underline;">2026 camp and playa history</a> so campmates can find you</td></tr>
+      <tr><td style="padding:4px 8px;color:#555;">&#9744;</td><td style="padding:4px 8px;">Add your <a href="${profileUrl}" style="color:#1C1610;text-decoration:underline;">2027 camp and playa history</a> so campmates can find you</td></tr>
       <tr style="background:#f9f9f9;"><td style="padding:4px 8px;color:#555;">&#9744;</td><td style="padding:4px 8px;">Add an item <a href="${SITE_URL}/add-item" style="color:#1C1610;text-decoration:underline;">to your inventory</a>, then list it or keep it private</td></tr>
       <tr><td style="padding:4px 8px;color:#555;">&#9744;</td><td style="padding:4px 8px;">Add items to <a href="${profileUrl}" style="color:#1C1610;text-decoration:underline;">your wish list</a> so others know what you need</td></tr>
       <tr style="background:#f9f9f9;"><td style="padding:4px 8px;color:#555;">&#9744;</td><td style="padding:4px 8px;">Set an <a href="${SITE_URL}/settings" style="color:#1C1610;text-decoration:underline;">item location</a> (home, storage, etc.)</td></tr>

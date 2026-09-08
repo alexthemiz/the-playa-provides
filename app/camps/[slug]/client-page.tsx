@@ -44,7 +44,7 @@ export default function CampPage() {
   const [editingResource, setEditingResource] = useState<any | null>(null);
   const [removingResourceId, setRemovingResourceId] = useState<string | null>(null);
   const [campItemsViewMode, setCampItemsViewMode] = useState<'grid' | 'list'>('list');
-  const [editReturning2026, setEditReturning2026] = useState<boolean | null>(null);
+  const [editReturning2027, setEditReturning2027] = useState<boolean | null>(null);
   const [editSaving, setEditSaving] = useState(false);
   const [editError, setEditError] = useState('');
   const [bannerUploading, setBannerUploading] = useState(false);
@@ -54,8 +54,8 @@ export default function CampPage() {
 
   // Member management
   const [memberActionError, setMemberActionError] = useState('');
-  // userId → 'yes'|'maybe'|'no'|'other' (different camp / open camping) | undefined (no 2026 row)
-  const [returning2026Map, setReturning2026Map] = useState<Record<string, string>>({});
+  // userId → 'yes'|'maybe'|'no'|'other' (different camp / open camping) | undefined (no 2027 row)
+  const [returning2027Map, setReturning2027Map] = useState<Record<string, string>>({});
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -144,25 +144,25 @@ export default function CampPage() {
             .sort((a, b) => Math.max(...b.years) - Math.max(...a.years));
           setMembers(memberList);
 
-          // Fetch each member's 2026 returning status for this specific camp
+          // Fetch each member's 2027 returning status for this specific camp
           if (memberList.length > 0) {
             const memberIds = memberList.map((m: any) => m.id);
-            const { data: ret2026 } = await supabase
+            const { data: ret2027 } = await supabase
               .from('user_camp_affiliations')
               .select('user_id, returning_status, camp_id, is_open_camping')
               .in('user_id', memberIds)
-              .eq('year', 2026);
+              .eq('year', 2027);
             const rmap: Record<string, string> = {};
-            for (const row of ret2026 || []) {
+            for (const row of ret2027 || []) {
               if (row.camp_id === campData.id) {
                 // Affiliation is for THIS camp — use returning_status directly
                 rmap[row.user_id] = row.returning_status || 'none';
               } else if (!rmap[row.user_id]) {
-                // Has a 2026 row but for a different camp / open camping → show ✗
+                // Has a 2027 row but for a different camp / open camping → show ✗
                 rmap[row.user_id] = 'other';
               }
             }
-            setReturning2026Map(rmap);
+            setReturning2027Map(rmap);
           }
         }
       } catch (err) {
@@ -248,7 +248,7 @@ export default function CampPage() {
     setEditFoundedYear(camp.founded_year ? String(camp.founded_year) : '');
     setEditHomebase(camp.homebase || '');
     setEditSocialLinks(camp.social_links || {});
-    setEditReturning2026(camp.returning_2026 ?? null);
+    setEditReturning2027(camp.returning_2027 ?? null);
     setEditError('');
     setEditMode(true);
   };
@@ -309,7 +309,7 @@ export default function CampPage() {
         description: editDescription.trim() || null,
         founded_year: editFoundedYear ? parseInt(editFoundedYear, 10) : null,
         homebase: editHomebase.trim() || null,
-        returning_2026: editReturning2026,
+        returning_2027: editReturning2027,
         social_links: editSocialLinks,
         updated_at: new Date().toISOString(),
       };
@@ -554,14 +554,14 @@ export default function CampPage() {
               {camp.homebase && (
                 <p style={{ fontSize: '0.85rem', color: '#9A8878', margin: '0 0 6px' }}>Homebase: {camp.homebase}</p>
               )}
-              {camp.returning_2026 === true && (
+              {camp.returning_2027 === true && (
                 <p style={{ fontSize: '0.85rem', color: '#9A8878', margin: '0 0 10px', lineHeight: 1.5 }}>
-                  2026 Playa Address:<br /><strong>{camp.playa_location || 'To Be Announced'}</strong>
+                  2027 Playa Address:<br /><strong>{camp.playa_location || 'To Be Announced'}</strong>
                 </p>
               )}
-              {camp.returning_2026 === false && (
+              {camp.returning_2027 === false && (
                 <p style={{ fontSize: '0.85rem', color: '#9A8878', margin: '0 0 10px', lineHeight: 1.5 }}>
-                  2026 Playa Address:<br /><strong>Not Returning</strong>
+                  2027 Playa Address:<br /><strong>Not Returning</strong>
                 </p>
               )}
               {/* Social links pills — includes bm_homepage_url fallback for Website */}
@@ -649,24 +649,24 @@ export default function CampPage() {
           </div>
 
           <div style={{ marginBottom: '14px' }}>
-            <label style={editLabelStyle}>Returning in 2026?</label>
+            <label style={editLabelStyle}>Returning in 2027?</label>
             <select
-              value={editReturning2026 === null ? '' : String(editReturning2026)}
+              value={editReturning2027 === null ? '' : String(editReturning2027)}
               onChange={e => {
                 const v = e.target.value;
-                setEditReturning2026(v === '' ? null : v === 'true');
+                setEditReturning2027(v === '' ? null : v === 'true');
               }}
               style={{ ...editInputStyle, marginBottom: 0 }}
             >
               <option value="">Not set</option>
-              <option value="true">Yes, returning in 2026</option>
-              <option value="false">No, not returning in 2026</option>
+              <option value="true">Yes, returning in 2027</option>
+              <option value="false">No, not returning in 2027</option>
             </select>
           </div>
 
-          {editReturning2026 === true && (
+          {editReturning2027 === true && (
             <div style={{ marginBottom: '14px' }}>
-              <label style={editLabelStyle}>2026 Playa Address</label>
+              <label style={editLabelStyle}>2027 Playa Address</label>
               <p style={{ margin: 0, fontSize: '0.85rem', color: '#9A8878', fontStyle: 'italic' as const }}>
                 {camp.playa_location || 'To be announced — populated by Burning Man API'}
               </p>
@@ -748,7 +748,7 @@ export default function CampPage() {
                 <div>Name</div>
                 <div>Location</div>
                 <div>Camp Years</div>
-                <div style={{ textAlign: 'center' as const, whiteSpace: 'nowrap' as const }}>2026 Camp?</div>
+                <div style={{ textAlign: 'center' as const, whiteSpace: 'nowrap' as const }}>2027 Camp?</div>
                 <div>Wish List</div>
                 {editMode && <div>Actions</div>}
               </div>
@@ -757,7 +757,7 @@ export default function CampPage() {
               const isOwner = camp.page_owner_id === member.id;
               const isCurrentUser = member.id === currentUserId;
               const wishList: string[] = Array.isArray(member.wish_list) ? member.wish_list : [];
-              const ret2026 = returning2026Map[member.id]; // 'yes'|'maybe'|'no'|'other'|undefined
+              const ret2027 = returning2027Map[member.id]; // 'yes'|'maybe'|'no'|'other'|undefined
 
               // Returning box config
               const retCfg: Record<string, { symbol: string; bg: string; color: string; border: string }> = {
@@ -766,7 +766,7 @@ export default function CampPage() {
                 no:    { symbol: '✗', bg: '#fee2e2', color: '#dc2626', border: '#fca5a5' },
                 other: { symbol: '✗', bg: '#fee2e2', color: '#dc2626', border: '#fca5a5' },
               };
-              const rc = ret2026 ? retCfg[ret2026] : null;
+              const rc = ret2027 ? retCfg[ret2027] : null;
 
               return (
                 <div key={member.id} style={{ ...memberGridStyle(editMode), padding: '10px 15px', backgroundColor: '#FDFAF4', borderBottom: '1px solid rgba(28,22,16,0.06)' }}>
@@ -798,7 +798,7 @@ export default function CampPage() {
                     ))}
                   </div>
 
-                  {/* Returning in 2026? column */}
+                  {/* Returning in 2027? column */}
                   <div style={{ display: 'flex', justifyContent: 'center' as const }}>
                     <div style={{ width: '26px', height: '26px', border: `1px solid ${rc ? rc.border : 'rgba(28,22,16,0.15)'}`, backgroundColor: rc ? rc.bg : '#FDFAF4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 700, color: rc ? rc.color : 'transparent' }}>
                       {rc?.symbol || ''}

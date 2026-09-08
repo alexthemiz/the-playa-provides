@@ -42,8 +42,8 @@ export default function PublicProfilePage() {
   const [checklistDismissed, setChecklistDismissed] = useState(false)
   const [checklistExpanded,  setChecklistExpanded]  = useState(false)
 
-  // 2026 returning status — managed separately from regular year drafts
-  const [draft2026, setDraft2026] = useState<{
+  // 2027 returning status — managed separately from regular year drafts
+  const [draft2027, setDraft2027] = useState<{
     status: 'yes' | 'maybe' | 'no' | null;
     campInput: string;
     campId: string | null;
@@ -54,7 +54,7 @@ export default function PublicProfilePage() {
   }>({ status: null, campInput: '', campId: null, isOpenCamping: false, isTBD: false, searchResults: [], showDropdown: false });
 
   const startYear = 1986;
-  const maxHistoryYear = 2025; // year dropdown capped at 2025; 2026 handled via "Returning in 2026?" UI
+  const maxHistoryYear = 2026; // year dropdown capped at 2026; 2027 handled via "Returning in 2027?" UI
   const YEAR_OPTIONS = Array.from({ length: maxHistoryYear - startYear + 1 }, (_, i) => (maxHistoryYear - i).toString());
 
   useEffect(() => {
@@ -349,19 +349,19 @@ export default function PublicProfilePage() {
       desiredRows.push({ matchId: existingMatch ? draft.tempId : null, year: draft.year, is_open_camping: false, camp_id: campId, returning_status: null });
     }
 
-    // 2026 returning row — handled separately
-    if (draft2026.status) {
-      const existingMatch2026 = affiliations.find((a: any) => a.year === 2026);
+    // 2027 returning row — handled separately
+    if (draft2027.status) {
+      const existingMatch2027 = affiliations.find((a: any) => a.year === 2027);
       let camp_id: string | null = null;
       let is_open_camping = false;
-      if (draft2026.status !== 'no') {
-        if (draft2026.isOpenCamping) {
+      if (draft2027.status !== 'no') {
+        if (draft2027.isOpenCamping) {
           is_open_camping = true;
-        } else if (draft2026.campInput.trim()) {
-          camp_id = draft2026.campId || await findOrCreateCamp(draft2026.campInput, true);
+        } else if (draft2027.campInput.trim()) {
+          camp_id = draft2027.campId || await findOrCreateCamp(draft2027.campInput, true);
         }
       }
-      desiredRows.push({ matchId: existingMatch2026 ? existingMatch2026.id : null, year: 2026, is_open_camping, camp_id, returning_status: draft2026.status });
+      desiredRows.push({ matchId: existingMatch2027 ? existingMatch2027.id : null, year: 2027, is_open_camping, camp_id, returning_status: draft2027.status });
     }
 
     // Rows that match an existing DB row on every field — leave completely untouched.
@@ -432,10 +432,10 @@ export default function PublicProfilePage() {
   async function findOrCreateCamp(name: string, restrictToReturning: boolean = false): Promise<string | null> {
     const trimmed = name.trim();
     if (restrictToReturning) {
-      const { data: allowedExact } = await supabase.from('camps').select('id').ilike('display_name', trimmed).or('returning_2026.is.null,returning_2026.neq.false').maybeSingle();
+      const { data: allowedExact } = await supabase.from('camps').select('id').ilike('display_name', trimmed).or('returning_2027.is.null,returning_2027.neq.false').maybeSingle();
       if (allowedExact) return allowedExact.id;
       const { data: anyExact } = await supabase.from('camps').select('id').ilike('display_name', trimmed).maybeSingle();
-      if (anyExact) return null; // camp exists but is marked not returning in 2026 — don't select it or create a duplicate
+      if (anyExact) return null; // camp exists but is marked not returning in 2027 — don't select it or create a duplicate
     } else {
       const { data: exact } = await supabase.from('camps').select('id').ilike('display_name', trimmed).maybeSingle();
       if (exact) return exact.id;
@@ -452,7 +452,7 @@ export default function PublicProfilePage() {
   async function searchCampsDB(query: string, restrictToReturning: boolean = false): Promise<any[]> {
     if (!query.trim()) return [];
     let campsQuery = supabase.from('camps').select('id, display_name, slug').ilike('display_name', `%${query.trim()}%`);
-    if (restrictToReturning) campsQuery = campsQuery.or('returning_2026.is.null,returning_2026.neq.false');
+    if (restrictToReturning) campsQuery = campsQuery.or('returning_2027.is.null,returning_2027.neq.false');
     const { data } = await campsQuery.limit(8);
     return data || [];
   }
@@ -490,13 +490,13 @@ export default function PublicProfilePage() {
     updateDraft(tempId, { campInput: camp.display_name, campId: camp.id, searchResults: [], showDropdown: false });
   };
 
-  const handle2026CampInputChange = async (value: string) => {
-    setDraft2026(prev => ({ ...prev, campInput: value, campId: null, isOpenCamping: false, isTBD: false, showDropdown: !!value.trim() }));
+  const handle2027CampInputChange = async (value: string) => {
+    setDraft2027(prev => ({ ...prev, campInput: value, campId: null, isOpenCamping: false, isTBD: false, showDropdown: !!value.trim() }));
     if (value.trim()) {
       const results = await searchCampsDB(value, true);
-      setDraft2026(prev => ({ ...prev, searchResults: results, showDropdown: true }));
+      setDraft2027(prev => ({ ...prev, searchResults: results, showDropdown: true }));
     } else {
-      setDraft2026(prev => ({ ...prev, searchResults: [], showDropdown: false }));
+      setDraft2027(prev => ({ ...prev, searchResults: [], showDropdown: false }));
     }
   };
 
@@ -516,7 +516,7 @@ export default function PublicProfilePage() {
   const locationStr = [profile.city, profile.state].filter(Boolean).join(', ');
 
   // Helper for returning status badge display
-  const attending2026Badge = (status: string | null) => {
+  const attendingBadge = (status: string | null) => {
     if (!status) return null;
     const cfg = {
       yes:   { label: 'Attending',       bg: '#dcfce7', color: '#16a34a', border: '#86efac' },
@@ -613,20 +613,20 @@ export default function PublicProfilePage() {
                       ) : (
                         <button
                           onClick={() => {
-                            const aff2026 = affiliations.find((a: any) => a.year === 2026);
-                            const aff2026HasCamp = !!aff2026?.camp_id || !!aff2026?.is_open_camping;
-                            setDraft2026({
-                              status: aff2026?.returning_status ?? null,
-                              campInput: (aff2026?.camps as any)?.display_name || '',
-                              campId: aff2026?.camp_id || null,
-                              isOpenCamping: aff2026?.is_open_camping || false,
-                              isTBD: (aff2026?.returning_status === 'yes' || aff2026?.returning_status === 'maybe') && !aff2026HasCamp,
+                            const aff2027 = affiliations.find((a: any) => a.year === 2027);
+                            const aff2027HasCamp = !!aff2027?.camp_id || !!aff2027?.is_open_camping;
+                            setDraft2027({
+                              status: aff2027?.returning_status ?? null,
+                              campInput: (aff2027?.camps as any)?.display_name || '',
+                              campId: aff2027?.camp_id || null,
+                              isOpenCamping: aff2027?.is_open_camping || false,
+                              isTBD: (aff2027?.returning_status === 'yes' || aff2027?.returning_status === 'maybe') && !aff2027HasCamp,
                               searchResults: [],
                               showDropdown: false,
                             });
                             setDraftAffiliations(
                               affiliations
-                                .filter((a: any) => a.year !== 2026)
+                                .filter((a: any) => a.year !== 2027)
                                 .map((a: any) => ({
                                   tempId: a.id,
                                   year: a.year,
@@ -865,18 +865,18 @@ export default function PublicProfilePage() {
             <h4 style={subheadStyle}>Playa History</h4>
             <p style={{ fontSize: '0.78rem', color: '#9A8878', margin: '0 0 12px', lineHeight: 1.5 }}>Find and connect with campmates past and present and see what they have or need.</p>
             {isEditing ? (() => {
-              const is2026No = draft2026.status === 'no';
+              const is2027No = draft2027.status === 'no';
               return (
                 <div style={{ marginBottom: '20px' }}>
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' as const, marginBottom: '14px' }}>
-                    <span style={{ ...subheadStyle, marginBottom: 0 }}>Attending In 2026?</span>
+                    <span style={{ ...subheadStyle, marginBottom: 0 }}>Attending In 2027?</span>
                     {(['yes', 'maybe', 'no'] as const).map(s => {
                       const cfg = { yes: { label: 'Yes', bg: '#dcfce7', col: '#16a34a', brd: '#86efac' }, maybe: { label: 'Maybe', bg: '#fef9c3', col: '#92400e', brd: '#fde68a' }, no: { label: 'No', bg: '#fee2e2', col: '#dc2626', brd: '#fca5a5' } }[s];
-                      const active = draft2026.status === s;
+                      const active = draft2027.status === s;
                       return (
                         <button
                           key={s}
-                          onClick={() => setDraft2026(prev => ({ ...prev, status: prev.status === s ? null : s }))}
+                          onClick={() => setDraft2027(prev => ({ ...prev, status: prev.status === s ? null : s }))}
                           style={{ padding: '5px 18px', borderRadius: '20px', border: `1px solid ${active ? cfg.brd : '#ddd'}`, fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', backgroundColor: active ? cfg.bg : '#fff', color: active ? cfg.col : '#888' }}
                         >
                           {cfg.label}
@@ -887,50 +887,50 @@ export default function PublicProfilePage() {
 
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' as const }}>
                     <span style={{ ...subheadStyle, marginBottom: 0 }}>Camp:</span>
-                    {is2026No ? (
+                    {is2027No ? (
                       <input disabled value="N/A" style={{ width: '275px', flexShrink: 0, padding: '6px 8px', border: '1px solid #eee', borderRadius: '6px', fontSize: '13px', backgroundColor: '#f5f5f5', color: '#aaa', boxSizing: 'border-box' as const }} />
                     ) : (
                       <div style={{ position: 'relative' as const, width: '275px', flexShrink: 0 }}>
                         <input
                           type="text"
                           placeholder="Camp name..."
-                          value={draft2026.campInput}
-                          onChange={e => handle2026CampInputChange(e.target.value)}
-                          onFocus={() => { if (draft2026.campInput.trim()) setDraft2026(prev => ({ ...prev, showDropdown: true })); }}
-                          onBlur={() => setTimeout(() => setDraft2026(prev => ({ ...prev, showDropdown: false })), 150)}
+                          value={draft2027.campInput}
+                          onChange={e => handle2027CampInputChange(e.target.value)}
+                          onFocus={() => { if (draft2027.campInput.trim()) setDraft2027(prev => ({ ...prev, showDropdown: true })); }}
+                          onBlur={() => setTimeout(() => setDraft2027(prev => ({ ...prev, showDropdown: false })), 150)}
                           style={{ width: '100%', padding: '6px 8px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', backgroundColor: '#fff', color: '#1C1610', boxSizing: 'border-box' as const, outline: 'none' }}
                         />
-                        {draft2026.showDropdown && (draft2026.searchResults.length > 0 || draft2026.campInput.trim()) && (
+                        {draft2027.showDropdown && (draft2027.searchResults.length > 0 || draft2027.campInput.trim()) && (
                           <div style={{ position: 'absolute' as const, top: '100%', left: 0, right: 0, backgroundColor: '#fff', border: '1px solid #ddd', borderRadius: '6px', zIndex: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', overflow: 'hidden' as const }}>
-                            {draft2026.searchResults.map((camp: any) => (
-                              <div key={camp.id} onMouseDown={() => setDraft2026(prev => ({ ...prev, campInput: camp.display_name, campId: camp.id, searchResults: [], showDropdown: false }))} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '0.875rem', color: '#1C1610' }}>
+                            {draft2027.searchResults.map((camp: any) => (
+                              <div key={camp.id} onMouseDown={() => setDraft2027(prev => ({ ...prev, campInput: camp.display_name, campId: camp.id, searchResults: [], showDropdown: false }))} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '0.875rem', color: '#1C1610' }}>
                                 {camp.display_name}
                               </div>
                             ))}
-                            {draft2026.campInput.trim() && !draft2026.searchResults.some((c: any) => c.display_name.toLowerCase() === draft2026.campInput.trim().toLowerCase()) && (
-                              <div onMouseDown={() => setDraft2026(prev => ({ ...prev, showDropdown: false }))} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '0.875rem', color: '#1E8A82', borderTop: draft2026.searchResults.length > 0 ? '1px solid #f0f0f0' : undefined }}>
-                                Add &quot;{draft2026.campInput}&quot; as a new camp
+                            {draft2027.campInput.trim() && !draft2027.searchResults.some((c: any) => c.display_name.toLowerCase() === draft2027.campInput.trim().toLowerCase()) && (
+                              <div onMouseDown={() => setDraft2027(prev => ({ ...prev, showDropdown: false }))} style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '0.875rem', color: '#1E8A82', borderTop: draft2027.searchResults.length > 0 ? '1px solid #f0f0f0' : undefined }}>
+                                Add &quot;{draft2027.campInput}&quot; as a new camp
                               </div>
                             )}
                           </div>
                         )}
                       </div>
                     )}
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: is2026No ? '#bbb' : '#555', cursor: is2026No ? 'default' as const : 'pointer' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: is2027No ? '#bbb' : '#555', cursor: is2027No ? 'default' as const : 'pointer' }}>
                       <input
                         type="checkbox"
-                        disabled={is2026No}
-                        checked={!is2026No && draft2026.isOpenCamping}
-                        onChange={e => setDraft2026(prev => ({ ...prev, isOpenCamping: e.target.checked, isTBD: false, campInput: '', campId: null }))}
+                        disabled={is2027No}
+                        checked={!is2027No && draft2027.isOpenCamping}
+                        onChange={e => setDraft2027(prev => ({ ...prev, isOpenCamping: e.target.checked, isTBD: false, campInput: '', campId: null }))}
                       />
                       Open Camping
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: is2026No ? '#bbb' : '#555', cursor: is2026No ? 'default' as const : 'pointer' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.8rem', color: is2027No ? '#bbb' : '#555', cursor: is2027No ? 'default' as const : 'pointer' }}>
                       <input
                         type="checkbox"
-                        disabled={is2026No}
-                        checked={!is2026No && draft2026.isTBD}
-                        onChange={e => setDraft2026(prev => ({ ...prev, isTBD: e.target.checked, isOpenCamping: false, campInput: '', campId: null }))}
+                        disabled={is2027No}
+                        checked={!is2027No && draft2027.isTBD}
+                        onChange={e => setDraft2027(prev => ({ ...prev, isTBD: e.target.checked, isOpenCamping: false, campInput: '', campId: null }))}
                       />
                       TBD
                     </label>
@@ -938,32 +938,31 @@ export default function PublicProfilePage() {
                 </div>
               );
             })() : (() => {
-              const aff2026 = affiliations.find((a: any) => a.year === 2026);
-              if (!aff2026?.returning_status) return null;
-              const campName2026 = (aff2026.camps as any)?.display_name ?? null;
-              const campSlug2026 = (aff2026.camps as any)?.slug ?? null;
+              const aff2027 = affiliations.find((a: any) => a.year === 2027);
+              if (!aff2027?.returning_status) return null;
+              const campName2027 = (aff2027.camps as any)?.display_name ?? null;
+              const campSlug2027 = (aff2027.camps as any)?.slug ?? null;
               return (
                 <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' as const }}>
-                  <span style={{ ...subheadStyle, marginBottom: 0 }}>2026:</span>
-                  {attending2026Badge(aff2026.returning_status)}
+                  <span style={{ ...subheadStyle, marginBottom: 0 }}>2027:</span>
+                  {attendingBadge(aff2027.returning_status)}
                   <span style={{ ...subheadStyle, marginBottom: 0 }}>Camp:</span>
-                  {aff2026.returning_status === 'no' ? (
-                    <span style={camp2026NAStyle}>N/A</span>
-                  ) : aff2026.is_open_camping ? (
-                    <span style={camp2026OpenCampingStyle}>Open Camping</span>
-                  ) : campSlug2026 ? (
-                    <a href={`/camps/${campSlug2026}`} style={{ ...camp2026ChipStyle, color: '#1E8A82', textDecoration: 'none' }}>{campName2026}</a>
-                  ) : campName2026 ? (
-                    <span style={camp2026ChipStyle}>{campName2026}</span>
+                  {aff2027.returning_status === 'no' ? (
+                    <span style={campNAStyle}>N/A</span>
+                  ) : aff2027.is_open_camping ? (
+                    <span style={campOpenCampingStyle}>Open Camping</span>
+                  ) : campSlug2027 ? (
+                    <a href={`/camps/${campSlug2027}`} style={{ ...campChipStyle, color: '#1E8A82', textDecoration: 'none' }}>{campName2027}</a>
+                  ) : campName2027 ? (
+                    <span style={campChipStyle}>{campName2027}</span>
                   ) : (
-                    <span style={camp2026TBDStyle}>TBD</span>
+                    <span style={campTBDStyle}>TBD</span>
                   )}
                 </div>
               );
             })()}
             {isEditing ? (
               <div>
-                <p style={{ ...subheadStyle, marginBottom: '8px' }}>Previous Years</p>
                 {draftAffiliations.map(draft => (
                   <div key={draft.tempId} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginBottom: '8px' }}>
                     <select
@@ -1017,21 +1016,20 @@ export default function PublicProfilePage() {
               </div>
             ) : (
               <div>
-                <p style={{ ...subheadStyle, marginBottom: '8px' }}>Previous Years</p>
-                {affiliations.filter((a: any) => a.year !== 2026).length > 0 ? (
+                {affiliations.filter((a: any) => a.year !== 2027).length > 0 ? (
                   <div style={{ display: 'flex', flexWrap: 'wrap' as const, rowGap: '12px', columnGap: '22px' }}>
-                    {affiliations.filter((aff: any) => aff.year !== 2026).map((aff: any) => {
+                    {affiliations.filter((aff: any) => aff.year !== 2027).map((aff: any) => {
                       const campName = (aff.camps as any)?.display_name ?? null;
                       const campSlug = (aff.camps as any)?.slug ?? null;
                       return (
                         <div key={aff.id} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                           <span style={{ ...subheadStyle, marginBottom: 0 }}>{aff.year}:</span>
                           {aff.is_open_camping ? (
-                            <span style={camp2026OpenCampingStyle}>Open Camping</span>
+                            <span style={campOpenCampingStyle}>Open Camping</span>
                           ) : campSlug ? (
-                            <a href={`/camps/${campSlug}`} style={{ ...camp2026ChipStyle, color: '#1E8A82', textDecoration: 'none' }}>{campName}</a>
+                            <a href={`/camps/${campSlug}`} style={{ ...campChipStyle, color: '#1E8A82', textDecoration: 'none' }}>{campName}</a>
                           ) : campName ? (
-                            <span style={camp2026ChipStyle}>{campName}</span>
+                            <span style={campChipStyle}>{campName}</span>
                           ) : null}
                         </div>
                       );
@@ -1237,11 +1235,11 @@ export default function PublicProfilePage() {
 const LIST_COLS = '50px 160px 1fr 140px 120px 1fr 60px';
 
 const subheadStyle: React.CSSProperties = { fontFamily: "'Space Mono', monospace", color: '#4A3828', textTransform: 'uppercase' as const, fontSize: '0.68rem', fontWeight: 700, marginBottom: '6px', marginTop: 0, letterSpacing: '0.08em' };
-const camp2026ChipBase: React.CSSProperties = { fontSize: '0.85rem', fontWeight: 700, padding: '4px 12px', border: '1.5px solid', flexShrink: 0 };
-const camp2026ChipStyle: React.CSSProperties = { ...camp2026ChipBase, backgroundColor: '#EDE5D0', color: '#4A3828', borderColor: 'rgba(28,22,16,0.2)' };
-const camp2026NAStyle: React.CSSProperties = { ...camp2026ChipBase, backgroundColor: '#fee2e2', color: '#dc2626', borderColor: '#fca5a5' };
-const camp2026TBDStyle: React.CSSProperties = { ...camp2026ChipBase, backgroundColor: '#fef9c3', color: '#92400e', borderColor: '#fde68a' };
-const camp2026OpenCampingStyle: React.CSSProperties = { ...camp2026ChipBase, backgroundColor: '#F5F0D0', color: '#D4A020', borderColor: '#D4A020' };
+const campChipBase: React.CSSProperties = { fontSize: '0.85rem', fontWeight: 700, padding: '4px 12px', border: '1.5px solid', flexShrink: 0 };
+const campChipStyle: React.CSSProperties = { ...campChipBase, backgroundColor: '#EDE5D0', color: '#4A3828', borderColor: 'rgba(28,22,16,0.2)' };
+const campNAStyle: React.CSSProperties = { ...campChipBase, backgroundColor: '#fee2e2', color: '#dc2626', borderColor: '#fca5a5' };
+const campTBDStyle: React.CSSProperties = { ...campChipBase, backgroundColor: '#fef9c3', color: '#92400e', borderColor: '#fde68a' };
+const campOpenCampingStyle: React.CSSProperties = { ...campChipBase, backgroundColor: '#F5F0D0', color: '#D4A020', borderColor: '#D4A020' };
 const editTextareaStyle: React.CSSProperties = { width: '100%', backgroundColor: '#FDFAF4', color: '#1C1610', border: '1.5px solid rgba(28,22,16,0.25)', padding: '10px', height: '80px', boxSizing: 'border-box' as const, outline: 'none' };
 const listHeaderStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: LIST_COLS, gap: '10px', padding: '12px 15px', fontFamily: "'Space Mono', monospace", fontSize: '0.6rem', fontWeight: 700, color: '#4A3828', textTransform: 'uppercase' as const, letterSpacing: '0.08em', borderBottom: '1.5px solid rgba(28,22,16,0.12)', backgroundColor: '#EDE5D0' };
 const listRowStyle: React.CSSProperties = { display: 'grid', gridTemplateColumns: LIST_COLS, gap: '10px', alignItems: 'center', padding: '10px 12px', backgroundColor: '#FDFAF4', borderBottom: '1px solid rgba(28,22,16,0.08)' };
