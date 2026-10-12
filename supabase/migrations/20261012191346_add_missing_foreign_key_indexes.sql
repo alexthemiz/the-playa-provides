@@ -1,0 +1,23 @@
+-- Supabase performance advisor: 22 foreign keys had no covering index. Purely additive.
+create index if not exists idx_camp_claim_requests_user_id on public.camp_claim_requests (user_id);
+create index if not exists idx_camps_page_owner_id on public.camps (page_owner_id);
+create index if not exists idx_feedback_user_id on public.feedback (user_id);
+create index if not exists idx_gear_items_location_id on public.gear_items (location_id);
+create index if not exists idx_gear_items_user_id on public.gear_items (user_id);
+create index if not exists idx_informal_loans_converted_loan_id on public.informal_loans (converted_loan_id);
+create index if not exists idx_informal_loans_owner_id on public.informal_loans (owner_id);
+create index if not exists idx_item_loans_borrower_id on public.item_loans (borrower_id);
+create index if not exists idx_item_loans_borrower_location_id on public.item_loans (borrower_location_id);
+create index if not exists idx_item_loans_item_id on public.item_loans (item_id);
+create index if not exists idx_item_loans_owner_id on public.item_loans (owner_id);
+create index if not exists idx_item_transfers_item_id on public.item_transfers (item_id);
+create index if not exists idx_item_transfers_owner_id on public.item_transfers (owner_id);
+create index if not exists idx_item_transfers_recipient_id on public.item_transfers (recipient_id);
+create index if not exists idx_locations_user_id on public.locations (user_id);
+create index if not exists idx_notifications_actor_id on public.notifications (actor_id);
+create index if not exists idx_notifications_camp_id on public.notifications (camp_id);
+create index if not exists idx_notifications_item_id on public.notifications (item_id);
+create index if not exists idx_playa_resources_camp_id on public.playa_resources (camp_id);
+create index if not exists idx_playa_resources_submitted_by on public.playa_resources (submitted_by);
+create index if not exists idx_user_camp_affiliations_camp_id on public.user_camp_affiliations (camp_id);
+create index if not exists idx_user_camp_affiliations_user_id on public.user_camp_affiliations (user_id);
