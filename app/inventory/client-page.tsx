@@ -453,6 +453,52 @@ export default function InventoryPage() {
     ));
   }
 
+  // Owner-initiated return: lets an owner close an ACTIVE loan when the item came back
+  // in person and the borrower never clicked "Return Item". Does exactly what
+  // handleOwnerConfirmReturn does, but guards on status='active' so a stale tab can't
+  // re-complete a loan that was just disputed/cancelled/returned by the borrower.
+  async function handleOwnerMarkReturned(loan: any, itemName: string, borrowerName: string) {
+    const ok = window.confirm(
+      `Mark "${itemName}" as returned by ${borrowerName}?\n\nThis closes the loan and sets the item to Not Available (private) until you list it again.`
+    );
+    if (!ok) return;
+
+    const { data, error } = await supabase
+      .from('item_loans')
+      .update({ owner_confirmed_return: true, status: 'complete', returned_at: new Date().toISOString() })
+      .eq('id', loan.id)
+      .eq('status', 'active')
+      .select('id');
+    if (error) {
+      alert('Could not mark this loan as returned. Please try again.');
+      return;
+    }
+    if (!data || data.length === 0) {
+      alert('This loan was just updated — refreshing.');
+      fetchMyInventory();
+      return;
+    }
+
+    await supabase
+      .from('gear_items')
+      .update({ availability_status: 'Not Available', visibility: 'private' })
+      .eq('id', loan.item_id);
+
+    await supabase.from('notifications').insert({
+      type: 'loan_return_confirmed',
+      recipient_id: loan.borrower_id,
+      actor_id: userId,
+      item_id: loan.item_id,
+    });
+
+    setActiveLoans(prev => prev.filter(l => l.id !== loan.id));
+    setItems(prev => prev.map(i =>
+      i.id === loan.item_id
+        ? { ...i, availability_status: 'Not Available', visibility: 'private' }
+        : i
+    ));
+  }
+
   async function handleRecipientConfirmTransfer(transfer: any) {
     // Use a SECURITY DEFINER RPC to atomically transfer ownership + mark complete.
     // Direct client-side UPDATE on gear_items is blocked by RLS (recipient doesn't
@@ -938,6 +984,9 @@ export default function InventoryPage() {
                         <td style={tdStyle}>{returnBy}</td>
                         <td style={tdStyle}>{renderTerms(items.find(i => i.id === loan.item_id))}</td>
                         <td style={tdActionStyle}>
+                          {loan.status === 'active' && (
+                            <button onClick={() => handleOwnerMarkReturned(loan, itemName, borrowerName)} style={handsOverButtonStyle}>Mark Returned</button>
+                          )}
                           {loan.status === 'return_pending' && (
                             <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '4px' }}>
                               <span style={{ fontSize: '0.75rem', color: '#92400e', fontWeight: 600 }}>Return Pending</span>
