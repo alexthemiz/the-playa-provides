@@ -142,9 +142,14 @@ export default function SettingsPage() {
     const { error: iErr } = newLocs.length > 0
       ? await supabase.from('locations').insert(newLocs)
       : { error: null };
-    const { error: uErr } = existingLocs.length > 0
-      ? await supabase.from('locations').upsert(existingLocs)
-      : { error: null };
+    // Plain per-row UPDATEs, not an upsert: an upsert's `EXCLUDED.address_line_1` needs read
+    // permission on that column, which the public API deliberately no longer grants.
+    const updateResults = await Promise.all(
+      existingLocs.map(({ id, created_at, user_id, ...fields }) =>
+        supabase.from('locations').update(fields).eq('id', id)
+      )
+    );
+    const uErr = updateResults.find(r => r.error)?.error ?? null;
     const lErr = iErr || uErr;
 
     if (pErr || lErr) showToast("Error saving: " + (pErr?.message || lErr?.message), true);
