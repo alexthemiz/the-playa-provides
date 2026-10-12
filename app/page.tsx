@@ -205,9 +205,11 @@ export default function HomePage() {
 
     const panel    = heroRightRef.current
     const gameView = gameViewRef.current
-    const playerEl = playerRef.current
-    const flashEl  = flashRef.current
-    if (!panel || !gameView || !playerEl || !flashEl) return
+    if (!panel || !gameView || !playerRef.current || !flashRef.current) return
+    // Explicit non-null types so the nested game functions below (hoisted
+    // declarations, which TypeScript can't narrow through) see HTMLElement.
+    const playerEl: HTMLElement = playerRef.current
+    const flashEl: HTMLElement  = flashRef.current
 
     const panelH = () => panel.offsetHeight
     const panelW = () => panel.offsetWidth

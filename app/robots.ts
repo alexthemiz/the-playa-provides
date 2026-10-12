@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: '*', allow: '/' },
       { userAgent: '*', disallow: ['/inventory', '/settings', '/add-item', '/list-item', '/login', '/signup', '/auth/'] },
     ],
-    sitemap: 'https://theplayaprovides.com/sitemap.xml',
+    sitemap: 'https://www.theplayaprovides.com/sitemap.xml',
   }
 }
