@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import { geocodeZip } from '@/lib/geocodeZip';
@@ -28,6 +28,9 @@ export default function SettingsPage() {
   });
 
   const [locations, setLocations] = useState<any[]>([]);
+  // True only once the signed-in user's own street addresses were fetched successfully.
+  // Save skips address_line_1 when false, so a failed lookup can never blank out stored addresses.
+  const addressesLoaded = useRef(false);
 
   // Account & Security state
   const [newEmail, setNewEmail] = useState('');
@@ -59,8 +62,12 @@ export default function SettingsPage() {
           setUser(activeUser);
           const { data: pData } = await supabase.from('profiles').select('id, full_name, preferred_name, username, pronouns, contact_email, city, state, zip_code, notify_new_items_email, has_seen_welcome').eq('id', activeUser.id).maybeSingle();
           if (pData) setProfile({ ...pData });
-          const { data: lData } = await supabase.from('locations').select('*').eq('user_id', activeUser.id).order('created_at', { ascending: true });
-          if (lData) setLocations(lData);
+          // Street addresses are not readable through the public API (privacy); everything else is.
+          const { data: lData } = await supabase.from('locations').select('id, user_id, label, city, state, zip_code, is_default, created_at, location_type, latitude, longitude').eq('user_id', activeUser.id).order('created_at', { ascending: true });
+          const { data: addrData, error: addrErr } = await supabase.rpc('get_my_location_addresses');
+          addressesLoaded.current = !addrErr;
+          const addrById = new Map<string, string>((addrData ?? []).map((a: any) => [a.id, a.address_line_1]));
+          if (lData) setLocations(lData.map((l: any) => ({ ...l, address_line_1: addrById.get(l.id) ?? '' })));
         }
       } catch (err) {
         console.error('Settings load error:', err);
@@ -123,7 +130,7 @@ export default function SettingsPage() {
     );
     const existingLocsRaw = locations
       .filter(l => !l._isNew)
-      .map(({ _isNew, ...rest }) => ({ ...rest, user_id: user.id }));
+      .map(({ _isNew, address_line_1, ...rest }) => ({ ...rest, ...(addressesLoaded.current ? { address_line_1 } : {}), user_id: user.id }));
     const existingLocs = await Promise.all(
       existingLocsRaw.map(async loc => {
         if (loc.latitude != null) return loc;
